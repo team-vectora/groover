@@ -1,0 +1,124 @@
+#home {
+    display: flex;
+    height: 100vh;
+    background-color: #2a2a2a;
+    overflow: hidden; 
+    align-items: center;
+    justify-content:space-around;
+    overflow: auto;
+    
+}
+
+.data{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20%;
+    background-color: #1e1e1e;
+    height: 90%;
+    border-radius: 15px;
+}
+
+#edit-window {
+    width: 50%;
+    max-width: 50%;
+    max-height: 90vh;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    
+    overflow-y: auto;
+    border-radius: 12px;
+}
+
+#piano-roll-container {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
+    border: 2px solid #8BAB44;
+    border-radius: 15px;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+
+#notes {
+    display: flex;
+    flex-direction: column;
+    width: 125px;
+    height: fit-content; 
+    background-color: #2a2a2a;
+    border-right: 1px solid #444;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.3);
+    position: sticky;
+    left: 0; 
+    z-index: 2; 
+}
+
+.note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    width: 120px;
+    min-height: 30px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    user-select: none;
+}
+
+.note:hover {
+    filter: brightness(1.1);
+}
+
+.note:active {
+    transform: scale(0.98);
+}
+
+.note p {
+    margin: 0;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    pointer-events: none;
+}
+
+.note.white {
+    background: linear-gradient(to bottom, #f8f8f8, #e0e0e0);
+    color: #333;
+    border-bottom: 1px solid #ddd;
+    box-shadow: inset 0 -2px 3px rgba(0,0,0,0.1);
+}
+
+.note.white:hover {
+    filter: brightness(1.1);
+}
+
+.note.black {
+    background: linear-gradient(to bottom, #55692a, #8BAB44);
+    color: #f8f8f8;
+    height: 30px;
+    min-height: 30px;
+    width: 90px;
+    z-index: 1;
+    border-bottom: 1px solid #444;
+    box-shadow: 
+        inset 0 -2px 5px rgba(0,0,0,0.5),
+        0 2px 3px rgba(0,0,0,0.4);
+    margin-left: -15px;
+    margin-right: -15px;
+    transition: all ease-in-out 300ms;
+}
+
+
+.note.black:hover {
+    background-color: #8BAB44;
+}
+
+.note.black p {
+    color: #f8f8f8;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+}
