@@ -5,18 +5,26 @@ import * as Tone from "tone";
 import './styles.css';
 
 const Home = () => {
+  
   const [instrument, setInstrument] = useState('synth');
   const [volume, setVolume] = useState(-10); 
   const synthRef = useRef(null);
-
   const instruments = {
     synth: () => new Tone.Synth(),
     fm: () => new Tone.FMSynth(),
     am: () => new Tone.AMSynth(),
     membrane: () => new Tone.MembraneSynth(),
-    metal: () => new Tone.MetalSynth(),
-    duo: () => new Tone.DuoSynth()
+    duo: () => new Tone.DuoSynth(),
+    mono: () => new Tone.MonoSynth(),
+    lepo: () => new Tone.Sampler({
+      urls: {
+        A1: "A1.mp3",
+        A2: "A2.mp3",
+      },
+      baseUrl: "https://tonejs.github.io/audio/casio/",
+    }).toDestination()
   };
+  
   
   const notes = [
     "C6", "B5", "A#5", "A5", "G#5", "G5", "F#5", "F5", "E5", "D#5",
@@ -27,6 +35,7 @@ const Home = () => {
   ];
 
   useEffect(() => {
+
     synthRef.current = instruments[instrument]().toDestination();
     Tone.getDestination().volume.value = volume;
     
@@ -39,7 +48,32 @@ const Home = () => {
   
   useEffect(() => {
     Tone.getDestination().volume.rampTo(volume, 0.1);
+  
+    if (synthRef.current && Tone.getContext().state === "running") {
+      const now = Tone.now();
+  
+      const volumeNoteMap = [
+        { min: -30, max: -25.7, note: "C4" },
+        { min: -25.7, max: -21.5, note: "D4" },
+        { min: -21.5, max: -18, note: "E4" },
+        { min: -18, max: -15, note: "F4" },
+        { min: -15, max: -12, note: "G4" },
+        { min: -12, max: -9, note: "A4" },
+        { min: -9, max: -6, note: "B4" },
+        { min: -6, max: 0.1, note: "C5" },
+      ];
+  
+      const noteToPlay = volumeNoteMap.find(
+        (range) => volume >= range.min && volume < range.max
+      );
+  
+      if (noteToPlay) {
+        synthRef.current.triggerAttackRelease(noteToPlay.note, "8n", now);
+      }
+    }
   }, [volume]);
+  
+  
 
   const renderKeys = () => {
     return notes.map((note, index) => {
@@ -105,6 +139,13 @@ const Home = () => {
             onChange={handleVolumeChange}
           />
         </div>
+        <label htmlFor="">BPM</label>
+        <input type="text" placeholder="BPM" />
+        
+        Customizar instrumente (talvez?)
+        <br></br>
+        Visualizacao da onda da musica com wavesurfer (talvez?)
+
       </div>
 
       <div id="edit-window">
@@ -120,6 +161,10 @@ const Home = () => {
       
       <div className="data">
         Paginas de sons
+        <br></br>
+        adicionar novas Paginas
+        <br></br>
+        upar um audio(?)
       </div>
     </div>
   );
