@@ -47,7 +47,7 @@
     display: flex;
     width: 100%;
     overflow-x: auto;
-    background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
+    background-color: #2a2a2a;
     border: 2px solid #8BAB44;
     border-radius: 15px;
     margin-bottom: 1rem;
@@ -56,8 +56,8 @@
 #notes {
     display: flex;
     flex-direction: column;
-    width: 60px;
-    min-width: 60px;
+    width: 80px;
+    min-width: 80px;
     height: fit-content;
     background-color: #2a2a2a;
     border-right: 1px solid #444;

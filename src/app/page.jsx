@@ -9,6 +9,7 @@ const Home = () => {
   const [instrument, setInstrument] = useState('synth');
   const [volume, setVolume] = useState(-10); 
   const synthRef = useRef(null);
+
   const instruments = {
     synth: () => new Tone.Synth(),
     fm: () => new Tone.FMSynth(),
@@ -51,17 +52,17 @@ const Home = () => {
   
     if (synthRef.current && Tone.getContext().state === "running") {
       const now = Tone.now();
+      const minVolume = -30;
+      const maxVolume = 0.1;
   
-      const volumeNoteMap = [
-        { min: -30, max: -25.7, note: "C4" },
-        { min: -25.7, max: -21.5, note: "D4" },
-        { min: -21.5, max: -18, note: "E4" },
-        { min: -18, max: -15, note: "F4" },
-        { min: -15, max: -12, note: "G4" },
-        { min: -12, max: -9, note: "A4" },
-        { min: -9, max: -6, note: "B4" },
-        { min: -6, max: 0.1, note: "C5" },
-      ];
+      const notes = ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5"];
+      const step = (maxVolume - minVolume) / notes.length;
+  
+      const volumeNoteMap = notes.map((note, i) => ({
+        min: minVolume + i * step,
+        max: minVolume + (i + 1) * step,
+        note,
+      }));
   
       const noteToPlay = volumeNoteMap.find(
         (range) => volume >= range.min && volume < range.max
@@ -91,9 +92,8 @@ const Home = () => {
   };
 
   const playNotePiano = (note) => {
-    const cleanNote = note.split("/")[0].trim();
     if (synthRef.current) {
-      synthRef.current.triggerAttackRelease(cleanNote, "8n");
+      synthRef.current.triggerAttackRelease(note, "8n");
     }
   };
 
@@ -133,7 +133,7 @@ const Home = () => {
           <input 
             type="range" 
             min="-30" 
-            max="0" 
+            max="20" 
             step="1"
             value={volume}
             onChange={handleVolumeChange}
@@ -153,7 +153,7 @@ const Home = () => {
           <div id="notes">
             {renderKeys()}
           </div>
-          <PianoRoll />
+          <PianoRoll  synthRef={synthRef}/>
         </div>
         Camadas
         <p>* +</p>
