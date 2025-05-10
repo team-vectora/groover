@@ -8,6 +8,8 @@ const Home = () => {
   
   const [instrument, setInstrument] = useState('synth');
   const [volume, setVolume] = useState(-10); 
+  const [tempo, setTempo] = useState("8");
+  const [bpm, setBpm] =useState(120);
   const synthRef = useRef(null);
 
   const instruments = {
@@ -139,9 +141,29 @@ const Home = () => {
             onChange={handleVolumeChange}
           />
         </div>
-        <label htmlFor="">BPM</label>
-        <input type="text" placeholder="BPM" />
+        <label htmlFor="time">Tempo</label>
+        <select 
+          name="time" 
+          id="time"
+          value={tempo}
+          onChange={(e) => setTempo(Number(e.target.value))}
+        >
+          <option value="1">1 Tempo (Semibreve)</option> 
+          <option value="2">2 Tempos (Mínima)</option>  
+          <option value="4">4 Tempos (Semínima)</option>  
+          <option value="8">8 Tempos (Colcheia)</option>  
+          <option value="16">16 Tempos (Semicolcheia)</option>  
         
+        </select> 
+
+        <label htmlFor="bpm">Bpm</label>
+        <input
+          type="range"
+          min="40"
+          max="300"
+          value={bpm}
+          onChange={(e) => setBpm(Number(e.target.value))}
+        />
         Customizar instrumente (talvez?)
         <br></br>
         Visualizacao da onda da musica com wavesurfer (talvez?)
@@ -153,7 +175,7 @@ const Home = () => {
           <div id="notes">
             {renderKeys()}
           </div>
-          <PianoRoll  synthRef={synthRef}/>
+          <PianoRoll  synthRef={synthRef} tempo={tempo}/>
         </div>
         Camadas
         <p>* +</p>

@@ -1,13 +1,13 @@
 .piano-roll-grid {
     border-collapse: collapse;
-    width: 100%;
+    width: max-content;    overflow-x: auto;
   }
   
   .piano-roll-cell {
     border: 1px solid #444;
     height: 30px;
-    min-width: 2rem;
-    width: 10rem;
+    min-width: 120px;
+    width: 100px;
     padding: 0;
     text-align: center;
     cursor: pointer;
