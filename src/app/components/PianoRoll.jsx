@@ -2,19 +2,16 @@
 
 import { useEffect, useState } from "react";
 import './piano.css';
-/*
-Lembrando => Isso eh um teste. Tamo tipo vendo oq eh codavel ou nao. Tentei fazer tocar musica so usando
-o Tone js, talvez de certo mas seja um problema para exportar depois.
+import * as Tone from 'tone';
 
-Ola, se vc ta lendo tem umas coisas que tem que se fazer que sao importantes. Pensar em ter que tocar
-as colunas que nao tem nenhuma celula preenchida para obter as pausas certas
-
-*/
 const PianoRoll = ({ synthRef, tempo, bpm }) => {
   const rows = 49; 
-  const [cols, setCols] = useState(10);
-  const [selectedCells, setSelectedCells] = useState([]);
-  
+  const initialCols = 10;
+  const [cols, setCols] = useState(initialCols);
+  const [matrixNotes, setMatrixNotes] = useState(
+    Array.from({length: initialCols}, () => Array(rows).fill(null))
+  ); // Matriz pra representar a tabela, cada coluna é um array
+
   const notes = [
     "C6", "B5", "A#5", "A5", "G#5", "G5", "F#5", "F5", "E5", "D#5",
     "D5", "C#5", "C5", "B4", "A#4", "A4", "G#4", "G4", "F#4", "F4",
@@ -24,42 +21,56 @@ const PianoRoll = ({ synthRef, tempo, bpm }) => {
   ];
 
   const isSelected = (row, col) => {
-    return selectedCells.some(cell => cell.row === row && cell.col === col);
+    return matrixNotes[col][row] !== null;
   };
 
-  
-  // logica para adicionar/excluir uma celula (odeio esse "[...prev," bizarro)
   const handleClickTable = (rowIndex, colIndex, note) => {
-    const cellIndex = selectedCells.findIndex(cell => cell.row === rowIndex && cell.col === colIndex);
-    if (cellIndex !== -1) {
-      setSelectedCells(prev => prev.filter((_, index) => index !== cellIndex));
-    } else {
-      setSelectedCells(prev => [...prev, { row: rowIndex, col: colIndex }]);
-    }
-    synthRef.current.triggerAttackRelease(note, "8n");
+    setMatrixNotes(prev => {
+      const newMatrix = [...prev];
+      // toggle da nota (adiciona/remove)
+      newMatrix[colIndex] = [...newMatrix[colIndex]];
+      newMatrix[colIndex][rowIndex] = newMatrix[colIndex][rowIndex] ? null : note;
+      
+      // adiciona mais colunas se necessário
+      if (colIndex === prev.length - 1) {
+        for (let i = 0; i < 10; i++) {
+          newMatrix.push(Array(rows).fill(null));
+        }
+        setCols(prevCols => prevCols + 10);
+      }
+      
+      return newMatrix;
+    });
     
-    // adiciona mais colunas
-    if (cols === colIndex +1){
-      setCols(prev => prev + 10)
-    }
+    // toca a nota ao clicar
+    synthRef.current.triggerAttackRelease(note, "8n");
   };
 
-  // Toca as notas, entretanto nao toca duas ao mesmo tempo, ta ordenando e tocando uma por vez
-  
   const playSelectedNotes = async () => {
-    const duration = 60/bpm;
+    console.log("entrou");
     
-    const sorted = [...selectedCells].sort((a, b) => a.col - b.col);
-    for (const cell of sorted) {
-      const note = notes[cell.row];
-      synthRef.current.triggerAttackRelease(note, tempo + "n"); 
-      // Isso aqui ta cortando a duracao da nota. Existe uma relacao entre bpm, duracao e tempo, mas tambem da para fazer com o pro
-      // proprio tone js eu acho
-      await new Promise(resolve => setTimeout(resolve,400)); 
-    }
+    Tone.getTransport().bpm.value = bpm;
+    Tone.getTransport().stop();
+
+    const noteDuration = tempo + "n";
+
+    matrixNotes.forEach((col, colIndex) => {
+      const notesToPlay = col.filter(note => note !== null);
+
+        Tone.getTransport().schedule(time => {
+          if (notesToPlay.length === 1) {
+            synthRef.current.triggerAttackRelease(notesToPlay[0], noteDuration, time);
+          } else if (notesToPlay.length > 0) {
+            synthRef.current.triggerAttackRelease(notesToPlay, noteDuration, time);
+          }
+        }, colIndex * Tone.Time(noteDuration).toSeconds());
+    });
+    
+    await Tone.start();
+    Tone.getTransport().start();
+    
   };
   
-  // faz a tabela basicamente
   const tableMaker = () => {
     return (
       <table className="piano-roll-grid">
@@ -82,12 +93,25 @@ const PianoRoll = ({ synthRef, tempo, bpm }) => {
     );
   };
 
-  return (
-    <>
-      {tableMaker()}
+  const playNotes = () => {
+    return (
       <button onClick={playSelectedNotes} className="play-button">
         Tocar notas selecionadas
       </button>
+    );
+  }
+
+  useEffect(() => {
+    return () => {
+      Tone.getTransport().cancel();
+      Tone.getTransport().stop();
+    };
+  }, []);
+
+  return (
+    <>
+      {playNotes()}
+      {tableMaker()}
     </>
   );
 };

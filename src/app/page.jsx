@@ -13,9 +13,9 @@ const Home = () => {
   const synthRef = useRef(null);
 
   const instruments = {
-    synth: () => new Tone.Synth(),
-    fm: () => new Tone.FMSynth(),
-    am: () => new Tone.AMSynth(),
+    synth: () => new Tone.PolySynth(Tone.Synth), // Alterado para PolySynth isso é pra fazer acorde
+    fm: () => new Tone.PolySynth(Tone.FMSynth), // Alterado para PolySynth
+    am: () => new Tone.PolySynth(Tone.AMSynth), // Alterado para PolySynth
     membrane: () => new Tone.MembraneSynth(),
     duo: () => new Tone.DuoSynth(),
     mono: () => new Tone.MonoSynth(),
@@ -26,9 +26,9 @@ const Home = () => {
       },
       baseUrl: "https://tonejs.github.io/audio/casio/",
     }).toDestination()
-  };
   
-  
+  }
+
   const notes = [
     "C6", "B5", "A#5", "A5", "G#5", "G5", "F#5", "F5", "E5", "D#5",
     "D5", "C#5", "C5", "B4", "A#4", "A4", "G#4", "G4", "F#4", "F4",
@@ -38,16 +38,29 @@ const Home = () => {
   ];
 
   useEffect(() => {
-
+    // Configuração inicial do PolySynth
     synthRef.current = instruments[instrument]().toDestination();
-    Tone.getDestination().volume.value = volume;
+    synthRef.current.volume.value = volume;
+    
+    // Configuração recomendada para PolySynth nao entendi nada mas se precisar a gnt muda depois
+    if (synthRef.current instanceof Tone.PolySynth) {
+      synthRef.current.set({
+        envelope: {
+          attack: 0.02,
+          decay: 0.1,
+          sustain: 0.3,
+          release: 0.5
+        },
+        maxPolyphony: 16 // Número máximo de vozes simultâneas da pra mudar tbm mas se o deep deixou em 16 entao em 16 ficará
+      });
+    }
     
     return () => {
       if (synthRef.current) {
         synthRef.current.dispose();
       }
     };
-  }, []);
+  }, [instrument]);
   
   useEffect(() => {
     Tone.getDestination().volume.rampTo(volume, 0.1);
@@ -156,11 +169,12 @@ const Home = () => {
         
         </select> 
 
-        <label htmlFor="bpm">Bpm</label>
+        <label htmlFor="bpm">Bpm ({bpm})</label>
         <input
           type="range"
           min="40"
           max="300"
+          step="10"
           value={bpm}
           onChange={(e) => setBpm(Number(e.target.value))}
         />
@@ -175,7 +189,7 @@ const Home = () => {
           <div id="notes">
             {renderKeys()}
           </div>
-          <PianoRoll  synthRef={synthRef} tempo={tempo}/>
+          <PianoRoll  synthRef={synthRef} tempo={tempo} bpm={bpm}/>
         </div>
         Camadas
         <p>* +</p>
