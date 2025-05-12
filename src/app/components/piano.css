@@ -15,5 +15,17 @@
   }
   
   .piano-roll-cell.selected {
+        transition: all 100ms ease-in-out;
+
     background-color: #8BAB44;
   }
+
+  .piano-roll-cell {
+  transition: background-color 0.1s ease;
+}
+
+.piano-roll-cell.active-col {
+  background-color: #444;
+}
+
+

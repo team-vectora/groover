@@ -8,6 +8,7 @@ const PianoRoll = ({ synthRef, tempo, bpm }) => {
   const rows = 49; 
   const initialCols = 10;
   const [cols, setCols] = useState(initialCols);
+  const [activeCol, setActiveCol] = useState(null);
   const [matrixNotes, setMatrixNotes] = useState(
     Array.from({length: initialCols}, () => Array(rows).fill(null))
   ); // Matriz pra representar a tabela, cada coluna é um array
@@ -20,11 +21,15 @@ const PianoRoll = ({ synthRef, tempo, bpm }) => {
     "A2", "G#2", "G2", "F#2", "F2", "E2", "D#2", "D2", "C#2", "C2"
   ];
 
-  const isSelected = (row, col) => {
-    return matrixNotes[col][row] !== null;
-  };
+const isSelected = (row, col) => {
+  // Verifique se a coluna existe antes de tentar acessar
+  if (!matrixNotes[col]) return false;
+  return matrixNotes[col][row] !== null;
+};
+
 
   const handleClickTable = (rowIndex, colIndex, note) => {
+
     setMatrixNotes(prev => {
       const newMatrix = [...prev];
       // toggle da nota (adiciona/remove)
@@ -56,13 +61,24 @@ const PianoRoll = ({ synthRef, tempo, bpm }) => {
 
     matrixNotes.forEach((col, colIndex) => {
       const notesToPlay = col.filter(note => note !== null);
-
         Tone.getTransport().schedule(time => {
+          
+          console.log(colIndex)
+      
           if (notesToPlay.length === 1) {
             synthRef.current.triggerAttackRelease(notesToPlay[0], noteDuration, time);
           } else if (notesToPlay.length > 0) {
             synthRef.current.triggerAttackRelease(notesToPlay, noteDuration, time);
           }
+
+          setActiveCol(colIndex);
+          console.log(noteDuration)
+          if(colIndex+1 == initialCols){
+            setTimeout(() => {
+              setActiveCol(-1);
+            }, Tone.Time(noteDuration).toMilliseconds());
+          }
+
         }, colIndex * Tone.Time(noteDuration).toSeconds());
     });
     
@@ -72,6 +88,7 @@ const PianoRoll = ({ synthRef, tempo, bpm }) => {
   };
   
   const tableMaker = () => {
+    
     return (
       <table className="piano-roll-grid">
         <tbody>
@@ -80,7 +97,10 @@ const PianoRoll = ({ synthRef, tempo, bpm }) => {
               {Array.from({ length: cols }).map((_, colIndex) => (
                 <td 
                   key={`cell-${rowIndex}-${colIndex}`}
-                  className={`piano-roll-cell ${isSelected(rowIndex, colIndex) ? 'selected' : ''}`}
+                  className={`piano-roll-cell
+                    ${isSelected(rowIndex, colIndex) ? 'selected' : ''}
+                    ${activeCol === colIndex ? 'active-col' : ''}
+                  `}
                   onClick={() => handleClickTable(rowIndex, colIndex, notes[rowIndex])}
                 >
                   <b>{notes[rowIndex]}</b>
