@@ -14,6 +14,17 @@ pnpm dev
 bun dev
 ```
 
+In the Lab's computers;
+
+```bash
+mkdir ~/nodejs
+cd ~/nodejs
+wget https://nodejs.org/dist/v18.18.0/node-v18.18.0-linux-x64.tar.xz
+tar -xf node-v18.18.0-linux-x64.tar.xz
+
+export PATH="$HOME/nodejs/node-v18.18.0-linux-x64/bin:$PATH"
+```
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
