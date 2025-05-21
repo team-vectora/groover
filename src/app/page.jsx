@@ -189,7 +189,9 @@ const Home = () => {
           <div id="notes">
             {renderKeys()}
           </div>
-          <PianoRoll  synthRef={synthRef} tempo={tempo} bpm={bpm} 
+          <PianoRoll  synthRef={synthRef} 
+                      tempo={tempo} 
+                      bpm={bpm} 
                       setTempo={setTempo}
                       setBpm={setBpm}/>
         </div>
