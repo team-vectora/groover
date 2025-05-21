@@ -28,4 +28,44 @@
   background-color: #444;
 }
 
+.export-button {
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #2a9d8f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.export-button:hover {
+  background-color: #21867a;
+}
+
+
+.import-button {
+  display: inline-block;
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #f4a261;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.import-button input[type="file"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.import-button:hover {
+  background-color: #e37c36;
+}
+
+
 
