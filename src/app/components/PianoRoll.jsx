@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import { Midi } from '@tonejs/midi';
 import './piano.css';
 import * as Tone from 'tone';
+/**
+ * 
+ * Eu acho que tem que tirar o tempo, nao serve pra mta coisa e só vai dar trabalho 
+ * Deixar como BPM em tudo mesmo
+ *  
+ */
 
 const PianoRoll = ({ synthRef, tempo, bpm, setTempo, setBpm }) => {
   const rows = 49; 
@@ -127,7 +133,6 @@ const PianoRoll = ({ synthRef, tempo, bpm, setTempo, setBpm }) => {
     }
   };
   
-
   const tableMaker = () => {
     console.log('Renderizando tabela', { cols, rows });
     return (
@@ -166,21 +171,26 @@ const PianoRoll = ({ synthRef, tempo, bpm, setTempo, setBpm }) => {
   const exportToMIDI = () => {
     const midi = new Midi();
     const track = midi.addTrack();
-    const noteDurationSeconds = Tone.Time(tempo + 'n').toSeconds();
+    
+    // Definir o BPM no cabeçalho MIDI
+    midi.header.setTempo(bpm);
+    
+    // Calcular a duração em segundos de uma nota baseada no tempo e BPM
+    const noteDurationSeconds = (60 / bpm) * (4 / parseInt(tempo));
   
     matrixNotes.forEach((col, colIndex) => {
       col.forEach((note, rowIndex) => {
-        if (note) {
-          track.addNote({
-            midi: Tone.Frequency(note).toMidi(),
-            time: colIndex * noteDurationSeconds,
-            duration: noteDurationSeconds,
-            velocity: 0.8
-          });
-        }
-      });
+          if (note) {
+            track.addNote({
+              midi: Tone.Frequency(note).toMidi(),
+              time: colIndex * noteDurationSeconds,
+              duration: noteDurationSeconds,
+              velocity: 0.8
+            }); 
+          }
+        });
     });
-  
+    
     const bytes = midi.toArray();
     const blob = new Blob([bytes], { type: 'audio/midi' });
     const url = URL.createObjectURL(blob);
@@ -196,41 +206,45 @@ const PianoRoll = ({ synthRef, tempo, bpm, setTempo, setBpm }) => {
   const importFromMIDI = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-  
+
     const arrayBuffer = await file.arrayBuffer();
     const midi = new Midi(arrayBuffer);
-  
-    const track = midi.tracks[0]; // Consideramos uma única track
-    const bpmFromMidi = midi.header.tempos?.[0]?.bpm || 120;
-  
-    // Converter tempo absoluto para colunas baseado em steps
-    const noteDurationSec = track.notes[0]?.duration || 0.5;
-    const tempoFromNote = Tone.Time(noteDurationSec).toNotation().replace('n', '');
-  
-    const colDuration = noteDurationSec;
-    const newCols = Math.ceil(track.notes[track.notes.length - 1].time / colDuration) + 1;
-  
-    // Inicializa uma nova matriz
+
+    // Obter BPM do MIDI (padrão para 120 se não existir)
+    const bpmFromMidi = midi.header.tempos[0]?.bpm || 120;
+    
+    // Analisar a duração típica das notas para determinar o valor de tempo
+    const track = midi.tracks[0];
+    if (!track.notes.length) return;
+
+    // Calcular a duração média das notas em segundos
+    const avgDuration = track.notes.reduce((sum, note) => sum + note.duration, 0) / track.notes.length;
+    
+    // Converter duração para notação musical (8n, 16n, etc.)
+    const tempoFromNote = Tone.Time(avgDuration).toNotation().replace('n', '');
+
+    // Calcular quantas colunas precisamos baseado na última nota
+    const lastNoteTime = track.notes[track.notes.length - 1].time;
+    const noteDuration = (60 / bpmFromMidi) * (4 / parseInt(tempoFromNote));
+    const newCols = Math.ceil(lastNoteTime / noteDuration) + 1;
+
+    // Inicializar nova matriz
     const newMatrix = Array.from({ length: newCols }, () => Array(rows).fill(null));
-  
+
+    // Preencher a matriz
     track.notes.forEach(note => {
-      const colIndex = Math.round(note.time / colDuration);
+      const colIndex = Math.round(note.time / noteDuration);
       const rowIndex = notes.indexOf(Tone.Frequency(note.midi, "midi").toNote());
       if (colIndex >= 0 && rowIndex >= 0) {
         newMatrix[colIndex][rowIndex] = Tone.Frequency(note.midi, "midi").toNote();
       }
     });
-  
+
+    // Atualizar estado
     setMatrixNotes(newMatrix);
-    setCols(newMatrix.length);
+    setCols(newCols);
     setTempo(tempoFromNote);
     setBpm(Math.round(bpmFromMidi));
-  
-    console.log('MIDI importado com sucesso:', {
-      bpm: bpmFromMidi,
-      tempo: tempoFromNote,
-      cols: newMatrix.length
-    });
   };
 
   

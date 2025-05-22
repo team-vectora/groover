@@ -87,10 +87,8 @@ const Home = () => {
         synthRef.current.triggerAttackRelease(noteToPlay.note, "8n", now);
       }
     }
-  }, [volume]);
+  }, [volume]); 
   
-  
-
   const renderKeys = () => {
     return notes.map((note, index) => {
       const isBlackKey = note.includes("#");
