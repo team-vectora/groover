@@ -1,9 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from .utils.db import init_db
-from .config import Config
-from .routes import project_routes
+from routes.routes import auth_bp
+from config import Config
+from utils.db import mongo, init_db
 
 def create_app():
     app = Flask(__name__)
@@ -11,15 +11,13 @@ def create_app():
     
     # Configurações
     CORS(app)
-    init_db(app)
     JWTManager(app)
     
-    # Registrar blueprints
-    app.register_blueprint(project_routes.project_bp, url_prefix='/api')
+    # Inicializa o banco de dados
+    init_db(app)
     
-    @app.route('/')
-    def health_check():
-        return 'Music Composer API is running'
+    # Registrar blueprint
+    app.register_blueprint(auth_bp, url_prefix='/api')
     
     return app
 
