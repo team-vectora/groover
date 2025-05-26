@@ -1,9 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from utils.db import mongo
 from routes.routes import auth_bp
-from config import Config
-from utils.db import mongo, init_db
+from utils.config import Config
 
 def create_app():
     app = Flask(__name__)
@@ -14,9 +14,9 @@ def create_app():
     JWTManager(app)
     
     # Inicializa o banco de dados
-    init_db(app)
+    mongo.init_db()
     
-    # Registrar blueprint
+    # Registra blueprints
     app.register_blueprint(auth_bp, url_prefix='/api')
     
     return app

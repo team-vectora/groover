@@ -1,20 +1,44 @@
-from flask_pymongo import PyMongo
+from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson.json_util import dumps
-from flask import current_app
 import json
+import os
+from dotenv import load_dotenv
 
-mongo = PyMongo()
+load_dotenv()
 
-def init_db(app):
-    try:
-        mongo.init_app(app, uri=app.config['MONGO_URI'])
-        # Testa a conexão
-        mongo.db.command('ping')
-        current_app.logger.info("Conexão com MongoDB estabelecida com sucesso!")
-    except Exception as e:
-        current_app.logger.error(f"Erro ao conectar ao MongoDB: {str(e)}")
-        raise
+class MongoDB:
+    _instance = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.init_db()
+        return cls._instance
+    
+    def init_db(self):
+        try:
+            # Configuração da URI de conexão
+            username = os.getenv('MONGO_USERNAME', 'team_vectora')
+            password = os.getenv('MONGO_PASSWORD', 'vectora!2025')
+            cluster = os.getenv('MONGO_CLUSTER', 'cluster-groover.9gfspos.mongodb.net')
+            dbname = os.getenv('MONGO_DBNAME', 'music_app')
+            
+            self.uri = f"mongodb+srv://{username}:{password}@{cluster}/{dbname}?retryWrites=true&w=majority&appName=cluster-groover"
+            
+            # Conexão com o MongoDB
+            self.client = MongoClient(self.uri)
+            self.db = self.client[dbname]
+            
+            # Testa a conexão
+            self.db.command('ping')
+            print("Conexão com MongoDB estabelecida com sucesso!")
+        except Exception as e:
+            print(f"Erro ao conectar ao MongoDB: {str(e)}")
+            raise
 
-def jsonify_mongo(data):
-    return json.loads(dumps(data))
+    def jsonify(self, data):
+        return json.loads(dumps(data))
+
+# Instância global do banco de dados
+mongo = MongoDB()
