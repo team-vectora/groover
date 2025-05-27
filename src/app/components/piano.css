@@ -1,71 +1,70 @@
 .piano-roll-grid {
     border-collapse: collapse;
-    width: max-content;    overflow-x: auto;
-  }
+    width: max-content;
+    overflow-x: auto;
+}
   
-  .piano-roll-cell {
-    border: 1px solid #444;
+.piano-roll-cell {
+    border: 1px solid var(--bg-darker);
     height: 30px;
     min-width: 120px;
     width: 100px;
     padding: 0;
     text-align: center;
     cursor: pointer;
-    color: #2a2a2a;
-  }
+    color: var(--foreground);
+    background-color: var(--bg-secondary);
+}
   
-  .piano-roll-cell.selected {
-        transition: all 100ms ease-in-out;
+.piano-roll-cell.selected {
+    transition: all 100ms ease-in-out;
+    background-color: var(--accent);
+}
 
-    background-color: #8BAB44;
-  }
-
-  .piano-roll-cell {
-  transition: background-color 0.1s ease;
+.piano-roll-cell {
+    transition: background-color 0.1s ease;
 }
 
 .piano-roll-cell.active-col {
-  background-color: #444;
+    background-color: var(--primary);
 }
 
 .export-button {
-  margin: 10px;
-  padding: 10px 20px;
-  background-color: #2a9d8f;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: var(--primary);
+    color: var(--text-lighter);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
 }
 
 .export-button:hover {
-  background-color: #21867a;
+    background-color: var(--primary-light);
 }
-
 
 .import-button {
-  display: inline-block;
-  margin: 10px;
-  padding: 10px 20px;
-  background-color: #f4a261;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  position: relative;
-  overflow: hidden;
+    display: inline-block;
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: var(--accent);
+    color: var(--text-lighter);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    position: relative;
+    overflow: hidden;
 }
+
 .import-button input[type="file"] {
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 0;
-  cursor: pointer;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
 }
+
 .import-button:hover {
-  background-color: #e37c36;
+    background-color: var(--accent-light);
 }
-
-
-
