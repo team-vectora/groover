@@ -127,61 +127,94 @@ const Home = () => {
   return (
     <div id="home">
       <div className="data">
-        <label htmlFor="instruments">Instrumentos:</label>
-        <select 
-          name="instruments" 
-          id="instruments"
-          value={instrument}
-          onChange={handleInstrumentChange}
-        >
-          {Object.keys(instruments).map((inst) => (
-            <option key={inst} value={inst}>
-              {inst.charAt(0).toUpperCase() + inst.slice(1)}
-            </option>
-          ))}
-        </select> 
+          <div className="control-panel">
+              {/* Seção de Instrumento */}
+              <div className="control-group">
+                  <h3>Instrumento</h3>
+                  <div className="control-item">
+                      <label htmlFor="instruments">Selecione um instrumento:</label>
+                      <select
+                          id="instruments"
+                          className="control-select"
+                          value={instrument}
+                          onChange={handleInstrumentChange}
+                      >
+                          {Object.keys(instruments).map((inst) => (
+                              <option key={inst} value={inst}>
+                                  {inst.charAt(0).toUpperCase() + inst.slice(1)}
+                              </option>
+                          ))}
+                      </select>
+                  </div>
+              </div>
 
-        <div className="volume-control">
-          <label>Volume: {volume}dB</label>
-          <input 
-            type="range" 
-            min="-30" 
-            max="20" 
-            step="1"
-            value={volume}
-            onChange={handleVolumeChange}
-          />
-        </div>
-        <label htmlFor="time">Tempo</label>
-        <select 
-          name="time" 
-          id="time"
-          value={tempo}
-          onChange={(e) => setTempo(Number(e.target.value))}
-        >
-          <option value="1">1 Tempo (Semibreve)</option> 
-          <option value="2">2 Tempos (Mínima)</option>  
-          <option value="4">4 Tempos (Semínima)</option>  
-          <option value="8">8 Tempos (Colcheia)</option>  
-          <option value="16">16 Tempos (Semicolcheia)</option>  
-        
-        </select> 
+              {/* Seção de Volume */}
+              <div className="control-group">
+                  <h3>Volume</h3>
+                  <div className="control-item">
+                      <label>
+                          Nível: <span className="control-value">{volume}dB</span>
+                      </label>
+                      <input
+                          type="range"
+                          min="-30"
+                          max="20"
+                          step="1"
+                          className="control-range"
+                          value={volume}
+                          onChange={handleVolumeChange}
+                      />
+                  </div>
+              </div>
 
-        <label htmlFor="bpm">Bpm ({bpm})</label>
-        <input
-          type="range"
-          min="40"
-          max="300"
-          step="10"
-          value={bpm}
-          onChange={(e) => setBpm(Number(e.target.value))}
-        />
-        Customizar instrumente (talvez?)
-        <br></br>
-        Visualizacao da onda da musica com wavesurfer (talvez?)
+              {/* Seção de Tempo */}
+              <div className="control-group">
+                  <h3>Tempo</h3>
+                  <div className="control-item">
+                      <label htmlFor="time">Unidade de tempo:</label>
+                      <select
+                          id="time"
+                          className="control-select"
+                          value={tempo}
+                          onChange={(e) => setTempo(Number(e.target.value))}
+                      >
+                          <option value="1">Semibreve (1 tempo)</option>
+                          <option value="2">Mínima (2 tempos)</option>
+                          <option value="4">Semínima (4 tempos)</option>
+                          <option value="8">Colcheia (8 tempos)</option>
+                          <option value="16">Semicolcheia (16 tempos)</option>
+                      </select>
+                  </div>
+              </div>
 
+              {/* Seção de BPM */}
+              <div className="control-group">
+                  <h3>Andamento</h3>
+                  <div className="control-item">
+                      <label>
+                          BPM: <span className="control-value">{bpm}</span>
+                      </label>
+                      <input
+                          type="range"
+                          min="40"
+                          max="300"
+                          step="10"
+                          className="control-range"
+                          value={bpm}
+                          onChange={(e) => setBpm(Number(e.target.value))}
+                      />
+                  </div>
+              </div>
+
+              {/* Seção de Visualização, não entendii muito bem mas deixei*/} 
+              <div className="control-group">
+                  <h3>Visualização</h3>
+                  <p className="text-sm" style={{color: 'var(--text-light)'}}>
+                      Visualizacao da onda da musica com wavesurfer (talvez?)
+                  </p>
+              </div>
+          </div>
       </div>
-
       <div id="edit-window">
         <div id="piano-roll-container">
           <div id="notes">
