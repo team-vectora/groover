@@ -217,6 +217,77 @@
     font-weight: 600;
 }
 
+/* Header Styles */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.app-header {
+    background-color: var(--bg-darker);
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    border-bottom: 2px solid var(--accent);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-logo-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-circle {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    background-color: white;
+}
+
+.header-logo-text {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-lighter);
+    letter-spacing: 1px;
+}
+
+.header-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-user-avatar {
+    height: 45px;
+    width: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-light);
+}
+
+.header-user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-user-name {
+    font-weight: 600;
+    color: var(--text-lighter);
+    font-size: 1rem;
+}
+
+.header-user-role {
+    font-size: 0.8rem;
+    color: var(--accent-light);
+    font-weight: 500;
+}
+
 /* Ajustes para telas maiores */
 @media (min-width: 768px) {
     .control-panel {

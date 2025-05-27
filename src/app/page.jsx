@@ -124,7 +124,33 @@ const Home = () => {
     setVolume(newVolume);
   };
 
+  // é um exemplo
+  const userData = {
+      name: "Carlos Silva",
+      role: "Produtor Musical",
+      avatar: "" 
+  };
+
   return (
+    <div className="app-container">
+      <header className="app-header">
+        <div className="header-logo-container">
+          <div className="logo-circle"></div>
+             <h1 className="header-logo-text">GROOVER</h1>
+          </div>
+                
+        <div className="header-user-profile">
+          <div className="header-user-info">
+              <span className="header-user-name">{userData.name}</span>
+              <span className="header-user-role">{userData.role}</span>
+          </div>
+        <img 
+          src={userData.avatar} 
+          alt="Avatar"
+          className="header-user-avatar"
+        />
+        </div>
+      </header>
     <div id="home">
       <div className="data">
           <div className="control-panel">
@@ -237,6 +263,7 @@ const Home = () => {
         <br></br>
         upar um audio(?)
       </div>
+    </div>
     </div>
   );
 };
