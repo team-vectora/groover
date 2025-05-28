@@ -11,14 +11,11 @@ import * as Tone from 'tone';
  *  
  */
 
-const PianoRoll = ({ synthRef, tempo, bpm, setTempo, setBpm }) => {
+const PianoRoll = ({ synthRef, tempo, bpm, setTempo, setBpm, matrixNotes, setMatrixNotes,   activeCol,setActiveCol, cols, setCols }) => {
   const rows = 49; 
-  const initialCols = 10;
-  const [cols, setCols] = useState(initialCols);
-  const [activeCol, setActiveCol] = useState(null);
-  const [matrixNotes, setMatrixNotes] = useState(
-    Array.from({length: initialCols}, () => Array(rows).fill(null))
-  );
+  
+  const [page, setPage]= useState(1);
+  const [activePage, setActivePage]= useState(1);
 
   const notes = [
     "C6", "B5", "A#5", "A5", "G#5", "G5", "F#5", "F5", "E5", "D#5",
@@ -40,7 +37,7 @@ const PianoRoll = ({ synthRef, tempo, bpm, setTempo, setBpm }) => {
 
   const handleClickTable = (rowIndex, colIndex, note) => {
     console.log('Célula clicada', { rowIndex, colIndex, note });
-    
+    console.log(matrixNotes);
     setMatrixNotes(prev => {
       const newMatrix = [...prev];
       newMatrix[colIndex] = [...newMatrix[colIndex]];
@@ -67,72 +64,6 @@ const PianoRoll = ({ synthRef, tempo, bpm, setTempo, setBpm }) => {
     }
   };
 
-  let isPlaying = false;
-
-  const playSelectedNotes = async () => {
-    if (isPlaying) {
-      console.warn('playSelectedNotes já está em execução, ignorando chamada duplicada.');
-      return;
-    }
-    
-    isPlaying = true;
-    console.group('Iniciando playSelectedNotes');
-  
-    console.log('Estado inicial:', { 
-      matrixNotes,
-      bpm,
-      tempo,
-      synthRef: synthRef.current
-    });
-  
-    try {
-      Tone.getTransport().stop();    // Parar reprodução atual
-      Tone.getTransport().cancel();  // Cancelar eventos agendados
-      synthRef.current?.releaseAll?.();
-  
-      Tone.getTransport().bpm.value = bpm;
-      const noteDuration = tempo + "n";
-  
-      matrixNotes.forEach((col, colIndex) => {
-        const notesToPlay = col.filter(note => note !== null);
-  
-        if (notesToPlay.length > 0) {
-          Tone.getTransport().schedule(time => {
-            try {
-              if (notesToPlay.length === 1) {
-                synthRef.current.triggerAttackRelease(notesToPlay[0], noteDuration, time);
-              } else {
-                synthRef.current.triggerAttackRelease(notesToPlay, noteDuration, time);
-              }
-            } catch (error) {
-              console.error(`Erro ao tocar nota:`, error);
-            }
-  
-            setActiveCol(colIndex);
-  
-            if (colIndex + 1 === initialCols) {
-              setTimeout(() => setActiveCol(-1), Tone.Time(noteDuration).toMilliseconds());
-            }
-          }, colIndex * Tone.Time(noteDuration).toSeconds());
-        }
-      });
-  
-      await Tone.start();
-      Tone.getTransport().start();
-  
-    } catch (error) {
-      console.error('Erro durante playSelectedNotes:', error);
-    } finally {
-      console.groupEnd();
-      // Delay para liberar a flag apenas após o tempo total
-      const totalTime = matrixNotes.length * Tone.Time(noteDuration).toMilliseconds();
-      setTimeout(() => {
-        isPlaying = false;
-        console.log('playSelectedNotes liberado para nova execução');
-      }, totalTime + 100); // +100ms de margem
-    }
-  };
-  
   const tableMaker = () => {
     console.log('Renderizando tabela', { cols, rows });
     return (
@@ -157,50 +88,6 @@ const PianoRoll = ({ synthRef, tempo, bpm, setTempo, setBpm }) => {
         </tbody>
       </table>
     );
-  };
-
-  const playNotes = () => {
-    console.log('Renderizando botão de play');
-    return (
-      <button onClick={playSelectedNotes} className="play-button">
-        Tocar notas selecionadas
-      </button>
-    );
-  }
-
-  const exportToMIDI = () => {
-    const midi = new Midi();
-    const track = midi.addTrack();
-    
-    // Definir o BPM no cabeçalho MIDI
-    midi.header.setTempo(bpm);
-    
-    // Calcular a duração em segundos de uma nota baseada no tempo e BPM
-    const noteDurationSeconds = (60 / bpm) * (4 / parseInt(tempo));
-  
-    matrixNotes.forEach((col, colIndex) => {
-      col.forEach((note, rowIndex) => {
-          if (note) {
-            track.addNote({
-              midi: Tone.Frequency(note).toMidi(),
-              time: colIndex * noteDurationSeconds,
-              duration: noteDurationSeconds,
-              velocity: 0.8
-            }); 
-          }
-        });
-    });
-    
-    const bytes = midi.toArray();
-    const blob = new Blob([bytes], { type: 'audio/midi' });
-    const url = URL.createObjectURL(blob);
-  
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'piano-roll.mid';
-    link.click();
-  
-    URL.revokeObjectURL(url);
   };
 
   const importFromMIDI = async (event) => {
@@ -248,19 +135,7 @@ const PianoRoll = ({ synthRef, tempo, bpm, setTempo, setBpm }) => {
   };
 
   
-  const importButton = () => (
-    <label className="import-button">
-      Importar MIDI
-      <input type="file" accept=".mid" onChange={importFromMIDI} style={{ display: 'none' }} />
-    </label>
-  );
-  
 
-  const exportButton = () => (
-    <button onClick={exportToMIDI} className="export-button">
-      Exportar para MIDI
-    </button>
-  );
 
   useEffect(() => {
     console.log('Efeito de limpeza montado');
@@ -279,9 +154,6 @@ const PianoRoll = ({ synthRef, tempo, bpm, setTempo, setBpm }) => {
   console.log('Renderizando componente principal');
   return (
     <>
-      {playNotes()}
-      {exportButton()}
-      {importButton()}
       {tableMaker()}
     </>
   );
