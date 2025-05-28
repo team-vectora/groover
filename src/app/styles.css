@@ -235,6 +235,10 @@
     position: sticky;
     top: 0;
     z-index: 100;
+    flex-wrap: wrap;
+    padding: 1rem 2rem;
+    height: auto;
+    gap: 1rem;
 }
 
 .header-logo-container {
@@ -292,23 +296,51 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    order: 3;
+    width: 100%;
+    margin-top: 0.5rem;
 
 }
 
-.header-buttons button{
-    background-color: var(--primary);
-    margin: 1rem;
-    padding: 0.5rem;
-    border-radius: 100%;
+/* Estilo padronizado para botões principais */
+.action-buttons {
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start; 
+    width: 100%;
+}
+
+.action-button {
+    background-color: var(--bg-darker);
+    color: var(--text-lighter);
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all ease-in-out 300ms;
+    transition: all 0.2s ease;
+    min-width: 160px;
+    text-align: center;
 }
 
-.header-buttons button:hover{
-    background-color: var(--primary-light);
-
+.action-button:hover {
+    background-color: rgba(76, 78, 48, 0.1); 
+    transform: translateY(-2px);
 }
 
+.action-button:active {
+    transform: translateY(0);
+}
+
+.action-button.import {
+    border-color: var(--accent);
+}
+
+.action-button.import:hover {
+    background-color: rgba(169, 127, 82, 0.1);
+}
 
 /* Ajustes para telas maiores */
 @media (min-width: 768px) {
@@ -340,6 +372,8 @@
         width: calc(60% - 2rem);
         max-height: calc(100vh - 2rem);
         overflow-y: auto;
+        padding: 1.5rem;
+        gap: 1rem;
     }
 
     #notes {

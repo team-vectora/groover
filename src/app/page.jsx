@@ -320,13 +320,6 @@ const Home = () => {
           <div className="logo-circle"></div>
              <h1 className="header-logo-text">GROOVER</h1>
           </div>
-
-          <div className="header-buttons">
-            {playNotes()}
-            {exportButton()}
-            {importButton()}
-          </div>
-
         <div className="header-user-profile">
           <div className="header-user-info">
 
@@ -434,7 +427,7 @@ const Home = () => {
               </div>
           </div>
       </div>
-      <div id="edit-window">
+      <div id="edit-window">                      
         <div id="piano-roll-container">
           <div id="notes">
             {renderKeys()}
@@ -450,10 +443,25 @@ const Home = () => {
                       setActiveCol={setActiveCol}
                       cols={cols}
                       setCols={setCols}
-      />
-        </div>
-        Camadas
-        <p>* +</p>
+          />
+          </div>
+                <div className="action-buttons">
+              <button className="action-button" onClick={playSelectedNotes}>
+                  PLAY
+              </button>
+              <button className="action-button" onClick={exportToMIDI}>
+                  EXPORT
+              </button>
+              <button className="action-button import">
+                  IMPORT
+                  <input 
+                      type="file" 
+                      accept=".mid" 
+                      onChange={importFromMIDI} 
+                      style={{ display: 'none' }} 
+                  />
+              </button>
+          </div>
       </div>
       
       <div className="data">
