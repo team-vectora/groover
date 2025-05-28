@@ -447,13 +447,14 @@ const Home = () => {
           </div>
                 <div className="action-buttons">
               <button className="action-button" onClick={playSelectedNotes}>
-                  PLAY
+                  ▶ PLAY 
+
               </button>
               <button className="action-button" onClick={exportToMIDI}>
-                  EXPORT
+                  ↕ EXPORT
               </button>
               <button className="action-button import">
-                  IMPORT
+                  ↓ IMPORT
                   <input 
                       type="file" 
                       accept=".mid" 
