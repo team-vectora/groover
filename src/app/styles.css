@@ -369,6 +369,7 @@
     }
 
     #edit-window {
+        background-color: var(--bg-secondary);
         width: calc(60% - 2rem);
         max-height: calc(100vh - 2rem);
         overflow-y: auto;
@@ -377,6 +378,7 @@
     }
 
     #notes {
+        background-color: var(--bg-secondary);
         width: 100px;
         min-width: 100px;
     }
