@@ -29,6 +29,7 @@ class Project:
     def create_project(user_id, project_data):
         project = {
             'user_id': user_id,
+            'collaborators': [],  # Nova lista de colaboradores
             'title': project_data.get('title', 'New Project'),
             'description': project_data.get('description', ''),
             'bpm': project_data.get('bpm'),
@@ -41,6 +42,14 @@ class Project:
             #sem current_music_id mas o Music também vai cuidar papai
         }
         return str(mongo.db.projects.insert_one(project).inserted_id)
+
+    @staticmethod
+    def add_collaborator(project_id, user_id):
+        result = mongo.db.projects.update_one(
+            {'_id': ObjectId(project_id)},
+            {'$addToSet': {'collaborators': ObjectId(user_id)}}
+        )
+        return result.modified_count > 0
 
     @staticmethod
     def update_project(project_id, user_id, update_data):
@@ -94,7 +103,13 @@ class Project:
 
     @staticmethod
     def get_user_projects(user_id):
-        projects = mongo.db.projects.find({'user_id': user_id})
+        # Busca projetos onde o usuário é dono OU colaborador
+        projects = mongo.db.projects.find({
+            '$or': [
+                {'user_id': user_id},
+                {'collaborators': ObjectId(user_id)}
+            ]
+        })
         return [{
             'id': str(p['_id']),
             'title': p.get('title'),
@@ -103,7 +118,8 @@ class Project:
             'created_at': p.get('created_at'),
             'updated_at': p.get('updated_at'),
             'created_by': str(p.get('created_by', '')),
-            'last_updated_by': str(p.get('last_updated_by', ''))
+            'last_updated_by': str(p.get('last_updated_by', '')),
+            'is_owner': p['user_id'] == user_id
         } for p in projects]
 
     @staticmethod
@@ -130,6 +146,8 @@ class Project:
             }
         )
         return result.modified_count > 0
+    
+    
 
 class Music:
     @staticmethod
@@ -173,3 +191,35 @@ class Music:
             music['created_by'] = str(music.get('created_by', ''))
 
         return music
+
+# Adicionar nova coleção de convites
+class Invitation:
+    @staticmethod
+    def create_invitation(project_id, from_user_id, to_user_id):
+        invitation = {
+            'project_id': ObjectId(project_id),
+            'from_user_id': ObjectId(from_user_id),
+            'to_user_id': ObjectId(to_user_id),
+            'status': 'pending',  # pending, accepted, rejected
+            'created_at': datetime.now()
+        }
+        return mongo.db.invitations.insert_one(invitation).inserted_id
+
+    @staticmethod
+    def find_by_id(invitation_id):
+        return mongo.db.invitations.find_one({'_id': ObjectId(invitation_id)})
+    
+    @staticmethod
+    def find_pending_by_user(user_id):
+        return list(mongo.db.invitations.find({
+            'to_user_id': ObjectId(user_id),
+            'status': 'pending'
+        }))
+    
+    @staticmethod
+    def update_status(invitation_id, status):
+        result = mongo.db.invitations.update_one(
+            {'_id': ObjectId(invitation_id)},
+            {'$set': {'status': status}}
+        )
+        return result.modified_count > 0
