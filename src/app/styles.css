@@ -3,12 +3,13 @@
 }
 
 #home {
-    display: flex;
-    flex-direction: column;
-    max-height: 100vh;
-    background-color: var(--background);
-    padding: 1rem;
-    box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* muda max-height para height */
+  background-color: var(--background);
+  padding: 1rem;
+  box-sizing: border-box;
+  overflow: hidden; /* opcional, evita scroll indesejado */
 }
 
 .data {
@@ -307,6 +308,43 @@
 .action-button.import:hover {
     background-color: rgba(169, 127, 82, 0.1);
 }
+.page-buttons {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+/* Botões em formato circular */
+.page-buttons button {
+    background-color: transparent;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--text-lighter);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 
+        background-color 0.2s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.page-buttons button:hover {
+    background-color: rgba(76, 175, 80, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.page-buttons button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
 
 /* Ajustes para telas maiores */
 @media (min-width: 768px) {

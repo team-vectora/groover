@@ -1,17 +1,41 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { Midi } from '@tonejs/midi';
+import { useEffect } from 'react';
 import './piano.css';
-import * as Tone from 'tone';
+import * as Tone from "tone";
 
 
-const ChangeVolume = ({volume, setVolume}) => {
+
+const ChangeVolume = ({volume, setVolume, synthRef}) => {
   const handleVolumeChange = (e) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
   };
-
+  useEffect(() => {
+    Tone.getDestination().volume.rampTo(volume, 0.1);
+  
+    if (synthRef.current && Tone.getContext().state === "running") {
+      const now = Tone.now();
+      const minVolume = -30;
+      const maxVolume = 0.1;
+  
+      const notes = ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5"];
+      const step = (maxVolume - minVolume) / notes.length;
+  
+      const volumeNoteMap = notes.map((note, i) => ({
+        min: minVolume + i * step,
+        max: minVolume + (i + 1) * step,
+        note,
+      }));
+  
+      const noteToPlay = volumeNoteMap.find(
+        (range) => volume >= range.min && volume < range.max
+      );
+  
+      if (noteToPlay) {
+        synthRef.current.triggerAttackRelease(noteToPlay.note, "8n", now);
+      }
+    }
+  }, [volume]); 
 
 
   return (

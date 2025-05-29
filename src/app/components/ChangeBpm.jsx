@@ -1,9 +1,5 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { Midi } from '@tonejs/midi';
 import './piano.css';
-import * as Tone from 'tone';
 
 
 const ChangeBpm = ({bpm, setBpm}) => {
