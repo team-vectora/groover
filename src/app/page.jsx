@@ -3,8 +3,11 @@ import { useState, useEffect, useRef } from "react";
 import PianoRoll from "./components/PianoRoll.jsx";
 import * as Tone from "tone";
 import { Midi } from '@tonejs/midi';
-
 import './styles.css';
+import TittleCaption from "./components/TittleCaption.jsx";
+import ChangeInstrument from "./components/ChangeInstrument.jsx";
+import ChangeVolume from "./components/ChangeVolume.jsx";
+import ChangeBpm from "./components/ChangeBpm.jsx";
 
 const Home = () => {
 
@@ -61,7 +64,7 @@ const Home = () => {
           sustain: 0.3,
           release: 0.5
         },
-        maxPolyphony: 16 // Número máximo de vozes simultâneas da pra mudar tbm mas se o deep deixou em 16 entao em 16 ficará
+        maxPolyphony: 49 // Número máximo de vozes simultâneas da pra mudar tbm mas se o deep deixou em 16 entao em 16 ficará
       });
     }
     
@@ -148,32 +151,11 @@ const Home = () => {
       URL.revokeObjectURL(url);
     };
 
-    const exportButton = () => (
-      <button onClick={exportToMIDI} >
-        Exportar para MIDI
-      </button>
-    );
-
   const playNotePiano = (note) => {
     if (synthRef.current) {
       synthRef.current.triggerAttackRelease(note, "8n");
     }
   };
-
-  const handleInstrumentChange = (e) => {
-    const newInstrument = e.target.value;
-    if (synthRef.current) {
-      synthRef.current.dispose();
-    }
-    synthRef.current = instruments[newInstrument]().toDestination();
-    setInstrument(newInstrument);
-  };
-
-  const handleVolumeChange = (e) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-  };
-
 
 
   let isPlaying = false;
@@ -245,15 +227,6 @@ const Home = () => {
       }
     };
 
-  const playNotes = () => {
-    console.log('Renderizando botão de play');
-    return (
-      <button onClick={playSelectedNotes} >
-        Tocar notas selecionadas
-      </button>
-    );
-  }
-
   const importFromMIDI = async (event) => {
       const file = event.target.files[0];
       if (!file) return;
@@ -297,86 +270,27 @@ const Home = () => {
       setTempo(tempoFromNote);
       setBpm(Math.round(bpmFromMidi));
     };
-
-  const importButton = () => (
-    <button >
-      Importar MIDI
-      <input type="file" accept=".mid" onChange={importFromMIDI} style={{ display: 'none' }} />
-    </button>
-  );
   
-
   // é um exemplo
-  const userData = {
-      name: "Carlos Silva",
-      role: "Produtor Musical",
-      avatar: "" 
-  };
+
 
   return (
     <div className="app-container">
-      <header className="app-header">
-        <div className="header-logo-container">
-          <div className="logo-circle"></div>
-             <h1 className="header-logo-text">GROOVER</h1>
-          </div>
-        <div className="header-user-profile">
-          <div className="header-user-info">
 
-              <span className="header-user-name">{userData.name}</span>
-              <span className="header-user-role">{userData.role}</span>
-          </div>
-        {/*Nao ta carregando para nao dar bug*/}
-        {userData.avatar && (
-          <img 
-            src={userData.avatar} 
-            alt="Avatar"
-            className="header-user-avatar"
-          />
-        )}
+    <TittleCaption/>
 
-        </div>
-      </header>
     <div id="home">
       <div className="data">
           <div className="control-panel">
               {/* Seção de Instrumento */}
               <div className="control-group">
-                  <h3>Instrumento</h3>
-                  <div className="control-item">
-                      <label htmlFor="instruments">Selecione um instrumento:</label>
-                      <select
-                          id="instruments"
-                          className="control-select"
-                          value={instrument}
-                          onChange={handleInstrumentChange}
-                      >
-                          {Object.keys(instruments).map((inst) => (
-                              <option key={inst} value={inst}>
-                                  {inst.charAt(0).toUpperCase() + inst.slice(1)}
-                              </option>
-                          ))}
-                      </select>
-                  </div>
+                 <ChangeInstrument instrument={instrument} instruments={instruments} setInstrument={setInstrument} synthRef={synthRef}/>
               </div>
 
               {/* Seção de Volume */}
               <div className="control-group">
-                  <h3>Volume</h3>
-                  <div className="control-item">
-                      <label>
-                          Nível: <span className="control-value">{volume}dB</span>
-                      </label>
-                      <input
-                          type="range"
-                          min="-30"
-                          max="20"
-                          step="1"
-                          className="control-range"
-                          value={volume}
-                          onChange={handleVolumeChange}
-                      />
-                  </div>
+                  <ChangeVolume volume={volume} setVolume={setVolume} />
+
               </div>
 
               {/* Seção de Tempo */}
@@ -461,6 +375,9 @@ const Home = () => {
                       onChange={importFromMIDI} 
                       style={{ display: 'none' }} 
                   />
+              </button>
+              <button className="action-button">
+                salvar
               </button>
           </div>
       </div>

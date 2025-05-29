@@ -90,53 +90,6 @@ const PianoRoll = ({ synthRef, tempo, bpm, setTempo, setBpm, matrixNotes, setMat
     );
   };
 
-  const importFromMIDI = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const arrayBuffer = await file.arrayBuffer();
-    const midi = new Midi(arrayBuffer);
-
-    // Obter BPM do MIDI (padrão para 120 se não existir)
-    const bpmFromMidi = midi.header.tempos[0]?.bpm || 120;
-    
-    // Analisar a duração típica das notas para determinar o valor de tempo
-    const track = midi.tracks[0];
-    if (!track.notes.length) return;
-
-    // Calcular a duração média das notas em segundos
-    const avgDuration = track.notes.reduce((sum, note) => sum + note.duration, 0) / track.notes.length;
-    
-    // Converter duração para notação musical (8n, 16n, etc.)
-    const tempoFromNote = Tone.Time(avgDuration).toNotation().replace('n', '');
-
-    // Calcular quantas colunas precisamos baseado na última nota
-    const lastNoteTime = track.notes[track.notes.length - 1].time;
-    const noteDuration = (60 / bpmFromMidi) * (4 / parseInt(tempoFromNote));
-    const newCols = Math.ceil(lastNoteTime / noteDuration) + 1;
-
-    // Inicializar nova matriz
-    const newMatrix = Array.from({ length: newCols }, () => Array(rows).fill(null));
-
-    // Preencher a matriz
-    track.notes.forEach(note => {
-      const colIndex = Math.round(note.time / noteDuration);
-      const rowIndex = notes.indexOf(Tone.Frequency(note.midi, "midi").toNote());
-      if (colIndex >= 0 && rowIndex >= 0) {
-        newMatrix[colIndex][rowIndex] = Tone.Frequency(note.midi, "midi").toNote();
-      }
-    });
-
-    // Atualizar estado
-    setMatrixNotes(newMatrix);
-    setCols(newCols);
-    setTempo(tempoFromNote);
-    setBpm(Math.round(bpmFromMidi));
-  };
-
-  
-
-
   useEffect(() => {
     console.log('Efeito de limpeza montado');
     return () => {
