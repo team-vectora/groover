@@ -212,11 +212,12 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem 2rem;
-    border-bottom: 2px solid var(--primary);
     position: sticky;
     top: 0;
     z-index: 100;
     gap: 1rem;
+    padding: 0.5rem 1rem; 
+    height: 60px;
 }
 
 .header-logo-container {
@@ -226,14 +227,14 @@
 }
 
 .logo-circle {
-    height: 50px;
-    width: 50px;
+    height: 30px;
+    width: 30px;
     border-radius: 50%;
     background-color: white;
 }
 
 .header-logo-text {
-    font-size: 1.8rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--text-lighter);
     letter-spacing: 1px;
@@ -246,8 +247,8 @@
 }
 
 .header-user-avatar {
-    height: 45px;
-    width: 45px;
+    height: 30px;
+    width: 30px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--primary);
@@ -261,11 +262,11 @@
 .header-user-name {
     font-weight: 600;
     color: var(--text-lighter);
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 
 .header-user-role {
-    font-size: 0.8rem;
+    font-size: 0.6rem;
     color: var(--primary-light);
     font-weight: 500;
 }
