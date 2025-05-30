@@ -231,7 +231,12 @@ const [isPlaying, setIsPlaying] = useState(false);
 
   return (
     <div className="app-container">
-      <TittleCaption />
+      <TittleCaption 
+        onPlay={playSelectedNotes}
+        onExport={exportToMIDI}
+        onImport={importFromMIDI}
+        onSave={() => console.log('Save clicked')}
+      />
       <div id="home">
         <div className="data">
           <div className="control-panel">
@@ -300,23 +305,6 @@ const [isPlaying, setIsPlaying] = useState(false);
               activePage={activePage}
               setActivePage={setActivePage}
             />
-          </div>
-          <div className="action-buttons">
-            <button className="action-button" onClick={playSelectedNotes}>▶ TOCAR</button>
-            <button className="action-button" onClick={exportToMIDI}>↕ EXPORTAR</button>
-            <button className="action-button import">
-              ↓ IMPORTAR
-              <input
-                type="file"
-                accept=".mid"
-                onChange={importFromMIDI}
-                style={{ display: 'none' }}
-              />
-            </button>
-
-
-            <button className="action-button">⎙ SALVAR</button>
-            {pages}
           </div>
         </div>
 
