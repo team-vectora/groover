@@ -260,7 +260,7 @@ const [isPlaying, setIsPlaying] = useState(false);
             <div className="control-group">
               <h3>Versoes</h3>
               <div className="control-item">
-                <select name="cars" id="cars">
+                <select name="cars" className="control-select" id="cars">
                   <option value="volvo">Volvo</option>
                   <option value="saab">Saab</option>
                   <option value="mercedes">Mercedes</option>
@@ -273,7 +273,7 @@ const [isPlaying, setIsPlaying] = useState(false);
               <p className="text-sm">Pagina <strong>{activePage+1}</strong> de <strong>{pages.length}</strong></p>
               <div className="page-buttons">
                 <button  onClick={() => movePage(-1)}>⬅</button>
-                <button  onClick={addPage}>➕</button>
+                <button  onClick={addPage}>✛</button>
                 <button  onClick={() => movePage(1)}>⮕</button>
               </div>
             </div>
@@ -302,10 +302,10 @@ const [isPlaying, setIsPlaying] = useState(false);
             />
           </div>
           <div className="action-buttons">
-            <button className="action-button" onClick={playSelectedNotes}>▶ PLAY</button>
-            <button className="action-button" onClick={exportToMIDI}>↕ EXPORT</button>
+            <button className="action-button" onClick={playSelectedNotes}>▶ TOCAR</button>
+            <button className="action-button" onClick={exportToMIDI}>↕ EXPORTAR</button>
             <button className="action-button import">
-              ↓ IMPORT
+              ↓ IMPORTAR
               <input
                 type="file"
                 accept=".mid"
@@ -315,7 +315,7 @@ const [isPlaying, setIsPlaying] = useState(false);
             </button>
 
 
-            <button className="action-button">salvar</button>
+            <button className="action-button">⎙ SALVAR</button>
             {pages}
           </div>
         </div>

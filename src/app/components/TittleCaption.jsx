@@ -12,9 +12,8 @@ const TittleCaption = () => {
   return (
     <header className="app-header">
       <div className="header-logo-container">
-        <div className="logo-circle"></div>
-           <h1 className="header-logo-text">GROOVER</h1>
-        </div>
+          <h1 className="header-logo-text">GROOVER</h1>
+      </div>
       <div className="header-user-profile">
         <div className="header-user-info">
 
