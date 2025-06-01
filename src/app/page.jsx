@@ -187,8 +187,8 @@ const exportToMIDI = () => {
 
 
 const playSelectedNotesActivePage = (n) => {
-  
   return new Promise(async (resolve) => {
+    console.log(matrixNotes)
     if (isPlaying) {
       console.warn('Playback já em execução.');
       return resolve();
@@ -203,50 +203,34 @@ const playSelectedNotesActivePage = (n) => {
     setIsPlaying(true);
     const noteDuration = tempo + "n";
 
-    // Set para colocar as notas 
-    let sustainedNotes = new Set();
+    // Colocar as notas continuas que vao estar em um set
+  
+    const sustainedNotes = new Set();
 
     try {
-
       Tone.getTransport().bpm.value = bpm;
 
       currentMatrix.forEach((col, colIndex) => {
         Tone.getTransport().schedule(time => {
-          // Notas da coluna atual
           const notesToPlay = col.filter(note => note !== null);
-          // Notas proxima coluna
-          const nextCol = currentMatrix[colIndex + 1] || [];
-          // Ver quais vao continuar
-          const nextNotes = nextCol.filter(note => note !== null);
-
-          // Vai tocar a nota que ia tocar e tira ela do set
+          
+          notesToPlay.forEach(note => {
+              if (!sustainedNotes.has(note)) {
+                if(String(note).endsWith('*')){
+                    synthRef.current.triggerAttack(note, time);
+                }
+                else{
+                  sustainedNotes.add(note);
+                }
+                
+              }
+          });
           sustainedNotes.forEach(note => {
             if (!notesToPlay.includes(note)) {
+              
               synthRef.current.triggerRelease(note, time);
               sustainedNotes.delete(note);
             }
-          });
-
-          // Tocar ou sustentar notas atuais
-          notesToPlay.forEach(note => {
-            const isInNext = nextNotes.includes(note);
-            if (sustainedNotes.has(note)) {
-              // Já está sustentada, não faz nada (continua tocando)
-            } else {
-              // Nota nova, começa ela
-              synthRef.current.triggerAttack(note, time);
-              sustainedNotes.add(note);
-            }
-
-            // Se não vai continuar na próxima, agenda release
-            if (!isInNext) {
-              const releaseTime = time + Tone.Time(noteDuration).toSeconds();
-
-            Tone.getTransport().scheduleOnce(releaseTime => {
-              synthRef.current.triggerRelease(note, releaseTime);
-              sustainedNotes.delete(note);
-            }, releaseTime);
-          }
           });
 
           setActiveCol(colIndex);
@@ -264,12 +248,10 @@ const playSelectedNotesActivePage = (n) => {
       setTimeout(() => {
         Tone.getTransport().stop();
         Tone.getTransport().cancel();
-              synthRef.current?.releaseAll?.();
-
+        synthRef.current?.releaseAll?.();
         setIsPlaying(false);
         resolve();
       }, totalTime);
-      
     }
   });
 };

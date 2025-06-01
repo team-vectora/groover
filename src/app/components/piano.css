@@ -29,3 +29,7 @@
     background-color: var(--primary);
 }
 
+.piano-roll-cell.super-selected {
+  background-color: #FF9800; 
+  color: white;
+}

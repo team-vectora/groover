@@ -20,12 +20,9 @@ const PianoRoll = ({
 }) => {
   console.log('Componente PianoRoll renderizado', { bpm, synthRef, activePage });
 
-  const isSelected = (row, col) => {
-    if (!pages[activePage] || !pages[activePage][col]) {
-      console.warn(`Tentativa de acessar coluna inexistente: ${col}`);
-      return false;
-    }
-    return pages[activePage][col][row] !== null;
+  const getCellState = (row, col) => {
+    if (!pages[activePage] || !pages[activePage][col]) return null;
+    return pages[activePage][col][row];
   };
 
   const handleClickTable = (rowIndex, colIndex, note) => {
@@ -42,9 +39,18 @@ const PianoRoll = ({
       }
 
       // Alterna nota ativa/inativa
-      currentMatrix[colIndex][rowIndex] = currentMatrix[colIndex][rowIndex] ? null : note;
-
-
+      // Sei que estou colocando asterisco aqui e no page verificando se eh um /A, mas estranhamente eh o jeito que funciona mais "parecido"
+      // ent tava fazendo uns testes para ver oq tava errado
+      if (currentMatrix[colIndex][rowIndex] === null){
+        currentMatrix[colIndex][rowIndex] = note;
+      }
+      else if(currentMatrix[colIndex][rowIndex] === note){
+        currentMatrix[colIndex][rowIndex] = note+"*";
+      }
+      else{
+        currentMatrix[colIndex][rowIndex] = null;
+      }
+      
       newPages[activePage] = currentMatrix;
       return newPages;
     });
@@ -56,6 +62,7 @@ const PianoRoll = ({
     }
   };
 
+
   const tableMaker = () => {
     return (
       <table className="piano-roll-grid">
@@ -63,16 +70,18 @@ const PianoRoll = ({
           {Array.from({ length: rows }).map((_, rowIndex) => (
             <tr key={`row-${rowIndex}`}>
               {Array.from({ length: cols }).map((_, colIndex) => (
-                <td
-                  key={`cell-${rowIndex}-${colIndex}`}
-                  className={`piano-roll-cell
-                    ${isSelected(rowIndex, colIndex) ? 'selected' : ''}
-                    ${activeCol === colIndex ? 'active-col' : ''}
-                  `}
-                  onClick={() => handleClickTable(rowIndex, colIndex, notes[rowIndex])}
-                >
-                  <b>{notes[rowIndex]}</b>
-                </td>
+              <td
+                key={`cell-${rowIndex}-${colIndex}`}
+                className={`piano-roll-cell
+                  ${getCellState(rowIndex, colIndex) === notes[rowIndex] ? 'selected' : ''}
+                  ${getCellState(rowIndex, colIndex) === notes[rowIndex] + '*' ? 'super-selected' : ''}
+                  ${activeCol === colIndex ? 'active-col' : ''}
+                `}
+                onClick={() => handleClickTable(rowIndex, colIndex, notes[rowIndex])}
+              >
+                <b>{notes[rowIndex]}</b>
+              </td>
+
               ))}
             </tr>
           ))}
