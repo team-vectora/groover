@@ -44,13 +44,6 @@ const PianoRoll = ({
       // Alterna nota ativa/inativa
       currentMatrix[colIndex][rowIndex] = currentMatrix[colIndex][rowIndex] ? null : note;
 
-      // Se clicou na última coluna, adiciona mais colunas
-      if (colIndex === currentMatrix.length - 1) {
-        for (let i = 0; i < 10; i++) {
-          currentMatrix.push(Array(rows).fill(null));
-        }
-        setCols(prevCols => prevCols + 10);
-      }
 
       newPages[activePage] = currentMatrix;
       return newPages;

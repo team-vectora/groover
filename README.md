@@ -1,9 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<div style="text-align: center;">
+  <img src="public/img/vetora_camiseta_costas_png.png" alt="logo groover" style="height: 500px;" />
+</div>
 
-## Getting Started
+Groover é uma plataforma desenvolvida pelo Team Vectora que revoluciona a forma como as pessoas interagem com o som e a música digital. Através de uma interface intuitiva e colaborativa, Groover permite a criação, edição e compartilhamento de composições musicais diretamente no navegador, integrando recursos inovadores como controle visual do piano roll, camadas sonoras e um painel de controle detalhado para mixagem e manipulação sonora.
 
-First, run the development server:
+## O que é o Groover
 
+Groover é uma plataforma digital que democratiza a criação musical, tornando acessível para qualquer usuário, seja iniciante ou profissional. Com foco em usabilidade e performance, permite a edição precisa de notas, sons e efeitos, promovendo uma experiência interativa e criativa. O projeto é ideal para músicos, produtores, educadores musicais e entusiastas que desejam explorar novas formas de expressão sonora.
+
+Além disso, Groover valoriza a colaboração e a expansão do repertório sonoro, possibilitando aos usuários adicionarem novas camadas e sons personalizados, tornando o processo criativo ainda mais rico.
+## Tecnologias
+
+Groover é construído com uma arquitetura modular e moderna, utilizando tecnologias de ponta para garantir robustez, escalabilidade e uma experiência fluida:
+
+- **Front-end**: Desenvolvido com React e estilizado com CSS moderno, Groover oferece uma interface dinâmica e responsiva, incluindo funcionalidades como piano roll interativo e controle avançado de mixagem..
+
+  ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+  ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+    ![Next](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
+  
+
+
+
+- **API**: Construído com Python e Flask, fornecendo APIs REST para gerenciamento de usuários, sessões e armazenamento das composições musicais, garantindo segurança, escalabilidade e facilidade de manutenção.
+
+    ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+    ![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
+
+- **Banco de Dados**: MongoDB para armazenamento flexível e eficiente dos dados de projetos musicais e usuários.
+
+    ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
+
+
+- **Deploy**: ferramentas e plataformas utilizadas para a implantação das aplicações.
+
+  ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)
+
+
+
+
+
+# LEPO
 ```bash
 npm run dev
 # or
@@ -24,24 +61,3 @@ tar -xf node-v18.18.0-linux-x64.tar.xz
 
 export PATH="$HOME/nodejs/node-v18.18.0-linux-x64/bin:$PATH"
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

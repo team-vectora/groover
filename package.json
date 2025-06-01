@@ -10,12 +10,15 @@
   },
   "dependencies": {
     "@tonejs/midi": "^2.0.28",
+    "i18next": "^25.2.1",
+    "i18next-browser-languagedetector": "^8.1.0",
     "midi": "file:",
     "next": "^15.3.2",
     "react": "^19.0.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.0.0",
+    "react-i18next": "^15.5.2",
     "tone": "^15.1.21"
   },
   "devDependencies": {
