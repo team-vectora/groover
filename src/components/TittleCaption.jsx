@@ -1,5 +1,4 @@
 "use client";
-import './piano.css';
 import Image from 'next/image';
 
 const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSave, t }) => {
