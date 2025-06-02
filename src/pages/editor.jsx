@@ -4,9 +4,10 @@ import PianoRoll from "../components/PianoRoll.jsx";
 import * as Tone from "tone";
 import { Midi } from '@tonejs/midi';
 import TittleCaption from "../components/TittleCaption.jsx";
-import ChangeInstrument from "../components/ChangeInstrument.jsx";
+
 import ChangeVolume from "../components/ChangeVolume.jsx";
-import translations from "./locales/language.js";
+import translations from "../locales/language.js";
+import ChangeInstrument from "../components/ChangeInstrument.jsx";
 
 
 const EditorPage = () => {
