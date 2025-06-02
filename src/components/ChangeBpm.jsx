@@ -1,5 +1,4 @@
 "use client";
-import './piano.css';
 
 
 const ChangeBpm = ({bpm, setBpm}) => {

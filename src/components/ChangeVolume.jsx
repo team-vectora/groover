@@ -1,6 +1,5 @@
 "use client";
 import { useEffect } from 'react';
-import './piano.css';
 import * as Tone from "tone";
 
 

@@ -1,5 +1,4 @@
 "use client";
-import "./piano.css";
 import { useState } from "react";
 
 const ChangeInstrument = ({ instrument, instruments, setInstrument, synthRef }) => {
