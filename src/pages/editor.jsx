@@ -1,13 +1,14 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import PianoRoll from "@/components/PianoRoll.jsx";
+import PianoRoll from "../components/PianoRoll.jsx";
 import * as Tone from "tone";
 import { Midi } from '@tonejs/midi';
 import './editor.css';
-import TittleCaption from "@/components/TittleCaption.jsx";
-import ChangeInstrument from "@/components/ChangeInstrument.jsx";
-import ChangeVolume from "@/components/ChangeVolume.jsx";
-import translations from "@/pages/locales/language.js";
+import "../globals.css";
+import TittleCaption from "../components/TittleCaption.jsx";
+import ChangeInstrument from "../components/ChangeInstrument.jsx";
+import ChangeVolume from "../components/ChangeVolume.jsx";
+import translations from "../pages/locales/language.js";
 
 
 function EditorPage () {
@@ -440,4 +441,4 @@ const importFromMIDI = async (event) => {
   );
 };
 
-export default Home;
+export default EditorPage;
