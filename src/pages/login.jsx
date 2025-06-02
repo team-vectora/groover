@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import "./login.css";
-import "./globals.css";
+import "../globals.css";
 
-function LoginPage() {
+const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
 
@@ -55,9 +55,6 @@ function LoginPage() {
                         </a>
 
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '24px', margin: '10px 0' }}>
-                            {erro && <p style={{ color: 'red', margin: 0 }}>{erro}</p>}
-                        </div>
                         <input id='botao-enviar' type="submit" value="Logar" />
                 </form>
 
