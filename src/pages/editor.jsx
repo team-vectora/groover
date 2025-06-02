@@ -30,7 +30,7 @@ const EditorPage = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const synthRef = useRef(null);
-
+  // Traducao
   const t = (key, params) => {
     let text = translations[lang][key] || key;
     if (params) {
@@ -41,6 +41,7 @@ const EditorPage = () => {
     return text;
   };
 
+  
   const acousticInstruments = [
     "bass-electric",
     "bassoon",
@@ -63,11 +64,13 @@ const EditorPage = () => {
     "violin",
     "xylophone"
   ];
-
+// o Synth por algum motivo fica bugado em alguns casos, ja os samples nao
   const instruments = {
     synth: () => new Tone.PolySynth(Tone.Synth).toDestination()
   };
-
+// Alguns instrumentos nao tem a nota C4 entao nao funcionam, mas so uma nota da pouco range pro tone descobrir as outras.
+  // Da para separar os instrumentos em um component e fazer um map de umas 5 notas que cada um tem.
+  // E se vc muda de instrumento e ja vai direto clicar, tipo 1s, ele buga tem q fazer o usuario esperar carregar
   acousticInstruments.forEach(name => {
     instruments[name] = () => new Tone.Sampler({
       urls: {
