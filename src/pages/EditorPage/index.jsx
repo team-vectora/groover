@@ -10,7 +10,7 @@ import ChangeVolume from "./components/ChangeVolume.jsx";
 import translations from "./locales/language.js";
 
 
-const Home = () => {
+function EditorPage () {
   const rows = 49;
   const initialCols = 10;
   const [activeCol, setActiveCol] = useState(null);
