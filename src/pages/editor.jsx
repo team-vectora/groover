@@ -3,8 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import PianoRoll from "../components/PianoRoll.jsx";
 import * as Tone from "tone";
 import { Midi } from '@tonejs/midi';
-import './editor.css';
-import '../globals.css';
 import TittleCaption from "../components/TittleCaption.jsx";
 import ChangeInstrument from "../components/ChangeInstrument.jsx";
 import ChangeVolume from "../components/ChangeVolume.jsx";
