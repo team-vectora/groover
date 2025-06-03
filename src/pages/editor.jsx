@@ -1,36 +1,102 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import PianoRoll from "../components/PianoRoll.jsx";
 import * as Tone from "tone";
 import { Midi } from '@tonejs/midi';
 import TittleCaption from "../components/TittleCaption.jsx";
-
 import ChangeVolume from "../components/ChangeVolume.jsx";
 import translations from "../locales/language.js";
 import ChangeInstrument from "../components/ChangeInstrument.jsx";
+import SelectRitmo from "../components/SelectRitmo";
 
-
-const EditorPage = () => {
+function EditorPage() {
+  // Constants and state declarations
   const rows = 49;
   const initialCols = 10;
+  const notes = [
+    "C6", "B5", "A#5", "A5", "G#5", "G5", "F#5", "F5", "E5", "D#5",
+    "D5", "C#5", "C5", "B4", "A#4", "A4", "G#4", "G4", "F#4", "F4",
+    "E4", "D#4", "D4", "C#4", "C4", "B3", "A#3", "A3", "G#3", "G3",
+    "F#3", "F3", "E3", "D#3", "D3", "C#3", "C3", "B2", "A#2", "A2",
+    "G#2", "G2", "F#2", "F2", "E2", "D#2", "D2", "C#2", "C2"
+  ];
+
+  const acousticInstruments = [
+    "bass-electric", "bassoon", "cello", "clarinet", "contrabass",
+    "flute", "french-horn", "guitar-acoustic", "guitar-electric",
+    "guitar-nylon", "harmonium", "harp", "organ", "piano", "saxophone",
+    "trombone", "trumpet", "tuba", "violin", "xylophone"
+  ];
+
+  // State hooks
   const [activeCol, setActiveCol] = useState(null);
   const [cols, setCols] = useState(initialCols);
+
+  const createSubNote = (name = null) => ({
+    name,           // ex: "C4" ou null
+    isStart: false,
+    isEnd: false,
+    isSeparated: false
+  });
+
+  const createNote = (noteName, duration = 1, initialSubNotes = null) => {
+    // Se vier um array inicial de strings, converte em SubNote
+    let subNotesArray;
+    if (Array.isArray(initialSubNotes)) {
+      // inicializar SubNote a partir de cada nome
+      subNotesArray = initialSubNotes.map((nm) =>
+          createSubNote(nm)
+      );
+    } else {
+      // cria array de SubNote vazias com tamanho = duration
+      subNotesArray = Array.from({ length: duration }, () =>
+          createSubNote(null)
+      );
+    }
+
+    return {
+      name: noteName,      // ex: "C4"
+      duration,            // valor rítmico: 1, 2, 4, 8, ...
+      subNotes: subNotesArray,
+      // Estas flags não são mais usadas diretamente em Note,
+      // mas cada SubNote conterá isStart/isEnd/isSeparated.
+    };
+  };
+
   const [matrixNotes, setMatrixNotes] = useState(
-      Array.from({ length: initialCols }, () => Array(rows).fill(null))
+      Array.from({ length: initialCols }, () =>
+          Array.from({ length: rows }, () =>
+              createNote() // cria uma Note com duration = 1 e subNotes = [ { name: null, isStart:false, isEnd:false, isSeparated:false } ]
+          )
+      )
   );
+
   const [pages, setPages] = useState([matrixNotes]);
   const [activePage, setActivePage] = useState(0);
-
   const [lang, setLang] = useState("en");
-
   const [instrument, setInstrument] = useState('synth');
   const [volume, setVolume] = useState(-10);
-  const [tempo, setTempo] = useState("8");
   const [bpm, setBpm] = useState(120);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [rhythm, setRhythm] = useState(1);
+  const [selectedColumn, setSelectedColumn] = useState(null);
 
+  // Refs
   const synthRef = useRef(null);
-  // Traducao
+
+  // Instruments configuration
+  const instruments = {
+    synth: () => new Tone.PolySynth(Tone.Synth).toDestination()
+  };
+
+  acousticInstruments.forEach(name => {
+    instruments[name] = () => new Tone.Sampler({
+      urls: { C4: "C4.mp3" },
+      baseUrl: `https://nbrosowsky.github.io/tonejs-instruments/samples/${name}/`,
+    }).toDestination();
+  });
+
+  // Helper functions
   const t = (key, params) => {
     let text = translations[lang][key] || key;
     if (params) {
@@ -41,54 +107,22 @@ const EditorPage = () => {
     return text;
   };
 
-  
-  const acousticInstruments = [
-    "bass-electric",
-    "bassoon",
-    "cello",
-    "clarinet",
-    "contrabass",
-    "flute",
-    "french-horn",
-    "guitar-acoustic",
-    "guitar-electric",
-    "guitar-nylon",
-    "harmonium",
-    "harp",
-    "organ",
-    "piano",
-    "saxophone",
-    "trombone",
-    "trumpet",
-    "tuba",
-    "violin",
-    "xylophone"
-  ];
-// o Synth por algum motivo fica bugado em alguns casos, ja os samples nao
-  const instruments = {
-    synth: () => new Tone.PolySynth(Tone.Synth).toDestination()
+  const renderKeys = () => {
+    return notes.map((note, index) => {
+      const isBlackKey = note.includes("#");
+      return (
+          <div
+              onClick={() => playNotePiano(note.split(" ")[0])}
+              key={index}
+              className={`note ${isBlackKey ? 'black' : ''}`}
+          >
+            <p>{note}</p>
+          </div>
+      );
+    });
   };
-// Alguns instrumentos nao tem a nota C4 entao nao funcionam, mas so uma nota da pouco range pro tone descobrir as outras.
-  // Da para separar os instrumentos em um component e fazer um map de umas 5 notas que cada um tem.
-  // E se vc muda de instrumento e ja vai direto clicar, tipo 1s, ele buga tem q fazer o usuario esperar carregar
-  acousticInstruments.forEach(name => {
-    instruments[name] = () => new Tone.Sampler({
-      urls: {
-        C4: "C4.mp3",
 
-      },
-      baseUrl: `https://nbrosowsky.github.io/tonejs-instruments/samples/${name}/`,
-    }).toDestination();
-  });
-
-  const notes = [
-    "C6", "B5", "A#5", "A5", "G#5", "G5", "F#5", "F5", "E5", "D#5",
-    "D5", "C#5", "C5", "B4", "A#4", "A4", "G#4", "G4", "F#4", "F4",
-    "E4", "D#4", "D4", "C#4", "C4", "B3", "A#3", "A3", "G#3", "G3",
-    "F#3", "F3", "E3", "D#3", "D3", "C#3", "C3", "B2", "A#2", "A2",
-    "G#2", "G2", "F#2", "F2", "E2", "D#2", "D2", "C#2", "C2"
-  ];
-
+  // Effects
   useEffect(() => {
     synthRef.current = instruments[instrument]().toDestination();
     synthRef.current.volume.value = volume;
@@ -107,20 +141,26 @@ const EditorPage = () => {
     Tone.getDestination().volume.rampTo(volume, 0.1);
   }, [volume]);
 
-  const renderKeys = () => {
-    return notes.map((note, index) => {
-      const isBlackKey = note.includes("#");
-      return (
-          <div
-              onClick={() => playNotePiano(note.split(" ")[0])}
-              key={index}
-              className={`note ${isBlackKey ? 'black' : ''}`}
-          >
-            <p>{note}</p>
-          </div>
-      );
-    });
-  };
+  useEffect(() => {
+    if (selectedColumn === null) return;
+
+    setMatrixNotes(prev => prev.map((col, colIdx) => {
+      if (colIdx !== selectedColumn) return col;
+
+      return col.map(note => {
+        const newSubNotes = Array(rhythm).fill(null);
+        note.subNotes.forEach((subNote, i) => {
+          if (i < rhythm) newSubNotes[i] = subNote;
+        });
+
+        return {
+          ...note,
+          duration: rhythm,
+          subNotes: newSubNotes
+        };
+      });
+    }));
+  }, [rhythm]);
 
   useEffect(() => {
     setPages(prev => {
@@ -130,13 +170,13 @@ const EditorPage = () => {
     });
   }, [matrixNotes, activePage]);
 
+  // Core functions
   const addPage = () => {
     const newMatrix = Array.from({ length: initialCols }, () => Array(rows).fill(null));
     setPages(prev => [...prev, newMatrix]);
     setMatrixNotes(newMatrix);
     setActivePage(pages.length);
   };
-
 
   const movePage = (change) => {
     setActivePage(prev => {
@@ -149,48 +189,21 @@ const EditorPage = () => {
     });
   };
 
+  const playNotePiano = (note) => {
+    if (!synthRef.current) return;
 
-  const exportToMIDI = () => {
-    const midi = new Midi();
-    const track = midi.addTrack();
+    // Toca a nota
+    synthRef.current.triggerAttackRelease(note, "8n");
 
-    midi.header.setTempo(bpm);
-
-    const noteDurationSeconds = (60 / bpm) * (4 / parseInt(tempo));
-    const pageLengthSeconds = cols * noteDurationSeconds;
-
-    pages.forEach((pageMatrix, pageIndex) => {
-      pageMatrix.forEach((col, colIndex) => {
-        col.forEach((note, rowIndex) => {
-          if (note) {
-            const time = (pageIndex * pageLengthSeconds) + (colIndex * noteDurationSeconds);
-            track.addNote({
-              midi: Tone.Frequency(note).toMidi(),
-              time: time,
-              duration: noteDurationSeconds,
-              velocity: 0.8,
-            });
-          }
-        });
-      });
-    });
-
-    const bytes = midi.toArray();
-    const blob = new Blob([bytes], { type: 'audio/midi' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'piano-roll.mid';
-    link.click();
-
-    URL.revokeObjectURL(url);
+    // Opcional: podemos adicionar um feedback visual
+    const noteElement = document.querySelector(`.note p[data-note="${note}"]`)?.parentElement;
+    if (noteElement) {
+      noteElement.classList.add('active');
+      setTimeout(() => noteElement.classList.remove('active'), 200);
+    }
   };
 
-
-
-  const playSelectedNotesActivePage = (n) => {
-
+  const playSelectedNotesActivePage = async (n) => {
     return new Promise(async (resolve) => {
       if (isPlaying) {
         console.warn('Playback já em execução.');
@@ -198,85 +211,92 @@ const EditorPage = () => {
       }
 
       const currentMatrix = pages[n];
-
       if (!currentMatrix || currentMatrix.length === 0) {
         return resolve();
       }
 
       setIsPlaying(true);
-      const noteDuration = tempo + "n";
-
-      // Set para colocar as notas
-      let sustainedNotes = new Set();
+      const activeNotes = new Map();
 
       try {
-
         Tone.getTransport().bpm.value = bpm;
 
         currentMatrix.forEach((col, colIndex) => {
-          Tone.getTransport().schedule(time => {
-            // Notas da coluna atual
-            const notesToPlay = col.filter(note => note !== null);
-            // Notas proxima coluna
-            const nextCol = currentMatrix[colIndex + 1] || [];
-            // Ver quais vao continuar
-            const nextNotes = nextCol.filter(note => note !== null);
+          col.forEach((note, rowIndex) => {
+            if (!note || !note.subNotes || note.subNotes.length === 0) return;
 
-            // Vai tocar a nota que ia tocar e tira ela do set
-            sustainedNotes.forEach(note => {
-              if (!notesToPlay.includes(note)) {
-                synthRef.current.triggerRelease(note, time);
-                sustainedNotes.delete(note);
+            // Para cada subNota (agora objeto SubNote)
+            note.subNotes.forEach((subNote, subIndex) => {
+              if (!subNote || !subNote.name) return;
+
+              // duração de cada subnota em segundos
+              const subNoteDuration = Tone.Time(`${note.duration}n`).toSeconds();
+              // tempo base de cada célula: “4n” (semibreve) assumido como unidade fixa
+              const cellDuration = Tone.Time("4n").toSeconds();
+              // calcula o início: coluna * cellDuration + índice da subnota * subNoteDuration
+              const time = colIndex * cellDuration + subIndex * subNoteDuration;
+
+              const noteKey = `${rowIndex}-${colIndex}-${subIndex}`;
+
+              // Condições para disparar o triggerAttack:
+              // se subNote.isStart === true
+              // OU se está separado (isSeparated === true)
+              // OU se nome for diferente do anterior no array de subNotes
+              if (
+                  subNote.isStart ||
+                  subNote.isSeparated ||
+                  (note.subNotes[subIndex - 1] &&
+                      note.subNotes[subIndex - 1].name !== subNote.name)
+              ) {
+                Tone.getTransport().schedule((t) => {
+                  synthRef.current?.triggerAttack(subNote.name, t);
+                  activeNotes.set(noteKey, { note: subNote.name, time: t });
+                }, time);
               }
-            });
 
-            // Tocar ou sustentar notas atuais
-            notesToPlay.forEach(note => {
-              const isInNext = nextNotes.includes(note);
-              if (sustainedNotes.has(note)) {
-                // Já está sustentada, não faz nada (continua tocando)
-              } else {
-                // Nota nova, começa ela
-                synthRef.current.triggerAttack(note, time);
-                sustainedNotes.add(note);
-              }
-
-              // Se não vai continuar na próxima, agenda release
-              if (!isInNext) {
-                const releaseTime = time + Tone.Time(noteDuration).toSeconds();
-
-                Tone.getTransport().scheduleOnce(releaseTime => {
-                  synthRef.current.triggerRelease(note, releaseTime);
-                  sustainedNotes.delete(note);
+              // Condições para disparar o triggerRelease:
+              // se subNote.isEnd === true
+              // OU se isSeparated === true
+              // OU se o próximo for diferente
+              if (
+                  subNote.isEnd ||
+                  subNote.isSeparated ||
+                  (note.subNotes[subIndex + 1] &&
+                      note.subNotes[subIndex + 1].name !== subNote.name)
+              ) {
+                const releaseTime = time + subNoteDuration;
+                Tone.getTransport().schedule((t) => {
+                  synthRef.current?.triggerRelease(subNote.name, t);
+                  activeNotes.delete(noteKey);
                 }, releaseTime);
               }
             });
+          });
 
+          // Highlight da coluna
+          const cellDuration = Tone.Time("4n").toSeconds();
+          Tone.getTransport().schedule((t) => {
             setActiveCol(colIndex);
-
             if (colIndex + 1 === currentMatrix.length) {
-              setTimeout(() => setActiveCol(-1), Tone.Time(noteDuration).toMilliseconds());
+              setTimeout(() => setActiveCol(-1), Tone.Time("4n").toMilliseconds());
             }
-          }, colIndex * Tone.Time(noteDuration).toSeconds());
+          }, colIndex * cellDuration);
         });
 
         await Tone.start();
         Tone.getTransport().start();
       } finally {
-        const totalTime = currentMatrix.length * Tone.Time(noteDuration).toMilliseconds();
+        const totalTime = currentMatrix.length * Tone.Time("4n").toMilliseconds();
         setTimeout(() => {
           Tone.getTransport().stop();
           Tone.getTransport().cancel();
           synthRef.current?.releaseAll?.();
-
           setIsPlaying(false);
           resolve();
         }, totalTime);
-
       }
     });
   };
-
 
   const playSong = async () => {
     if (isPlaying) {
@@ -290,6 +310,7 @@ const EditorPage = () => {
     Tone.getTransport().stop();
     Tone.getTransport().cancel();
     synthRef.current?.releaseAll?.();
+
     for (let i = 0; i < pages.length; i++) {
       setActivePage(i);
       setMatrixNotes(pages[i]);
@@ -297,6 +318,56 @@ const EditorPage = () => {
     }
 
     setIsPlaying(false);
+  };
+
+  const exportToMIDI = () => {
+    const midi = new Midi();
+    const track = midi.addTrack();
+    midi.header.setTempo(bpm);
+
+    const cellDuration = Tone.Time("4n").toSeconds(); // Duração de uma célula (coluna inteira)
+
+    pages.forEach((pageMatrix, pageIndex) => {
+      pageMatrix.forEach((col, colIndex) => {
+        col.forEach((note, rowIndex) => {
+          if (!note || !note.subNotes || note.subNotes.length === 0) return;
+
+          const noteDuration = Tone.Time(note.duration + "n").toSeconds();
+          const startTimeBase = (pageIndex * pageMatrix.length + colIndex) * cellDuration;
+
+          note.subNotes.forEach((subNote, subIndex) => {
+            if (!subNote) return;
+
+            const startTime = startTimeBase + subIndex * noteDuration;
+
+            const shouldAttack =
+                note.isStart || note.isSeparated || note.subNotes[subIndex - 1] !== subNote;
+
+            const shouldRelease =
+                note.isEnd || note.isSeparated || note.subNotes[subIndex + 1] !== subNote;
+
+            if (shouldAttack) {
+              track.addNote({
+                midi: Tone.Frequency(subNote).toMidi(),
+                time: startTime,
+                duration: shouldRelease ? noteDuration : undefined,
+                velocity: 0.8,
+              });
+            }
+          });
+        });
+      });
+    });
+
+    const bytes = midi.toArray();
+    const blob = new Blob([bytes], { type: 'audio/midi' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'piano-roll.mid';
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const importFromMIDI = async (event) => {
@@ -308,54 +379,83 @@ const EditorPage = () => {
       return;
     }
 
-
     const arrayBuffer = await file.arrayBuffer();
     const midi = new Midi(arrayBuffer);
 
     const bpmFromMidi = midi.header.tempos[0]?.bpm || 120;
+    setBpm(Math.round(bpmFromMidi));
+
     const allNotes = midi.tracks.flatMap(track => track.notes);
     if (!allNotes.length) return;
 
-    const avgDuration = allNotes.reduce((sum, note) => sum + note.duration, 0) / allNotes.length;
-    const tempoFromNote = Tone.Time(avgDuration).toNotation().replace('n', '') || "8";
+    const noteGroups = {};
 
-    const noteDuration = (60 / bpmFromMidi) * (4 / parseInt(tempoFromNote));
-    const pageLengthSeconds = initialCols * noteDuration;
+    allNotes.forEach(note => {
+      const timeInBeats = Tone.Time(note.time).toSeconds();
+      const duration = Tone.Time(note.duration).toSeconds();
 
-    const lastNoteTime = Math.max(...allNotes.map(n => n.time));
-    const totalPages = Math.ceil(lastNoteTime / pageLengthSeconds);
+      const col = Math.floor(timeInBeats / Tone.Time("4n").toSeconds());
+      const subIndex = Math.round(
+          (timeInBeats % Tone.Time("4n").toSeconds()) / duration
+      );
+
+      const pageIndex = Math.floor(col / initialCols);
+      const colIndex = col % initialCols;
+
+      const noteName = Tone.Frequency(note.midi, "midi").toNote();
+      const rowIndex = notes.indexOf(noteName);
+      if (rowIndex === -1) return;
+
+      const key = `${pageIndex}-${colIndex}-${rowIndex}`;
+
+      if (!noteGroups[key]) {
+        noteGroups[key] = {
+          name: noteName,
+          duration: 1,
+          subNotes: [],
+          isStart: true,
+          isEnd: true,
+          isSeparated: false,
+        };
+      }
+
+      noteGroups[key].subNotes[subIndex] = noteName;
+      noteGroups[key].duration = Math.max(noteGroups[key].duration, subIndex + 1);
+    });
+
+    const totalPages = Math.max(
+        ...Object.keys(noteGroups).map(k => parseInt(k.split("-")[0], 10))
+    ) + 1;
 
     const newPages = Array.from({ length: totalPages }, () =>
         Array.from({ length: initialCols }, () => Array(rows).fill(null))
     );
 
-    allNotes.forEach(note => {
-      const time = note.time;
+    Object.entries(noteGroups).forEach(([key, value]) => {
+      const [page, col, row] = key.split("-").map(Number);
+      const filledSubNotes = Array.from({ length: value.duration }).map(
+          (_, i) => value.subNotes[i] ?? value.name
+      );
 
-      const pageIndex = Math.floor(time / pageLengthSeconds);
-      const timeInPage = time % pageLengthSeconds;
-      const colIndex = Math.round(timeInPage / noteDuration);
-
-      const noteName = Tone.Frequency(note.midi, "midi").toNote();
-      const rowIndex = notes.indexOf(noteName);
-
-      if (
-          pageIndex >= 0 && pageIndex < totalPages &&
-          colIndex >= 0 && colIndex < initialCols &&
-          rowIndex >= 0
-      ) {
-        newPages[pageIndex][colIndex][rowIndex] = noteName;
-      }
+      newPages[page][col][row] = {
+        name: value.name,
+        duration: value.duration,
+        isStart: true,
+        isEnd: true,
+        isSeparated: false,
+        subNotes: filledSubNotes
+      };
     });
 
     setPages(newPages);
     setActivePage(0);
     setMatrixNotes(newPages[0]);
     setCols(initialCols);
-    setTempo(tempoFromNote);
-    setBpm(Math.round(bpmFromMidi));
+    setTempo("1"); // cada célula = semínima
   };
 
+
+  // Render
   return (
       <div className="app-container">
         <TittleCaption
@@ -370,13 +470,21 @@ const EditorPage = () => {
         <div id="home">
           <div className="data">
             <div className="control-panel">
-
               <div className="control-group">
-                <ChangeInstrument instrument={instrument} instruments={instruments} setInstrument={setInstrument} synthRef={synthRef} />
+                <ChangeInstrument
+                    instrument={instrument}
+                    instruments={instruments}
+                    setInstrument={setInstrument}
+                    synthRef={synthRef}
+                />
               </div>
 
               <div className="control-group">
-                <ChangeVolume volume={volume} setVolume={setVolume} synthRef={synthRef} />
+                <ChangeVolume
+                    volume={volume}
+                    setVolume={setVolume}
+                    synthRef={synthRef}
+                />
               </div>
 
               <div className="control-group">
@@ -394,6 +502,8 @@ const EditorPage = () => {
                   />
                 </div>
               </div>
+
+              <SelectRitmo rhythm={rhythm} setRhythm={setRhythm} />
 
               <div className="control-group">
                 <h3>{t("versions")}</h3>
@@ -418,7 +528,6 @@ const EditorPage = () => {
                   <button onClick={() => movePage(1)}>⮕</button>
                 </div>
               </div>
-
             </div>
           </div>
 
@@ -427,10 +536,7 @@ const EditorPage = () => {
               <div id="notes">{renderKeys()}</div>
               <PianoRoll
                   synthRef={synthRef}
-                  tempo={tempo}
                   bpm={bpm}
-                  setTempo={setTempo}
-                  setBpm={setBpm}
                   pages={pages}
                   setPages={setPages}
                   activeCol={activeCol}
@@ -441,9 +547,14 @@ const EditorPage = () => {
                   notes={notes}
                   activePage={activePage}
                   setActivePage={setActivePage}
+                  selectedColumn={selectedColumn}
+                  setSelectedColumn={setSelectedColumn}
+                  createNote={createNote}
+                  createSubNote={createSubNote}
               />
             </div>
           </div>
+
           <div className="data">
             <div className="language-switcher">
               <button
@@ -459,6 +570,6 @@ const EditorPage = () => {
         </div>
       </div>
   );
-};
+}
 
 export default EditorPage;

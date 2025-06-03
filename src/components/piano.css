@@ -33,3 +33,7 @@
   background-color: #FF9800; 
   color: white;
 }
+
+.subnote.separated {
+    background-color: rgba(255, 152, 0, 0.5); /* laranja mais apagado */
+}

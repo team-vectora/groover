@@ -3,7 +3,6 @@
 
 const ChangeBpm = ({bpm, setBpm}) => {
 
-
   return (
   <>
 <h3>Andamento</h3>
