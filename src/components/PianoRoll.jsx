@@ -3,99 +3,183 @@ import { useEffect } from "react";
 import * as Tone from 'tone';
 
 const PianoRoll = ({
-                     synthRef,
-                     bpm,
-                     setBpm,
-                     pages,
-                     setPages,
-                     activePage,
-                     activeCol,
-                     setActiveCol,
-                     cols,
-                     setCols,
-                     notes,
-                     rows,
-                     setActivePage
+                       synthRef,
+                       bpm,
+                       pages,
+                       activePage,
+                       activeCol,
+                       cols,
+                       notes,
+                       rows,
+                       selectedColumn,
+                       setSelectedColumn,
+                       setPages,
+                       createSubNote
                    }) => {
-  console.log('Componente PianoRoll renderizado', { bpm, synthRef, activePage });
+    // Debug logging
+    console.log('Componente PianoRoll renderizado', { bpm, synthRef, activePage });
 
-  const isSelected = (row, col) => {
-    if (!pages[activePage] || !pages[activePage][col]) {
-      console.warn(`Tentativa de acessar coluna inexistente: ${col}`);
-      return false;
-    }
-    return pages[activePage][col][row] !== null;
-  };
+    // Event handlers
+    const handleDoubleClick = (colIndex) => {
+        setSelectedColumn(colIndex === selectedColumn ? null : colIndex);
 
-  const handleClickTable = (rowIndex, colIndex, note) => {
-    console.log('Célula clicada', { rowIndex, colIndex, note });
-    setPages(prevPages => {
-      const newPages = [...prevPages];
-      let currentMatrix = newPages[activePage] ? [...newPages[activePage]] : [];
+        console.log(`Coluna Selecionada: ${selectedColumn}`)
+    };
 
-      // Garante que a coluna exista
-      if (!currentMatrix[colIndex]) {
-        currentMatrix[colIndex] = Array(rows).fill(null);
-      } else {
-        currentMatrix[colIndex] = [...currentMatrix[colIndex]];
-      }
+    const handleSubNoteClick = (e, rowIndex, colIndex, subIndex) => {
+        console.log("📄 Página ativa antes da atualização:", pages[activePage]);
+        console.log("🎯 Clique em subnota:", { rowIndex, colIndex, subIndex });
+        e.stopPropagation();
 
-      // Alterna nota ativa/inativa
-      currentMatrix[colIndex][rowIndex] = currentMatrix[colIndex][rowIndex] ? null : note;
+        setPages((prevPages) => {
+            console.log("📘 Estado anterior (prevPages):", prevPages);
+
+            const newPages = [...prevPages];
+            const currentMatrix = [...newPages[activePage]];
+            const currentColumn = currentMatrix[colIndex] ? [...currentMatrix[colIndex]] : Array(rows).fill(null);
+
+            console.log("📐 Matriz da página ativa antes da modificação:", currentMatrix);
+
+            let note = currentMatrix[colIndex][rowIndex];
+            console.log("🎵 Nota original:", note);
+
+            note = { ...note };
+            const noteName = notes[rowIndex];
+            console.log("🔠 Nome da nota:", noteName);
+
+            if (!note.subNotes || !Array.isArray(note.subNotes)) {
+                console.log("🆕 Subnotas ainda não existem. Criando novas...");
+                note.subNotes = Array.from({ length: note.duration }, () => createSubNote());
+            } else {
+                console.log("📋 Subnotas existentes detectadas. Fazendo cópia...");
+                note.subNotes = [...note.subNotes];
+            }
+
+            if (note.subNotes[subIndex] && note.subNotes[subIndex].name) {
+                console.log("🗑️ Subnota existente detectada. Removendo:", note.subNotes[subIndex]);
+                note.subNotes[subIndex] = createSubNote();
+            } else {
+                console.log("✅ Ativando nova subnota:", noteName);
+                note.subNotes[subIndex] = createSubNote(noteName);
+            }
+
+            console.log("📝 Nota modificada:", note);
+            currentColumn[rowIndex] = note;
+            currentMatrix[colIndex] = currentColumn;
+            newPages[activePage] = currentMatrix;
+
+            console.log("📄 Página ativa após modificação:", newPages[activePage]);
+            return newPages;
+        });
+
+        // Toca o som da nota da linha clicada
+        try {
+            console.log("🔊 Tocando nota:", notes[rowIndex]);
+            synthRef.current.triggerAttackRelease(notes[rowIndex], "32n");
+        } catch (error) {
+            console.error("🚨 Erro ao tocar subnota:", error);
+        }
+    };
 
 
-      newPages[activePage] = currentMatrix;
-      return newPages;
-    });
+    const handleSubNoteRightClick = (e, rowIndex, colIndex, subIndex) => {
+        e.preventDefault();
+        e.stopPropagation();
 
-    try {
-      synthRef.current.triggerAttackRelease(note, "8n");
-    } catch (error) {
-      console.error('Erro ao tocar nota:', error);
-    }
-  };
+        setPages((prevPages) => {
+            const newPages = [...prevPages];
+            const currentMatrix = [...newPages[activePage]];
 
-  const tableMaker = () => {
-    return (
+            let note = currentMatrix[colIndex][rowIndex];
+            if (!note) return prevPages;  // Proteção contra undefined
+            note = { ...note };
+            note.subNotes = note.subNotes ? [...note.subNotes] : [];
+
+            const oldSubNote = note.subNotes[subIndex];
+            if (!oldSubNote || !oldSubNote.name) return prevPages;
+
+            const newSubNote = { ...oldSubNote, isSeparated: !oldSubNote.isSeparated };
+            note.subNotes[subIndex] = newSubNote;
+
+            currentMatrix[colIndex][rowIndex] = note;
+            newPages[activePage] = currentMatrix;
+
+            return newPages;
+        });
+
+        // Toca o som da nota da linha clicada
+        try {
+            synthRef.current.triggerAttackRelease(notes[rowIndex], "32n");
+        } catch (error) {
+            console.error("Erro ao tocar subnota:", error);
+        }
+    };
+
+
+    const tableMaker = () => (
         <table className="piano-roll-grid">
-          <tbody>
-          {Array.from({ length: rows }).map((_, rowIndex) => (
-              <tr key={`row-${rowIndex}`}>
-                {Array.from({ length: cols }).map((_, colIndex) => (
-                    <td
-                        key={`cell-${rowIndex}-${colIndex}`}
-                        className={`piano-roll-cell
-                    ${isSelected(rowIndex, colIndex) ? 'selected' : ''}
-                    ${activeCol === colIndex ? 'active-col' : ''}
-                  `}
-                        onClick={() => handleClickTable(rowIndex, colIndex, notes[rowIndex])}
-                    >
-                      <b>{notes[rowIndex]}</b>
-                    </td>
-                ))}
-              </tr>
-          ))}
-          </tbody>
+            <tbody>
+            {Array.from({ length: rows }).map((_, rowIndex) => (
+                <tr key={`row-${rowIndex}`} className={`${notes[rowIndex].startsWith("C") && !notes[rowIndex].startsWith("C#") ? 'division' : ''}`}>
+                    {Array.from({ length: cols }).map((_, colIndex) => {
+                        const note = pages[activePage][colIndex][rowIndex];
+
+                        return (
+                            <td
+                                key={`cell-${rowIndex}-${colIndex}`}
+                                className={`piano-roll-cell td-div ${selectedColumn === colIndex ? 'selected-column' : ''}`}
+                            >
+                                <div className="subnote-container">
+                                    {note.subNotes.map((subNote, subIndex) => {
+                                        const isActive = subNote && subNote.name != null;
+                                        const isSeparated = subNote && subNote.isSeparated;
+                                        return (
+                                        <div
+                                            key={`subnote-${rowIndex}-${colIndex}-${subIndex}`}
+                                            className={`
+                                                  subnote-cell 
+                                                  ${isActive ? 'selected' : ''} 
+                                                  ${isSeparated ? 'separated' : ''} 
+                                                  ${activeCol === colIndex ? 'active-col' : ''}
+                                                `}
+                                            style={{
+                                                width: `${100 / note.duration}%`,
+                                                height: '100%',
+                                            }}
+                                            onDoubleClick={() => handleDoubleClick(colIndex)}
+                                            onClick={(e) => handleSubNoteClick(e, rowIndex, colIndex, subIndex)}
+                                            onContextMenu={(e) => handleSubNoteRightClick(e, rowIndex, colIndex, subIndex)}
+                                        />
+                                    )})}
+                                </div>
+                            </td>
+                        );
+                    })}
+                </tr>
+            ))}
+            </tbody>
         </table>
     );
-  };
 
-  useEffect(() => {
-    return () => {
-      try {
-        Tone.getTransport().cancel();
-        Tone.getTransport().stop();
-      } catch (error) {
-        console.error('Erro na limpeza:', error);
-      }
-    };
-  }, []);
 
-  return (
-      <>
-        {tableMaker()}
-      </>
-  );
+    // Effects
+    useEffect(() => {
+        return () => {
+            try {
+                Tone.getTransport().cancel();
+                Tone.getTransport().stop();
+            } catch (error) {
+                console.error('Erro na limpeza:', error);
+            }
+        };
+    }, []);
+
+    // Main render
+    return (
+        <>
+            {tableMaker()}
+        </>
+    );
 };
 
 export default PianoRoll;
