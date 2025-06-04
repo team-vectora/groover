@@ -1,16 +1,19 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import PianoRoll from "../components/PianoRoll.jsx";
+import PianoRoll from "../../components/PianoRoll.jsx";
 import * as Tone from "tone";
 import { Midi } from '@tonejs/midi';
-import TittleCaption from "../components/TittleCaption.jsx";
-import ChangeVolume from "../components/ChangeVolume.jsx";
-import translations from "../locales/language.js";
-import ChangeInstrument from "../components/ChangeInstrument.jsx";
-import SelectRitmo from "../components/SelectRitmo";
-import { useRouter } from "next/navigation";
+import TittleCaption from "../../components/TittleCaption.jsx";
+import ChangeVolume from "../../components/ChangeVolume.jsx";
+import translations from "../../locales/language.js";
+import ChangeInstrument from "../../components/ChangeInstrument.jsx";
+import SelectRitmo from "../../components/SelectRitmo";
+import {useRouter} from "next/router";
 
 function EditorPage() {
+  const router = useRouter();
+  const { id } = router.query;
+
   const rows = 49;
   const initialCols = 10;
   const notes = [
@@ -39,7 +42,6 @@ function EditorPage() {
 
 
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
   const [activeCol, setActiveCol] = useState(null);
   const [activeSubIndex, setActiveSubIndex] = useState(0);
   const [cols, setCols] = useState(initialCols);
@@ -104,6 +106,7 @@ function EditorPage() {
 
     return () => synthRef.current?.dispose();
   }, [instrument]);
+
 
   useEffect(() => {
     Tone.getDestination().volume.rampTo(volume, 0.1);
@@ -520,6 +523,70 @@ function EditorPage() {
     URL.revokeObjectURL(url);
   };
 
+  useEffect(() => {
+    if (id && id !== "new") {
+      setProjectId(id);
+      console.log("COMECOU A DATA")
+      console.log(projectId)
+      loadProjectData(id);
+    }
+  }, [id]);
+
+  const loadProjectData = async (projectId) => {
+    console.log("OIA O PROJECT ID")
+    console.log(projectId)
+
+    try {
+      const response = await fetch(`https://groover-api.onrender.com/api/projects/${projectId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${tokenJWT}`
+        }
+      });
+
+      if (response.status === 401) {
+        alert("Sessão expirada. Por favor, faça login novamente.");
+        await router.push("/login");
+        return;
+      }
+
+      const data = await response.json();
+      console.log("OIA A DATAAAAAA")
+      console.log(JSON.stringify(data))
+      console.log(JSON.stringify(data.current_music_id))
+
+      // // Atualiza todos os estados com os dados do projeto
+      setBpm(data.bpm);
+      setInstrument(data.instrument);
+      setVolume(data.volume);
+      setProjectId(projectId);
+
+      // Verifica se há layers/pages no projeto
+      if (data.current_music_id.layers && data.current_music_id.layers.length > 0) {
+        console.log("Falsoooooo 1")
+        setPages(data.current_music_id.layers);
+        console.log("Falsoooooo 2")
+        setMatrixNotes(pages[0]);
+        console.log("Falsoooooo 3")
+        setActivePage(0);
+        console.log("Falsoooooo 4")
+
+      } else {
+        console.log("Falsoooooo")
+        // Se não houver dados, inicializa com valores padrão
+        const newMatrix = Array.from({ length: initialCols }, () =>
+            Array.from({ length: rows }, () => createNote())
+        );
+        setPages([newMatrix]);
+        setMatrixNotes(newMatrix);
+      }
+
+    } catch (error) {
+      console.error('Erro ao carregar projeto:', error);
+      alert("Erro ao carregar projeto. Tente novamente.");
+    }
+  };
+
   const importFromMIDI = (file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -527,18 +594,45 @@ function EditorPage() {
       try {
         const data = JSON.parse(content);
 
-        setBpm(data.bpm);
-        setInstrument(data.instrument);
-        setVolume(data.volume);
-        setRhythm(data.rhythm);
-        setPages(data.pages);
-        setMatrixNotes(data.pages[0]);
+        // Validação básica dos dados
+        if (!data.layers || !Array.isArray(data.layers)) {
+          throw new Error("Formato de arquivo inválido");
+        }
+
+        // Atualiza os estados com os dados importados
+        setBpm(data.bpm || 120);
+        setInstrument(data.instrument || 'piano');
+        setVolume(data.volume || -10);
+
+        // Processa as layers/pages
+        const validatedLayers = data.layers.map(layer =>
+            layer.map(column =>
+                column.map(note => ({
+                  name: note?.name || null,
+                  duration: note?.duration || 1,
+                  subNotes: (note?.subNotes || []).map(sub => ({
+                    name: sub?.name || null,
+                    isSeparated: sub?.isSeparated || false
+                  }))
+                }))
+            )
+        );
+
+        setPages(validatedLayers);
+        setMatrixNotes(validatedLayers[0]);
         setActivePage(0);
 
-        alert("Música importada com sucesso!");
+        // Define o rhythm baseado na primeira nota da primeira coluna (se existir)
+        const firstNote = validatedLayers[0]?.[0]?.[0];
+        if (firstNote) {
+          setRhythm(firstNote.subNotes?.length || 1);
+        }
+
+        alert("Projeto importado com sucesso!");
+
       } catch (error) {
-        console.error("Erro ao importar música:", error);
-        alert("Falha ao importar. Verifique o arquivo.");
+        console.error("Erro ao importar projeto:", error);
+        alert(`Falha ao importar: ${error.message || "Formato de arquivo inválido"}`);
       }
     };
     reader.readAsText(file);
