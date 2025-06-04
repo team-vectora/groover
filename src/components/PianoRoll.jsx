@@ -91,12 +91,13 @@ const PianoRoll = ({
             const currentMatrix = [...newPages[activePage]];
 
             let note = currentMatrix[colIndex][rowIndex];
+
             if (!note) return prevPages;  // Proteção contra undefined
             note = { ...note };
             note.subNotes = note.subNotes ? [...note.subNotes] : [];
 
             const oldSubNote = note.subNotes[subIndex];
-            if (!oldSubNote || !oldSubNote.name) return prevPages;
+            if (!oldSubNote || !oldSubNote.name) note.subNotes[subIndex] = createSubNote(note);;
 
             const newSubNote = { ...oldSubNote, isSeparated: !oldSubNote.isSeparated };
             note.subNotes[subIndex] = newSubNote;

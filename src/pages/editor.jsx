@@ -124,25 +124,63 @@ function EditorPage() {
   }, [volume]);
 
   useEffect(() => {
-    if (selectedColumn === null) return;
+    if (selectedColumn === null) {
+      console.log("❌ selectedColumn é null, saindo do useEffect.");
+      return;
+    }
 
-    setMatrixNotes(prev => prev.map((col, colIdx) => {
-      if (colIdx !== selectedColumn) return col;
+    console.log("🎯 Atualizando coluna:", selectedColumn);
+    console.log("🎼 Novo valor de rhythm:", rhythm);
 
-      return col.map(note => {
-        const newSubNotes = Array(rhythm).fill(createSubNote());
+    setPages((prevPages) => {
+      const currentMatrix = prevPages[activePage];
 
-        note.subNotes.forEach((subNote, i) => {
-          if (i < rhythm) newSubNotes[i] = subNote;
+      if (!Array.isArray(currentMatrix)) {
+        console.error("🚨 currentMatrix não é um array:", currentMatrix);
+        return prevPages;
+      }
+
+      const updatedMatrix = currentMatrix.map((col, colIdx) => {
+        if (!Array.isArray(col)) {
+          console.error(`🚨 col ${colIdx} não é array:`, col);
+          return col;
+        }
+
+        if (colIdx !== selectedColumn) {
+          console.log(`⏩ Mantendo coluna ${colIdx} intacta.`);
+          return col;
+        }
+
+        console.log(`🛠️ Atualizando coluna ${colIdx}...`);
+
+        const updatedCol = col.map((note, noteIdx) => {
+          const oldSubNotes = note.subNotes || [];
+          console.log(`  🎵 Nota ${noteIdx}:`);
+          console.log("    🔹 Subnotas antigas:", oldSubNotes);
+
+          const newSubNotes = Array.from({ length: rhythm }, (_, i) => {
+            const existing = oldSubNotes[i];
+            const sub = existing ? { ...existing } : createSubNote();
+            console.log(`    🔧 subNote[${i}] =`, sub);
+            return sub;
+          });
+
+          return {
+            ...note,
+            subNotes: newSubNotes,
+          };
         });
 
-        const newNote = createNote(note.subNotes[0].name, rhythm);
-        newNote.subNotes = newSubNotes;
-
-        return newNote;
+        return updatedCol;
       });
-    }));
+
+      const updatedPages = [...prevPages];
+      updatedPages[activePage] = updatedMatrix;
+      console.log("✅ Novo estado de pages[activePage]:", JSON.stringify(updatedMatrix));
+      return updatedPages;
+    });
   }, [rhythm]);
+
 
   useEffect(() => {
     setPages(prev => {
@@ -184,29 +222,35 @@ function EditorPage() {
       setTimeout(() => noteElement.classList.remove('active'), 200);
     }
   };
-
   const playSelectedNotesActivePage = async (n) => {
     if (isPlaying) {
       console.warn('Playback já em execução.');
       return;
     }
 
+    console.log(`[play] Iniciando reprodução da página ${n}`);
     const currentMatrix = pages[n];
-    if (!currentMatrix || currentMatrix.length === 0) return;
+    if (!currentMatrix || currentMatrix.length === 0) {
+      console.warn('[play] Matriz da página vazia ou inexistente.');
+      return;
+    }
 
     setIsPlaying(true);
     let lastNoteTime = 0;
     const activeNotes = new Map();
 
     try {
+      console.log(`[play] Configurando BPM: ${bpm}`);
       Tone.getTransport().bpm.value = bpm;
       Tone.getTransport().cancel();
 
       currentMatrix.forEach((col, colIndex) => {
         const colTime = colIndex * Tone.Time("4n").toSeconds();
+        console.log(`[col ${colIndex}] Tempo da coluna: ${colTime}s`);
 
         // Destacar coluna
         Tone.getTransport().schedule((t) => {
+          console.log(`[transport] Coluna ativa: ${colIndex} @ ${t}`);
           setActiveCol(colIndex);
         }, colTime);
 
@@ -214,38 +258,42 @@ function EditorPage() {
           if (!note?.subNotes?.length) return;
 
           const subDuration = Tone.Time(`${4 / note.duration}n`).toSeconds();
+          console.log(`[row ${rowIndex}] ${note.subNotes.length} subnotas com duração ${subDuration}s cada`);
 
           note.subNotes.forEach((subNote, subIdx) => {
             const currentName = subNote?.name;
 
             const isStart = currentName && (
-                (colIndex === 0 && subIdx === 0) ||                          // Caso especial: primeira célula do piano roll
-                note.subNotes[subIdx]?.isSeparated ||                       // A subnota atual está separada (break forçada)
-                !note.subNotes[subIdx - 1]?.name ||                         // Não há nota anterior (null)
-                note.subNotes[subIdx - 1]?.name !== currentName             // A nota anterior é diferente (início de uma nova)
+                (colIndex === 0 && subIdx === 0) ||
+                note.subNotes[subIdx]?.isSeparated ||
+                !note.subNotes[subIdx - 1]?.name ||
+                note.subNotes[subIdx - 1]?.name !== currentName
             );
 
             const isEnd = currentName && (
-                (colIndex === cols - 1 && subIdx === note.subNotes.length - 1) ||  // Última subnota da última coluna
-                note.subNotes[subIdx + 1]?.isSeparated ||                          // A próxima subnota está separada
-                !note.subNotes[subIdx + 1]?.name ||                                // A próxima subnota está vazia (null)
-                note.subNotes[subIdx + 1]?.name !== currentName                    // A próxima é diferente (fim da atual)
+                (colIndex === cols - 1 && subIdx === note.subNotes.length - 1) ||
+                note.subNotes[subIdx + 1]?.isSeparated ||
+                !note.subNotes[subIdx + 1]?.name ||
+                note.subNotes[subIdx + 1]?.name !== currentName
             );
 
             const startTime = colTime + subIdx * subDuration;
             lastNoteTime = Math.max(lastNoteTime, startTime + subDuration);
-
             const noteKey = `${rowIndex}-${colIndex}-${subIdx}`;
 
             if (isStart) {
+              console.log(`🎵 Início: ${currentName} [${noteKey}] @ ${startTime}`);
               Tone.getTransport().schedule((t) => {
+                console.log(`▶️ TriggerAttack: ${currentName} @ ${t}`);
                 synthRef.current?.triggerAttack(currentName, t);
                 activeNotes.set(noteKey, { note: currentName, time: t });
               }, startTime);
             }
 
             if (isEnd) {
+              console.log(`🛑 Fim: ${currentName} [${noteKey}] @ ${startTime + subDuration}`);
               Tone.getTransport().schedule((t) => {
+                console.log(`⏹️ TriggerRelease: ${currentName} @ ${t}`);
                 synthRef.current?.triggerRelease(currentName, t);
                 activeNotes.delete(noteKey);
               }, startTime + subDuration);
@@ -254,15 +302,20 @@ function EditorPage() {
         });
       });
 
-      // Resetar destaque
       const totalColsTime = currentMatrix.length * Tone.Time("4n").toSeconds();
-      Tone.getTransport().schedule(() => setActiveCol(-1), totalColsTime);
+      console.log(`[play] Total de tempo: ${totalColsTime}s`);
+      Tone.getTransport().schedule(() => {
+        console.log('[transport] Fim da reprodução, limpando colunas');
+        setActiveCol(-1);
+      }, totalColsTime);
 
       await Tone.start();
+      console.log('[tone] Transport iniciado');
       Tone.getTransport().start();
 
       await new Promise(resolve => {
         setTimeout(() => {
+          console.log('[play] Playback encerrado');
           Tone.getTransport().stop();
           synthRef.current?.releaseAll?.();
           setIsPlaying(false);
@@ -444,6 +497,8 @@ function EditorPage() {
             onExport={exportToMIDI}
             onImport={importFromMIDI}
             onSave={() => console.log('Save clicked')}
+            setLang={setLang}
+            lang={lang}
             t={t}
         />
 
@@ -534,18 +589,6 @@ function EditorPage() {
             </div>
           </div>
 
-          <div className="data">
-            <div className="language-switcher">
-              <button
-                  className="lang-button"
-                  onClick={() => setLang(lang === "pt" ? "en" : "pt")}
-                  aria-label="Switch Language"
-                  title={lang === "pt" ? "Switch to English" : "Mudar para Português"}
-              >
-                {lang === "pt" ? "🇧🇷" : "🇺🇸"}
-              </button>
-            </div>
-          </div>
         </div>
       </div>
   );

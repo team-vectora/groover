@@ -1,7 +1,7 @@
 "use client";
 import Image from 'next/image';
 
-const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSave, t }) => {
+const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSave, t, setLang, lang }) => {
   const userData = {
     name: "Carlos Alberto",
     role: "Produtor Musical",
@@ -36,6 +36,16 @@ const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSav
           </label>
           <button className="header-button" onClick={onSave}>
             ⎙ {t("save")}
+          </button>
+        </div>
+        <div className="language-switcher">
+          <button
+              className="header-button"
+              onClick={() => setLang(lang === "pt" ? "en" : "pt")}
+              aria-label="Switch Language"
+              title={lang === "pt" ? "Switch to English" : "Mudar para Português"}
+          >
+            {lang === "pt" ? "🇧🇷" : "🇺🇸"}
           </button>
         </div>
         <div className="header-user-info">
