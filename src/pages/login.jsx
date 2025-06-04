@@ -32,7 +32,7 @@ const LoginPage = () => {
         if (response.ok) {
             localStorage.setItem('token', data.access_token);
             localStorage.setItem('username', data.username);
-            router.push('/editor');
+            router.push('/projects');
         } else {
             alert(data.error || 'Erro no login');
         }

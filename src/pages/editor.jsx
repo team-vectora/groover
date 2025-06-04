@@ -579,10 +579,9 @@ function EditorPage() {
               <h3>{t("versions")}</h3>
               <div className="control-item">
                 <select name="cars" className="control-select" id="cars">
-                  <option value="volvo">Volvo</option>
-                  <option value="saab">Saab</option>
-                  <option value="mercedes">Mercedes</option>
-                  <option value="audi">Audi</option>
+                  <option value="musica1">musica1</option>
+                  <option value="musica2">musica2</option>
+                  <option value="musica3">musica3</option>
                 </select>
               </div>
             </div>

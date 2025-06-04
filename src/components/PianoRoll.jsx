@@ -3,20 +3,20 @@ import { useEffect } from "react";
 import * as Tone from 'tone';
 
 const PianoRoll = ({
-                       synthRef,
-                       bpm,
-                       pages,
-                       activePage,
-                       activeCol,
-                       activeSubIndex,
-                       cols,
-                       notes,
-                       rows,
-                       selectedColumn,
-                       setSelectedColumn,
-                       setPages,
-                       createSubNote
-                   }) => {
+    synthRef,
+    bpm,
+    pages,
+    activePage,
+    activeCol,
+    activeSubIndex,
+    cols,
+    notes,
+    rows,
+    selectedColumn,
+    setSelectedColumn,
+    setPages,
+    createSubNote
+}) => {
     // Debug logging
     console.log('Componente PianoRoll renderizado', { bpm, synthRef, activePage });
 
@@ -121,44 +121,45 @@ const PianoRoll = ({
     const tableMaker = () => (
         <table className="piano-roll-grid">
             <tbody>
-            {Array.from({ length: rows }).map((_, rowIndex) => (
-                <tr key={`row-${rowIndex}`} className={`${notes[rowIndex].startsWith("C") && !notes[rowIndex].startsWith("C#") ? 'division' : ''}`}>
-                    {Array.from({ length: cols }).map((_, colIndex) => {
-                        const note = pages[activePage][colIndex][rowIndex];
+                {Array.from({ length: rows }).map((_, rowIndex) => (
+                    <tr key={`row-${rowIndex}`} className={`${notes[rowIndex].startsWith("C") && !notes[rowIndex].startsWith("C#") ? 'division' : ''}`}>
+                        {Array.from({ length: cols }).map((_, colIndex) => {
+                            const note = pages[activePage][colIndex][rowIndex];
 
-                        return (
-                            <td
-                                key={`cell-${rowIndex}-${colIndex}`}
-                                className={`piano-roll-cell td-div ${selectedColumn === colIndex ? 'selected-column' : ''}`}
-                            >
-                                <div className="subnote-container">
-                                    {note.subNotes.map((subNote, subIndex) => {
-                                        const isActive = subNote && subNote.name != null;
-                                        const isSeparated = subNote && subNote.isSeparated;
-                                        return (
-                                        <div
-                                            key={`subnote-${rowIndex}-${colIndex}-${subIndex}`}
-                                            className={`
+                            return (
+                                <td
+                                    key={`cell-${rowIndex}-${colIndex}`}
+                                    className={`piano-roll-cell td-div ${selectedColumn === colIndex ? 'selected-column' : ''}`}
+                                >
+                                    <div className="subnote-container">
+                                        {note.subNotes.map((subNote, subIndex) => {
+                                            const isActive = subNote && subNote.name != null;
+                                            const isSeparated = subNote && subNote.isSeparated;
+                                            return (
+                                                <div
+                                                    key={`subnote-${rowIndex}-${colIndex}-${subIndex}`}
+                                                    className={`
                                                   subnote-cell 
                                                   ${isActive ? 'selected' : ''} 
                                                   ${isSeparated ? 'separated' : ''} 
                                                    ${activeCol === colIndex && activeSubIndex === subIndex ? 'active-col' : ''}
                                             ` }
-                                            style={{
-                                                width: `${100 / note.duration}%`,
-                                                height: '100%',
-                                            }}
-                                            onDoubleClick={() => handleDoubleClick(colIndex)}
-                                            onClick={(e) => handleSubNoteClick(e, rowIndex, colIndex, subIndex)}
-                                            onContextMenu={(e) => handleSubNoteRightClick(e, rowIndex, colIndex, subIndex)}
-                                        />
-                                    )})}
-                                </div>
-                            </td>
-                        );
-                    })}
-                </tr>
-            ))}
+                                                    style={{
+                                                        width: `${100 / note.duration}%`,
+                                                        height: '100%',
+                                                    }}
+                                                    onDoubleClick={() => handleDoubleClick(colIndex)}
+                                                    onClick={(e) => handleSubNoteClick(e, rowIndex, colIndex, subIndex)}
+                                                    onContextMenu={(e) => handleSubNoteRightClick(e, rowIndex, colIndex, subIndex)}
+                                                />
+                                            )
+                                        })}
+                                    </div>
+                                </td>
+                            );
+                        })}
+                    </tr>
+                ))}
             </tbody>
         </table>
     );
