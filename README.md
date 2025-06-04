@@ -2,12 +2,11 @@
   <img src="public/img/vetora_camiseta_costas_png.png" alt="logo groover" height="400" />
 </div>
 
-<h1 align="center"><i>Groover</i></h1>
-<h3 align="center">
+##  O que é o Groover?
+
+<h3 align="left">
   Uma plataforma desenvolvida pelo <b>Team Vectora</b> que revoluciona a forma como as pessoas interagem com o som e a música digital.
 </h3>
-
-##  O que é o Groover?
 
 **Groover** é uma plataforma digital que **democratiza a criação musical**, tornando-a acessível para qualquer usuário, desde iniciantes até profissionais.
 
