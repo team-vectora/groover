@@ -76,13 +76,14 @@ def save_project():
     project_data = {
         'title': data.get('title', 'New Project'),
         'description': data.get('description', ''),
-        'tempo': data.get('tempo', '4/4'),
-        'bpm': data.get('bpm', 120)
+        'bpm': data.get('bpm', 120),
+        'instrument': data.get('instrument', 'piano'),
+        'volume': data.get('volume', -10)
     }
 
     if 'id' in data:
         project_id = data['id']
-        
+
         if data.get('layers'):
             music_id = Music.create_music(
                 project_id=project_id,
@@ -96,7 +97,7 @@ def save_project():
         return jsonify({'error': 'Project not found or update failed'}), 404
     else:
         project_id = Project.create_project(user_id, project_data)
-        
+
         music_id = Music.create_music(
             project_id=project_id,
             layers=data.get('layers', {}),

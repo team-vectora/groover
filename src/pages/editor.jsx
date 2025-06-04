@@ -73,6 +73,8 @@ function EditorPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [rhythm, setRhythm] = useState(1);
   const [selectedColumn, setSelectedColumn] = useState(null);
+  const [tokenJWT, setTokenJWT] = useState(null);
+  const [projectId, setProjectId] = useState(false);
 
   const synthRef = useRef(null);
 
@@ -85,6 +87,7 @@ function EditorPage() {
       router.push("/login");
     } else {
       setLoading(false);
+      setTokenJWT(token);
     }
   }, [router]);
 
@@ -431,11 +434,12 @@ function EditorPage() {
 
   const toJson = () => {
     const musicData = {
+      title: '',
+      description: '',
       bpm,
       instrument,
       volume,
-      rhythm,
-      pages: pages.map(page =>
+      layers: pages.map(page =>
         page.map(column =>
           column.map(note => ({
             name: note.name,
@@ -450,39 +454,59 @@ function EditorPage() {
     };
 
     const json = JSON.stringify(musicData, null, 2);
-    return json;
+    return musicData;
   }
 
+  const handleSave = async (e) => {
+    e.preventDefault();
 
-  const save = async () => {
-    toJson();
+    // Verifica se há um token JWT válido
+    if (!tokenJWT) {
+      alert("Você precisa estar logado para salvar projetos");
+      return;
+    }
+
+    const projectData = toJson();
+    if (projectId) projectData.id = projectId;
 
     try {
-      const response = await fetch('https://groover-api.onrender.com/api/signup', {
+      const response = await fetch('https://groover-api.onrender.com/api/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tokenJWT}`
         },
-        body: JSON.stringify({
-          username: username,
-          email: email,
-          password: senha,
-        }),
+        body: JSON.stringify(projectData),
       });
 
       const data = await response.json();
-      console.log(data);
 
-      if (response.ok) {
-        router.push('/login');
-      } else {
-        alert(data.error || 'Erro no cadastro');
+      if (!response.ok) {
+        // Trata erros específicos da API
+        if (response.status === 401) {
+          alert("Sessão expirada. Por favor, faça login novamente.");
+          // Redirecionar para login
+          return;
+        }
+        throw new Error(data.error || "Erro desconhecido ao salvar");
       }
+
+      // Sucesso - trata diferentes respostas da API
+      if (data.id) {
+        alert(`Projeto ${data.message.includes('updated') ? 'atualizado' : 'salvo'} com sucesso!`);
+        // Atualiza o estado com o ID se for uma nova criação
+        if (!projectId && data.id) {
+          setProjectId(data.id);
+        }
+      } else {
+        alert("Operação realizada, mas sem ID de retorno");
+      }
+
     } catch (error) {
       console.error('Erro:', error);
-      alert('Erro ao conectar com a API');
+      alert(error.message || 'Erro ao conectar com a API');
     }
-  }
+  };
 
   const exportToMIDI = () => {
 
@@ -531,7 +555,7 @@ function EditorPage() {
         onPlayActivePage={() => playSelectedNotesActivePage(activePage)}
         onExport={exportToMIDI}
         onImport={importFromMIDI}
-        onSave={() => console.log('Save clicked')}
+        onSave={handleSave}
         setLang={setLang}
         lang={lang}
         t={t}
