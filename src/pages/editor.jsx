@@ -30,6 +30,7 @@ function EditorPage() {
 
   // State hooks
   const [activeCol, setActiveCol] = useState(null);
+  const [activeSubIndex, setActiveSubIndex] = useState(0);
   const [cols, setCols] = useState(initialCols);
 
   const createSubNote = (name = null) => ({
@@ -244,6 +245,9 @@ function EditorPage() {
       Tone.getTransport().bpm.value = bpm;
       Tone.getTransport().cancel();
 
+      const highlightTimes = [];
+
+
       currentMatrix.forEach((col, colIndex) => {
         const colTime = colIndex * Tone.Time("4n").toSeconds();
         console.log(`[col ${colIndex}] Tempo da coluna: ${colTime}s`);
@@ -251,63 +255,147 @@ function EditorPage() {
         // Destacar coluna
         Tone.getTransport().schedule((t) => {
           console.log(`[transport] Coluna ativa: ${colIndex} @ ${t}`);
-          setActiveCol(colIndex);
         }, colTime);
 
         col.forEach((note, rowIndex) => {
           if (!note?.subNotes?.length) return;
 
-          const subDuration = Tone.Time(`${4 / note.duration}n`).toSeconds();
+          // Duração de cada subnota em segundos
+          const subDuration = Tone.Time("4n").toSeconds() / note.duration;
           console.log(`[row ${rowIndex}] ${note.subNotes.length} subnotas com duração ${subDuration}s cada`);
 
+          let currentNote = null;
+          let noteStartTime = 0;
+
           note.subNotes.forEach((subNote, subIdx) => {
+            highlightTimes.push({
+              time: colTime + (subIdx * subDuration),
+              colIndex,
+              subIndex: subIdx
+            });
+
             const currentName = subNote?.name;
-
-            const isStart = currentName && (
-                (colIndex === 0 && subIdx === 0) ||
-                note.subNotes[subIdx]?.isSeparated ||
-                !note.subNotes[subIdx - 1]?.name ||
-                note.subNotes[subIdx - 1]?.name !== currentName
-            );
-
-            const isEnd = currentName && (
-                (colIndex === cols - 1 && subIdx === note.subNotes.length - 1) ||
-                note.subNotes[subIdx + 1]?.isSeparated ||
-                !note.subNotes[subIdx + 1]?.name ||
-                note.subNotes[subIdx + 1]?.name !== currentName
-            );
-
-            const startTime = colTime + subIdx * subDuration;
-            lastNoteTime = Math.max(lastNoteTime, startTime + subDuration);
             const noteKey = `${rowIndex}-${colIndex}-${subIdx}`;
+            const subTime = colTime + (subIdx * subDuration);
 
-            if (isStart) {
-              console.log(`🎵 Início: ${currentName} [${noteKey}] @ ${startTime}`);
+            // Condições para START (início de nova nota)
+            const isStartBecauseFirst = colIndex === 0 && subIdx === 0;
+            const isStartBecauseSeparated = subNote.isSeparated;
+
+            // Verifica se a subnota anterior NA MESMA COLUNA está vazia ou é diferente
+            const isPrevSubNoteEmptyOrDifferent = subIdx > 0 &&
+                (!note.subNotes[subIdx - 1]?.name || note.subNotes[subIdx - 1]?.name !== currentName);
+
+            // Verifica se a ÚLTIMA subnota da COLUNA ANTERIOR está vazia ou é diferente
+            const prevColLastSubNote = colIndex > 0 ?
+                currentMatrix[colIndex - 1]?.[rowIndex]?.subNotes?.slice(-1)[0] : null;
+            const isPrevColLastNoteEmptyOrDifferent = colIndex > 0 &&
+                (!prevColLastSubNote?.name || prevColLastSubNote?.name !== currentName);
+
+            const shouldStartNewNote = currentName && (
+                isStartBecauseFirst ||
+                isStartBecauseSeparated ||
+                isPrevSubNoteEmptyOrDifferent ||
+                isPrevColLastNoteEmptyOrDifferent
+            );
+
+            if (shouldStartNewNote) {
+              console.log(`🔵 START CONDITION for ${currentName} at [${rowIndex},${colIndex},${subIdx}]:`, {
+                isStartBecauseFirst,
+                isStartBecauseSeparated,
+                isPrevSubNoteEmptyOrDifferent,
+                isPrevColLastNoteEmptyOrDifferent,
+                prevNote: note.subNotes[subIdx - 1]?.name,
+                currentNote: currentName
+              });
+            }
+
+            // Condições para END (término de nota)
+            const isEndBecauseLast = colIndex === currentMatrix.length - 1 &&
+                subIdx === note.subNotes.length - 1;
+            const isEndBecauseSeparated = subNote.isSeparated;
+
+            // Verifica se a próxima subnota NA MESMA COLUNA está vazia ou é diferente
+            const isNextSubNoteEmptyOrDifferent = subIdx < note.subNotes.length - 1 &&
+                (!note.subNotes[subIdx + 1]?.name || note.subNotes[subIdx + 1]?.name !== currentName);
+
+            // Verifica se a PRIMEIRA subnota da PRÓXIMA COLUNA está vazia ou é diferente
+            const nextColFirstSubNote = colIndex < currentMatrix.length - 1 ?
+                currentMatrix[colIndex + 1]?.[rowIndex]?.subNotes[0] : null;
+            const isNextColFirstNoteEmptyOrDifferent = colIndex < currentMatrix.length - 1 &&
+                (!nextColFirstSubNote?.name || nextColFirstSubNote?.name !== currentName);
+
+            const shouldEndNote = currentName && (
+                isEndBecauseLast ||
+                isEndBecauseSeparated ||
+                isNextSubNoteEmptyOrDifferent ||
+                isNextColFirstNoteEmptyOrDifferent
+            );
+
+            if (shouldEndNote) {
+              console.log(`🔴 END CONDITION for ${currentName} at [${rowIndex},${colIndex},${subIdx}]:`, {
+                isEndBecauseLast,
+                isEndBecauseSeparated,
+                isNextSubNoteEmptyOrDifferent,
+                isNextColFirstNoteEmptyOrDifferent,
+                currentNote: currentName,
+                nextNote: note.subNotes[subIdx + 1]?.name
+              });
+            }
+
+            // Verifica se precisa iniciar uma nova nota
+            if (shouldStartNewNote) {
+              // Se havia uma nota em andamento, encerra primeiro
+              if (currentNote) {
+                const endTime = colTime + ((subIdx - 1) * subDuration) + subDuration;
+                console.log(`🛑 Fim antecipado: ${currentNote} @ ${endTime}`);
+                Tone.getTransport().schedule((t) => {
+                  console.log(`⏹️ TriggerRelease: ${currentNote} @ ${t}`);
+                  synthRef.current?.triggerRelease(currentNote, t);
+                  activeNotes.delete(`${rowIndex}-${colIndex}-${subIdx - 1}`);
+                }, endTime);
+              }
+
+              // Agenda início da nova nota
+              console.log(`🎵 Início: ${currentName} [${noteKey}] @ ${subTime}`);
               Tone.getTransport().schedule((t) => {
                 console.log(`▶️ TriggerAttack: ${currentName} @ ${t}`);
                 synthRef.current?.triggerAttack(currentName, t);
                 activeNotes.set(noteKey, { note: currentName, time: t });
-              }, startTime);
+              }, subTime);
+
+              currentNote = currentName;
+              noteStartTime = subTime;
             }
 
-            if (isEnd) {
-              console.log(`🛑 Fim: ${currentName} [${noteKey}] @ ${startTime + subDuration}`);
+            // Verifica se precisa encerrar a nota atual
+            if (shouldEndNote) {
+              const endTime = subTime + subDuration;
+              console.log(`🛑 Fim: ${currentName} [${noteKey}] @ ${endTime}`);
               Tone.getTransport().schedule((t) => {
                 console.log(`⏹️ TriggerRelease: ${currentName} @ ${t}`);
                 synthRef.current?.triggerRelease(currentName, t);
                 activeNotes.delete(noteKey);
-              }, startTime + subDuration);
+              }, endTime);
+
+              currentNote = null;
+              noteStartTime = 0;
             }
+
+            lastNoteTime = Math.max(lastNoteTime, subTime + subDuration);
           });
         });
       });
 
       const totalColsTime = currentMatrix.length * Tone.Time("4n").toSeconds();
       console.log(`[play] Total de tempo: ${totalColsTime}s`);
-      Tone.getTransport().schedule(() => {
-        console.log('[transport] Fim da reprodução, limpando colunas');
-        setActiveCol(-1);
-      }, totalColsTime);
+
+      highlightTimes.sort((a, b) => a.time - b.time).forEach(({time, colIndex, subIndex}) => {
+        Tone.getTransport().schedule(() => {
+          setActiveCol(colIndex);
+          setActiveSubIndex(subIndex);
+        }, time);
+      });
 
       await Tone.start();
       console.log('[tone] Transport iniciado');
@@ -575,6 +663,7 @@ function EditorPage() {
                   pages={pages}
                   setPages={setPages}
                   activeCol={activeCol}
+                  activeSubIndex={activeSubIndex}
                   setActiveCol={setActiveCol}
                   cols={cols}
                   setCols={setCols}

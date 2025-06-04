@@ -8,6 +8,7 @@ const PianoRoll = ({
                        pages,
                        activePage,
                        activeCol,
+                       activeSubIndex,
                        cols,
                        notes,
                        rows,
@@ -141,8 +142,8 @@ const PianoRoll = ({
                                                   subnote-cell 
                                                   ${isActive ? 'selected' : ''} 
                                                   ${isSeparated ? 'separated' : ''} 
-                                                  ${activeCol === colIndex ? 'active-col' : ''}
-                                                `}
+                                                   ${activeCol === colIndex && activeSubIndex === subIndex ? 'active-col' : ''}
+                                            ` }
                                             style={{
                                                 width: `${100 / note.duration}%`,
                                                 height: '100%',
