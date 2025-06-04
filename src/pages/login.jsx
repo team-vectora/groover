@@ -84,7 +84,7 @@ const LoginPage = () => {
                             placeholder="Digite sua senha"
                         />
                         <a href="#" className="esquecer-senha">
-                            Esquecer senha
+                            Esqueci senha
                         </a>
 
                     </div>

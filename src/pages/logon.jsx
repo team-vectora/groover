@@ -53,7 +53,7 @@ const LoginPage = () => {
             </header>
 
             <div className="caixa-login">
-                <h2>Entrar</h2>
+                <h2>Criar Conta</h2>
 
                 <form onSubmit={handleSubmit}>
                     <div className="container-input">
@@ -87,10 +87,10 @@ const LoginPage = () => {
                             onChange={(e) => setSenha(e.target.value)}
                             placeholder="Digite sua senha"
                         />
-                        <a href="#" className="esquecer-senha">Esquecer senha</a>
+                        <a href="#" className="esquecer-senha">Esqueci senha</a>
                     </div>
 
-                    <input id='botao-enviar' type="submit" value="Logar" />
+                    <input id='botao-enviar' type="submit" value="Criar" />
                 </form>
 
                 <div className="container-texto-divisor">
@@ -101,13 +101,13 @@ const LoginPage = () => {
 
                 <div className="botoes-sociais">
                     <button className="botao-social">
-                        <img src="google.png" alt="Google" width="25" height="25" />
+                        <img src="../../public/img/google.png" alt="Google" width="25" height="25" />
                     </button>
                     <button className="botao-social">
-                        <img src="facebook.png" alt="Facebook" width="25" height="25" />
+                        <img src="../../public/img/facebook.png" alt="Facebook" width="25" height="25" />
                     </button>
                     <button className="botao-social">
-                        <img src="apple.png" alt="Apple" width="25" height="25" />
+                        <img src="../../public/img/apple.png" alt="Apple" width="25" height="25" />
                     </button>
                 </div>
 
@@ -118,7 +118,7 @@ const LoginPage = () => {
                 </p>
 
                 <p className="texto-criar-conta">
-                    Não tem uma conta? <a href='/login'>Entrar</a>
+                    Já tem uma conta? <a href='/login'>Entrar</a>
                 </p>
             </div>
         </div>

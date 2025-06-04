@@ -161,6 +161,7 @@ function EditorPage() {
       const updatedPages = [...prevPages];
       updatedPages[activePage] = updatedMatrix;
       console.log("✅ Novo estado de pages[activePage]:", JSON.stringify(updatedMatrix));
+      setSelectedColumn(null);
       return updatedPages;
     });
   }, [rhythm]);
@@ -237,192 +238,165 @@ function EditorPage() {
       setTimeout(() => noteElement.classList.remove('active'), 200);
     }
   };
+
   const playSelectedNotesActivePage = async (n) => {
     if (isPlaying) {
       console.warn('Playback já em execução.');
       return;
     }
 
-    console.log(`[play] Iniciando reprodução da página ${n}`);
-    const currentMatrix = pages[n];
-    if (!currentMatrix || currentMatrix.length === 0) {
-      console.warn('[play] Matriz da página vazia ou inexistente.');
-      return;
-    }
-
     setIsPlaying(true);
-    let lastNoteTime = 0;
+    const currentMatrix = pages[n];
     const activeNotes = new Map();
+    let lastEventTime = 0;
 
     try {
-      console.log(`[play] Configurando BPM: ${bpm}`);
       Tone.getTransport().bpm.value = bpm;
       Tone.getTransport().cancel();
 
-      const highlightTimes = [];
+      // Lineariza todas as subnotas em uma sequência temporal
+      const allSubNotes = [];
+      let currentTime = 0;
 
-
+      // 1. Primeira passada: calcular durações e coletar todas as subnotas
       currentMatrix.forEach((col, colIndex) => {
-        const colTime = colIndex * Tone.Time("4n").toSeconds();
-        console.log(`[col ${colIndex}] Tempo da coluna: ${colTime}s`);
-
-        // Destacar coluna
-        Tone.getTransport().schedule((t) => {
-          console.log(`[transport] Coluna ativa: ${colIndex} @ ${t}`);
-        }, colTime);
+        const colDuration = Tone.Time("4n").toSeconds(); // Duração fixa por coluna
+        const subNotesCount = Math.max(...col.map(note => note?.subNotes?.length || 1));
+        const subDuration = colDuration / subNotesCount;
 
         col.forEach((note, rowIndex) => {
-          if (!note?.subNotes?.length) return;
+          const effectiveSubNotes = note?.subNotes || [createSubNote()];
 
-          // Duração de cada subnota em segundos
-          const subDuration = Tone.Time("4n").toSeconds() / note.duration;
-          console.log(`[row ${rowIndex}] ${note.subNotes.length} subnotas com duração ${subDuration}s cada`);
-
-          let currentNote = null;
-          let noteStartTime = 0;
-
-          note.subNotes.forEach((subNote, subIdx) => {
-            highlightTimes.push({
-              time: colTime + (subIdx * subDuration),
+          effectiveSubNotes.forEach((subNote, subIndex) => {
+            const startTime = currentTime + (subIndex * subDuration);
+            allSubNotes.push({
+              rowIndex,
               colIndex,
-              subIndex: subIdx
+              subIndex,
+              subNote,
+              startTime,
+              duration: subDuration,
+              noteName: notes[rowIndex]
             });
-
-            const currentName = subNote?.name;
-            const noteKey = `${rowIndex}-${colIndex}-${subIdx}`;
-            const subTime = colTime + (subIdx * subDuration);
-
-            // Condições para START (início de nova nota)
-            const isStartBecauseFirst = colIndex === 0 && subIdx === 0;
-            const isStartBecauseSeparated = subNote.isSeparated;
-
-            // Verifica se a subnota anterior NA MESMA COLUNA está vazia ou é diferente
-            const isPrevSubNoteEmptyOrDifferent = subIdx > 0 &&
-                (!note.subNotes[subIdx - 1]?.name || note.subNotes[subIdx - 1]?.name !== currentName);
-
-            // Verifica se a ÚLTIMA subnota da COLUNA ANTERIOR está vazia ou é diferente
-            const prevColLastSubNote = colIndex > 0 ?
-                currentMatrix[colIndex - 1]?.[rowIndex]?.subNotes?.slice(-1)[0] : null;
-            const isPrevColLastNoteEmptyOrDifferent = colIndex > 0 &&
-                (!prevColLastSubNote?.name || prevColLastSubNote?.name !== currentName);
-
-            const shouldStartNewNote = currentName && (
-                isStartBecauseFirst ||
-                isStartBecauseSeparated ||
-                isPrevSubNoteEmptyOrDifferent ||
-                isPrevColLastNoteEmptyOrDifferent
-            );
-
-            if (shouldStartNewNote) {
-              console.log(`🔵 START CONDITION for ${currentName} at [${rowIndex},${colIndex},${subIdx}]:`, {
-                isStartBecauseFirst,
-                isStartBecauseSeparated,
-                isPrevSubNoteEmptyOrDifferent,
-                isPrevColLastNoteEmptyOrDifferent,
-                prevNote: note.subNotes[subIdx - 1]?.name,
-                currentNote: currentName
-              });
-            }
-
-            // Condições para END (término de nota)
-            const isEndBecauseLast = colIndex === currentMatrix.length - 1 &&
-                subIdx === note.subNotes.length - 1;
-            const isEndBecauseSeparated = subNote.isSeparated;
-
-            // Verifica se a próxima subnota NA MESMA COLUNA está vazia ou é diferente
-            const isNextSubNoteEmptyOrDifferent = subIdx < note.subNotes.length - 1 &&
-                (!note.subNotes[subIdx + 1]?.name || note.subNotes[subIdx + 1]?.name !== currentName);
-
-            // Verifica se a PRIMEIRA subnota da PRÓXIMA COLUNA está vazia ou é diferente
-            const nextColFirstSubNote = colIndex < currentMatrix.length - 1 ?
-                currentMatrix[colIndex + 1]?.[rowIndex]?.subNotes[0] : null;
-            const isNextColFirstNoteEmptyOrDifferent = colIndex < currentMatrix.length - 1 &&
-                (!nextColFirstSubNote?.name || nextColFirstSubNote?.name !== currentName);
-
-            const shouldEndNote = currentName && (
-                isEndBecauseLast ||
-                isEndBecauseSeparated ||
-                isNextSubNoteEmptyOrDifferent ||
-                isNextColFirstNoteEmptyOrDifferent
-            );
-
-            if (shouldEndNote) {
-              console.log(`🔴 END CONDITION for ${currentName} at [${rowIndex},${colIndex},${subIdx}]:`, {
-                isEndBecauseLast,
-                isEndBecauseSeparated,
-                isNextSubNoteEmptyOrDifferent,
-                isNextColFirstNoteEmptyOrDifferent,
-                currentNote: currentName,
-                nextNote: note.subNotes[subIdx + 1]?.name
-              });
-            }
-
-            // Verifica se precisa iniciar uma nova nota
-            if (shouldStartNewNote) {
-              // Se havia uma nota em andamento, encerra primeiro
-              if (currentNote) {
-                const endTime = colTime + ((subIdx - 1) * subDuration) + subDuration;
-                console.log(`🛑 Fim antecipado: ${currentNote} @ ${endTime}`);
-                Tone.getTransport().schedule((t) => {
-                  console.log(`⏹️ TriggerRelease: ${currentNote} @ ${t}`);
-                  synthRef.current?.triggerRelease(currentNote, t);
-                  activeNotes.delete(`${rowIndex}-${colIndex}-${subIdx - 1}`);
-                }, endTime);
-              }
-
-              // Agenda início da nova nota
-              console.log(`🎵 Início: ${currentName} [${noteKey}] @ ${subTime}`);
-              Tone.getTransport().schedule((t) => {
-                console.log(`▶️ TriggerAttack: ${currentName} @ ${t}`);
-                synthRef.current?.triggerAttack(currentName, t);
-                activeNotes.set(noteKey, { note: currentName, time: t });
-              }, subTime);
-
-              currentNote = currentName;
-              noteStartTime = subTime;
-            }
-
-            // Verifica se precisa encerrar a nota atual
-            if (shouldEndNote) {
-              const endTime = subTime + subDuration;
-              console.log(`🛑 Fim: ${currentName} [${noteKey}] @ ${endTime}`);
-              Tone.getTransport().schedule((t) => {
-                console.log(`⏹️ TriggerRelease: ${currentName} @ ${t}`);
-                synthRef.current?.triggerRelease(currentName, t);
-                activeNotes.delete(noteKey);
-              }, endTime);
-
-              currentNote = null;
-              noteStartTime = 0;
-            }
-
-            lastNoteTime = Math.max(lastNoteTime, subTime + subDuration);
           });
         });
+
+        currentTime += colDuration;
       });
 
-      const totalColsTime = currentMatrix.length * Tone.Time("4n").toSeconds();
-      console.log(`[play] Total de tempo: ${totalColsTime}s`);
+      // 2. Segunda passada: agendar eventos
+      allSubNotes.forEach(({ rowIndex, colIndex, subIndex, subNote, startTime, duration, noteName }) => {
+        const noteKey = `${rowIndex}-${colIndex}-${subIndex}`;
+        lastEventTime = Math.max(lastEventTime, startTime + duration);
 
-      highlightTimes.sort((a, b) => a.time - b.time).forEach(({time, colIndex, subIndex}) => {
+        // Agendar highlight (para TODAS as subnotas, inclusive vazias)
         Tone.getTransport().schedule(() => {
           setActiveCol(colIndex);
           setActiveSubIndex(subIndex);
-        }, time);
+        }, startTime);
+
+        // Lógica de reprodução apenas para subnotas com nome
+        if (subNote?.name) {
+          // Verificar se precisa iniciar nova nota
+          const shouldStart = (
+              // É a primeira subnota da primeira coluna
+              (colIndex === 0 && subIndex === 0) ||
+              // Está marcada como separada
+              subNote.isSeparated ||
+              // Subnota anterior na mesma coluna está vazia ou é diferente
+              (subIndex > 0 && (
+                      !allSubNotes.find(s =>
+                          s.rowIndex === rowIndex &&
+                          s.colIndex === colIndex &&
+                          s.subIndex === subIndex - 1
+                      )?.subNote?.name ||
+                      allSubNotes.find(s =>
+                          s.rowIndex === rowIndex &&
+                          s.colIndex === colIndex &&
+                          s.subIndex === subIndex - 1
+                      )?.subNote?.name !== subNote.name
+                  ) ||
+                  // Última subnota da coluna anterior está vazia ou é diferente
+                  (colIndex > 0 && (
+                          !allSubNotes.find(s =>
+                              s.rowIndex === rowIndex &&
+                              s.colIndex === colIndex - 1 &&
+                              s.subIndex === (currentMatrix[colIndex - 1][rowIndex]?.subNotes?.length || 1) - 1
+                          )?.subNote?.name ||
+                          allSubNotes.find(s =>
+                              s.rowIndex === rowIndex &&
+                              s.colIndex === colIndex - 1 &&
+                              s.subIndex === (currentMatrix[colIndex - 1][rowIndex]?.subNotes?.length || 1) - 1
+                          )?.subNote?.name !== subNote.name
+                      )
+                  )
+              )
+          );
+
+          // Verificar se precisa terminar a nota
+          const shouldEnd = (
+              // É a última subnota da última coluna
+              (colIndex === currentMatrix.length - 1 && subIndex === (currentMatrix[colIndex][rowIndex]?.subNotes?.length || 1) - 1) ||
+              // Está marcada como separada
+              subNote.isSeparated ||
+              // Próxima subnota na mesma coluna está vazia ou é diferente
+              (subIndex < (currentMatrix[colIndex][rowIndex]?.subNotes?.length || 1) - 1 && (
+                      !allSubNotes.find(s =>
+                          s.rowIndex === rowIndex &&
+                          s.colIndex === colIndex &&
+                          s.subIndex === subIndex + 1
+                      )?.subNote?.name ||
+                      allSubNotes.find(s =>
+                          s.rowIndex === rowIndex &&
+                          s.colIndex === colIndex &&
+                          s.subIndex === subIndex + 1
+                      )?.subNote?.name !== subNote.name
+                  ) ||
+                  // Primeira subnota da próxima coluna está vazia ou é diferente
+                  (colIndex < currentMatrix.length - 1 && (
+                          !allSubNotes.find(s =>
+                              s.rowIndex === rowIndex &&
+                              s.colIndex === colIndex + 1 &&
+                              s.subIndex === 0
+                          )?.subNote?.name ||
+                          allSubNotes.find(s =>
+                              s.rowIndex === rowIndex &&
+                              s.colIndex === colIndex + 1 &&
+                              s.subIndex === 0
+                          )?.subNote?.name !== subNote.name
+                      )
+                  )
+              )
+          );
+
+          if (shouldStart) {
+            Tone.getTransport().schedule((time) => {
+              synthRef.current?.triggerAttack(subNote.name, time);
+              activeNotes.set(noteKey, { note: subNote.name, time });
+            }, startTime);
+          }
+
+          if (shouldEnd) {
+            Tone.getTransport().schedule((time) => {
+              synthRef.current?.triggerRelease(subNote.name, time);
+              activeNotes.delete(noteKey);
+            }, startTime + duration);
+          }
+        }
       });
 
       await Tone.start();
-      console.log('[tone] Transport iniciado');
       Tone.getTransport().start();
 
       await new Promise(resolve => {
         setTimeout(() => {
-          console.log('[play] Playback encerrado');
           Tone.getTransport().stop();
           synthRef.current?.releaseAll?.();
           setIsPlaying(false);
+          setActiveCol(null);
+          setActiveSubIndex(null);
           resolve();
-        }, (lastNoteTime + 0.1) * 1000);
+        }, (lastEventTime + 0.1) * 1000);
       });
 
     } catch (error) {
@@ -432,6 +406,7 @@ function EditorPage() {
       setIsPlaying(false);
     }
   };
+
 
   const playSong = async () => {
     if (isPlaying) {
