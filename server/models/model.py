@@ -33,6 +33,8 @@ class Project:
             'title': project_data.get('title', 'New Project'),
             'description': project_data.get('description', ''),
             'bpm': project_data.get('bpm'),
+            'instrument': project_data.get('instrument', 'piano'),
+            'volume': project_data.get('volume', -10),
             'tempo': project_data.get('tempo'),
             'music_versions': [],  # Inicializa vazio, Music cuidará disso depois
             'created_at': datetime.now(),
