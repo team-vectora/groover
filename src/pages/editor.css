@@ -297,7 +297,28 @@
     justify-content: center;
     background-color: transparent;
 }
-
+.header-button-logout{
+    color: var(--text-lighter);
+    border: 2px solid var(--primary);
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    min-width: auto;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    
+}
+.header-button-logout:hover{
+    background-color: rgba(168, 21, 28, 0.596);
+    border: 2px solid red;
+    transform: translateY(-1px);
+}
 .header-button:hover {
     background-color: rgba(76, 78, 48, 0.1);
     transform: translateY(-1px);

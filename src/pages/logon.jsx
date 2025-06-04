@@ -1,44 +1,41 @@
-'use client';
+"use client";
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import Image from 'next/image';
 
-
 const LoginPage = () => {
     const router = useRouter();
-
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
-
+    const [username, setUsername] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-        const response = await fetch('https://groover-api.onrender.com/api/signin', {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-            username: username,
-            password: senha,
-            }),
-        });
+            const response = await fetch('https://groover-api.onrender.com/api/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    email: email,
+                    password: senha,
+                }),
+            });
 
-        const data = await response.json();
-        console.log(data);
+            const data = await response.json();
+            console.log(data);
 
-        if (response.ok) {
-            localStorage.setItem('token', data.access_token);
-            localStorage.setItem('username', data.username);
-            router.push('/editor');
-        } else {
-            alert(data.error || 'Erro no login');
-        }
+            if (response.ok) {
+                router.push('/login');
+            } else {
+                alert(data.error || 'Erro no cadastro');
+            }
         } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao conectar com a API');
+            console.error('Erro:', error);
+            alert('Erro ao conectar com a API');
         }
     };
 
@@ -50,12 +47,8 @@ const LoginPage = () => {
                     <span className="logo-texto">GrooveClub</span>
                 </div>
                 <div className="botoes">
-                    <a href="/login" className="entrar">
-                        Entrar
-                    </a>
-                    <a href="/logon" className="criar-conta">
-                        Criar Conta
-                    </a>
+                    <a href="/login" className="entrar">Entrar</a>
+                    <a href="/logon" className="criar-conta">Criar Conta</a>
                 </div>
             </header>
 
@@ -70,7 +63,18 @@ const LoginPage = () => {
                             id="username"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            placeholder="Yanke Doodle"
+                            placeholder="Yankee Doodle"
+                        />
+                    </div>
+
+                    <div className="container-input">
+                        <label htmlFor="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="exemplo@e-mail.com"
                         />
                     </div>
 
@@ -83,15 +87,11 @@ const LoginPage = () => {
                             onChange={(e) => setSenha(e.target.value)}
                             placeholder="Digite sua senha"
                         />
-                        <a href="#" className="esquecer-senha">
-                            Esquecer senha
-                        </a>
-
+                        <a href="#" className="esquecer-senha">Esquecer senha</a>
                     </div>
-                        <input id='botao-enviar' type="submit" value="Logar" />
+
+                    <input id='botao-enviar' type="submit" value="Logar" />
                 </form>
-
-
 
                 <div className="container-texto-divisor">
                     <div className="linha-divisoria"></div>
@@ -101,20 +101,10 @@ const LoginPage = () => {
 
                 <div className="botoes-sociais">
                     <button className="botao-social">
-                        <img
-                            src="google.png"
-                            alt="Google"
-                            width="25"
-                            height="25"
-                        />
+                        <img src="google.png" alt="Google" width="25" height="25" />
                     </button>
                     <button className="botao-social">
-                        <img
-                            src="facebook.png"
-                            alt="Facebook"
-                            width="25"
-                            height="25"
-                        />
+                        <img src="facebook.png" alt="Facebook" width="25" height="25" />
                     </button>
                     <button className="botao-social">
                         <img src="apple.png" alt="Apple" width="25" height="25" />
@@ -128,11 +118,11 @@ const LoginPage = () => {
                 </p>
 
                 <p className="texto-criar-conta">
-                    Não tem uma conta? <a href='/logon'>Crie</a>
+                    Não tem uma conta? <a href='/login'>Entrar</a>
                 </p>
             </div>
         </div>
     );
-}
+};
 
 export default LoginPage;

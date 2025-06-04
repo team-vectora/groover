@@ -8,9 +8,27 @@ import ChangeVolume from "../components/ChangeVolume.jsx";
 import translations from "../locales/language.js";
 import ChangeInstrument from "../components/ChangeInstrument.jsx";
 import SelectRitmo from "../components/SelectRitmo";
+import { useRouter } from "next/navigation"; 
 
 function EditorPage() {
-  // Constants and state declarations
+  const [loading, setLoading] = useState(true);
+  
+  const router = useRouter();
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login");
+    } else {
+      setLoading(false);
+    }
+  }, [router]);
+
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
+
+  
   const rows = 49;
   const initialCols = 10;
   const notes = [

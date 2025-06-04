@@ -13,6 +13,7 @@ const translations = {
     export: "EXPORT",
     import: "IMPORT",
     save: "SAVE",
+    logout:"LOGOUT",
     instruments: {
       synth: "Synth",
       "bass-electric": "Electric Bass",
@@ -51,6 +52,7 @@ const translations = {
     export: "EXPORTAR",
     import: "IMPORTAR",
     save: "SALVAR",
+    logout:"SAIR",
     instruments: {
       synth: "Sintetizador",
       "bass-electric": "Baixo Elétrico",
