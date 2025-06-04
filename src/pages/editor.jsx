@@ -8,12 +8,12 @@ import ChangeVolume from "../components/ChangeVolume.jsx";
 import translations from "../locales/language.js";
 import ChangeInstrument from "../components/ChangeInstrument.jsx";
 import SelectRitmo from "../components/SelectRitmo";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 
 function EditorPage() {
   const rows = 49;
   const initialCols = 10;
-    const notes = [
+  const notes = [
     "C6", "B5", "A#5", "A5", "G#5", "G5", "F#5", "F5", "E5", "D#5",
     "D5", "C#5", "C5", "B4", "A#4", "A4", "G#4", "G4", "F#4", "F4",
     "E4", "D#4", "D4", "C#4", "C4", "B3", "A#3", "A3", "G#3", "G3",
@@ -22,15 +22,13 @@ function EditorPage() {
   ];
 
   const acousticInstruments = [
-    "bass-electric", "bassoon", "cello", "clarinet", "contrabass",
+    "bassoon", "cello", "clarinet",
     "flute", "french-horn", "guitar-acoustic", "guitar-electric",
-    "guitar-nylon", "harmonium", "harp", "organ", "piano", "saxophone",
-    "trombone", "trumpet", "tuba", "violin", "xylophone"
+    "guitar-nylon", "harmonium", "organ", "piano", "saxophone",
+    "trombone", "trumpet", "violin"
   ];
 
-  const instruments = {
-    synth: () => new Tone.PolySynth(Tone.Synth).toDestination()
-  };
+  const instruments = {};
 
   acousticInstruments.forEach(name => {
     instruments[name] = () => new Tone.Sampler({
@@ -38,6 +36,7 @@ function EditorPage() {
       baseUrl: `https://nbrosowsky.github.io/tonejs-instruments/samples/${name}/`,
     }).toDestination();
   });
+
 
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -59,16 +58,16 @@ function EditorPage() {
   };
   const [matrixNotes, setMatrixNotes] = useState(
     Array.from({ length: initialCols }, () =>
-        Array.from({ length: rows }, () =>
-            createNote()
-        )
+      Array.from({ length: rows }, () =>
+        createNote()
+      )
     )
   );
 
   const [pages, setPages] = useState([matrixNotes]);
   const [activePage, setActivePage] = useState(0);
   const [lang, setLang] = useState("en");
-  const [instrument, setInstrument] = useState('synth');
+  const [instrument, setInstrument] = useState('piano');
   const [volume, setVolume] = useState(-10);
   const [bpm, setBpm] = useState(120);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -88,7 +87,7 @@ function EditorPage() {
       setLoading(false);
     }
   }, [router]);
- 
+
   useEffect(() => {
     synthRef.current = instruments[instrument]().toDestination();
     synthRef.current.volume.value = volume;
@@ -190,24 +189,24 @@ function EditorPage() {
     return notes.map((note, index) => {
       const isBlackKey = note.includes("#");
       return (
-          <div
-              onClick={() => playNotePiano(note.split(" ")[0])}
-              key={index}
-              className={`note ${isBlackKey ? 'black' : ''}`}
-          >
-            <p>{note}</p>
-          </div>
+        <div
+          onClick={() => playNotePiano(note.split(" ")[0])}
+          key={index}
+          className={`note ${isBlackKey ? 'black' : ''}`}
+        >
+          <p>{note}</p>
+        </div>
       );
     });
   };
 
   // Core functions
-  
+
   const addPage = () => {
-    const newMatrix =     Array.from({ length: initialCols }, () =>
-        Array.from({ length: rows }, () =>
-            createNote()
-        )
+    const newMatrix = Array.from({ length: initialCols }, () =>
+      Array.from({ length: rows }, () =>
+        createNote()
+      )
     );
     setPages(prev => [...prev, newMatrix]);
     setMatrixNotes(newMatrix);
@@ -299,74 +298,74 @@ function EditorPage() {
         if (subNote?.name) {
           // Verificar se precisa iniciar nova nota
           const shouldStart = (
-              // É a primeira subnota da primeira coluna
-              (colIndex === 0 && subIndex === 0) ||
-              // Está marcada como separada
-              subNote.isSeparated ||
-              // Subnota anterior na mesma coluna está vazia ou é diferente
-              (subIndex > 0 && (
-                      !allSubNotes.find(s =>
-                          s.rowIndex === rowIndex &&
-                          s.colIndex === colIndex &&
-                          s.subIndex === subIndex - 1
-                      )?.subNote?.name ||
-                      allSubNotes.find(s =>
-                          s.rowIndex === rowIndex &&
-                          s.colIndex === colIndex &&
-                          s.subIndex === subIndex - 1
-                      )?.subNote?.name !== subNote.name
-                  ) ||
-                  // Última subnota da coluna anterior está vazia ou é diferente
-                  (colIndex > 0 && (
-                          !allSubNotes.find(s =>
-                              s.rowIndex === rowIndex &&
-                              s.colIndex === colIndex - 1 &&
-                              s.subIndex === (currentMatrix[colIndex - 1][rowIndex]?.subNotes?.length || 1) - 1
-                          )?.subNote?.name ||
-                          allSubNotes.find(s =>
-                              s.rowIndex === rowIndex &&
-                              s.colIndex === colIndex - 1 &&
-                              s.subIndex === (currentMatrix[colIndex - 1][rowIndex]?.subNotes?.length || 1) - 1
-                          )?.subNote?.name !== subNote.name
-                      )
-                  )
+            // É a primeira subnota da primeira coluna
+            (colIndex === 0 && subIndex === 0) ||
+            // Está marcada como separada
+            subNote.isSeparated ||
+            // Subnota anterior na mesma coluna está vazia ou é diferente
+            (subIndex > 0 && (
+              !allSubNotes.find(s =>
+                s.rowIndex === rowIndex &&
+                s.colIndex === colIndex &&
+                s.subIndex === subIndex - 1
+              )?.subNote?.name ||
+              allSubNotes.find(s =>
+                s.rowIndex === rowIndex &&
+                s.colIndex === colIndex &&
+                s.subIndex === subIndex - 1
+              )?.subNote?.name !== subNote.name
+            ) ||
+              // Última subnota da coluna anterior está vazia ou é diferente
+              (colIndex > 0 && (
+                !allSubNotes.find(s =>
+                  s.rowIndex === rowIndex &&
+                  s.colIndex === colIndex - 1 &&
+                  s.subIndex === (currentMatrix[colIndex - 1][rowIndex]?.subNotes?.length || 1) - 1
+                )?.subNote?.name ||
+                allSubNotes.find(s =>
+                  s.rowIndex === rowIndex &&
+                  s.colIndex === colIndex - 1 &&
+                  s.subIndex === (currentMatrix[colIndex - 1][rowIndex]?.subNotes?.length || 1) - 1
+                )?.subNote?.name !== subNote.name
               )
+              )
+            )
           );
 
           // Verificar se precisa terminar a nota
           const shouldEnd = (
-              // É a última subnota da última coluna
-              (colIndex === currentMatrix.length - 1 && subIndex === (currentMatrix[colIndex][rowIndex]?.subNotes?.length || 1) - 1) ||
-              // Está marcada como separada
-              subNote.isSeparated ||
-              // Próxima subnota na mesma coluna está vazia ou é diferente
-              (subIndex < (currentMatrix[colIndex][rowIndex]?.subNotes?.length || 1) - 1 && (
-                      !allSubNotes.find(s =>
-                          s.rowIndex === rowIndex &&
-                          s.colIndex === colIndex &&
-                          s.subIndex === subIndex + 1
-                      )?.subNote?.name ||
-                      allSubNotes.find(s =>
-                          s.rowIndex === rowIndex &&
-                          s.colIndex === colIndex &&
-                          s.subIndex === subIndex + 1
-                      )?.subNote?.name !== subNote.name
-                  ) ||
-                  // Primeira subnota da próxima coluna está vazia ou é diferente
-                  (colIndex < currentMatrix.length - 1 && (
-                          !allSubNotes.find(s =>
-                              s.rowIndex === rowIndex &&
-                              s.colIndex === colIndex + 1 &&
-                              s.subIndex === 0
-                          )?.subNote?.name ||
-                          allSubNotes.find(s =>
-                              s.rowIndex === rowIndex &&
-                              s.colIndex === colIndex + 1 &&
-                              s.subIndex === 0
-                          )?.subNote?.name !== subNote.name
-                      )
-                  )
+            // É a última subnota da última coluna
+            (colIndex === currentMatrix.length - 1 && subIndex === (currentMatrix[colIndex][rowIndex]?.subNotes?.length || 1) - 1) ||
+            // Está marcada como separada
+            subNote.isSeparated ||
+            // Próxima subnota na mesma coluna está vazia ou é diferente
+            (subIndex < (currentMatrix[colIndex][rowIndex]?.subNotes?.length || 1) - 1 && (
+              !allSubNotes.find(s =>
+                s.rowIndex === rowIndex &&
+                s.colIndex === colIndex &&
+                s.subIndex === subIndex + 1
+              )?.subNote?.name ||
+              allSubNotes.find(s =>
+                s.rowIndex === rowIndex &&
+                s.colIndex === colIndex &&
+                s.subIndex === subIndex + 1
+              )?.subNote?.name !== subNote.name
+            ) ||
+              // Primeira subnota da próxima coluna está vazia ou é diferente
+              (colIndex < currentMatrix.length - 1 && (
+                !allSubNotes.find(s =>
+                  s.rowIndex === rowIndex &&
+                  s.colIndex === colIndex + 1 &&
+                  s.subIndex === 0
+                )?.subNote?.name ||
+                allSubNotes.find(s =>
+                  s.rowIndex === rowIndex &&
+                  s.colIndex === colIndex + 1 &&
+                  s.subIndex === 0
+                )?.subNote?.name !== subNote.name
               )
+              )
+            )
           );
 
           if (shouldStart) {
@@ -430,168 +429,204 @@ function EditorPage() {
     setIsPlaying(false);
   };
 
-const exportToMIDI = () => {
-  const musicData = {
-    bpm,
-    instrument,
-    volume,
-    rhythm,
-    pages: pages.map(page =>
-      page.map(column =>
-        column.map(note => ({
-          name: note.name,
-          duration: note.duration,
-          subNotes: note.subNotes.map(sub => ({
-            name: sub.name,
-            isSeparated: sub.isSeparated
+  const toJson = () => {
+    const musicData = {
+      bpm,
+      instrument,
+      volume,
+      rhythm,
+      pages: pages.map(page =>
+        page.map(column =>
+          column.map(note => ({
+            name: note.name,
+            duration: note.duration,
+            subNotes: note.subNotes.map(sub => ({
+              name: sub.name,
+              isSeparated: sub.isSeparated
+            }))
           }))
-        }))
-      )
-    ),
-  };
+        )
+      ),
+    };
 
-  const json = JSON.stringify(musicData, null, 2);
-  const blob = new Blob([json], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
+    const json = JSON.stringify(musicData, null, 2);
+    return json;
+  }
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "music.json";
-  a.click();
-  URL.revokeObjectURL(url);
-};
 
-const importFromMIDI = (file) => {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const content = e.target.result;
+  const save = async () => {
+    toJson();
+
     try {
-      const data = JSON.parse(content);
+      const response = await fetch('https://groover-api.onrender.com/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          email: email,
+          password: senha,
+        }),
+      });
 
-      setBpm(data.bpm);
-      setInstrument(data.instrument);
-      setVolume(data.volume);
-      setRhythm(data.rhythm);
-      setPages(data.pages);
-      setMatrixNotes(data.pages[0]);
-      setActivePage(0);
+      const data = await response.json();
+      console.log(data);
 
-      alert("Música importada com sucesso!");
+      if (response.ok) {
+        router.push('/login');
+      } else {
+        alert(data.error || 'Erro no cadastro');
+      }
     } catch (error) {
-      console.error("Erro ao importar música:", error);
-      alert("Falha ao importar. Verifique o arquivo.");
+      console.error('Erro:', error);
+      alert('Erro ao conectar com a API');
     }
+  }
+
+  const exportToMIDI = () => {
+
+    const blob = new Blob([toJson()], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "music.json";
+    a.click();
+    URL.revokeObjectURL(url);
   };
-  reader.readAsText(file);
-};
+
+  const importFromMIDI = (file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target.result;
+      try {
+        const data = JSON.parse(content);
+
+        setBpm(data.bpm);
+        setInstrument(data.instrument);
+        setVolume(data.volume);
+        setRhythm(data.rhythm);
+        setPages(data.pages);
+        setMatrixNotes(data.pages[0]);
+        setActivePage(0);
+
+        alert("Música importada com sucesso!");
+      } catch (error) {
+        console.error("Erro ao importar música:", error);
+        alert("Falha ao importar. Verifique o arquivo.");
+      }
+    };
+    reader.readAsText(file);
+  };
 
   if (loading) {
     return <div>Carregando...</div>;
   }
   // Render
   return (
-      <div className="app-container">
-        <TittleCaption
-            onPlaySong={playSong}
-            onPlayActivePage={() => playSelectedNotesActivePage(activePage)}
-            onExport={exportToMIDI}
-            onImport={importFromMIDI}
-            onSave={() => console.log('Save clicked')}
-            setLang={setLang}
-            lang={lang}
-            t={t}
-        />
+    <div className="app-container">
+      <TittleCaption
+        onPlaySong={playSong}
+        onPlayActivePage={() => playSelectedNotesActivePage(activePage)}
+        onExport={exportToMIDI}
+        onImport={importFromMIDI}
+        onSave={() => console.log('Save clicked')}
+        setLang={setLang}
+        lang={lang}
+        t={t}
+      />
 
-        <div id="home">
-          <div className="data">
-            <div className="control-panel">
-              <div className="control-group">
-                <ChangeInstrument
-                    instrument={instrument}
-                    instruments={instruments}
-                    setInstrument={setInstrument}
-                    synthRef={synthRef}
-                />
-              </div>
-
-              <div className="control-group">
-                <ChangeVolume
-                    volume={volume}
-                    setVolume={setVolume}
-                    synthRef={synthRef}
-                />
-              </div>
-
-              <div className="control-group">
-                <h3>{t("tempo")}</h3>
-                <div className="control-item">
-                  <label>{t("bpmLabel")}: {bpm}</label>
-                  <input
-                      type="range"
-                      min="40"
-                      max="300"
-                      step="10"
-                      className="control-range"
-                      value={bpm}
-                      onChange={(e) => setBpm(Number(e.target.value))}
-                  />
-                </div>
-              </div>
-
-              <SelectRitmo rhythm={rhythm} setRhythm={setRhythm} />
-
-              <div className="control-group">
-                <h3>{t("versions")}</h3>
-                <div className="control-item">
-                  <select name="cars" className="control-select" id="cars">
-                    <option value="volvo">Volvo</option>
-                    <option value="saab">Saab</option>
-                    <option value="mercedes">Mercedes</option>
-                    <option value="audi">Audi</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="control-group">
-                <h3>{t("page")}</h3>
-                <p className="text-sm">
-                  {t("pageOf", { current: activePage + 1, total: pages.length })}
-                </p>
-                <div className="page-buttons">
-                  <button onClick={() => movePage(-1)}>⬅</button>
-                  <button onClick={addPage}>✛</button>
-                  <button onClick={() => movePage(1)}>⮕</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div id="edit-window">
-            <div id="piano-roll-container">
-              <div id="notes">{renderKeys()}</div>
-              <PianoRoll
-                  synthRef={synthRef}
-                  bpm={bpm}
-                  pages={pages}
-                  setPages={setPages}
-                  activeCol={activeCol}
-                  activeSubIndex={activeSubIndex}
-                  setActiveCol={setActiveCol}
-                  cols={cols}
-                  setCols={setCols}
-                  rows={rows}
-                  notes={notes}
-                  activePage={activePage}
-                  setActivePage={setActivePage}
-                  selectedColumn={selectedColumn}
-                  setSelectedColumn={setSelectedColumn}
-                  createSubNote={createSubNote}
+      <div id="home">
+        <div className="data">
+          <div className="control-panel">
+            <div className="control-group">
+              <ChangeInstrument
+                instrument={instrument}
+                instruments={instruments}
+                setInstrument={setInstrument}
+                synthRef={synthRef}
               />
             </div>
-          </div>
 
+            <div className="control-group">
+              <ChangeVolume
+                volume={volume}
+                setVolume={setVolume}
+                synthRef={synthRef}
+              />
+            </div>
+
+            <div className="control-group">
+              <h3>{t("tempo")}</h3>
+              <div className="control-item">
+                <label>{t("bpmLabel")}: {bpm}</label>
+                <input
+                  type="range"
+                  min="40"
+                  max="300"
+                  step="10"
+                  className="control-range"
+                  value={bpm}
+                  onChange={(e) => setBpm(Number(e.target.value))}
+                />
+              </div>
+            </div>
+
+            <SelectRitmo rhythm={rhythm} setRhythm={setRhythm} />
+
+            <div className="control-group">
+              <h3>{t("versions")}</h3>
+              <div className="control-item">
+                <select name="cars" className="control-select" id="cars">
+                  <option value="volvo">Volvo</option>
+                  <option value="saab">Saab</option>
+                  <option value="mercedes">Mercedes</option>
+                  <option value="audi">Audi</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="control-group">
+              <h3>{t("page")}</h3>
+              <p className="text-sm">
+                {t("pageOf", { current: activePage + 1, total: pages.length })}
+              </p>
+              <div className="page-buttons">
+                <button onClick={() => movePage(-1)}>⬅</button>
+                <button onClick={addPage}>✛</button>
+                <button onClick={() => movePage(1)}>⮕</button>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <div id="edit-window">
+          <div id="piano-roll-container">
+            <div id="notes">{renderKeys()}</div>
+            <PianoRoll
+              synthRef={synthRef}
+              bpm={bpm}
+              pages={pages}
+              setPages={setPages}
+              activeCol={activeCol}
+              activeSubIndex={activeSubIndex}
+              setActiveCol={setActiveCol}
+              cols={cols}
+              setCols={setCols}
+              rows={rows}
+              notes={notes}
+              activePage={activePage}
+              setActivePage={setActivePage}
+              selectedColumn={selectedColumn}
+              setSelectedColumn={setSelectedColumn}
+              createSubNote={createSubNote}
+            />
+          </div>
+        </div>
+
       </div>
+    </div>
   );
 }
 

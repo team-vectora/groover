@@ -55,6 +55,7 @@
     box-sizing: border-box;
     transition: background-color 0.1s ease, all 100ms ease-in-out;
     cursor: pointer;
+    border: 0.01px solid rgba(97, 103, 62, 0.363)
 }
 
 

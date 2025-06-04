@@ -1,7 +1,7 @@
 "use client";
 import Image from 'next/image';
-import { useEffect, useState} from "react";
-import { useRouter } from "next/navigation"; 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSave, t, setLang, lang }) => {
 
@@ -15,10 +15,12 @@ const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSav
     }
   }, []);
 
+
+
   const userData = {
     name: username,
     role: "Produtor Musical",
-    avatar: "" 
+    avatar: ""
   };
 
   const handleClickLogout = () => {
@@ -66,10 +68,10 @@ const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSav
         </div>
         <div className="language-switcher">
           <button
-              className="header-button"
-              onClick={() => setLang(lang === "pt" ? "en" : "pt")}
-              aria-label="Switch Language"
-              title={lang === "pt" ? "Switch to English" : "Mudar para Português"}
+            className="header-button"
+            onClick={() => setLang(lang === "pt" ? "en" : "pt")}
+            aria-label="Switch Language"
+            title={lang === "pt" ? "Switch to English" : "Mudar para Português"}
           >
             {lang === "pt" ? "🇧🇷" : "🇺🇸"}
           </button>
@@ -79,8 +81,8 @@ const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSav
           <span className="header-user-role">{userData.role}</span>
         </div>
         {userData.avatar && (
-          <img 
-            src={userData.avatar} 
+          <img
+            src={userData.avatar}
             alt="Avatar"
             className="header-user-avatar"
           />
