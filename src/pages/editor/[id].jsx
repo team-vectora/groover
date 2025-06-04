@@ -513,7 +513,7 @@ function EditorPage() {
 
   const exportToMIDI = () => {
 
-    const blob = new Blob([toJson()], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(toJson())], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
@@ -524,6 +524,7 @@ function EditorPage() {
   };
 
   useEffect(() => {
+    if (!router.isReady) return;
     if (id && id !== "new") {
       setProjectId(id);
       console.log("COMECOU A DATA")
@@ -551,25 +552,27 @@ function EditorPage() {
       }
 
       const data = await response.json();
-      console.log("OIA A DATAAAAAA")
-      console.log(JSON.stringify(data))
-      console.log(JSON.stringify(data.current_music_id))
 
-      // // Atualiza todos os estados com os dados do projeto
-      setBpm(data.bpm);
-      setInstrument(data.instrument);
-      setVolume(data.volume);
-      setProjectId(projectId);
+      if (data) {
+        if (data.bpm == null || data.instrument == null || data.volume == null) {
+          return;
+        }
 
-      // Verifica se há layers/pages no projeto
-      if (data.current_music_id.layers && data.current_music_id.layers.length > 0) {
-        console.log("Falsoooooo 1")
-        setPages(data.current_music_id.layers);
-        console.log("Falsoooooo 2")
-        setMatrixNotes(pages[0]);
-        console.log("Falsoooooo 3")
-        setActivePage(0);
-        console.log("Falsoooooo 4")
+        setBpm(data.bpm);
+        setInstrument(data.instrument);
+        setVolume(data.volume);
+        setProjectId(projectId);
+
+        // Verifica se há layers/pages no projeto
+        if (data.current_music_id?.layers?.length > 0) {
+          console.log("Falsoooooo 1");
+          setPages(data.current_music_id.layers);
+          console.log("Falsoooooo 2");
+          setMatrixNotes(data.current_music_id.layers[0]);
+          console.log("Falsoooooo 3");
+          setActivePage(0);
+          console.log("Falsoooooo 4");
+        }
 
       } else {
         console.log("Falsoooooo")
@@ -583,7 +586,6 @@ function EditorPage() {
 
     } catch (error) {
       console.error('Erro ao carregar projeto:', error);
-      alert("Erro ao carregar projeto. Tente novamente.");
     }
   };
 
@@ -593,42 +595,23 @@ function EditorPage() {
       const content = e.target.result;
       try {
         const data = JSON.parse(content);
+        console.log(data)
+        setBpm(data.bpm);
+        setInstrument(data.instrument);
+        setVolume(data.volume);
+        setProjectId(projectId);
 
-        // Validação básica dos dados
-        if (!data.layers || !Array.isArray(data.layers)) {
-          throw new Error("Formato de arquivo inválido");
+        // Verifica se há layers/pages no projeto
+        if (data.layers && data.layers.length > 0) {
+          console.log("Falsoooooo 1")
+          setPages(data.layers);
+          console.log("Falsoooooo 2")
+          setMatrixNotes(pages[0]);
+          console.log("Falsoooooo 3")
+          setActivePage(0);
+          console.log("Falsoooooo 4")
+
         }
-
-        // Atualiza os estados com os dados importados
-        setBpm(data.bpm || 120);
-        setInstrument(data.instrument || 'piano');
-        setVolume(data.volume || -10);
-
-        // Processa as layers/pages
-        const validatedLayers = data.layers.map(layer =>
-            layer.map(column =>
-                column.map(note => ({
-                  name: note?.name || null,
-                  duration: note?.duration || 1,
-                  subNotes: (note?.subNotes || []).map(sub => ({
-                    name: sub?.name || null,
-                    isSeparated: sub?.isSeparated || false
-                  }))
-                }))
-            )
-        );
-
-        setPages(validatedLayers);
-        setMatrixNotes(validatedLayers[0]);
-        setActivePage(0);
-
-        // Define o rhythm baseado na primeira nota da primeira coluna (se existir)
-        const firstNote = validatedLayers[0]?.[0]?.[0];
-        if (firstNote) {
-          setRhythm(firstNote.subNotes?.length || 1);
-        }
-
-        alert("Projeto importado com sucesso!");
 
       } catch (error) {
         console.error("Erro ao importar projeto:", error);
