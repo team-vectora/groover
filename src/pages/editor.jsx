@@ -11,27 +11,9 @@ import SelectRitmo from "../components/SelectRitmo";
 import { useRouter } from "next/navigation"; 
 
 function EditorPage() {
-  const [loading, setLoading] = useState(true);
-  
-  const router = useRouter();
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      router.push("/login");
-    } else {
-      setLoading(false);
-    }
-  }, [router]);
-
-  if (loading) {
-    return <div>Carregando...</div>;
-  }
-
-  
   const rows = 49;
   const initialCols = 10;
-  const notes = [
+    const notes = [
     "C6", "B5", "A#5", "A5", "G#5", "G5", "F#5", "F5", "E5", "D#5",
     "D5", "C#5", "C5", "B4", "A#4", "A4", "G#4", "G4", "F#4", "F4",
     "E4", "D#4", "D4", "C#4", "C4", "B3", "A#3", "A3", "G#3", "G3",
@@ -46,7 +28,19 @@ function EditorPage() {
     "trombone", "trumpet", "tuba", "violin", "xylophone"
   ];
 
-  // State hooks
+  const instruments = {
+    synth: () => new Tone.PolySynth(Tone.Synth).toDestination()
+  };
+
+  acousticInstruments.forEach(name => {
+    instruments[name] = () => new Tone.Sampler({
+      urls: { C4: "C4.mp3" },
+      baseUrl: `https://nbrosowsky.github.io/tonejs-instruments/samples/${name}/`,
+    }).toDestination();
+  });
+
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
   const [activeCol, setActiveCol] = useState(null);
   const [activeSubIndex, setActiveSubIndex] = useState(0);
   const [cols, setCols] = useState(initialCols);
@@ -63,13 +57,12 @@ function EditorPage() {
       subNotes: Array(duration).fill(createSubNote()),
     };
   };
-
   const [matrixNotes, setMatrixNotes] = useState(
-      Array.from({ length: initialCols }, () =>
-          Array.from({ length: rows }, () =>
-              createNote()
-          )
-      )
+    Array.from({ length: initialCols }, () =>
+        Array.from({ length: rows }, () =>
+            createNote()
+        )
+    )
   );
 
   const [pages, setPages] = useState([matrixNotes]);
@@ -82,48 +75,20 @@ function EditorPage() {
   const [rhythm, setRhythm] = useState(1);
   const [selectedColumn, setSelectedColumn] = useState(null);
 
-  // Refs
   const synthRef = useRef(null);
 
-  // Instruments configuration
-  const instruments = {
-    synth: () => new Tone.PolySynth(Tone.Synth).toDestination()
-  };
-
-  acousticInstruments.forEach(name => {
-    instruments[name] = () => new Tone.Sampler({
-      urls: { C4: "C4.mp3" },
-      baseUrl: `https://nbrosowsky.github.io/tonejs-instruments/samples/${name}/`,
-    }).toDestination();
-  });
-
-  // Helper functions
-  const t = (key, params) => {
-    let text = translations[lang][key] || key;
-    if (params) {
-      Object.entries(params).forEach(([k, v]) => {
-        text = text.replace(`{${k}}`, v);
-      });
-    }
-    return text;
-  };
-
-  const renderKeys = () => {
-    return notes.map((note, index) => {
-      const isBlackKey = note.includes("#");
-      return (
-          <div
-              onClick={() => playNotePiano(note.split(" ")[0])}
-              key={index}
-              className={`note ${isBlackKey ? 'black' : ''}`}
-          >
-            <p>{note}</p>
-          </div>
-      );
-    });
-  };
-
   // Effects
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login");
+    } else {
+      setLoading(false);
+    }
+  }, [router]);
+ 
   useEffect(() => {
     synthRef.current = instruments[instrument]().toDestination();
     synthRef.current.volume.value = volume;
@@ -209,9 +174,40 @@ function EditorPage() {
     });
   }, [matrixNotes, activePage]);
 
+  // Helper functions
+  const t = (key, params) => {
+    let text = translations[lang][key] || key;
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        text = text.replace(`{${k}}`, v);
+      });
+    }
+    return text;
+  };
+
+  const renderKeys = () => {
+    return notes.map((note, index) => {
+      const isBlackKey = note.includes("#");
+      return (
+          <div
+              onClick={() => playNotePiano(note.split(" ")[0])}
+              key={index}
+              className={`note ${isBlackKey ? 'black' : ''}`}
+          >
+            <p>{note}</p>
+          </div>
+      );
+    });
+  };
+
   // Core functions
+  
   const addPage = () => {
-    const newMatrix = Array.from({ length: initialCols }, () => Array(rows).fill(null));
+    const newMatrix =     Array.from({ length: initialCols }, () =>
+        Array.from({ length: rows }, () =>
+            createNote()
+        )
+    );
     setPages(prev => [...prev, newMatrix]);
     setMatrixNotes(newMatrix);
     setActivePage(pages.length);
@@ -459,141 +455,64 @@ function EditorPage() {
     setIsPlaying(false);
   };
 
-  const exportToMIDI = () => {
-    const midi = new Midi();
-    const track = midi.addTrack();
-    midi.header.setTempo(bpm);
-
-    const cellDuration = Tone.Time("4n").toSeconds(); // Duração de uma célula (coluna inteira)
-
-    pages.forEach((pageMatrix, pageIndex) => {
-      pageMatrix.forEach((col, colIndex) => {
-        col.forEach((note, rowIndex) => {
-          if (!note || !note.subNotes || note.subNotes.length === 0) return;
-
-          const noteDuration = Tone.Time(note.duration + "n").toSeconds();
-          const startTimeBase = (pageIndex * pageMatrix.length + colIndex) * cellDuration;
-
-          note.subNotes.forEach((subNote, subIndex) => {
-            if (!subNote) return;
-
-            const startTime = startTimeBase + subIndex * noteDuration;
-
-            const shouldAttack =
-                note.isStart || note.isSeparated || note.subNotes[subIndex - 1] !== subNote;
-
-            const shouldRelease =
-                note.isEnd || note.isSeparated || note.subNotes[subIndex + 1] !== subNote;
-
-            if (shouldAttack) {
-              track.addNote({
-                midi: Tone.Frequency(subNote).toMidi(),
-                time: startTime,
-                duration: shouldRelease ? noteDuration : undefined,
-                velocity: 0.8,
-              });
-            }
-          });
-        });
-      });
-    });
-
-    const bytes = midi.toArray();
-    const blob = new Blob([bytes], { type: 'audio/midi' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'piano-roll.mid';
-    link.click();
-    URL.revokeObjectURL(url);
+const exportToMIDI = () => {
+  const musicData = {
+    bpm,
+    instrument,
+    volume,
+    rhythm,
+    pages: pages.map(page =>
+      page.map(column =>
+        column.map(note => ({
+          name: note.name,
+          duration: note.duration,
+          subNotes: note.subNotes.map(sub => ({
+            name: sub.name,
+            isSeparated: sub.isSeparated
+          }))
+        }))
+      )
+    ),
   };
 
-  const importFromMIDI = async (event) => {
-    const file = event.target.files[0];
-    if (!file) {
-      setPages([]);
+  const json = JSON.stringify(musicData, null, 2);
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "music.json";
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+const importFromMIDI = (file) => {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const content = e.target.result;
+    try {
+      const data = JSON.parse(content);
+
+      setBpm(data.bpm);
+      setInstrument(data.instrument);
+      setVolume(data.volume);
+      setRhythm(data.rhythm);
+      setPages(data.pages);
+      setMatrixNotes(data.pages[0]);
       setActivePage(0);
-      setMatrixNotes([]);
-      return;
+
+      alert("Música importada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao importar música:", error);
+      alert("Falha ao importar. Verifique o arquivo.");
     }
-
-    const arrayBuffer = await file.arrayBuffer();
-    const midi = new Midi(arrayBuffer);
-
-    const bpmFromMidi = midi.header.tempos[0]?.bpm || 120;
-    setBpm(Math.round(bpmFromMidi));
-
-    const allNotes = midi.tracks.flatMap(track => track.notes);
-    if (!allNotes.length) return;
-
-    const noteGroups = {};
-
-    allNotes.forEach(note => {
-      const timeInBeats = Tone.Time(note.time).toSeconds();
-      const duration = Tone.Time(note.duration).toSeconds();
-
-      const col = Math.floor(timeInBeats / Tone.Time("4n").toSeconds());
-      const subIndex = Math.round(
-          (timeInBeats % Tone.Time("4n").toSeconds()) / duration
-      );
-
-      const pageIndex = Math.floor(col / initialCols);
-      const colIndex = col % initialCols;
-
-      const noteName = Tone.Frequency(note.midi, "midi").toNote();
-      const rowIndex = notes.indexOf(noteName);
-      if (rowIndex === -1) return;
-
-      const key = `${pageIndex}-${colIndex}-${rowIndex}`;
-
-      if (!noteGroups[key]) {
-        noteGroups[key] = {
-          name: noteName,
-          duration: 1,
-          subNotes: [],
-          isStart: true,
-          isEnd: true,
-          isSeparated: false,
-        };
-      }
-
-      noteGroups[key].subNotes[subIndex] = noteName;
-      noteGroups[key].duration = Math.max(noteGroups[key].duration, subIndex + 1);
-    });
-
-    const totalPages = Math.max(
-        ...Object.keys(noteGroups).map(k => parseInt(k.split("-")[0], 10))
-    ) + 1;
-
-    const newPages = Array.from({ length: totalPages }, () =>
-        Array.from({ length: initialCols }, () => Array(rows).fill(null))
-    );
-
-    Object.entries(noteGroups).forEach(([key, value]) => {
-      const [page, col, row] = key.split("-").map(Number);
-      const filledSubNotes = Array.from({ length: value.duration }).map(
-          (_, i) => value.subNotes[i] ?? value.name
-      );
-
-      newPages[page][col][row] = {
-        name: value.name,
-        duration: value.duration,
-        isStart: true,
-        isEnd: true,
-        isSeparated: false,
-        subNotes: filledSubNotes
-      };
-    });
-
-    setPages(newPages);
-    setActivePage(0);
-    setMatrixNotes(newPages[0]);
-    setCols(initialCols);
-    setTempo("1"); // cada célula = semínima
   };
+  reader.readAsText(file);
+};
 
-
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
   // Render
   return (
       <div className="app-container">

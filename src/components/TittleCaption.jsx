@@ -49,10 +49,13 @@ const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSav
             ↓ {t("import")}
             <input
               type="file"
-              accept=".mid"
-              onChange={onImport}
-              style={{ display: 'none' }}
+              accept="application/json"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) onImport(file);
+              }}
             />
+
           </label>
           <button className="header-button" onClick={onSave}>
             ⎙ {t("save")}
