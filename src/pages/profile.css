@@ -1,0 +1,138 @@
+
+
+.profile-container {
+    background-color: var(--background);
+    padding: 1.5rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 100%;
+    margin: 0;
+    background-color: var(--background);
+}
+
+.profile-header{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+.profile-title{
+    font-size: 2rem;
+}
+
+.new_project{
+    color: var(--text-lighter);
+    border: 2px solid var(--primary);
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: auto;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.new_project:hover{
+    background-color: var(--primary);
+}
+
+.tabs-nav {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0;
+}
+
+.tabs-nav .tab {
+    width: 33%;
+        border-radius: 4px;
+
+    border: 2px solid var(--primary);
+    margin: 0;
+    background-color: transparent;
+    color: var(--text-lighter);
+    font-weight: 600;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tabs-nav .tab:hover {
+    background-color: var(--primary-light);
+    color: var(--text-dark);
+}
+
+.tabs-nav .tab.active {
+    background-color: var(--primary);
+    color: var(--text-lighter);
+    font-weight: 700;
+}
+
+.color{
+    width: 100%;
+    background-color: var(--primary);
+    height: 4px;
+    margin: 0;
+}
+
+.tab-content{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.projects-grid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Aumentei para 320px */
+  gap: 1.5rem; /* aumentei o gap para ficar mais espaçado */
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.project-card {
+  border-radius: 8px;
+  padding: 1.5rem; /* aumentei o padding */
+  box-shadow: 0 2px 8px var(--primary);
+  transition: box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  font-size: 1.1rem; /* aumentei a fonte para deixar o conteúdo maior */
+}
+
+.project-card:hover {
+  box-shadow: 0 8px 12px var(--primary);
+}
+
+.project-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem; /* fonte maior */
+  color: var(--text-lighter);
+  margin-top: 0.75rem; /* um pouco mais de espaço */
+}
+
+.collab-badge {
+  margin-top: 0.75rem;
+  padding: 0.3rem 0.7rem;
+  background-color: var(--primary);
+  color: var(--text-lighter);
+  font-weight: 600;
+  border-radius: 4px;
+  width: fit-content;
+  font-size: 1rem; /* texto maior no badge */
+}

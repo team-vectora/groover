@@ -1,15 +1,21 @@
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.db import mongo
+from utils.genres import GENRES
 
 class User:
     @staticmethod
     def create(username, password_hash, email=None):
+        genres_dict = {genre: 0 for genre in GENRES}
+
         user = {
             'username': username,
+            'avatar': None,
             'password': password_hash,
             'email': email,
-            'created_at': datetime.now()
+            'created_at': datetime.now(),
+            'active': False,
+            'genres': genres_dict 
         }
         return mongo.db.users.insert_one(user).inserted_id
     
@@ -102,6 +108,34 @@ class Project:
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
         return project
+
+    @staticmethod
+    def get_user_projects_by_username(username):
+        user = User.find_by_username(username)
+        if not user:
+            return []
+        
+        # Convertemos o ObjectId para string para comparar com os user_id no banco
+        user_id_str = str(user['_id'])
+        
+        project_count = mongo.db.projects.count_documents({'user_id': user_id_str})
+        if project_count == 0:
+            print(f"Nenhum projeto encontrado para o usuário {username} com ID {user_id_str}")
+            return []
+        
+        projects = mongo.db.projects.find({'user_id': user_id_str})
+        
+        return [{
+            'id': str(p['_id']),
+            'title': p.get('title', 'Sem título'),
+            'bpm': p.get('bpm', 0),
+            'tempo': p.get('tempo', ''),
+            'created_at': p.get('created_at', ''),
+            'updated_at': p.get('updated_at', ''),
+            'created_by': str(p.get('created_by', '')),
+            'last_updated_by': str(p.get('last_updated_by', '')),
+            'is_owner': True  # Como estamos filtrando por user_id, sempre será True
+        } for p in projects]
 
     @staticmethod
     def get_user_projects(user_id):
@@ -225,3 +259,90 @@ class Invitation:
             {'$set': {'status': status}}
         )
         return result.modified_count > 0
+
+
+class Post:
+    @staticmethod
+    def create(user_id, photos=None, caption=None):
+        genres_dict = {genre: 0 for genre in GENRES}
+        
+        post = {
+            'user_id': ObjectId(user_id),
+            'photos': photos if photos else [],
+            'caption': caption if caption else "",
+            'created_at': datetime.now(),
+            'likes': [],  
+            'comments': [],  
+            'genres': genres_dict  
+        }
+        
+        return mongo.db.posts.insert_one(post).inserted_id
+    
+    @staticmethod
+    def get_post(post_id):
+        post = mongo.db.posts.find_one({'_id': ObjectId(post_id)})
+        if post:
+            post['_id'] = str(post['_id'])
+        return post
+
+    @staticmethod
+    def get_posts():
+        return list(mongo.db.posts.find())
+    
+    @staticmethod
+    def get_posts_by_user_id(user_id):
+        return list(mongo.db.posts.find({"user_id": ObjectId(user_id)}))
+
+    @staticmethod
+    def get_posts_by_username(username):
+        user = User.find_by_username(username)
+        if user is None:
+            return [] 
+        return list(mongo.db.posts.find({"user_id": ObjectId(user["_id"])}))
+
+    @staticmethod
+    def like(post_id, user_id):
+        post = Post.get_post(post_id)
+
+        if not post:
+            return {'error': 'Post não encontrado'}, 404
+
+        post_oid = ObjectId(post_id)
+        
+        if user_id in post.get('likes', []):
+            mongo.db.posts.update_one(
+                {'_id': post_oid},
+                {'$pull': {'likes': user_id}}  
+            )
+               
+            return {'message': 'Like removido'}, 200
+        else:
+            mongo.db.posts.update_one(
+                {'_id': post_oid},
+                {'$push': {'likes': user_id}}  
+            )
+            
+            return {'message': 'Post curtido com sucesso'}, 200
+
+# FAzer bunitinho neh? Separar seguidor da entidade usuario
+class Followers:
+
+    @staticmethod
+    def create_follow(follower_id, following_id):
+
+        follow={
+            "follower_id": follower_id,
+            "following_id": following_id,
+            "created_at": datetime.now()
+        }
+    
+        return mongo.db.followers.insert_one(follow).inserted_id
+
+    @staticmethod
+    def get_followers(user_id):
+        return list(mongo.db.followers.find({"follower_id": ObjectId(user_id)}))
+
+    @staticmethod
+    def get_followers(user_id):
+        return list(mongo.db.followers.find({"following_id": ObjectId(user_id)}))
+        

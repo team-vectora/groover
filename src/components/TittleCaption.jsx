@@ -65,6 +65,7 @@ const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSav
           <button className="header-button-logout" onClick={handleClickLogout}>
             ❌ {t("logout")}
           </button>
+
         </div>
         <div className="language-switcher">
           <button

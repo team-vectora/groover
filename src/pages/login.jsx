@@ -15,7 +15,7 @@ const LoginPage = () => {
         e.preventDefault();
 
         try {
-        const response = await fetch('https://groover-api.onrender.com/api/signin', {
+        const response = await fetch('http://localhost:5000/api/signin', {
             method: 'POST',
             headers: {
             'Content-Type': 'application/json',
@@ -32,7 +32,8 @@ const LoginPage = () => {
         if (response.ok) {
             localStorage.setItem('token', data.access_token);
             localStorage.setItem('username', data.username);
-            router.push('/projects');
+            localStorage.setItem('id', data.user_id);
+            router.push('/feed');
         } else {
             alert(data.error || 'Erro no login');
         }

@@ -4,8 +4,9 @@ from flask_jwt_extended import (
     get_jwt_identity,
     create_access_token
 )
+# from similarity import cosine_similarity
 from werkzeug.security import generate_password_hash, check_password_hash
-from models.model import Music, Project, User
+from models.model import Followers, Music, Project, User, Post
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
 
@@ -57,12 +58,13 @@ def signin():
         'username': user['username']
     }), 200
 
-@auth_bp.route('/projects', methods=['GET'])
+
+@auth_bp.route('/projects/user/<username>', methods=['GET'])
 @jwt_required()
-def list_projects():
-    user_id = get_jwt_identity()
-    projects = Project.get_user_projects(user_id)
+def list_projects_by_username(username):
+    projects = Project.get_user_projects_by_username(username)
     return jsonify(projects), 200
+
 
 @auth_bp.route('/projects', methods=['POST'])
 @jwt_required()
@@ -228,3 +230,124 @@ def respond_invitation(invitation_id):
         )
     
     return jsonify({'message': f'Invitation {response}ed'}), 200
+
+
+
+@auth_bp.route('/post', methods=['POST'])
+@jwt_required()
+def create_post():
+    data = request.get_json()
+    user_id = get_jwt_identity()
+
+    caption = data.get('caption', "")
+    photos = data.get('photos', [])
+    """music_id = data.get('music_id')
+
+    if not music_id:
+        return jsonify({'error': 'music_id is required'}), 400
+    """
+    post_id = Post.create(
+        user_id=user_id,
+        photos=photos,
+        caption=caption,
+    )
+
+    return jsonify({'message': 'Post created', 'post_id': str(post_id)}), 201
+
+@auth_bp.route('/post', methods=['GET'])
+@jwt_required()
+def get_posts():
+    posts = Post.get_posts()  
+
+    serialized = []
+    for post in posts:
+        
+        user = User.get_user(post.get('user_id'))  
+        
+        user_data = {
+            'id': str(user['_id']),
+            'username': user.get('username'),
+            'email': user.get('email')
+        } if user else None
+
+        serialized.append({
+            'id': str(post.get('_id', '')),
+            'user': user_data,  
+            'caption': post.get('caption', ''),
+            'photos': post.get('photos', []),
+            'created_at': post.get('created_at'),
+            'likes': post.get('likes', []),
+            'comments': post.get('comments', []),
+        })
+
+    return jsonify(serialized), 200
+
+@auth_bp.route('/post/<username>', methods=['GET'])
+@jwt_required()
+def get_posts_user(username):
+    posts = Post.get_posts_by_username(username)
+
+    serialized = [{
+        'id': str(post.get('_id', '')),
+        'user': str(post.get('user_id')),  
+        'caption': post.get('caption', ''),
+        'photos': post.get('photos', []),
+        'created_at': post.get('created_at'),
+        'likes': post.get('likes', []),
+        'comments': post.get('comments', []),
+    } for post in posts]
+
+    return jsonify(serialized), 200
+
+@auth_bp.route('/post/like', methods=['POST'])
+@jwt_required()
+def post_like():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    post_id = data.get('post_id')
+
+    if not post_id:
+        return jsonify({'error': 'missing post_id'}), 400
+    print(post_id)
+    response, status = Post.like(post_id, user_id)
+    
+    return jsonify(response), status
+
+@auth_bp.route('/follow', methods=['POST'])
+@jwt_required()
+def post_follower():
+    user_id =get_jwt_identity()
+    data = request.get_json()
+
+    following_id = data.get('following_id')
+
+    try:
+        follow_id = Followers.create_follow(user_id, following_id)
+        return jsonify({
+            "message": "Sucess",
+            "follow_id": str(follow_id)
+        }), 201
+    except Exception as e:
+        return jsonify({"error"}), 500
+ 
+
+"""
+Colocar tambem seguidores e em alta
+
+Na verdade pode pegar uns usuarios parecidos e suas postagens
+
+@auth_bp.route('/post/feed', methods=['GET'])
+@jwt_required()
+def posts_feed():
+    user_id = get_jwt_identity()
+
+    user = User.get_user(user_id)
+    posts = Post.get_posts()
+    post_list = list()
+    for post in posts():
+        if(cosine_similarity(user["genres"], post.genres)>0.8):
+            post_list.append(post)
+    
+    return post, 200
+"""
