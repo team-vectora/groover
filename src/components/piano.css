@@ -80,27 +80,3 @@
     height: 100%;
 }
 
-.follow_button {
-    background-color: var(--bg-darker);
-    color: var(--foreground);
-    border: 0.6px solid var(--accent);
-    padding: 5px 12px;
-    border-radius: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.follow_button:hover {
-    background-color: var(--primary);
-    border: 0.6px solid var(--primary);
-    
-    
-
-}
-
-.header-post{
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    width: 100%;
-}

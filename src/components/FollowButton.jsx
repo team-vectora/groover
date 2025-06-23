@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-const FollowButton = ({ followingId }) => {
+const FollowButton = ({ followingId, userId }) => {
   const [isFollowing, setIsFollowing] = useState(false);
 
   const handleClick = async () => {
@@ -35,13 +35,16 @@ const FollowButton = ({ followingId }) => {
   };
 
   return (
-    <button 
-      onClick={handleClick}
-      className="follow_button"
-    >
-      {isFollowing ? 'Seguindo' : 'Seguir'}
-    </button>
+    userId == followingId ? null : (
+      <button
+        onClick={handleClick}
+        className="follow_button"
+      >
+        {isFollowing ? 'Seguindo' : 'Seguir'}
+      </button>
+    )
   );
+
 };
 
 export default FollowButton;

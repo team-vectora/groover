@@ -4,7 +4,7 @@ import FollowButton from "./FollowButton";
 
 export default function Post({ post, handleClick, userId }) {
   const isLiked = post.likes.includes(userId);
-
+  
   return (
     <div className="post">
       <div className="header-post">
@@ -21,7 +21,7 @@ export default function Post({ post, handleClick, userId }) {
           </Link>
           <h3>{new Date(post.created_at).toLocaleString()}</h3>
         </div>
-        <FollowButton followingId={post.user?.id} />
+        <FollowButton followingId={post.user?.id} userId={userId} />
       </div>
 
       <p>{post.caption}</p>

@@ -8,7 +8,8 @@ import ChangeVolume from "../../components/ChangeVolume.jsx";
 import translations from "../../locales/language.js";
 import ChangeInstrument from "../../components/ChangeInstrument.jsx";
 import SelectRitmo from "../../components/SelectRitmo";
-import {useRouter} from "next/router";
+import { useRouter } from "next/router";
+import SaveMusicPopUp from "../../components/SaveMusicPopUp.jsx";
 
 function EditorPage() {
   const router = useRouter();
@@ -45,7 +46,8 @@ function EditorPage() {
   const [activeCol, setActiveCol] = useState(null);
   const [activeSubIndex, setActiveSubIndex] = useState(0);
   const [cols, setCols] = useState(initialCols);
-
+  const [openPop, setOpenPop] = useState(false)
+  const popUpRef = useRef(null);
   const createSubNote = (name = null) => ({
     name,           // ex: "C4" ou null
     isSeparated: false
@@ -77,7 +79,8 @@ function EditorPage() {
   const [selectedColumn, setSelectedColumn] = useState(null);
   const [tokenJWT, setTokenJWT] = useState(null);
   const [projectId, setProjectId] = useState(false);
-
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const synthRef = useRef(null);
 
   // Effects
@@ -208,6 +211,20 @@ function EditorPage() {
 
   // Core functions
 
+  const showPopup = () => {
+    return new Promise((resolve) => {
+      setOpenPop(true);
+      popUpRef.current = resolve;
+    });
+  };
+
+  const handleClosePopup = () => {
+    setOpenPop(false);
+    if (popUpRef.current) {
+      popUpRef.current(); 
+      popUpRef.current = null;
+    }
+  };
   const addPage = () => {
     const newMatrix = Array.from({ length: initialCols }, () =>
       Array.from({ length: rows }, () =>
@@ -437,8 +454,8 @@ function EditorPage() {
 
   const toJson = () => {
     const musicData = {
-      title: '',
-      description: '',
+      title,
+      description,
       bpm,
       instrument,
       volume,
@@ -461,9 +478,7 @@ function EditorPage() {
   }
 
   const handleSave = async (e) => {
-    e.preventDefault();
 
-    // Verifica se há um token JWT válido
     if (!tokenJWT) {
       alert("Você precisa estar logado para salvar projetos");
       return;
@@ -562,7 +577,8 @@ function EditorPage() {
         setInstrument(data.instrument);
         setVolume(data.volume);
         setProjectId(projectId);
-
+        setTitle(data.title);
+        setDescription(data.description);
         // Verifica se há layers/pages no projeto
         if (data.current_music_id?.layers?.length > 0) {
           console.log("Falsoooooo 1");
@@ -578,7 +594,7 @@ function EditorPage() {
         console.log("Falsoooooo")
         // Se não houver dados, inicializa com valores padrão
         const newMatrix = Array.from({ length: initialCols }, () =>
-            Array.from({ length: rows }, () => createNote())
+          Array.from({ length: rows }, () => createNote())
         );
         setPages([newMatrix]);
         setMatrixNotes(newMatrix);
@@ -632,12 +648,12 @@ function EditorPage() {
         onPlayActivePage={() => playSelectedNotesActivePage(activePage)}
         onExport={exportToMIDI}
         onImport={importFromMIDI}
-        onSave={handleSave}
+        onSave={showPopup}
         setLang={setLang}
         lang={lang}
         t={t}
       />
-
+      <SaveMusicPopUp onSave={handleSave} open={openPop} closeModal={handleClosePopup} description={description} title={title} setDescription={setDescription} setTitle={setTitle}></SaveMusicPopUp>
       <div id="home">
         <div className="data">
           <div className="control-panel">

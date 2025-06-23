@@ -50,6 +50,10 @@ class Project:
             #sem current_music_id mas o Music também vai cuidar papai
         }
         return str(mongo.db.projects.insert_one(project).inserted_id)
+    
+    @staticmethod
+    def create_project_fork(project_data):
+        return str(mongo.db.projects.insert_one(project_data).inserted_id)
 
     @staticmethod
     def add_collaborator(project_id, user_id):
@@ -108,6 +112,23 @@ class Project:
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
         return project
+    
+    @staticmethod
+    def get_project_full_data_without_user_id(project_id):
+        project = mongo.db.projects.find_one({
+            '_id': ObjectId(project_id)
+        })
+        if project:
+            project['_id'] = str(project['_id'])
+            if 'current_music_id' in project:
+                project['current_music_id'] = Music.get_music(project['current_music_id'])
+            if 'music_versions' in project:
+                for version in project['music_versions']:
+                    version['music_id'] = Music.get_music(version['music_id'])
+                    version['update_by'] = User.get_user(version['update_by'])
+            project['created_by'] = User.get_user(project.get('created_by', ''))
+            project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
+        return project
 
     @staticmethod
     def get_user_projects_by_username(username):
@@ -130,6 +151,7 @@ class Project:
             'title': p.get('title', 'Sem título'),
             'bpm': p.get('bpm', 0),
             'tempo': p.get('tempo', ''),
+            'description': p.get('description', ''),
             'created_at': p.get('created_at', ''),
             'updated_at': p.get('updated_at', ''),
             'created_by': str(p.get('created_by', '')),
@@ -343,6 +365,6 @@ class Followers:
         return list(mongo.db.followers.find({"follower_id": ObjectId(user_id)}))
 
     @staticmethod
-    def get_followers(user_id):
+    def get_followings(user_id):
         return list(mongo.db.followers.find({"following_id": ObjectId(user_id)}))
         

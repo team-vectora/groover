@@ -80,7 +80,8 @@ def save_project():
         'description': data.get('description', ''),
         'bpm': data.get('bpm', 120),
         'instrument': data.get('instrument', 'piano'),
-        'volume': data.get('volume', -10)
+        'volume': data.get('volume', -10),
+        'description': data.get('description')
     }
 
     if 'id' in data:
@@ -331,6 +332,49 @@ def post_follower():
     except Exception as e:
         return jsonify({"error"}), 500
  
+
+@auth_bp.route('/fork', methods=['POST'])
+@jwt_required()
+def fork_project():
+    data = request.get_json()
+    user_id = get_jwt_identity()
+
+    project_id = data.get('project_id')
+    if not project_id:
+        return jsonify({"error": "project_id not found"}), 400
+
+    project = Project.get_project_full_data_without_user_id(project_id)
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+
+    music = project.get('current_music_id')
+    if not music:
+        return jsonify({"error": "Projct doesnt have music to copy"}), 400
+
+    layers = music.get('layers', [])
+
+    new_project_id = Project.create_project(
+        user_id,
+        {
+            'title': project.get('title', '') + ' (Fork)',
+            'description': project.get('description', ''),
+            'bpm': project.get('bpm', 120),
+            'instrument': project.get('instrument', 'piano'),
+            'volume': project.get('volume', -10),
+            'tempo': project.get('tempo', None)
+        }
+    )
+    
+    Music.create_music(
+        new_project_id,
+        layers,
+        user_id
+    )
+
+    return jsonify({
+        'message': 'Fork created',
+        'new_project_id': new_project_id
+    }), 201
 
 """
 Colocar tambem seguidores e em alta
