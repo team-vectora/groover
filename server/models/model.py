@@ -11,6 +11,7 @@ class User:
         user = {
             'username': username,
             'avatar': None,
+            'bio': None,
             'password': password_hash,
             'email': email,
             'created_at': datetime.now(),
@@ -29,6 +30,30 @@ class User:
         if user:
             user['_id'] = str(user['_id'])
         return user
+
+    @staticmethod
+    def config_user(user_id, avatar=None, bio=None, music_tags=None):
+        update_fields = {}
+
+        if avatar:
+            update_fields['avatar'] = avatar
+        if bio is not None:
+            update_fields['bio'] = bio
+
+        if not update_fields:
+            return {"error": "Nenhum dado para atualizar"}, 400
+
+        result = mongo.db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_fields}
+        )
+
+        if result.matched_count == 0:
+            return {"error": "User not found"}, 404
+
+        return {"message": "Perfil updated"}, 200
+
+
 
 class Project:
     @staticmethod
@@ -136,7 +161,6 @@ class Project:
         if not user:
             return []
         
-        # Convertemos o ObjectId para string para comparar com os user_id no banco
         user_id_str = str(user['_id'])
         
         project_count = mongo.db.projects.count_documents({'user_id': user_id_str})

@@ -653,7 +653,7 @@ function EditorPage() {
         lang={lang}
         t={t}
       />
-      <SaveMusicPopUp onSave={handleSave} open={openPop} closeModal={handleClosePopup} description={description} title={title} setDescription={setDescription} setTitle={setTitle}></SaveMusicPopUp>
+      <SaveMusicPopUp onSave={handleSave} open={openPop} onCancel={handleClosePopup} description={description} title={title} setDescription={setDescription} setTitle={setTitle}></SaveMusicPopUp>
       <div id="home">
         <div className="data">
           <div className="control-panel">

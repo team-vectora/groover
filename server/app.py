@@ -5,6 +5,7 @@ from utils.db import mongo
 from routes.routes import auth_bp
 from utils.config import Config
 import os
+import cloudinary
 
 def create_app():
     app = Flask(__name__)
@@ -16,7 +17,16 @@ def create_app():
     
     # Inicializa o banco de dados
     mongo.init_db()
-    
+
+    # Inicializa o cloudinary
+    cloudinary.config(
+        cloud_name=Config.CLOUDINARY_CLOUD_NAME,
+        api_key=Config.CLOUDINARY_API_KEY,
+        api_secret=Config.CLOUDINARY_API_SECRET,
+        secure=True
+    )
+
+
     # Registra blueprints
     app.register_blueprint(auth_bp, url_prefix='/api')
     

@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models.model import Followers, Music, Project, User, Post
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
-
+import cloudinary.uploader
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/signup', methods=['POST'])
@@ -58,6 +58,14 @@ def signin():
         'username': user['username']
     }), 200
 
+@auth_bp.route("/user/<username>", methods=["GET"])
+def get_user_by_username(username):
+    user = User.find_by_username(username)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    user["_id"] = str(user["_id"])
+    return jsonify(user), 200
 
 @auth_bp.route('/projects/user/<username>', methods=['GET'])
 @jwt_required()
@@ -65,6 +73,27 @@ def list_projects_by_username(username):
     projects = Project.get_user_projects_by_username(username)
     return jsonify(projects), 200
 
+@auth_bp.route('/config', methods=['PUT'])
+@jwt_required()
+def config_user():
+    current_user_id = get_jwt_identity()
+
+    data = request.get_json()
+    avatar = data.get("avatar")
+    bio = data.get("bio")
+    music_tags = data.get("music_tags")
+
+    if music_tags is not None and len(music_tags) > 5:
+        music_tags = music_tags[:5]
+
+    result, status_code = User.config_user(
+        user_id=current_user_id,
+        avatar=avatar,
+        bio=bio,
+        music_tags=music_tags
+    )
+
+    return jsonify(result), status_code
 
 @auth_bp.route('/projects', methods=['POST'])
 @jwt_required()
@@ -242,11 +271,8 @@ def create_post():
 
     caption = data.get('caption', "")
     photos = data.get('photos', [])
-    """music_id = data.get('music_id')
 
-    if not music_id:
-        return jsonify({'error': 'music_id is required'}), 400
-    """
+
     post_id = Post.create(
         user_id=user_id,
         photos=photos,
@@ -254,6 +280,20 @@ def create_post():
     )
 
     return jsonify({'message': 'Post created', 'post_id': str(post_id)}), 201
+
+@auth_bp.route('/upload-image', methods=['POST'])
+@jwt_required()
+def upload_image():
+    if 'image' not in request.files:
+        return jsonify({'error': 'File not found'}), 400
+
+    image_file = request.files['image']
+
+    try:
+        result = cloudinary.uploader.upload(image_file)
+        return jsonify({'secure_url': result['secure_url']}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @auth_bp.route('/post', methods=['GET'])
 @jwt_required()
@@ -268,7 +308,8 @@ def get_posts():
         user_data = {
             'id': str(user['_id']),
             'username': user.get('username'),
-            'email': user.get('email')
+            'email': user.get('email'),
+            'avatar': user.get('avatar')
         } if user else None
 
         serialized.append({

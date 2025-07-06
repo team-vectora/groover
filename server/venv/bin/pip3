@@ -1,4 +1,4 @@
-#!/home/jazz/poc-groover/server/venv/bin/python
+#!/home/jazz/Projetos/TCC/poc-groover/server/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

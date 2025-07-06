@@ -1,20 +1,25 @@
 "use client";
 import Link from "next/link";
 import FollowButton from "./FollowButton";
-
-export default function Post({ post, handleClick, userId }) {
+import Image from 'next/image';
+export default function Post({ post, userId }) {
   const isLiked = post.likes.includes(userId);
-  
+
+  const avatarUrl =
+    post.user?.avatar || "/img/default_avatar.png";
+
   return (
     <div className="post">
       <div className="header-post">
-        <img
-          src="https://static.vecteezy.com/ti/vetor-gratis/p1/7319933-black-avatar-person-icons-user-profile-icon-vetor.jpg"
-          height="50px"
-          width="50px"
+        <Image
+          src={avatarUrl}
+          height={50}
+          width={50}
           style={{ borderRadius: "50%" }}
           alt="Avatar"
+          unoptimized={avatarUrl}
         />
+
         <div className="post-info">
           <Link href={`/profile/${post.user?.username}`}>
             <p>{post.user?.username || "Usuário desconhecido"}</p>
@@ -24,7 +29,20 @@ export default function Post({ post, handleClick, userId }) {
         <FollowButton followingId={post.user?.id} userId={userId} />
       </div>
 
-      <p>{post.caption}</p>
+      <h3>{post.caption}</h3>
+
+        {post.photos && post.photos.length > 0 && (
+          <div className="post-images" style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+            {post.photos.map((photoUrl, index) => (
+              <img
+                key={index}
+                src={photoUrl}
+                alt={`Post image ${index + 1}`}
+                style={{ maxWidth: "70%", borderRadius: "8px" }}
+              />
+            ))}
+          </div>
+        )}
 
       <button
         onClick={() => handleClick(post.id)}
@@ -65,13 +83,7 @@ export default function Post({ post, handleClick, userId }) {
         <h2 className="content">{post.likes?.length || 0}</h2>
       </button>
 
-      {post.image && (
-        <img
-          src={post.image}
-          alt="Post"
-          style={{ maxWidth: "300px", borderRadius: "8px" }}
-        />
-      )}
+
     </div>
   );
 }
