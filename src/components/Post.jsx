@@ -2,7 +2,7 @@
 import Link from "next/link";
 import FollowButton from "./FollowButton";
 import Image from 'next/image';
-export default function Post({ post, userId }) {
+export default function Post({ post, userId, handleClick }) {
   const isLiked = post.likes.includes(userId);
 
   const avatarUrl =

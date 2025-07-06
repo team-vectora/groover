@@ -2,7 +2,8 @@
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import Image from 'next/image';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const LoginPage = () => {
     const router = useRouter();
@@ -10,36 +11,36 @@ const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [senha, setSenha] = useState('');
 
+    const notifyError = (msg) => toast.error(msg, {theme: "colored",autoClose: 3000});
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
-        const response = await fetch('http://localhost:5000/api/signin', {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-            username: username,
-            password: senha,
-            }),
-        });
+            const response = await fetch('http://localhost:5000/api/signin', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                username: username,
+                password: senha,
+                }),
+            });
 
-        const data = await response.json();
-        console.log(data);
+            const data = await response.json();
+            console.log(data);
 
-        if (response.ok) {
-            localStorage.setItem('token', data.access_token);
-            localStorage.setItem('username', data.username);
-            localStorage.setItem('id', data.user_id);
-            router.push('/feed');
-        } else {
-            alert(data.error || 'Erro no login');
-        }
+            if (response.ok) {
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('id', data.user_id);
+                router.push('/feed');
+            } else {
+                 notifyError(data.error || 'Erro no login');
+            }
         } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao conectar com a API');
+            console.error('Erro:', error);
+            alert('Erro ao conectar com a API');
         }
     };
 
@@ -59,6 +60,15 @@ const LoginPage = () => {
                     </a>
                 </div>
             </header>
+            <ToastContainer
+                position="top-center"
+                limit={1}
+                toastStyle={{
+                    marginTop: '10vh',
+                    textAlign: 'center',
+                    fontSize: '1.2rem'
+                }}
+            />
 
             <div className="caixa-login">
                 <h2>Entrar</h2>

@@ -2,12 +2,16 @@
 import { useRouter } from 'next/navigation';
 import { useState } from "react";
 import Image from 'next/image';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const LoginPage = () => {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [username, setUsername] = useState('');
+
+    const notifySuccess = (msg) => toast.success(msg, {theme: "colored", autoClose: 3000});
+    const notifyError = (msg) => toast.error(msg, {theme: "colored",autoClose: 3000});
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,9 +33,9 @@ const LoginPage = () => {
             console.log(data);
 
             if (response.ok) {
-                router.push('/login');
+                notifySuccess("Conta criada");
             } else {
-                alert(data.error || 'Erro no cadastro');
+                notifyError(data.error || 'Erro no cadastro');
             }
         } catch (error) {
             console.error('Erro:', error);
@@ -41,6 +45,15 @@ const LoginPage = () => {
 
     return (
         <div id='login_page'>
+            <ToastContainer
+                position="top-center"
+                limit={1}
+                toastStyle={{
+                    marginTop: '2vh',
+                    textAlign: 'center',
+                    fontSize: '1.2rem'
+                }}
+            />
             <header>
                 <div className="logo">
                     <Image src="/img/groover_logo.png" alt="Logo" width={90} height={200} />

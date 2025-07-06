@@ -9,22 +9,33 @@ import Popup from "reactjs-popup";
 import PostFormPopUp from "../../components/PostFormPopUp";
 import ConfigUserPopUp from "../../components/ConfigUserPopUp";
 import Image from "next/image";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Profile() {
   const router = useRouter();
   const { user } = router.query;
 
+    // Talvez tire esse loading e error
   const [loading, setLoading] = useState(true);
-  const [projects, setProjects] = useState([]);
-  const [username, setUsername] = useState("Usuário");
-  const [avatarUrl, setAvatarUrl] = useState("/img/default_avatar.png");
   const [error, setError] = useState(null);
-  const [popUpFork, setPopUpFork] = useState(false);
+
+  const [username, setUsername] = useState("Usuário");
+  const [projects, setProjects] = useState([]);
+  const [avatarUrl, setAvatarUrl] = useState("/img/default_avatar.png");
   const [posts, setPosts] = useState([]);
   const [invites, setInvites] = useState([]);
+
+  const [activeTab, setActiveTab] = useState("posts");
+
+  // popUp
+  const [popUpFork, setPopUpFork] = useState(false);
   const [openPop, setOpenPop] = useState(false);
   const [configPop, setConfigPop] = useState(false);
-  const [activeTab, setActiveTab] = useState("posts");
+
+  // Toasts
+  const notifySuccess = (msg) => toast.success(msg, {theme: "dark", autoClose: 3000});
+  const notifyError = (msg) => toast.error(msg, {theme: "dark",autoClose: 3000});
 
   const fetchUserData = async (username) => {
     const token = localStorage.getItem("token");
@@ -107,9 +118,9 @@ export default function Profile() {
         body: JSON.stringify({ project_id: project.id }),
       });
       if (!response.ok) throw new Error("Erro ao fazer fork");
-      setPopUpFork(true);
+      notifySuccess("Projeto forkado");
     } catch (err) {
-      setError(err.message);
+      notifyError(err.message);
     } finally {
       setLoading(false);
     }
@@ -148,9 +159,7 @@ export default function Profile() {
                   <div className="button-info">
                     <a href={`/editor/${project.id}`} className="button-card-project">Editar</a>
                     <button className="button-card-project" onClick={() => handleClickFork(project)}>Fork</button>
-                    <Popup open={popUpFork} closeOnDocumentClick onClose={() => setPopUpFork(false)}>
-                      <div>Projeto copiado: recarregue a página</div>
-                    </Popup>
+
                   </div>
                 </div>
               ))}
@@ -174,6 +183,15 @@ export default function Profile() {
 
   return (
     <div className="profile-container">
+
+            <ToastContainer
+                position="top-center"
+                toastStyle={{
+
+                    textAlign: 'center',
+                    fontSize: '1.2rem'
+                }}
+            />
       <div className="flex items-center gap-4">
         <Image src={avatarUrl} height={120} width={120} style={{ borderRadius: "50%" }} alt="Avatar" />
         <h1 className="profile-title">Olá, {user}</h1>

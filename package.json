@@ -20,6 +20,7 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.0.0",
     "react-i18next": "^15.5.2",
+    "react-toastify": "^11.0.5",
     "reactjs-popup": "^2.0.6",
     "tone": "^15.1.21"
   },
