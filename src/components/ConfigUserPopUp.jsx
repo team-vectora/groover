@@ -54,37 +54,22 @@ const GENRES = [
   "Experimental",
 ];
 
-const ConfigUserPopUp = ({ open, onClose, username }) => {
-  const [profilePic, setProfilePic] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState("/img/default_avatar.png");
+// Bio bugada
+const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setBio, setProfilePic }) => {
   const [musicTags, setMusicTags] = useState([]);
-  const [bio, setBio] = useState("");
+  const [previewUrl, setPreviewUrl] = useState("/img/default_avatar.png");
 
-  useEffect(() => {
-    if (!username) return;
-
-    const fetchUser = async () => {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(`http://localhost:5000/api/user/${username}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setPreviewUrl(data.avatar || "/img/default_avatar.png");
-        setMusicTags(data.music_tags || []);
-        setBio(data.bio || "");
+    useEffect(() => {
+      if (profilePic instanceof File) {
+        setPreviewUrl(URL.createObjectURL(profilePic));
+      } else if (typeof profilePic === "string" && profilePic !== "") {
+        setPreviewUrl(profilePic);
       } else {
-        console.error("Erro ao buscar usuário:", data.error);
+        setPreviewUrl("/img/default_avatar.png");
       }
-    };
+    }, [profilePic]);
 
-    fetchUser();
-  }, [username]);
+
   const toggleTag = (tag) => {
     if (musicTags.includes(tag)) {
       setMusicTags(musicTags.filter((t) => t !== tag));
@@ -101,7 +86,7 @@ const ConfigUserPopUp = ({ open, onClose, username }) => {
     e.preventDefault();
 
     const token = localStorage.getItem("token");
-    let profilePicUrl = previewUrl;
+    let profilePicUrl = profilePic;
 
     if (profilePic) {
       profilePicUrl = await uploadToCloudinary(profilePic);
@@ -122,19 +107,21 @@ const ConfigUserPopUp = ({ open, onClose, username }) => {
 
     const data = await res.json();
     if (res.ok) {
+      localStorage.setItem("avatar",profilePicUrl);
       alert("Perfil atualizado com sucesso!");
       onClose();
     } else {
       alert(data.error || "Erro ao atualizar");
     }
   };
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setProfilePic(file);
-      setPreviewUrl(URL.createObjectURL(file));
-    }
-  };
+
+    const handleImageChange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        setProfilePic(file);
+        setPreviewUrl(URL.createObjectURL(file));
+      }
+    };
 
   return (
     <Popup
@@ -143,7 +130,7 @@ const ConfigUserPopUp = ({ open, onClose, username }) => {
       onClose={onClose}
       contentStyle={{ background: "transparent", boxShadow: "none", border: "none" }}
     >
-      <div className="modal p-6 rounded-lg shadow-lg bg-[#121113] text-[#e6e8e3] max-w-md mx-auto cursor">
+      <div className="modal w-full max-w-md mx-auto p-4 sm:p-6 rounded-lg shadow-lg bg-[#121113] text-[#e6e8e3]">
         <button
           className="close text-4xl font-bold float-right hover:text-red-600 transition-colors duration-300"
           onClick={onClose}
@@ -157,14 +144,19 @@ const ConfigUserPopUp = ({ open, onClose, username }) => {
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <label>Foto de perfil</label>
+            <div className="flex justify-center items-center">
+                {previewUrl && (
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border border-[#61673e] mb-2 hover:bg-[#c1915d] transition duration-300 ease-in-out cursor-pointer"
+                    />
 
-          {previewUrl && (
-            <img
-              src={previewUrl}
-              alt="Preview"
-              className="w-24 h-24 rounded-full object-cover border border-[#61673e] mb-2"
-            />
-          )}
+                )}
+
+            </div>
+
+
 
           <input
             type="file"

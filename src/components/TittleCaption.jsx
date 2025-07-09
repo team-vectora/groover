@@ -15,8 +15,6 @@ const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSav
     }
   }, []);
 
-
-
   const userData = {
     name: username,
     role: "Produtor Musical",

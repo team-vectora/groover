@@ -1,5 +1,4 @@
-"use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const FollowButton = ({ followingId, userId }) => {
   const [isFollowing, setIsFollowing] = useState(false);
@@ -14,9 +13,7 @@ const FollowButton = ({ followingId, userId }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          following_id: followingId,
-        }),
+        body: JSON.stringify({ following_id: followingId }),
       });
 
       const data = await response.json();
@@ -34,17 +31,11 @@ const FollowButton = ({ followingId, userId }) => {
     }
   };
 
-  return (
-    userId == followingId ? null : (
-      <button
-        onClick={handleClick}
-        className="follow_button"
-      >
-        {isFollowing ? 'Seguindo' : 'Seguir'}
-      </button>
-    )
+  return userId == followingId ? null : (
+    <button onClick={handleClick} className="follow_button">
+      {isFollowing ? 'Seguindo' : 'Seguir'}
+    </button>
   );
-
 };
 
 export default FollowButton;

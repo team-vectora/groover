@@ -52,7 +52,7 @@ class User:
             return {"error": "User not found"}, 404
 
         return {"message": "Perfil updated"}, 200
-
+          
 
 
 class Project:
@@ -376,13 +376,27 @@ class Followers:
     @staticmethod
     def create_follow(follower_id, following_id):
 
-        follow={
+        if follower_id == following_id:
+            raise ValueError("Cant follow itself.")
+
+
+        existing = mongo.db.followers.find_one({
+            "follower_id": ObjectId(follower_id),
+            "following_id": ObjectId(following_id)
+        })
+
+        if existing:
+            pass
+            # unfollow
+
+        follow = {
             "follower_id": follower_id,
             "following_id": following_id,
             "created_at": datetime.now()
         }
-    
+        print(follow)
         return mongo.db.followers.insert_one(follow).inserted_id
+
 
     @staticmethod
     def get_followers(user_id):
@@ -391,4 +405,17 @@ class Followers:
     @staticmethod
     def get_followings(user_id):
         return list(mongo.db.followers.find({"following_id": ObjectId(user_id)}))
-        
+
+    @staticmethod
+    def is_following(follower_id, following_id):
+
+
+        follower_oid = ObjectId(follower_id)
+        following_oid = ObjectId(following_id)
+
+        existing = mongo.db.followers.find_one({
+            "follower_id": follower_oid,
+            "following_id": following_oid
+        })
+
+        return bool(existing)

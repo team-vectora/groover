@@ -31,9 +31,11 @@ const LoginPage = () => {
             console.log(data);
 
             if (response.ok) {
+                // Mudar urgente essa porra ultra inseguro
                 localStorage.setItem('token', data.access_token);
                 localStorage.setItem('username', data.username);
                 localStorage.setItem('id', data.user_id);
+                localStorage.setItem('avatar', data.avatar);
                 router.push('/feed');
             } else {
                  notifyError(data.error || 'Erro no login');

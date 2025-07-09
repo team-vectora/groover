@@ -51,11 +51,14 @@ def signin():
         identity=str(user['_id']), 
         expires_delta=expires
     )
-    
+    followings = Followers.get_followings(user['_id'])
+    print(followings)
+
     return jsonify({
         'access_token': access_token,
         'user_id': str(user['_id']),
-        'username': user['username']
+        'username': user['username'],
+        'avatar': user['avatar']
     }), 200
 
 @auth_bp.route("/user/<username>", methods=["GET"])
@@ -363,7 +366,7 @@ def post_follower():
     data = request.get_json()
 
     following_id = data.get('following_id')
-
+    print(user_id)
     try:
         follow_id = Followers.create_follow(user_id, following_id)
         return jsonify({
@@ -372,7 +375,19 @@ def post_follower():
         }), 201
     except Exception as e:
         return jsonify({"error"}), 500
- 
+
+@auth_bp.route('/follow/<string:following_id>', methods=['GET'])
+@jwt_required()
+def check_follow_status(following_id):
+    user_id = get_jwt_identity()
+
+    try:
+        is_following = Followers.is_following(user_id, following_id)
+        return jsonify({"is_following": is_following})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 @auth_bp.route('/fork', methods=['POST'])
 @jwt_required()
