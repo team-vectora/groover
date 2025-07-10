@@ -187,7 +187,6 @@ export default function Profile() {
 
   return (
     <div className="profile-container">
-    Arrumar post do profile
             <ToastContainer
                 position="top-center"
                 toastStyle={{
@@ -231,7 +230,10 @@ export default function Profile() {
           setProfilePic={setAvatarUrl}
         />
       </div>
+      Arrumar os posts do profile e o config da bio
+      Adicionar tags
       <nav className="tabs-nav">
+
         <button className={activeTab === "posts" ? "tab active" : "tab"} onClick={() => setActiveTab("posts")}>My Posts</button>
         <button className={activeTab === "musics" ? "tab active" : "tab"} onClick={() => setActiveTab("musics")}>My Musics</button>
         <button className={activeTab === "invites" ? "tab active" : "tab"} onClick={() => setActiveTab("invites")}>Invites</button>
