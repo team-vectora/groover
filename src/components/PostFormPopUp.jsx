@@ -100,7 +100,7 @@ const PostFormPopUp = ({ open, onClose }) => {
         {/* Header */}
         <div
           className="flex justify-between items-center px-5 py-4 border-b"
-          style={{ backgroundColor: "#070608", borderColor: "#4c4e30" }} // --bg-darker e --primary
+          style={{ backgroundColor: "#070608", borderColor: "#4c4e30" }}
         >
           <h3 style={{ color: "#c1915d" }} className="text-lg font-semibold">
             Criar Nova Publicação
@@ -109,8 +109,8 @@ const PostFormPopUp = ({ open, onClose }) => {
             onClick={onClose}
             disabled={isSubmitting}
             className="text-2xl transition-colors"
-            style={{ color: "#e6e8e3" }} // --foreground
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#a97f52")} // --accent
+            style={{ color: "#e6e8e3" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#a97f52")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "#e6e8e3")}
             aria-label="Fechar"
           >
@@ -210,11 +210,11 @@ const PostFormPopUp = ({ open, onClose }) => {
               htmlFor="file-upload"
               className="inline-block px-4 py-2 rounded-md cursor-pointer select-none transition-colors"
               style={{
-                backgroundColor: "#4c4e30", // --primary
-                color: "#ffffff", // --text-lighter
+                backgroundColor: "#4c4e30",
+                color: "#ffffff",
               }}
               onMouseEnter={(e) =>
-                ((e.currentTarget.style.backgroundColor = "#61673e")) // --primary-light
+                ((e.currentTarget.style.backgroundColor = "#61673e"))
               }
               onMouseLeave={(e) =>
                 ((e.currentTarget.style.backgroundColor = "#4c4e30"))
@@ -239,8 +239,8 @@ const PostFormPopUp = ({ open, onClose }) => {
             disabled={isSubmitting || (!caption && images.length === 0)}
             className="w-full py-3 rounded-md font-semibold transition-colors flex justify-center items-center"
             style={{
-              backgroundColor: isSubmitting ? "#c1915d" : "#a97f52", // --accent-light ou --accent
-              color: "#0a090d", // --background (texto escuro)
+              backgroundColor: isSubmitting ? "#c1915d" : "#a97f52",
+              color: "#0a090d",
               cursor: isSubmitting ? "not-allowed" : "pointer",
             }}
           >

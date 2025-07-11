@@ -327,6 +327,33 @@ def get_posts():
 
     return jsonify(serialized), 200
 
+@auth_bp.route('/post/<id>', methods=['GET'])
+@jwt_required()
+def get_post(id):
+
+    post = Post.get_post(id)
+    serialized = []
+
+    user = User.get_user(post.get('user_id'))
+
+    user_data = {
+        'id': str(user['_id']),
+        'username': user.get('username'),
+        'avatar': user.get('avatar')
+    } if user else None
+
+    serialized.append({
+        'id': str(post.get('_id', '')),
+        'user': user_data,
+        'caption': post.get('caption', ''),
+        'photos': post.get('photos', []),
+        'created_at': post.get('created_at'),
+        'likes': post.get('likes', []),
+        'comments': post.get('comments', []),
+    })
+
+    return jsonify(serialized), 200
+
 @auth_bp.route('/post/<username>', methods=['GET'])
 @jwt_required()
 def get_posts_user(username):

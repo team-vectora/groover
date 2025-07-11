@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { useRouter } from "next/router";
 import Post from "../components/Post";
 import FeedCaption from "../components/FeedCaption";
+import useLikePost from "../hooks/useLikePost";
+
 function Feed() {
   const router = useRouter();
 
@@ -11,10 +13,11 @@ function Feed() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
+  const { likePost, error: likeError } = useLikePost(token, () => fetchPosts(token));
+
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
-    console.log(token)
     if (storedToken == null) {
       router.push("/login");
     } else {
@@ -53,40 +56,6 @@ function Feed() {
     }
   };
 
-  const handleLike = async (post_id) => {
-    try {
-      const res = await fetch("http://localhost:5000/api/post/like", {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ post_id }),
-      });
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          setError("Token inválido ou expirado. Faça login novamente.");
-          setToken("");
-          return;
-        }
-        const text = await res.text();
-        setError(`Erro na API: ${res.status} - ${text}`);
-        return;
-      }
-
-      const data = await res.json();
-      console.log(data.message);
-
-      fetchPosts(token);  
-
-    } catch (err) {
-      setError("Erro na comunicação com a API.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
   const handleLogin = () => {
     if (inputToken.trim()) {
       setToken(inputToken.trim());
@@ -94,34 +63,21 @@ function Feed() {
     }
   };
 
-  if (!token) {
-    return (
-      <div style={{ padding: 20 }}>
-        <h2>Informe seu Token JWT para continuar</h2>
-        <input
-          type="text"
-          value={inputToken}
-          onChange={(e) => setInputToken(e.target.value)}
-          style={{ width: "300px", padding: "8px" }}
-        />
-        <button onClick={handleLogin} style={{ marginLeft: 10, padding: "8px" }}>
-          Entrar
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div >
-      <FeedCaption></FeedCaption>
+    <div>
+      <FeedCaption />
       {loading && <p>Carregando posts...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
+      {(error || likeError) && <p style={{ color: "red" }}>{error || likeError}</p>}
       {!loading && !error && posts.length === 0 && <p>Nenhum post encontrado.</p>}
 
       <div className="post-container">
         {posts.map((post) => (
-          <Post userId={localStorage.getItem("id")} post={post} handleClick={handleLike}></Post>
+          <Post
+            key={post._id}
+            userId={localStorage.getItem("id")}
+            post={post}
+            handleClick={() => likePost(post.id)}
+          />
         ))}
       </div>
     </div>

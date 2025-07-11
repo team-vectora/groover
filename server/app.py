@@ -6,9 +6,11 @@ from routes.routes import auth_bp
 from utils.config import Config
 import os
 import cloudinary
+from flasgger import Swagger
 
 def create_app():
     app = Flask(__name__)
+    swagger = Swagger(app)
     app.config.from_object(Config)
     
     # Configurações
