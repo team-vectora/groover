@@ -54,7 +54,7 @@ const GENRES = [
   "Experimental",
 ];
 
-// Bio bugada
+
 const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setBio, setProfilePic }) => {
   const [musicTags, setMusicTags] = useState([]);
   const [previewUrl, setPreviewUrl] = useState("/img/default_avatar.png");
@@ -101,7 +101,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setBio, set
       body: JSON.stringify({
         avatar: profilePicUrl,
         music_tags: musicTags,
-        bio,
+        bio:bio,
       }),
     });
 

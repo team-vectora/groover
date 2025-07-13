@@ -49,7 +49,7 @@ const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSav
             ↓ {t("import")}
             <input
               type="file"
-              accept="application/json"
+              accept="application/midi"
               onChange={(e) => {
                 const file = e.target.files[0];
                 if (file) onImport(file);

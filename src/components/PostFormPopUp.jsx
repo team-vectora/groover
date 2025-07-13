@@ -5,13 +5,13 @@ import "reactjs-popup/dist/index.css";
 import { useState, useRef } from "react";
 import { uploadToCloudinary } from "../util/upload.jsx";
 
-const PostFormPopUp = ({ open, onClose }) => {
+const PostFormPopUp = ({ open, onClose, projects }) => {
   const [caption, setCaption] = useState("");
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);
   const fileInputRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [selectedProject, setSelectedProject] = useState("");
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -233,7 +233,34 @@ const PostFormPopUp = ({ open, onClose }) => {
             />
           </div>
 
-          {/* Submit Button */}
+          <div className="mb-5">
+            <label
+              htmlFor="project-select"
+              className="block mb-2 text-sm font-medium"
+              style={{ color: "#e6e8e3" }}
+            >
+              Projeto (opcional)
+            </label>
+            <select
+              id="project-select"
+              value={selectedProject}
+              onChange={(e) => setSelectedProject(e.target.value)}
+              className="w-full p-3 rounded-md font-sans focus:outline-none"
+              style={{
+                backgroundColor: "#070608", // --bg-darker
+                borderColor: "#4c4e30", // --primary
+                color: "#e6e8e3", // --foreground
+              }}
+            >
+              <option value="">Nenhum projeto</option>
+              {projects.map((proj) => (
+                <option key={proj._id} value={proj._id}>
+                  {proj.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <button
             type="submit"
             disabled={isSubmitting || (!caption && images.length === 0)}

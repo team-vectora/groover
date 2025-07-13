@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -36,9 +37,9 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Text content with modern typography */}
+
           <div className="text-content">
-            <div className="badge">NOVA PLATAFORMA</div>
+
             <h1>
               <span className="gradient-text">Groover</span> revoluciona
               <br />a criação musical
@@ -51,32 +52,40 @@ export default function Home() {
             </p>
 
             <div className="features-grid">
-              <div className="feature-card">
-                <div className="feature-icon">🎛️</div>
-                <h3>Estúdio Inteligente</h3>
-                <p>IA que auxilia na composição e mixagem</p>
-              </div>
+                <div className="feature-card">
+                  <div className="feature-icon">🎼</div>
+                  <h3>Editor MIDI Visual</h3>
+                  <p>Edite notas, velocidades e instrumentos em uma interface intuitiva</p>
+                </div>
               <div className="feature-card">
                 <div className="feature-icon">🌎</div>
                 <h3>Colaboração Global</h3>
                 <p>Conecte-se com artistas worldwide</p>
               </div>
-              <div className="feature-card">
-                <div className="feature-icon">⚡</div>
-                <h3>Performance</h3>
-                <p>Processamento em tempo real sem latência</p>
-              </div>
+                <div className="feature-card">
+                  <div className="feature-icon">🔗</div>
+                  <h3>Compartilhamento Fácil</h3>
+                  <p>Gere links para enviar seus projetos a colegas rapidamente</p>
+                </div>
+
               <div className="feature-card">
                 <div className="feature-icon">📱</div>
                 <h3>Multiplataforma</h3>
-                <p>Use em qualquer dispositivo</p>
+                <p>Use em dispositvos moveis e PCs</p>
               </div>
             </div>
 
-            <button className="cta-button">
-              Comece agora gratuitamente
-              <span className="arrow">→</span>
-            </button>
+    <div className="flex justify-center items-center gap-4">
+      <Link href="/login" className="cta-button">
+        Login
+        <span className="arrow">→</span>
+      </Link>
+      <Link href="/logon" className="cta-button">
+        Logon
+        <span className="arrow">→</span>
+      </Link>
+    </div>
+
           </div>
         </div>
       </div>
@@ -272,7 +281,7 @@ export default function Home() {
           color: rgba(230, 232, 227, 0.7);
         }
 
-        .cta-button {
+        a.cta-button {
           background: linear-gradient(45deg, var(--accent), var(--accent-light));
           color: var(--bg-darker);
           border: none;
@@ -284,9 +293,11 @@ export default function Home() {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          width: fit-content;
+          width: 50%;
           transition: all 0.3s ease;
           margin-top: 1rem;
+          margin: 0.1rem
+          text-decoration: none;
         }
 
         .cta-button:hover {

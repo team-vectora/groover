@@ -1,15 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+
 import { useRouter } from "next/router";
 import Link from "next/link";
+import Image from "next/image";
+
 import Post from "../../components/Post";
-import Popup from "reactjs-popup";
 import PostFormPopUp from "../../components/PostFormPopUp";
 import ConfigUserPopUp from "../../components/ConfigUserPopUp";
-import Image from "next/image";
-import { ToastContainer, toast } from 'react-toastify';
+import ProjectCard from "../../components/ProjectCard";
+
+import { MidiContext } from "../../contexts/MidiContext";
+
+import Popup from "reactjs-popup";
 import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
+
+
 
 export default function Profile() {
   const router = useRouter();
@@ -27,6 +35,8 @@ export default function Profile() {
   const [invites, setInvites] = useState([]);
 
   const [activeTab, setActiveTab] = useState("posts");
+
+  const { currentProject,setCurrentProject } = useContext(MidiContext);
 
   // popUp
   const [popUpFork, setPopUpFork] = useState(false);
@@ -78,26 +88,27 @@ export default function Profile() {
     fetchUserData(user);
   }, [router, user]);
 
-  const fetchUserProjects = async (token, user) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/projects/user/${user}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error("Erro ao carregar projetos");
-      const data = await response.json();
-      setProjects(data);
-    } catch (err) {
-      console.error("Erro:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchUserProjects = async (token, user) => {
+  try {
+    const response = await fetch(`http://localhost:5000/api/projects/user/${user}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error("Erro ao carregar projetos");
+    const data = await response.json();
+
+    setProjects(data);
+  } catch (err) {
+    console.error("Erro:", err);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchPosts = async (token) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/post/${user}`, {
+      const res = await fetch(`http://localhost:5000/api/post/username/${user}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Erro ao carregar posts");
@@ -138,7 +149,7 @@ export default function Profile() {
         return (
           <>
             <button className="new_project" onClick={() => setOpenPop(true)}>Novo Post</button>
-            <PostFormPopUp open={openPop} onClose={() => setOpenPop(false)} user={user} />
+            <PostFormPopUp open={openPop} onClose={() => setOpenPop(false)} user={user} projects={projects}/>
             {posts.length === 0 ? (
               <p className="empty-text">Você não tem posts ainda.</p>
             ) : (
@@ -152,20 +163,7 @@ export default function Profile() {
             <button className="new_project" onClick={handleNewProject}>Novo Projeto</button>
             <div className="projects-grid">
               {projects.map((project) => (
-                <div key={project.id} className="project-card">
-                  <h2>{project.title || "Sem título"}</h2>
-                  <p>{project.description || "Sem descrição"}</p>
-                  <div className="project-info">
-                    <span>BPM: {project.bpm || "--"}</span>
-                    <span>{new Date(project.created_at).toLocaleDateString()}</span>
-                  </div>
-                  {!project.is_owner && <div className="collab-badge">Colaborador</div>}
-                  <div className="button-info">
-                    <a href={`/editor/${project.id}`} className="button-card-project">Editar</a>
-                    <button className="button-card-project" onClick={() => handleClickFork(project)}>Fork</button>
-
-                  </div>
-                </div>
+                <ProjectCard project={project} setCurrentProject={setCurrentProject} handleClickFork={handleClickFork}/>
               ))}
             </div>
           </>
@@ -196,7 +194,15 @@ export default function Profile() {
                 }}
             />
       <div className="flex items-center gap-4">
-        <Image src={avatarUrl} height={120} width={120} style={{ borderRadius: "50%", maxWidth:"120px" , maxHeight:"120px" }} alt="Avatar" />
+        <Image
+          className="w-30 h-30 sm:w-30 sm:h-30 rounded-full object-cover border border-[#61673e] mb-2 hover:bg-[#c1915d] transition duration-300 ease-in-out cursor-pointer"
+          src={avatarUrl}
+          height={120}
+          width={120}
+          alt="Avatar"
+
+        />
+
         <h1 className="profile-title">Olá, {user}</h1>
         {username === user&& (
           <button
@@ -239,6 +245,7 @@ export default function Profile() {
         <button className={activeTab === "invites" ? "tab active" : "tab"} onClick={() => setActiveTab("invites")}>Invites</button>
       </nav>
       <section className="tab-content">{renderTabContent()}</section>
+
     </div>
   );
 }

@@ -477,8 +477,7 @@ function EditorPage() {
     return musicData;
   }
 
-  const handleSave = async (e) => {
-
+  const handleSave = async () => {
     if (!tokenJWT) {
       alert("Você precisa estar logado para salvar projetos");
       return;
@@ -487,6 +486,10 @@ function EditorPage() {
     const projectData = toJson();
     if (projectId) projectData.id = projectId;
 
+    const midiFile = midiBlob();
+    const midiBase64 = await blobToBase64(midiFile);
+    projectData.midi = midiBase64;
+    console.log(projectData.midi)
     try {
       const response = await fetch('http://localhost:5000/api/projects', {
         method: 'POST',
@@ -499,44 +502,78 @@ function EditorPage() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        // Trata erros específicos da API
-        if (response.status === 401) {
-          alert("Sessão expirada. Por favor, faça login novamente.");
-          // Redirecionar para login
-          return;
-        }
-        throw new Error(data.error || "Erro desconhecido ao salvar");
-      }
-
-      // Sucesso - trata diferentes respostas da API
-      if (data.id) {
-        alert(`Projeto ${data.message.includes('updated') ? 'atualizado' : 'salvo'} com sucesso!`);
-        // Atualiza o estado com o ID se for uma nova criação
-        if (!projectId && data.id) {
-          setProjectId(data.id);
-        }
-      } else {
-        alert("Operação realizada, mas sem ID de retorno");
-      }
-
     } catch (error) {
       console.error('Erro:', error);
       alert(error.message || 'Erro ao conectar com a API');
     }
   };
 
-  const exportToMIDI = () => {
 
-    const blob = new Blob([JSON.stringify(toJson())], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
+const midiBlob = () => {
+  const midi = new Midi();
+  const track = midi.addTrack();
+  midi.header.setTempo(bpm);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "music.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  let currentTime = 0;
+
+  pages.forEach(page => {
+    page.forEach((col, colIndex) => {
+      const colDuration = Tone.Time("4n").toSeconds();
+      const subNotesCount = Math.max(...col.map(note => note?.subNotes?.length || 1));
+      const subDuration = colDuration / subNotesCount;
+
+      col.forEach((noteRow, rowIndex) => {
+        const noteName = notes[rowIndex];
+
+        if (noteRow.subNotes && noteRow.subNotes.length > 0) {
+          noteRow.subNotes.forEach((subNote, subIndex) => {
+            const startTime = currentTime + (subIndex * subDuration);
+
+            if (subNote.name) {
+              try {
+                track.addNote({
+                  name: subNote.name,
+                  time: startTime,
+                  duration: subDuration
+                });
+              } catch (error) {
+                console.error(`Erro ao adicionar nota MIDI ${subNote.name}:`, error);
+              }
+            }
+          });
+        }
+      });
+
+      currentTime += colDuration;
+    });
+  });
+
+  const midiBytes = midi.toArray();
+  const blob = new Blob([midiBytes], { type: 'audio/midi' });
+
+  return blob;
+};
+
+const blobToBase64 = (blob) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
+
+const exportToMIDI = () => {
+  const blob = midiBlob();
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'music.mid';
+  a.click();
+  URL.revokeObjectURL(url);
+};
 
   useEffect(() => {
     if (!router.isReady) return;

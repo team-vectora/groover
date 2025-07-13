@@ -46,7 +46,7 @@ const FeedCaption = () => {
         src={avatarUrl}
         height={60}
         width={60}
-        className="rounded-full max-w-[60px] max-h-[60px]"
+        className="w-13 h-13 sm:w-13 sm:h-13 rounded-full object-cover border border-[#61673e] mb-2 hover:bg-[#c1915d] transition duration-300 ease-in-out cursor-pointer"
         alt="Avatar"
         unoptimized={true}
       />
