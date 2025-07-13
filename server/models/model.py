@@ -2,7 +2,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 from utils.db import mongo
 from utils.genres import GENRES
-
+from bson import Binary
 class User:
     @staticmethod
     def create(username, password_hash, email=None):
@@ -60,6 +60,7 @@ class Project:
     def create_project(user_id, project_data):
         project = {
             'user_id': user_id,
+            'midi': Binary(project_data.get('midi')) if project_data.get('midi') else None,
             'collaborators': [],  # Nova lista de colaboradores
             'title': project_data.get('title', 'New Project'),
             'description': project_data.get('description', ''),
@@ -172,6 +173,7 @@ class Project:
         
         return [{
             'id': str(p['_id']),
+            'midi': p.get('midi'),
             'title': p.get('title', 'Sem título'),
             'bpm': p.get('bpm', 0),
             'tempo': p.get('tempo', ''),
@@ -309,7 +311,7 @@ class Invitation:
 
 class Post:
     @staticmethod
-    def create(user_id, photos=None, caption=None):
+    def create(user_id, project_id=None, photos=None, caption=None):
         genres_dict = {genre: 0 for genre in GENRES}
         
         post = {
@@ -318,7 +320,8 @@ class Post:
             'caption': caption if caption else "",
             'created_at': datetime.now(),
             'likes': [],  
-            'comments': [],  
+            'comments': [],
+            'project_id': ObjectId(project_id),
             'genres': genres_dict  
         }
         

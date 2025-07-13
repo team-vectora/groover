@@ -1,3 +1,5 @@
+import base64
+
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import (
     jwt_required, 
@@ -70,11 +72,7 @@ def get_user_by_username(username):
     user["_id"] = str(user["_id"])
     return jsonify(user), 200
 
-@auth_bp.route('/projects/user/<username>', methods=['GET'])
-@jwt_required()
-def list_projects_by_username(username):
-    projects = Project.get_user_projects_by_username(username)
-    return jsonify(projects), 200
+
 
 @auth_bp.route('/config', methods=['PUT'])
 @jwt_required()
@@ -107,13 +105,16 @@ def save_project():
     if not data:
         return jsonify({'error': 'No data provided'}), 400
 
+    midi_base64 = data.get('midi')
+    midi_binary = base64.b64decode(midi_base64) if midi_base64 else None
+    print(midi_binary)
     project_data = {
         'title': data.get('title', 'New Project'),
+        'midi': midi_binary,
         'description': data.get('description', ''),
         'bpm': data.get('bpm', 120),
         'instrument': data.get('instrument', 'piano'),
-        'volume': data.get('volume', -10),
-        'description': data.get('description')
+        'volume': data.get('volume', -10)
     }
 
     if 'id' in data:
@@ -146,10 +147,35 @@ def save_project():
 def get_project(project_id):
     user_id = get_jwt_identity()
     project = Project.get_project_full_data(project_id, user_id)
-    
+
     if project:
+        midi_b64 = base64.b64encode(project['midi']).decode('utf-8') if project.get('midi') else None
+        project['midi'] = f"data:audio/midi;base64,{midi_b64}" if midi_b64 else None
+        print(project['midi'])
         return jsonify(project), 200
+
     return jsonify({'error': 'Project not found'}), 404
+
+@auth_bp.route('/projects/user/<username>', methods=['GET'])
+@jwt_required()
+def list_projects_by_username(username):
+    projects = Project.get_user_projects_by_username(username)
+
+    if not projects:
+        return jsonify([]), 200
+
+    for project in projects:
+        midi_bytes = project.get('midi')
+        if midi_bytes:
+            midi_b64 = base64.b64encode(midi_bytes).decode('utf-8') if project.get('midi') else None
+            project['midi'] = f"data:audio/midi;base64,{midi_b64}"
+
+        print("oi")
+        print( project.get('midi'))
+
+
+    return jsonify(projects), 200
+
 
 @auth_bp.route('/projects/<project_id>/revert', methods=['POST'])
 @jwt_required()
@@ -274,10 +300,12 @@ def create_post():
 
     caption = data.get('caption', "")
     photos = data.get('photos', [])
+    project_id = data.get('photos', None)
 
 
     post_id = Post.create(
         user_id=user_id,
+        project_id=project_id,
         photos=photos,
         caption=caption,
     )
@@ -287,10 +315,10 @@ def create_post():
 @auth_bp.route('/upload-image', methods=['POST'])
 @jwt_required()
 def upload_image():
-    if 'image' not in request.files:
+    if 'file' not in request.files:
         return jsonify({'error': 'File not found'}), 400
 
-    image_file = request.files['image']
+    image_file = request.files['file']
 
     try:
         result = cloudinary.uploader.upload(image_file)
@@ -354,7 +382,7 @@ def get_post(id):
 
     return jsonify(serialized), 200
 
-@auth_bp.route('/post/<username>', methods=['GET'])
+@auth_bp.route('/post/username/<username>', methods=['GET'])
 @jwt_required()
 def get_posts_user(username):
     posts = Post.get_posts_by_username(username)
@@ -440,6 +468,7 @@ def fork_project():
         user_id,
         {
             'title': project.get('title', '') + ' (Fork)',
+            'midi': project.get('midi', ''),
             'description': project.get('description', ''),
             'bpm': project.get('bpm', 120),
             'instrument': project.get('instrument', 'piano'),
