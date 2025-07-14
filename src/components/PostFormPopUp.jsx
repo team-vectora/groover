@@ -25,7 +25,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
           images.map((file) => uploadToCloudinary(file))
         );
       }
-
+        console.log(selectedProject)
       const response = await fetch("http://localhost:5000/api/post", {
         method: "POST",
         headers: {
@@ -35,6 +35,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
         body: JSON.stringify({
           caption,
           photos: photoUrls,
+          project_id: selectedProject,
         }),
       });
 
@@ -95,9 +96,9 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
     >
       <div
         className="rounded-xl overflow-hidden shadow-lg w-full max-w-md mx-auto"
-        style={{ backgroundColor: "#121113" }} // --bg-secondary
+        style={{ backgroundColor: "#121113" }}
       >
-        {/* Header */}
+
         <div
           className="flex justify-between items-center px-5 py-4 border-b"
           style={{ backgroundColor: "#070608", borderColor: "#4c4e30" }}
@@ -118,7 +119,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
           </button>
         </div>
 
-        {/* Form */}
+        {selectedProject}
         <form onSubmit={handleSubmit} className="p-5">
           <div className="mb-5">
             <textarea
@@ -129,22 +130,21 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
               maxLength={500}
               className="w-full p-3 rounded-md resize-none font-sans focus:outline-none"
               style={{
-                backgroundColor: "#070608", // --bg-darker
-                borderColor: "#4c4e30", // --primary
-                color: "#e6e8e3", // --foreground
+                backgroundColor: "#070608",
+                borderColor: "#4c4e30",
+                color: "#e6e8e3",
               }}
-              onFocus={(e) => (e.target.style.borderColor = "#a97f52")} // --accent
-              onBlur={(e) => (e.target.style.borderColor = "#4c4e30")} // --primary
+              onFocus={(e) => (e.target.style.borderColor = "#a97f52")}
+              onBlur={(e) => (e.target.style.borderColor = "#4c4e30")}
             />
             <div
               className="text-right text-xs select-none"
-              style={{ color: "#61673e", marginTop: "4px" }} // --primary-light
+              style={{ color: "#61673e", marginTop: "4px" }}
             >
               {caption.length}/500
             </div>
           </div>
 
-          {/* Images Preview or Empty State */}
           <div className="mb-5">
             {previews.length > 0 ? (
               <div className="grid grid-cols-3 gap-3 mb-4">
@@ -153,7 +153,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
                     key={index}
                     className="relative rounded-md overflow-hidden aspect-square"
                     style={{
-                      border: "1px solid #4c4e30", // --primary
+                      border: "1px solid #4c4e30",
                     }}
                   >
                     <img
@@ -184,7 +184,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
             ) : (
               <div
                 className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-md mb-4 text-center"
-                style={{ borderColor: "#4c4e30", color: "#61673e" }} // --primary e --primary-light
+                style={{ borderColor: "#4c4e30", color: "#61673e" }}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -192,7 +192,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   className="w-12 h-12 mb-3"
-                  style={{ color: "#4c4e30" }} // --primary
+                  style={{ color: "#4c4e30" }}
                 >
                   <path
                     strokeLinecap="round"
@@ -205,7 +205,6 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
               </div>
             )}
 
-            {/* Upload Button */}
             <label
               htmlFor="file-upload"
               className="inline-block px-4 py-2 rounded-md cursor-pointer select-none transition-colors"
@@ -247,14 +246,14 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
               onChange={(e) => setSelectedProject(e.target.value)}
               className="w-full p-3 rounded-md font-sans focus:outline-none"
               style={{
-                backgroundColor: "#070608", // --bg-darker
-                borderColor: "#4c4e30", // --primary
-                color: "#e6e8e3", // --foreground
+                backgroundColor: "#070608",
+                borderColor: "#4c4e30",
+                color: "#e6e8e3",
               }}
             >
               <option value="">Nenhum projeto</option>
               {projects.map((proj) => (
-                <option key={proj._id} value={proj._id}>
+                <option key={proj.id} value={proj.id}>
                   {proj.title}
                 </option>
               ))}

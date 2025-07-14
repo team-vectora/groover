@@ -14,7 +14,7 @@ export default function MyApp({ Component, pageProps }) {
   const [showPlayer, setShowPlayer] = useState(false);
 
   useEffect(() => {
-    const hidePlayerRoutes = ["/login", "/logon", "/editor"];
+    const hidePlayerRoutes = ["/login", "/logon", "/editor/*", "/"];
     setShowPlayer(!hidePlayerRoutes.includes(router.pathname));
   }, [router.pathname]);
 

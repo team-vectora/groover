@@ -120,7 +120,7 @@ class Project:
             project['created_by'] = str(project.get('created_by', ''))
             project['last_updated_by'] = str(project.get('last_updated_by', ''))
         return project
-    
+
     @staticmethod
     def get_project_full_data(project_id, user_id):
         project = mongo.db.projects.find_one({
@@ -138,7 +138,7 @@ class Project:
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
         return project
-    
+
     @staticmethod
     def get_project_full_data_without_user_id(project_id):
         project = mongo.db.projects.find_one({
@@ -313,18 +313,18 @@ class Post:
     @staticmethod
     def create(user_id, project_id=None, photos=None, caption=None):
         genres_dict = {genre: 0 for genre in GENRES}
-        
+
         post = {
             'user_id': ObjectId(user_id),
             'photos': photos if photos else [],
             'caption': caption if caption else "",
             'created_at': datetime.now(),
-            'likes': [],  
+            'likes': [],
             'comments': [],
-            'project_id': ObjectId(project_id),
-            'genres': genres_dict  
+            'project_id': ObjectId(project_id) if ObjectId(project_id) else None,
+            'genres': genres_dict
         }
-        
+
         return mongo.db.posts.insert_one(post).inserted_id
     
     @staticmethod

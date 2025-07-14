@@ -81,7 +81,7 @@ function Feed() {
             userId={localStorage.getItem("id")}
             post={post}
             handleClick={() => likePost(post.id)}
-            setCurrentProject={setCurrentProject()}
+            setCurrentProject={setCurrentProject}
           />
         ))}
       </div>

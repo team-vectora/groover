@@ -6,7 +6,7 @@
     import Image from 'next/image';
 
     import FollowButton from "./FollowButton";
-
+    import ProjectCard from "./ProjectCard";
 
     export default function Post({ post, userId, handleClick, setCurrentProject }) {
       const isLiked = post.likes.includes(userId);
@@ -212,8 +212,9 @@
               )}
             </div>
           )}
-        {post?.midi &&(
-            <ProjectCard project={project} setCurrentProject={setCurrentProject} />
+
+        {post?.project &&(
+            <ProjectCard project={post.project} setCurrentProject={setCurrentProject} />
         )}
         <div className="flex justify-center mt-10">
               <button
