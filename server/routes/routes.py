@@ -330,65 +330,13 @@ def upload_image():
 @auth_bp.route('/post', methods=['GET'])
 @jwt_required()
 def get_posts():
-    posts = Post.get_posts()
-
-    serialized = []
-    for post in posts:
-        user = User.get_user(post.get('user_id'))
-        project = Project.get_project_full_data_without_user_id(post.get('project_id'))
-        print("LEPOOOO")
-        print(project)
-
-        if project:
-            # Converte o campo midi em base64, se existir
-            midi_b64 = base64.b64encode(project['midi']).decode('utf-8') if project.get('midi') else None
-            midi_data_url = f"data:audio/midi;base64,{midi_b64}" if midi_b64 else None
-        else:
-            midi_data_url = None
-
-        project_data = {
-            'user_id': project.get('user_id') if project else None,
-            'midi': midi_data_url,
-            'collaborators': project.get('collaborators', []) if project else [],
-            'title': project.get('title', 'New Project') if project else 'New Project',
-            'description': project.get('description', '') if project else '',
-            'bpm': project.get('bpm') if project else None,
-            'instrument': project.get('instrument', 'piano') if project else 'piano',
-            'volume': project.get('volume', -10) if project else -10,
-            'tempo': project.get('tempo') if project else None,
-            'music_versions': project.get('music_versions', []) if project else [],
-            'created_at': project.get('created_at') if project else None,
-            'created_by': project.get('created_by') if project else None,
-            'updated_at': project.get('updated_at') if project else None,
-            'last_updated_by': project.get('last_updated_by') if project else None
-        } if project else None
-
-        user_data = {
-            'id': str(user['_id']),
-            'username': user.get('username'),
-            'email': user.get('email'),
-            'avatar': user.get('avatar')
-        } if user else None
-
-        serialized.append({
-            'id': str(post.get('_id', '')),
-            'user': user_data,
-            'caption': post.get('caption', ''),
-            'photos': post.get('photos', []),
-            'created_at': post.get('created_at'),
-            'likes': post.get('likes', []),
-            'comments': post.get('comments', []),
-            'project': project_data,
-        })
-    print("POST SERIALIZED:", serialized)
-
-    return jsonify(serialized), 200
-
+    posts = Post.get_posts_with_user_and_project()
+    return jsonify(posts), 200
 
 
 @auth_bp.route('/post/<id>', methods=['GET'])
 @jwt_required()
-def get_post(id):
+def get_post_by_id(id):
 
     post = Post.get_post(id)
     serialized = []
@@ -418,17 +366,7 @@ def get_post(id):
 def get_posts_user(username):
     posts = Post.get_posts_by_username(username)
 
-    serialized = [{
-        'id': str(post.get('_id', '')),
-        'user': str(post.get('user_id')),  
-        'caption': post.get('caption', ''),
-        'photos': post.get('photos', []),
-        'created_at': post.get('created_at'),
-        'likes': post.get('likes', []),
-        'comments': post.get('comments', []),
-    } for post in posts]
-
-    return jsonify(serialized), 200
+    return jsonify(posts), 200
 
 @auth_bp.route('/post/like', methods=['POST'])
 @jwt_required()

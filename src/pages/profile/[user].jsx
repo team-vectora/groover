@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState, useContext } from "react";
-
 import { useRouter } from "next/router";
-import Link from "next/link";
 import Image from "next/image";
 
 import Post from "../../components/Post";
@@ -11,19 +9,18 @@ import PostFormPopUp from "../../components/PostFormPopUp";
 import ConfigUserPopUp from "../../components/ConfigUserPopUp";
 import ProjectCard from "../../components/ProjectCard";
 
+import useLikePost from "../../hooks/useLikePost";
+import useForkProject from "../../hooks/useForkProject";
+
 import { MidiContext } from "../../contexts/MidiContext";
 
-import Popup from "reactjs-popup";
 import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer, toast } from 'react-toastify';
-
-
+import { ToastContainer } from 'react-toastify';
 
 export default function Profile() {
   const router = useRouter();
   const { user } = router.query;
 
-    // Talvez tire esse loading e error
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -33,22 +30,22 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState("/img/default_avatar.png");
   const [posts, setPosts] = useState([]);
   const [invites, setInvites] = useState([]);
+  const [genres, setGenres] = useState([]);
+  const [id, setId] = useState(null);
 
   const [activeTab, setActiveTab] = useState("posts");
 
-  const { currentProject,setCurrentProject } = useContext(MidiContext);
+  const { currentProject, setCurrentProject } = useContext(MidiContext);
 
-  // popUp
-  const [popUpFork, setPopUpFork] = useState(false);
   const [openPop, setOpenPop] = useState(false);
   const [configPop, setConfigPop] = useState(false);
 
-  // Toasts
-  const notifySuccess = (msg) => toast.success(msg, {theme: "dark", autoClose: 3000});
-  const notifyError = (msg) => toast.error(msg, {theme: "dark",autoClose: 3000});
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
+
+  const { likePost, error: likeError } = useLikePost(token, () => fetchPosts(token));
+  const { forkProject, loading: forkLoading } = useForkProject(token);
 
   const fetchUserData = async (username) => {
-    const token = localStorage.getItem("token");
     if (!username || !token) return;
 
     try {
@@ -62,9 +59,8 @@ export default function Profile() {
       }
 
       const data = await res.json();
-      if (data.avatar){
-          setAvatarUrl(data.avatar);
-      }
+      if (data.avatar) setAvatarUrl(data.avatar);
+      if (data.bio) setBio(data.bio);
     } catch (err) {
       console.error("Erro:", err);
     }
@@ -72,39 +68,44 @@ export default function Profile() {
 
   useEffect(() => {
     if (!user) return;
-    const token = localStorage.getItem("token");
+
     const storedUsername = localStorage.getItem("username");
+    const storedId = localStorage.getItem("id");
 
     if (!token) {
       router.push("/login");
       return;
     }
+
     if (storedUsername) {
-        setUsername(storedUsername)
-    };
+      setUsername(storedUsername);
+      setId(storedId);
+    }
 
     fetchUserProjects(token, user);
     fetchPosts(token);
     fetchUserData(user);
   }, [router, user]);
 
-const fetchUserProjects = async (token, user) => {
-  try {
-    const response = await fetch(`http://localhost:5000/api/projects/user/${user}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!response.ok) throw new Error("Erro ao carregar projetos");
-    const data = await response.json();
 
-    setProjects(data);
-  } catch (err) {
-    console.error("Erro:", err);
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+  const fetchUserProjects = async (token, user) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/projects/user/${user}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Erro ao carregar projetos");
+      const data = await response.json();
+      setProjects(data);
 
+    } catch (err) {
+      console.error("Erro:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Buscar posts do usuário
   const fetchPosts = async (token) => {
     setLoading(true);
     try {
@@ -114,6 +115,7 @@ const fetchUserProjects = async (token, user) => {
       if (!res.ok) throw new Error("Erro ao carregar posts");
       const data = await res.json();
       setPosts(data);
+      setGenres(data.length > 0 ? data[0].user.genres : []);
     } catch (err) {
       setError("Erro ao buscar posts");
     } finally {
@@ -122,23 +124,7 @@ const fetchUserProjects = async (token, user) => {
   };
 
   const handleClickFork = async (project) => {
-    const token = localStorage.getItem("token");
-    try {
-      const response = await fetch(`http://localhost:5000/api/fork`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ project_id: project.id }),
-      });
-      if (!response.ok) throw new Error("Erro ao fazer fork");
-      notifySuccess("Projeto forkado");
-    } catch (err) {
-      notifyError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    await forkProject(project.id);
   };
 
   const handleNewProject = () => router.push("/editor/new");
@@ -149,11 +135,21 @@ const fetchUserProjects = async (token, user) => {
         return (
           <>
             <button className="new_project" onClick={() => setOpenPop(true)}>Novo Post</button>
-            <PostFormPopUp open={openPop} onClose={() => setOpenPop(false)} user={user} projects={projects}/>
+            <PostFormPopUp open={openPop} onClose={() => setOpenPop(false)} user={user} projects={projects} />
+            {likeError && <p style={{ color: "red" }}>{likeError}</p>}
             {posts.length === 0 ? (
               <p className="empty-text">Você não tem posts ainda.</p>
             ) : (
-              posts.map((post) => <Post key={post.id} post={post} />)
+              posts.map((post) => (
+                <Post
+                  key={post.id}
+                  post={post}
+                  userId={id}
+                  handleClick={() => likePost(post._id)}
+                  setCurrentProject={setCurrentProject}
+                  handleClickFork={handleClickFork}
+                />
+              ))
             )}
           </>
         );
@@ -163,7 +159,12 @@ const fetchUserProjects = async (token, user) => {
             <button className="new_project" onClick={handleNewProject}>Novo Projeto</button>
             <div className="projects-grid">
               {projects.map((project) => (
-                <ProjectCard project={project} setCurrentProject={setCurrentProject} handleClickFork={handleClickFork}/>
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  setCurrentProject={setCurrentProject}
+                  handleClickFork={handleClickFork}
+                />
               ))}
             </div>
           </>
@@ -185,14 +186,10 @@ const fetchUserProjects = async (token, user) => {
 
   return (
     <div className="profile-container">
-            <ToastContainer
-                position="top-center"
-                toastStyle={{
-
-                    textAlign: 'center',
-                    fontSize: '1.2rem'
-                }}
-            />
+      <ToastContainer
+        position="top-center"
+        toastStyle={{ textAlign: 'center', fontSize: '1.2rem' }}
+      />
       <div className="flex items-center gap-4">
         <Image
           className="w-30 h-30 sm:w-30 sm:h-30 rounded-full object-cover border border-[#61673e] mb-2 hover:bg-[#c1915d] transition duration-300 ease-in-out cursor-pointer"
@@ -200,11 +197,11 @@ const fetchUserProjects = async (token, user) => {
           height={120}
           width={120}
           alt="Avatar"
-
         />
-
         <h1 className="profile-title">Olá, {user}</h1>
-        {username === user&& (
+        <h1 className="profile-title">{bio}</h1>
+
+        {username === user && (
           <button
             className="cursor-pointer flex items-center justify-center bg-[#a97f52] hover:bg-[#c1915d] text-white p-2 rounded-full shadow transition duration-300 transform hover:rotate-90 focus:outline-none focus:ring-2 focus:ring-[#c1915d]"
             onClick={() => setConfigPop(true)}
@@ -236,16 +233,14 @@ const fetchUserProjects = async (token, user) => {
           setProfilePic={setAvatarUrl}
         />
       </div>
-      Arrumar os posts do profile e o config da bio
-      Adicionar tags
-      <nav className="tabs-nav">
 
+      <nav className="tabs-nav">
         <button className={activeTab === "posts" ? "tab active" : "tab"} onClick={() => setActiveTab("posts")}>My Posts</button>
         <button className={activeTab === "musics" ? "tab active" : "tab"} onClick={() => setActiveTab("musics")}>My Musics</button>
         <button className={activeTab === "invites" ? "tab active" : "tab"} onClick={() => setActiveTab("invites")}>Invites</button>
       </nav>
-      <section className="tab-content">{renderTabContent()}</section>
 
+      <section className="tab-content">{renderTabContent()}</section>
     </div>
   );
 }

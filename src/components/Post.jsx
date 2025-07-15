@@ -8,7 +8,7 @@
     import FollowButton from "./FollowButton";
     import ProjectCard from "./ProjectCard";
 
-    export default function Post({ post, userId, handleClick, setCurrentProject }) {
+    export default function Post({ post, userId, handleClick, setCurrentProject, handleClickFork }) {
       const isLiked = post.likes.includes(userId);
       const [currentImageIndex, setCurrentImageIndex] = useState(0);
       const avatarUrl = post.user?.avatar || "/img/default_avatar.png";
@@ -114,7 +114,7 @@
                 position: 'relative'
               }}>
                 <img
-                  onDoubleClick={(e) => likeImage(post.id, e)}
+                  onDoubleClick={(e) => likeImage(post._id, e)}
                   src={post.photos[currentImageIndex]}
                   alt={`Post image ${currentImageIndex + 1}`}
                   style={{
@@ -214,7 +214,12 @@
           )}
 
         {post?.project &&(
-            <ProjectCard project={post.project} setCurrentProject={setCurrentProject} />
+            <ProjectCard
+              project={post.project}
+              setCurrentProject={setCurrentProject}
+              handleClickFork={handleClickFork}
+            />
+
         )}
         <div className="flex justify-center mt-10">
               <button
@@ -267,7 +272,7 @@
             </button>
 
               <button
-                      onClick={() => {navigator.clipboard.writeText("http://localhost:3000/p/" + post.id)}}
+                      onClick={() => {navigator.clipboard.writeText("http://localhost:3000/p/" + post._id)}}
                       disabled={isAnimating}
                       className={`like-button`}
                     >

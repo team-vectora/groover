@@ -3,6 +3,8 @@ from bson.objectid import ObjectId
 from utils.db import mongo
 from utils.genres import GENRES
 from bson import Binary
+import base64
+
 class User:
     @staticmethod
     def create(username, password_hash, email=None):
@@ -33,12 +35,32 @@ class User:
 
     @staticmethod
     def config_user(user_id, avatar=None, bio=None, music_tags=None):
+
+        user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return {"error": "User not found"}, 404
+
         update_fields = {}
 
         if avatar:
             update_fields['avatar'] = avatar
         if bio is not None:
             update_fields['bio'] = bio
+
+        if music_tags is not None:
+
+            old_tags = set([genre for genre, score in user.get('genres', {}).items() if score >= 100])
+            new_tags = set(music_tags)
+
+            genres = user.get('genres', {})
+
+            for tag in new_tags - old_tags:
+                genres[tag] = genres.get(tag, 0) + 100
+
+            for tag in old_tags - new_tags:
+                genres[tag] = max(genres.get(tag, 0) - 100, 0)  # evita valor negativo
+
+            update_fields['genres'] = genres
 
         if not update_fields:
             return {"error": "Nenhum dado para atualizar"}, 400
@@ -51,7 +73,6 @@ class User:
         if result.matched_count == 0:
             return {"error": "User not found"}, 404
 
-        return {"message": "Perfil updated"}, 200
           
 
 
@@ -326,7 +347,89 @@ class Post:
         }
 
         return mongo.db.posts.insert_one(post).inserted_id
-    
+
+    @staticmethod
+    def get_posts_with_user_and_project():
+        pipeline = [
+            {
+                '$lookup': {
+                    'from': 'users',
+                    'localField': 'user_id',
+                    'foreignField': '_id',
+                    'as': 'user'
+                }
+            },
+            {
+                '$unwind': {
+                    'path': '$user',
+                    'preserveNullAndEmptyArrays': True
+                }
+            },
+            {
+                '$lookup': {
+                    'from': 'projects',
+                    'localField': 'project_id',
+                    'foreignField': '_id',
+                    'as': 'project'
+                }
+            },
+            {
+                '$unwind': {
+                    'path': '$project',
+                    'preserveNullAndEmptyArrays': True
+                }
+            },
+            {
+                '$project': {
+                    '_id': {'$toString': '$_id'},
+                    'caption': 1,
+                    'photos': 1,
+                    'created_at': 1,
+                    'likes': 1,
+                    'comments': 1,
+                    'genres': 1,
+                    'user': {
+                        '_id': {'$toString': '$user._id'},
+                        'username': '$user.username',
+                        'avatar': '$user.avatar',
+                        'genres': '$user.genres',
+                    },
+                    'project': {
+                        '$cond': {
+                            'if': {'$ifNull': ['$project', False]},
+                            'then': {
+                                '_id': {'$toString': '$project._id'},
+                                'user_id': {'$toString': '$project.user_id'},
+                                'title': {'$ifNull': ['$project.title', 'New Project']},
+                                'description': {'$ifNull': ['$project.description', '']},
+                                'bpm': '$project.bpm',
+                                'instrument': {'$ifNull': ['$project.instrument', 'piano']},
+                                'volume': {'$ifNull': ['$project.volume', -10]},
+                                'tempo': '$project.tempo',
+                                'midi': '$project.midi'
+                            },
+                            'else': None
+                        }
+                    }
+                }
+            }
+        ]
+
+        posts = list(mongo.db.posts.aggregate(pipeline))
+
+        for post in posts:
+
+            if 'likes' in post:
+                post['likes'] = [str(like) if isinstance(like, ObjectId) else like for like in post['likes']]
+
+            if post.get('project') and post['project'] and 'midi' in post['project'] and post['project']['midi']:
+                midi_b64 = base64.b64encode(post['project']['midi']).decode('utf-8')
+                post['project']['midi'] = f"data:audio/midi;base64,{midi_b64}"
+            elif post.get('project') and post['project']:
+                post['project']['midi'] = None
+
+        return posts
+
     @staticmethod
     def get_post(post_id):
         post = mongo.db.posts.find_one({'_id': ObjectId(post_id)})
@@ -337,17 +440,182 @@ class Post:
     @staticmethod
     def get_posts():
         return list(mongo.db.posts.find())
-    
+
     @staticmethod
     def get_posts_by_user_id(user_id):
-        return list(mongo.db.posts.find({"user_id": ObjectId(user_id)}))
+        pipeline = [
+            {
+                '$match': {
+                    'user_id': ObjectId(user_id)
+                }
+            },
+            {
+                '$lookup': {
+                    'from': 'users',
+                    'localField': 'user_id',
+                    'foreignField': '_id',
+                    'as': 'user'
+                }
+            },
+            {
+                '$unwind': {
+                    'path': '$user',
+                    'preserveNullAndEmptyArrays': True
+                }
+            },
+            {
+                '$lookup': {
+                    'from': 'projects',
+                    'localField': 'project_id',
+                    'foreignField': '_id',
+                    'as': 'project'
+                }
+            },
+            {
+                '$unwind': {
+                    'path': '$project',
+                    'preserveNullAndEmptyArrays': True
+                }
+            },
+            {
+                '$project': {
+                    '_id': {'$toString': '$_id'},
+                    'caption': 1,
+                    'photos': 1,
+                    'created_at': 1,
+                    'likes': 1,
+                    'comments': 1,
+                    'genres': 1,
+                    'user': {
+                        '_id': {'$toString': '$user._id'},
+                        'username': '$user.username',
+                        'email': '$user.email',
+                        'avatar': '$user.avatar'
+                    },
+                    'project': {
+                        '$cond': {
+                            'if': {'$ifNull': ['$project', False]},
+                            'then': {
+                                '_id': {'$toString': '$project._id'},
+                                'user_id': {'$toString': '$project.user_id'},
+                                'title': {'$ifNull': ['$project.title', 'New Project']},
+                                'description': {'$ifNull': ['$project.description', '']},
+                                'bpm': '$project.bpm',
+                                'instrument': {'$ifNull': ['$project.instrument', 'piano']},
+                                'volume': {'$ifNull': ['$project.volume', -10]},
+                                'tempo': '$project.tempo',
+                                'midi': '$project.midi'
+                            },
+                            'else': None
+                        }
+                    }
+                }
+            }
+        ]
+
+        posts = list(mongo.db.posts.aggregate(pipeline))
+
+        for post in posts:
+            if 'likes' in post:
+                post['likes'] = [str(like) if isinstance(like, ObjectId) else like for like in post['likes']]
+
+            if post.get('project') and post['project'] and 'midi' in post['project'] and post['project']['midi']:
+                midi_b64 = base64.b64encode(post['project']['midi']).decode('utf-8')
+                post['project']['midi'] = f"data:audio/midi;base64,{midi_b64}"
+            elif post.get('project') and post['project']:
+                post['project']['midi'] = None
+
+        return posts
 
     @staticmethod
     def get_posts_by_username(username):
         user = User.find_by_username(username)
         if user is None:
-            return [] 
-        return list(mongo.db.posts.find({"user_id": ObjectId(user["_id"])}))
+            return []
+
+        pipeline = [
+            {
+                '$match': {
+                    'user_id': ObjectId(user["_id"])
+                }
+            },
+            {
+                '$lookup': {
+                    'from': 'users',
+                    'localField': 'user_id',
+                    'foreignField': '_id',
+                    'as': 'user'
+                }
+            },
+            {
+                '$unwind': {
+                    'path': '$user',
+                    'preserveNullAndEmptyArrays': True
+                }
+            },
+            {
+                '$lookup': {
+                    'from': 'projects',
+                    'localField': 'project_id',
+                    'foreignField': '_id',
+                    'as': 'project'
+                }
+            },
+            {
+                '$unwind': {
+                    'path': '$project',
+                    'preserveNullAndEmptyArrays': True
+                }
+            },
+            {
+                '$project': {
+                    '_id': {'$toString': '$_id'},
+                    'caption': 1,
+                    'photos': 1,
+                    'created_at': 1,
+                    'likes': 1,
+                    'comments': 1,
+                    'genres': 1,
+                    'user': {
+                        '_id': {'$toString': '$user._id'},
+                        'username': '$user.username',
+                        'email': '$user.email',
+                        'avatar': '$user.avatar'
+                    },
+                    'project': {
+                        '$cond': {
+                            'if': {'$ifNull': ['$project', False]},
+                            'then': {
+                                '_id': {'$toString': '$project._id'},
+                                'user_id': {'$toString': '$project.user_id'},
+                                'title': {'$ifNull': ['$project.title', 'New Project']},
+                                'description': {'$ifNull': ['$project.description', '']},
+                                'bpm': '$project.bpm',
+                                'instrument': {'$ifNull': ['$project.instrument', 'piano']},
+                                'volume': {'$ifNull': ['$project.volume', -10]},
+                                'tempo': '$project.tempo',
+                                'midi': '$project.midi'
+                            },
+                            'else': None
+                        }
+                    }
+                }
+            }
+        ]
+
+        posts = list(mongo.db.posts.aggregate(pipeline))
+
+        for post in posts:
+            if 'likes' in post:
+                post['likes'] = [str(like) if isinstance(like, ObjectId) else like for like in post['likes']]
+
+            if post.get('project') and post['project'] and 'midi' in post['project'] and post['project']['midi']:
+                midi_b64 = base64.b64encode(post['project']['midi']).decode('utf-8')
+                post['project']['midi'] = f"data:audio/midi;base64,{midi_b64}"
+            elif post.get('project') and post['project']:
+                post['project']['midi'] = None
+
+        return posts
 
     @staticmethod
     def like(post_id, user_id):

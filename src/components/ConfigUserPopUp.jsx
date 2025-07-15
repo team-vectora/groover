@@ -88,7 +88,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setBio, set
     const token = localStorage.getItem("token");
     let profilePicUrl = profilePic;
 
-    if (profilePic) {
+    if (profilePic instanceof File) {
       profilePicUrl = await uploadToCloudinary(profilePic);
     }
 

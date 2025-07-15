@@ -4,8 +4,9 @@ import { useRouter } from "next/router";
 import Post from "../components/Post";
 import FeedCaption from "../components/FeedCaption";
 import useLikePost from "../hooks/useLikePost";
+import useForkProject from "../hooks/useForkProject"; // <-- importe o hook
 import { MidiContext } from "../contexts/MidiContext";
-import MidiPlayer  from "../components/MidiPlayer";
+import MidiPlayer from "../components/MidiPlayer";
 
 function Feed() {
   const router = useRouter();
@@ -16,9 +17,12 @@ function Feed() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { currentProject,setCurrentProject } = useContext(MidiContext);
+  const { currentProject, setCurrentProject } = useContext(MidiContext);
 
   const { likePost, error: likeError } = useLikePost(token, () => fetchPosts(token));
+
+  // Use o hook de fork
+  const { forkProject, loading: forkLoading } = useForkProject(token);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -80,13 +84,13 @@ function Feed() {
             key={post._id}
             userId={localStorage.getItem("id")}
             post={post}
-            handleClick={() => likePost(post.id)}
+            handleClick={() => likePost(post._id)}
             setCurrentProject={setCurrentProject}
+            handleClickFork={forkProject} // <-- aqui passa forkProject
           />
         ))}
       </div>
-       <MidiPlayer project={currentProject} />
-
+      <MidiPlayer project={currentProject} />
     </div>
   );
 }
