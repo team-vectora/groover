@@ -10,6 +10,8 @@ import ChangeInstrument from "../../components/ChangeInstrument.jsx";
 import SelectRitmo from "../../components/SelectRitmo";
 import { useRouter } from "next/router";
 import SaveMusicPopUp from "../../components/SaveMusicPopUp.jsx";
+import ReactDOM from 'react-dom';
+import {navigate} from "next/dist/client/components/segment-cache";
 
 function EditorPage() {
   const router = useRouter();
@@ -81,6 +83,9 @@ function EditorPage() {
   const [projectId, setProjectId] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [versions, setVersions] = useState([]);
+  const [currentMusicId, setCurrentMusicId] = useState("");
+  const [lastVersionId, setLastVersionId] = useState("");
   const synthRef = useRef(null);
 
   // Effects
@@ -225,6 +230,27 @@ function EditorPage() {
       popUpRef.current = null;
     }
   };
+
+  const handleVersionChange = async (musicId) => {
+
+    console.log("Id selecionado", musicId);
+
+    let selectedVersion = null;
+
+    versions.forEach(v => {
+      if (v.music_id._id === musicId) {
+        console.log("Id encontrado", v.music_id._id);
+        console.log("Time da versao selecionada", v.updated_at);
+        selectedVersion = v;
+      }
+    });
+
+    if (selectedVersion) {
+      await loadVersionData(selectedVersion.music_id);
+    }
+    setCurrentMusicId(musicId)
+  };
+
   const addPage = () => {
     const newMatrix = Array.from({ length: initialCols }, () =>
       Array.from({ length: rows }, () =>
@@ -439,14 +465,176 @@ function EditorPage() {
     setIsPlaying(true);
     setActivePage(0);
     setMatrixNotes(pages[0]);
-    Tone.getTransport().stop();
-    Tone.getTransport().cancel();
-    synthRef.current?.releaseAll?.();
 
-    for (let i = 0; i < pages.length; i++) {
-      setActivePage(i);
-      setMatrixNotes(pages[i]);
-      await playSelectedNotesActivePage(i);
+    const activeNotes = new Map();
+    let lastEventTime = 0;
+
+    try {
+      Tone.getTransport().bpm.value = bpm;
+      Tone.getTransport().cancel();
+
+      // Lineariza todas as subnotas em uma sequência temporal
+      const allSubNotes = [];
+      let currentTime = 0;
+      let currentMatrix = pages[0];
+
+      // 1. Primeira passada: calcular durações e coletar todas as subnotas
+      for (let matrixIndex= 0; matrixIndex < pages.length; matrixIndex++) {
+        let currentMatrix = pages[matrixIndex];
+
+        currentMatrix.forEach((col , colIndex) => {
+          const colDuration=Tone.Time("4n").toSeconds(); // Duração fixa por coluna
+          const subNotesCount=Math.max(...col.map(note => note?.subNotes?.length || 1));
+          const subDuration=colDuration / subNotesCount;
+
+          col.forEach((note , rowIndex) => {
+            const effectiveSubNotes=note?.subNotes || [ createSubNote() ];
+
+            effectiveSubNotes.forEach((subNote , subIndex) => {
+              const startTime=currentTime+(subIndex * subDuration);
+              allSubNotes.push({
+                matrixIndex ,
+                rowIndex ,
+                colIndex ,
+                subIndex ,
+                subNote ,
+                startTime ,
+                duration: subDuration ,
+                noteName: notes[rowIndex]
+              });
+            });
+          });
+
+          currentTime+=colDuration;
+        });
+
+      }
+
+      // 2. Segunda passada: agendar eventos
+      allSubNotes.forEach(({ matrixIndex, rowIndex, colIndex, subIndex, subNote, startTime, duration, noteName }) => {
+        const noteKey = `${rowIndex}-${colIndex}-${subIndex}`;
+        currentMatrix = pages[matrixIndex];
+
+        lastEventTime = Math.max(lastEventTime, startTime + duration);
+
+        // Agendar highlight (para TODAS as subnotas, inclusive vazias)
+        Tone.getTransport().schedule(() => {
+          setActiveCol(colIndex);
+          setActiveSubIndex(subIndex);
+
+          setActivePage(matrixIndex);
+          setMatrixNotes(pages[matrixIndex]);
+        }, startTime);
+
+        // Lógica de reprodução apenas para subnotas com nome
+        if (subNote?.name) {
+          // Verificar se precisa iniciar nova nota
+          const shouldStart = (
+              // É a primeira subnota da primeira coluna
+              (colIndex === 0 && subIndex === 0) ||
+              // Está marcada como separada
+              subNote.isSeparated ||
+              // Subnota anterior na mesma coluna está vazia ou é diferente
+              (subIndex > 0 && (
+                      !allSubNotes.find(s =>
+                          s.rowIndex === rowIndex &&
+                          s.colIndex === colIndex &&
+                          s.subIndex === subIndex - 1
+                      )?.subNote?.name ||
+                      allSubNotes.find(s =>
+                          s.rowIndex === rowIndex &&
+                          s.colIndex === colIndex &&
+                          s.subIndex === subIndex - 1
+                      )?.subNote?.name !== subNote.name
+                  ) ||
+                  // Última subnota da coluna anterior está vazia ou é diferente
+                  (colIndex > 0 && (
+                          !allSubNotes.find(s =>
+                              s.rowIndex === rowIndex &&
+                              s.colIndex === colIndex - 1 &&
+                              s.subIndex === (currentMatrix[colIndex - 1][rowIndex]?.subNotes?.length || 1) - 1
+                          )?.subNote?.name ||
+                          allSubNotes.find(s =>
+                              s.rowIndex === rowIndex &&
+                              s.colIndex === colIndex - 1 &&
+                              s.subIndex === (currentMatrix[colIndex - 1][rowIndex]?.subNotes?.length || 1) - 1
+                          )?.subNote?.name !== subNote.name
+                      )
+                  )
+              )
+          );
+
+          // Verificar se precisa terminar a nota
+          const shouldEnd = (
+              // É a última subnota da última coluna
+              (colIndex === currentMatrix.length - 1 && subIndex === (currentMatrix[colIndex][rowIndex]?.subNotes?.length || 1) - 1) ||
+              // Está marcada como separada
+              subNote.isSeparated ||
+              // Próxima subnota na mesma coluna está vazia ou é diferente
+              (subIndex < (currentMatrix[colIndex][rowIndex]?.subNotes?.length || 1) - 1 && (
+                      !allSubNotes.find(s =>
+                          s.rowIndex === rowIndex &&
+                          s.colIndex === colIndex &&
+                          s.subIndex === subIndex + 1
+                      )?.subNote?.name ||
+                      allSubNotes.find(s =>
+                          s.rowIndex === rowIndex &&
+                          s.colIndex === colIndex &&
+                          s.subIndex === subIndex + 1
+                      )?.subNote?.name !== subNote.name
+                  ) ||
+                  // Primeira subnota da próxima coluna está vazia ou é diferente
+                  (colIndex < currentMatrix.length - 1 && (
+                          !allSubNotes.find(s =>
+                              s.rowIndex === rowIndex &&
+                              s.colIndex === colIndex + 1 &&
+                              s.subIndex === 0
+                          )?.subNote?.name ||
+                          allSubNotes.find(s =>
+                              s.rowIndex === rowIndex &&
+                              s.colIndex === colIndex + 1 &&
+                              s.subIndex === 0
+                          )?.subNote?.name !== subNote.name
+                      )
+                  )
+              )
+          );
+
+          if (shouldStart) {
+            Tone.getTransport().schedule((time) => {
+              synthRef.current?.triggerAttack(subNote.name, time);
+              activeNotes.set(noteKey, { note: subNote.name, time });
+            }, startTime);
+          }
+
+          if (shouldEnd) {
+            Tone.getTransport().schedule((time) => {
+              synthRef.current?.triggerRelease(subNote.name, time);
+              activeNotes.delete(noteKey);
+            }, startTime + duration);
+          }
+        }
+      });
+
+      await Tone.start();
+      Tone.getTransport().start();
+
+      await new Promise(resolve => {
+        setTimeout(() => {
+          Tone.getTransport().stop();
+          synthRef.current?.releaseAll?.();
+          setIsPlaying(false);
+          setActiveCol(null);
+          setActiveSubIndex(null);
+          resolve();
+        }, (lastEventTime + 0.1) * 1000);
+      });
+
+    } catch (error) {
+      console.error('Erro na reprodução:', error);
+      Tone.getTransport().stop();
+      synthRef.current?.releaseAll?.();
+      setIsPlaying(false);
     }
 
     setIsPlaying(false);
@@ -501,89 +689,123 @@ function EditorPage() {
       });
 
       const data = await response.json();
+      console.log("Resposta do salvamento:", data);
+
+      if (!projectId) {
+        // Redireciona para a nova URL com o ID recebido
+        await router.push(`/editor/${data._id}`);
+      }
+
+      setCurrentMusicId(data.current_music_id._id);
+      setLastVersionId(data.current_music_id._id)
+      setVersions(data.music_versions);
+
+      // Atualiza estados básicos
+      setBpm(data.bpm ?? 120);
+      setInstrument(data.instrument ?? 'piano');
+      setVolume(data.volume ?? -10);
+      setTitle(data.title ?? '');
+      setDescription(data.description ?? '');
+
+      // Fecha o popup
+      handleClosePopup();
 
     } catch (error) {
       console.error('Erro:', error);
-      alert(error.message || 'Erro ao conectar com a API');
     }
   };
 
+  const midiBlob = () => {
+    const midi = new Midi();
+    const track = midi.addTrack();
+    midi.header.setTempo(bpm);
 
-const midiBlob = () => {
-  const midi = new Midi();
-  const track = midi.addTrack();
-  midi.header.setTempo(bpm);
+    let currentTime = 0;
 
-  let currentTime = 0;
+    pages.forEach(page => {
+      page.forEach((col, colIndex) => {
+        const colDuration = Tone.Time("4n").toSeconds();
+        const subNotesCount = Math.max(...col.map(note => note?.subNotes?.length || 1));
+        const subDuration = colDuration / subNotesCount;
 
-  pages.forEach(page => {
-    page.forEach((col, colIndex) => {
-      const colDuration = Tone.Time("4n").toSeconds();
-      const subNotesCount = Math.max(...col.map(note => note?.subNotes?.length || 1));
-      const subDuration = colDuration / subNotesCount;
+        col.forEach((noteRow, rowIndex) => {
+          const noteName = notes[rowIndex];
 
-      col.forEach((noteRow, rowIndex) => {
-        const noteName = notes[rowIndex];
+          if (noteRow.subNotes && noteRow.subNotes.length > 0) {
+            noteRow.subNotes.forEach((subNote, subIndex) => {
+              const startTime = currentTime + (subIndex * subDuration);
 
-        if (noteRow.subNotes && noteRow.subNotes.length > 0) {
-          noteRow.subNotes.forEach((subNote, subIndex) => {
-            const startTime = currentTime + (subIndex * subDuration);
-
-            if (subNote.name) {
-              try {
-                track.addNote({
-                  name: subNote.name,
-                  time: startTime,
-                  duration: subDuration
-                });
-              } catch (error) {
-                console.error(`Erro ao adicionar nota MIDI ${subNote.name}:`, error);
+              if (subNote.name) {
+                try {
+                  track.addNote({
+                    name: subNote.name,
+                    time: startTime,
+                    duration: subDuration
+                  });
+                } catch (error) {
+                  console.error(`Erro ao adicionar nota MIDI ${subNote.name}:`, error);
+                }
               }
-            }
-          });
-        }
+            });
+          }
+        });
+
+        currentTime += colDuration;
       });
-
-      currentTime += colDuration;
     });
-  });
 
-  const midiBytes = midi.toArray();
-  const blob = new Blob([midiBytes], { type: 'audio/midi' });
+    const midiBytes = midi.toArray();
+    const blob = new Blob([midiBytes], { type: 'audio/midi' });
 
-  return blob;
-};
+    return blob;
+  };
 
-const blobToBase64 = (blob) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-};
+  const blobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
 
+  const exportToMIDI = () => {
+    const blob = midiBlob();
 
-const exportToMIDI = () => {
-  const blob = midiBlob();
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'music.mid';
-  a.click();
-  URL.revokeObjectURL(url);
-};
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'music.mid';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
-    if (!router.isReady) return;
-    if (id && id !== "new") {
-      setProjectId(id);
-      console.log("COMECOU A DATA")
-      console.log(projectId)
-      loadProjectData(id);
+    const loadData = async () => {
+      if (!router.isReady || !tokenJWT) return;
+
+      if (id && id !== "new") {
+        console.log("Carregando projeto ID:", id);
+        await loadProjectData(id);
+      } else {
+        // Inicializa um novo projeto
+        const newMatrix = Array.from({ length: initialCols }, () =>
+            Array.from({ length: rows }, () => createNote())
+        );
+        setPages([newMatrix]);
+        setMatrixNotes(newMatrix);
+        setActivePage(0);
+      }
+    };
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+    } else {
+      setTokenJWT(token);
+      loadData().then(() => setLoading(false));
     }
-  }, [id]);
+  }, [router.isReady, id, tokenJWT]);
 
   const loadProjectData = async (projectId) => {
     console.log("OIA O PROJECT ID")
@@ -604,41 +826,79 @@ const exportToMIDI = () => {
       }
 
       const data = await response.json();
+      console.log("OIA A DATAAAA")
+      console.log(data)
 
       if (data) {
         if (data.bpm == null || data.instrument == null || data.volume == null) {
           return;
         }
 
-        setBpm(data.bpm);
-        setInstrument(data.instrument);
-        setVolume(data.volume);
+        // Carrega a versão atual (current_music_id)
+        await loadVersionData(data.current_music_id);
+        setCurrentMusicId(data.current_music_id._id);
+        setLastVersionId(data.current_music_id._id);
+
+        // Atualiza os metadados do projeto
         setProjectId(projectId);
-        setTitle(data.title);
-        setDescription(data.description);
-        // Verifica se há layers/pages no projeto
-        if (data.current_music_id?.layers?.length > 0) {
-          console.log("Falsoooooo 1");
-          setPages(data.current_music_id.layers);
-          console.log("Falsoooooo 2");
-          setMatrixNotes(data.current_music_id.layers[0]);
-          console.log("Falsoooooo 3");
-          setActivePage(0);
-          console.log("Falsoooooo 4");
-        }
+        setVersions(data.music_versions);
+
+        // Atualiza estados básicos
+        setBpm(data.bpm ?? 120);
+        setInstrument(data.instrument ?? 'piano');
+        setVolume(data.volume ?? -10);
+        setTitle(data.title ?? '');
+        setDescription(data.description ?? '');
 
       } else {
-        console.log("Falsoooooo")
         // Se não houver dados, inicializa com valores padrão
         const newMatrix = Array.from({ length: initialCols }, () =>
-          Array.from({ length: rows }, () => createNote())
+            Array.from({ length: rows }, () => createNote())
         );
         setPages([newMatrix]);
         setMatrixNotes(newMatrix);
       }
-
     } catch (error) {
       console.error('Erro ao carregar projeto:', error);
+    }
+  };
+
+  const loadVersionData = async (version) => {
+    try {
+      if (!version) {
+        console.warn("Versão não fornecida");
+        return;
+      }
+
+
+      console.log("Versão recebida para carregar:", version);
+      console.log("Layers para carregar:", version.layers);
+
+
+      // Processa os layers
+      if (version.layers?.length > 0) {
+        console.log("Layers encontrados:", version.layers);
+
+        // Atualiza os estados
+        setPages(version.layers);
+        setMatrixNotes(version.layers[0]);
+        setActivePage(0);
+      } else {
+        console.warn("Sem layers válidos - criando padrão");
+        const newMatrix = Array.from({ length: initialCols }, () =>
+            Array.from({ length: rows }, () => createNote())
+        );
+        setPages([newMatrix]);
+        setMatrixNotes(newMatrix);
+      }
+    } catch (error) {
+      console.error("Erro crítico ao carregar versão:", error);
+      // Fallback seguro
+      const fallbackMatrix = Array.from({ length: initialCols }, () =>
+          Array.from({ length: rows }, () => createNote())
+      );
+      setPages([fallbackMatrix]);
+      setMatrixNotes(fallbackMatrix);
     }
   };
 
@@ -672,6 +932,18 @@ const exportToMIDI = () => {
       }
     };
     reader.readAsText(file);
+  };
+
+  const formatAPIDate = (dateString) => {
+    try {
+      const date = new Date(dateString.replace("GMT", ""));
+      return isNaN(date)
+          ? "Data inválida"
+          : `${date.getDate()}/${date.getMonth() + 1} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+    } catch (error) {
+      console.error("Erro ao formatar data:", error);
+      return "Data inválida";
+    }
   };
 
   if (loading) {
@@ -732,10 +1004,27 @@ const exportToMIDI = () => {
             <div className="control-group">
               <h3>{t("versions")}</h3>
               <div className="control-item">
-                <select name="cars" className="control-select" id="cars">
-                  <option value="musica1">musica1</option>
-                  <option value="musica2">musica2</option>
-                  <option value="musica3">musica3</option>
+                <select
+                    name="versions"
+                    className="control-select"
+                    value={currentMusicId}
+                    onChange={(e) => handleVersionChange(e.target.value)}
+                >
+                  {versions.length > 0 ? (
+                      versions.map((version, index) => {
+                        const formattedDate = formatAPIDate(version.updated_at);
+                        const userName = version.update_by?.username || t("unknown_user");
+
+                        return (
+                            <option key={version._id} value={version.music_id._id}>
+                              {`${formattedDate} - ${userName}`}
+                              {lastVersionId === version.music_id._id && " (Current)"}
+                            </option>
+                        );
+                      })
+                  ) : (
+                      <option disabled>{t("no_versions")}</option>
+                  )}
                 </select>
               </div>
             </div>

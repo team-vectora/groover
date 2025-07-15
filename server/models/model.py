@@ -138,6 +138,11 @@ class Project:
                 for version in project['music_versions']:
                     version['music_id'] = str(version['music_id'])
                     version['update_by'] = str(version.get('update_by', ''))
+
+            if 'midi' in project:
+                         midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
+                         project['midi'] = f"data:audio/midi;base64,{midi_b64}"
+
             project['created_by'] = str(project.get('created_by', ''))
             project['last_updated_by'] = str(project.get('last_updated_by', ''))
         return project
@@ -150,12 +155,19 @@ class Project:
         })
         if project:
             project['_id'] = str(project['_id'])
+
             if 'current_music_id' in project:
                 project['current_music_id'] = Music.get_music(project['current_music_id'])
+
             if 'music_versions' in project:
                 for version in project['music_versions']:
                     version['music_id'] = Music.get_music(version['music_id'])
                     version['update_by'] = User.get_user(version['update_by'])
+
+            if 'midi' in project:
+                midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
+                project['midi'] = f"data:audio/midi;base64,{midi_b64}"
+
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
         return project
@@ -173,6 +185,11 @@ class Project:
                 for version in project['music_versions']:
                     version['music_id'] = Music.get_music(version['music_id'])
                     version['update_by'] = User.get_user(version['update_by'])
+
+            if 'midi' in project:
+                                     midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
+                                     project['midi'] = f"data:audio/midi;base64,{midi_b64}"
+
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
         return project
@@ -191,18 +208,22 @@ class Project:
             return []
         
         projects = mongo.db.projects.find({'user_id': user_id_str})
-        
+
         return [{
             'id': str(p['_id']),
-            'midi': p.get('midi'),
+            'midi': (lambda project:
+                        f"data:audio/midi;base64," + base64.b64encode(project['midi']).decode('utf-8')
+                        if 'midi' in project
+                        else None
+                )(p),
             'title': p.get('title', 'Sem título'),
             'bpm': p.get('bpm', 0),
             'tempo': p.get('tempo', ''),
             'description': p.get('description', ''),
             'created_at': p.get('created_at', ''),
             'updated_at': p.get('updated_at', ''),
-            'created_by': str(p.get('created_by', '')),
-            'last_updated_by': str(p.get('last_updated_by', '')),
+            'created_by': User.get_user(p.get('created_by', '')),
+            'last_updated_by': User.get_user(p.get('last_updated_by', '')),
             'is_owner': True  # Como estamos filtrando por user_id, sempre será True
         } for p in projects]
 
@@ -217,6 +238,11 @@ class Project:
         })
         return [{
             'id': str(p['_id']),
+            'midi': (lambda project:
+                                    f"data:audio/midi;base64," + base64.b64encode(project['midi']).decode('utf-8')
+                                    if 'midi' in project
+                                    else None
+                            )(p),
             'title': p.get('title'),
             'bpm': p.get('bpm'),
             'tempo': p.get('tempo'),
@@ -342,7 +368,7 @@ class Post:
             'created_at': datetime.now(),
             'likes': [],
             'comments': [],
-            'project_id': ObjectId(project_id) if ObjectId(project_id) else None,
+            'project_id': ObjectId(project_id) if project_id else None,
             'genres': genres_dict
         }
 

@@ -8,11 +8,12 @@ from flask_jwt_extended import (
 )
 # from similarity import cosine_similarity
 from werkzeug.security import generate_password_hash, check_password_hash
-from models.model import Followers, Music, Project, User, Post
+from models.model import Followers, Music, Project, User, Post, Invitation
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
 import cloudinary.uploader
 auth_bp = Blueprint('auth', __name__)
+
 
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
@@ -55,6 +56,9 @@ def signin():
     )
     followings = Followers.get_followings(user['_id'])
     print(followings)
+
+    if 'avatar' not in user.keys():
+        user['avatar'] = None
 
     return jsonify({
         'access_token': access_token,
@@ -107,7 +111,7 @@ def save_project():
 
     midi_base64 = data.get('midi')
     midi_binary = base64.b64decode(midi_base64) if midi_base64 else None
-    print(midi_binary)
+
     project_data = {
         'title': data.get('title', 'New Project'),
         'midi': midi_binary,
@@ -128,8 +132,10 @@ def save_project():
             )
 
         success = Project.update_project(project_id, user_id, project_data)
+        project = Project.get_project_full_data(project_id, user_id)
+
         if success:
-            return jsonify({'message': 'Project updated', 'id': project_id}), 200
+            return jsonify(project), 200
         return jsonify({'error': 'Project not found or update failed'}), 404
     else:
         project_id = Project.create_project(user_id, project_data)
@@ -140,7 +146,9 @@ def save_project():
             user_id=user_id
         )
 
-        return jsonify({'message': 'Project created', 'id': project_id}), 201
+        project = Project.get_project_full_data(project_id, user_id)
+
+        return jsonify(project), 201
 
 
 @auth_bp.route('/projects/<project_id>', methods=['GET'])
@@ -150,9 +158,6 @@ def get_project(project_id):
     project = Project.get_project_full_data(project_id, user_id)
 
     if project:
-        midi_b64 = base64.b64encode(project['midi']).decode('utf-8') if project.get('midi') else None
-        project['midi'] = f"data:audio/midi;base64,{midi_b64}" if midi_b64 else None
-        print(project['midi'])
         return jsonify(project), 200
 
     return jsonify({'error': 'Project not found'}), 404
@@ -160,17 +165,13 @@ def get_project(project_id):
 @auth_bp.route('/projects/user/<username>', methods=['GET'])
 @jwt_required()
 def list_projects_by_username(username):
+    print("oi")
     projects = Project.get_user_projects_by_username(username)
 
     if not projects:
         return jsonify([]), 200
 
     for project in projects:
-        midi_bytes = project.get('midi')
-        if midi_bytes:
-            midi_b64 = base64.b64encode(midi_bytes).decode('utf-8') if project.get('midi') else None
-            project['midi'] = f"data:audio/midi;base64,{midi_b64}"
-
         print("oi")
         print( project.get('midi'))
 
@@ -326,6 +327,7 @@ def upload_image():
         return jsonify({'secure_url': result['secure_url']}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @auth_bp.route('/post', methods=['GET'])
 @jwt_required()
