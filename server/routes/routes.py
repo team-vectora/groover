@@ -154,8 +154,7 @@ def save_project():
 @auth_bp.route('/projects/<project_id>', methods=['GET'])
 @jwt_required()
 def get_project(project_id):
-    user_id = get_jwt_identity()
-    project = Project.get_project_full_data(project_id, user_id)
+    project = Project.get_project_full_data_without_user_id(project_id)
 
     if project:
         return jsonify(project), 200

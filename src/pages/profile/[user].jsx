@@ -95,6 +95,8 @@ export default function Profile() {
       });
       if (!response.ok) throw new Error("Erro ao carregar projetos");
       const data = await response.json();
+      console.log("Olha os projetos")
+      console.log(data)
       setProjects(data);
 
     } catch (err) {
@@ -160,6 +162,7 @@ export default function Profile() {
             <div className="projects-grid">
               {projects.map((project) => (
                 <ProjectCard
+                    owner={userId}
                   key={project.id}
                   project={project}
                   setCurrentProject={setCurrentProject}

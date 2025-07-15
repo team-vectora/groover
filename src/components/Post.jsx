@@ -215,13 +215,14 @@
 
         {post?.project &&(
             <ProjectCard
-              project={post.project}
-              setCurrentProject={setCurrentProject}
-              handleClickFork={handleClickFork}
+                owner={post.posted_by}
+                project={post.project}
+                setCurrentProject={setCurrentProject}
+                handleClickFork={handleClickFork}
             />
 
         )}
-        <div className="flex justify-center mt-10">
+        <div className="flex justify-center mt-10"  >
               <button
                 onClick={() => {
                   if (!isAnimating) {
