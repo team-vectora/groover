@@ -682,6 +682,7 @@ function EditorPage() {
     const midiFile = midiBlob();
     const midiBase64 = await blobToBase64(midiFile);
     projectData.midi = midiBase64;
+    projectData.title = title + " (Fork)"
 
     try {
       const response = await fetch('http://localhost:5000/api/projects', {
