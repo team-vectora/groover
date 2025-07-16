@@ -13,7 +13,11 @@ const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFor
 
       <div className="project-info">
         <span>BPM: {project.bpm || "--"}</span>
-        <span>{new Date(project.created_at).toLocaleDateString()}</span>
+        <span>
+          {project.created_at
+            ? new Date(project?.created_at).toLocaleDateString()
+            : "--"}
+        </span>
       </div>
 
       <div className="button-info">
