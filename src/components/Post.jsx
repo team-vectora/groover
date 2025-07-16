@@ -87,14 +87,7 @@ import { useRouter } from "next/navigation";
           </div>
 
           <h3 className="break-words w-full mt-5">{post.caption}</h3>
-        {post?.project &&(
-            <ProjectCard
-                project={post.project}
-                setCurrentProject={setCurrentProject}
-                handleClickFork={handleClickFork}
-            />
 
-        )}
           {post.photos && post.photos.length > 0 && (
             <div className="post-images-container" style={{ position: 'relative' }}>
               {post.photos.length > 1 && (
@@ -229,7 +222,14 @@ import { useRouter } from "next/navigation";
               )}
             </div>
           )}
+        {post?.project &&(
+            <ProjectCard
+                project={post.project}
+                setCurrentProject={setCurrentProject}
+                handleClickFork={handleClickFork}
+            />
 
+        )}
         <div className="flex justify-center mt-10"  >
               <button
                 onClick={() => {

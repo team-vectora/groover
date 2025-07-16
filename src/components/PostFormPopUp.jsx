@@ -5,6 +5,16 @@ import "reactjs-popup/dist/index.css";
 import { useState, useRef } from "react";
 import { uploadToCloudinary } from "../util/upload.jsx";
 
+const GENRES = [
+  "rock", "pop", "jazz", "blues", "rap", "hip hop", "r&b", "reggae",
+  "samba", "mpb", "bossa nova", "funk", "sertanejo", "forró", "axé",
+  "pagode", "indie", "metal", "heavy metal", "trap", "lo-fi", "electronic",
+  "house", "techno", "trance", "drum and bass", "dubstep", "k-pop", "j-pop",
+  "classical", "opera", "gospel", "country", "folk", "punk", "hardcore",
+  "grunge", "soul", "disco", "reggaeton", "cumbia", "tango", "flamenco",
+  "chillout", "ambient", "experimental"
+];
+
 const PostFormPopUp = ({ open, onClose, projects }) => {
   const [caption, setCaption] = useState("");
   const [images, setImages] = useState([]);
@@ -12,6 +22,20 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
   const fileInputRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProject, setSelectedProject] = useState("");
+  const [selectedGenres, setSelectedGenres] = useState([]);
+
+  const toggleGenre = (genre) => {
+    if (selectedGenres.includes(genre)) {
+      setSelectedGenres(selectedGenres.filter((g) => g !== genre));
+    } else {
+      if (selectedGenres.length < 5) {
+        setSelectedGenres([...selectedGenres, genre]);
+      } else {
+        alert("Você pode selecionar no máximo 5 tags musicais.");
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -25,7 +49,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
           images.map((file) => uploadToCloudinary(file))
         );
       }
-        console.log(selectedProject)
+
       const response = await fetch("http://localhost:5000/api/post", {
         method: "POST",
         headers: {
@@ -36,6 +60,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
           caption,
           photos: photoUrls,
           project_id: selectedProject,
+          genres: selectedGenres,
         }),
       });
 
@@ -45,6 +70,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
         setCaption("");
         setImages([]);
         setPreviews([]);
+        setSelectedGenres([]);
         if (fileInputRef.current) fileInputRef.current.value = "";
         onClose();
       } else {
@@ -96,10 +122,8 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
     >
       <div
         className="rounded-xl overflow-hidden shadow-lg w-[448px] mx-auto"
-
         style={{ backgroundColor: "#121113" }}
       >
-
         <div
           className="flex justify-between items-center px-5 py-4 border-b"
           style={{ backgroundColor: "#070608", borderColor: "#4c4e30" }}
@@ -120,8 +144,8 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
           </button>
         </div>
 
-        {selectedProject}
         <form onSubmit={handleSubmit} className="p-5">
+          {/* Legenda */}
           <div className="mb-5">
             <textarea
               value={caption}
@@ -146,6 +170,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
             </div>
           </div>
 
+          {/* Imagens */}
           <div className="mb-5">
             {previews.length > 0 ? (
               <div className="grid grid-cols-3 gap-3 mb-4">
@@ -153,9 +178,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
                   <div
                     key={index}
                     className="relative rounded-md overflow-hidden aspect-square"
-                    style={{
-                      border: "1px solid #4c4e30",
-                    }}
+                    style={{ border: "1px solid #4c4e30" }}
                   >
                     <img
                       src={preview.url}
@@ -166,9 +189,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
                       type="button"
                       onClick={() => removeImage(index)}
                       className="absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center text-white text-lg transition-colors"
-                      style={{
-                        backgroundColor: "rgba(0,0,0,0.7)",
-                      }}
+                      style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
                       onMouseEnter={(e) =>
                         (e.currentTarget.style.backgroundColor = "#b91c1c")
                       }
@@ -209,15 +230,12 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
             <label
               htmlFor="file-upload"
               className="inline-block px-4 py-2 rounded-md cursor-pointer select-none transition-colors"
-              style={{
-                backgroundColor: "#4c4e30",
-                color: "#ffffff",
-              }}
+              style={{ backgroundColor: "#4c4e30", color: "#ffffff" }}
               onMouseEnter={(e) =>
-                ((e.currentTarget.style.backgroundColor = "#61673e"))
+                (e.currentTarget.style.backgroundColor = "#61673e")
               }
               onMouseLeave={(e) =>
-                ((e.currentTarget.style.backgroundColor = "#4c4e30"))
+                (e.currentTarget.style.backgroundColor = "#4c4e30")
               }
             >
               Selecionar Imagens
@@ -233,6 +251,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
             />
           </div>
 
+          {/* Projeto */}
           <div className="mb-5">
             <label
               htmlFor="project-select"
@@ -259,6 +278,39 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Gêneros */}
+          <div className="mb-5">
+            <label
+              className="block mb-2 text-sm font-medium"
+              style={{ color: "#e6e8e3" }}
+            >
+              Escolha até 5 tags musicais
+            </label>
+            <div
+              className="grid grid-cols-2 max-h-40 overflow-y-auto gap-2 border border-[#61673e] rounded p-2 bg-[#070608]"
+              style={{ scrollbarWidth: "thin" }}
+            >
+              {GENRES.map((genre) => (
+                <label
+                  key={genre}
+                  className={`cursor-pointer select-none px-2 py-1 rounded-full text-center transition duration-300 ease-in-out ${
+                    selectedGenres.includes(genre)
+                      ? "bg-[#4c4e30] text-black font-semibold"
+                      : "bg-[#121113] text-[#e6e8e3]"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    checked={selectedGenres.includes(genre)}
+                    onChange={() => toggleGenre(genre)}
+                  />
+                  {genre.charAt(0).toUpperCase() + genre.slice(1)}
+                </label>
+              ))}
+            </div>
           </div>
 
           <button

@@ -120,7 +120,7 @@ class User:
             u_genres = u.get('genres', {})
             u_vector = [u_genres.get(g, 0) for g in GENRES]
             similarity = cosine_similarity(user_vector, u_vector)
-            if similarity >= 0.5:
+            if similarity >= 0.8:
                 similar_users.append({
                     '_id': str(u['_id']),
                     'username': u.get('username'),
@@ -442,8 +442,32 @@ class Post:
 
         return mongo.db.posts.insert_one(post).inserted_id
 
+
+
     @staticmethod
     def get_posts_with_user_and_project(user_id, similarity_threshold=0.5, limit=25):
+
+        def encode_midi_field(post):
+            if post.get('project') and post['project'] and 'midi' in post['project'] and post['project']['midi']:
+                midi = post['project']['midi']
+                if isinstance(midi, bytes):
+                    midi_b64 = base64.b64encode(midi).decode('utf-8')
+                elif isinstance(midi, str):
+                    # Se já começa com o prefixo data:audio/midi;base64, remove para não duplicar
+                    if midi.startswith('data:audio/midi;base64,'):
+                        midi_b64 = midi.split(',', 1)[1]
+                    else:
+                        midi_b64 = midi
+                else:
+                    midi_b64 = None
+
+                if midi_b64:
+                    post['project']['midi'] = f"data:audio/midi;base64,{midi_b64}"
+                else:
+                    post['project']['midi'] = None
+            elif post.get('project') and post['project']:
+                post['project']['midi'] = None
+            return post
 
         user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
         if not user:
@@ -528,7 +552,6 @@ class Post:
 
         filtered_posts = []
         for post in raw_posts:
-            # Pega o user do post
             post_user_genres = post['user'].get('genres', {})
             if isinstance(post_user_genres, list):
                 post_user_genres = {genre: 1 for genre in post_user_genres}
@@ -542,18 +565,30 @@ class Post:
                 if 'likes' in post:
                     post['likes'] = [str(like) if isinstance(like, ObjectId) else like for like in post['likes']]
 
-                if post.get('project') and post['project'] and 'midi' in post['project'] and post['project']['midi']:
-                    midi_b64 = base64.b64encode(post['project']['midi']).decode('utf-8')
-                    post['project']['midi'] = f"data:audio/midi;base64,{midi_b64}"
-                elif post.get('project') and post['project']:
-                    post['project']['midi'] = None
+                post = encode_midi_field(post)
 
                 filtered_posts.append(post)
 
                 if len(filtered_posts) == limit:
                     break
 
+        if len(filtered_posts) < 5:
+            fallback_posts = []
+            for post in raw_posts:
+                if 'likes' in post:
+                    post['likes'] = [str(like) if isinstance(like, ObjectId) else like for like in post['likes']]
+
+                post = encode_midi_field(post)
+
+                fallback_posts.append(post)
+
+                if len(fallback_posts) == limit:
+                    break
+
+            return fallback_posts
+
         return filtered_posts
+
 
     @staticmethod
     def get_posts():

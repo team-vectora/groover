@@ -54,7 +54,12 @@ export default function Profile() {
       setFollowingsUserLoged(storedFollowing);
   }, []);
 
+  const handleClickLogout = () => {
 
+    localStorage.clear();
+    router.push("login");
+
+  }
   const fetchUserData = async (username) => {
     if (!username || !token) return;
 
@@ -216,12 +221,15 @@ export default function Profile() {
     }
   }
 
-  return (
-    <div className="profile-container">
-      <ToastContainer
-        position="top-center"
-        toastStyle={{ textAlign: 'center', fontSize: '1.2rem' }}
-      />
+return (
+  <div className="profile-container">
+    <ToastContainer
+      position="top-center"
+      toastStyle={{ textAlign: 'center', fontSize: '1.2rem' }}
+    />
+
+    {/* TOP BAR */}
+    <div className="flex justify-between items-center w-full mb-4">
       <div className="flex items-center gap-4">
         <Image
           className="w-30 h-30 sm:w-30 sm:h-30 rounded-full object-cover border border-[#61673e] mb-2 hover:bg-[#c1915d] transition duration-300 ease-in-out cursor-pointer"
@@ -231,26 +239,26 @@ export default function Profile() {
           alt="Avatar"
         />
         <div className="flex flex-col">
-            <h1 className="profile-title">Olá, {user}</h1>
-            <div className="flex">
-                <p>Seguidores: {followers.length}</p>
-                <p>Seguindo: {followings.length}</p>
-            </div>
+          <h1 className="profile-title">Olá, {user}</h1>
+          <div className="flex gap-4">
+            <p>Seguidores: {followers.length}</p>
+            <p>Seguindo: {followings.length}</p>
+          </div>
 
-            <h3 className="text-x">{bio}</h3>
-            <ul className="flex flex-wrap gap-2 mt-4">
-              {Object.entries(genres)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 5)
-                .map(([genre]) => (
-                  <li
-                    key={genre}
-                    className="px-3 py-1 bg-[#61673e] text-white rounded-full shadow text-sm font-semibold"
-                  >
-                    {genre.charAt(0).toUpperCase() + genre.slice(1)}
-                  </li>
-                ))}
-            </ul>
+          <h3 className="text-x m-2">{bio}</h3>
+          <ul className="flex flex-wrap gap-2 mt-4">
+            {Object.entries(genres)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 5)
+              .map(([genre]) => (
+                <li
+                  key={genre}
+                  className="px-3 py-1 bg-[#61673e] text-white rounded-full shadow text-sm font-semibold"
+                >
+                  {genre.charAt(0).toUpperCase() + genre.slice(1)}
+                </li>
+              ))}
+          </ul>
         </div>
 
         {username === user && (
@@ -274,25 +282,35 @@ export default function Profile() {
             </svg>
           </button>
         )}
-
-        <ConfigUserPopUp
-          open={configPop}
-          onClose={() => setConfigPop(false)}
-          username={username}
-          bio={bio}
-          profilePic={avatarUrl}
-          setProfilePic={setAvatarUrl}
-          favoriteTags={genres}
-        />
       </div>
 
-      <nav className="tabs-nav">
-        <button className={activeTab === "posts" ? "tab active" : "tab"} onClick={() => setActiveTab("posts")}>My Posts</button>
-        <button className={activeTab === "musics" ? "tab active" : "tab"} onClick={() => setActiveTab("musics")}>My Musics</button>
-        <button className={activeTab === "invites" ? "tab active" : "tab"} onClick={() => setActiveTab("invites")}>Invites</button>
-      </nav>
-
-      <section className="tab-content">{renderTabContent()}</section>
+      {/* LOGOUT BUTTON FAR RIGHT */}
+      <button
+        className="header-button-logout"
+        onClick={handleClickLogout}
+      >
+        ❌ {"logout"}
+      </button>
     </div>
-  );
+
+    <ConfigUserPopUp
+      open={configPop}
+      onClose={() => setConfigPop(false)}
+      username={username}
+      bio={bio}
+      profilePic={avatarUrl}
+      setProfilePic={setAvatarUrl}
+      favoriteTags={genres}
+    />
+
+    <nav className="tabs-nav">
+      <button className={activeTab === "posts" ? "tab active" : "tab"} onClick={() => setActiveTab("posts")}>My Posts</button>
+      <button className={activeTab === "musics" ? "tab active" : "tab"} onClick={() => setActiveTab("musics")}>My Musics</button>
+      <button className={activeTab === "invites" ? "tab active" : "tab"} onClick={() => setActiveTab("invites")}>Invites</button>
+    </nav>
+
+    <section className="tab-content">{renderTabContent()}</section>
+  </div>
+);
+
 }

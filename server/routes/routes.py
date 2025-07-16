@@ -77,12 +77,13 @@ def get_user_by_username(username):
     return jsonify(user), 200
 
 @auth_bp.route("/user/similar", methods=["GET"])
+@jwt_required()
 def get_users_similar():
     users = User.get_similar_users(user_id=get_jwt_identity())
-    if not users:
+    if users is None:
         return jsonify({"error": "User not found"}), 404
-
     return jsonify(users), 200
+
 
 
 @auth_bp.route('/config', methods=['PUT'])

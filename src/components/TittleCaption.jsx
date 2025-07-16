@@ -21,12 +21,7 @@ const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSav
     avatar: ""
   };
 
-  const handleClickLogout = () => {
 
-    localStorage.clear();
-    router.push("login");
-
-  }
 
   return (
     <header className="app-header">
@@ -60,9 +55,7 @@ const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSav
           <button className="header-button" onClick={onSave}>
             ⎙ {t("save")}
           </button>
-          <button className="header-button-logout" onClick={handleClickLogout}>
-            ❌ {t("logout")}
-          </button>
+
 
         </div>
         <div className="language-switcher">

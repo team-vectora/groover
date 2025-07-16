@@ -8,15 +8,35 @@ const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFor
              console.log(project)
          }, []);
   return (
-    <div
-      key={project.id}
-      className="project-card"
-      onClick={() => setCurrentProject(project)}
-    >
+        <div
+          key={project.id}
+          onClick={() => setCurrentProject(project)}
+          className="
+            rounded-lg
+            p-6
+            transition-shadow
+            duration-200
+            bg-[var(--bg-darker)]
+            text-[var(--text)]
+            text-[1.1rem]
+            w-full
+            cursor-pointer
+            hover:shadow-lg
+          "
+          style={{
+            boxShadow: "0 2px 8px var(--primary)",
+          }}
+          onMouseEnter={(e) =>
+            e.currentTarget.style.boxShadow = "0 8px 12px var(--primary)"
+          }
+          onMouseLeave={(e) =>
+            e.currentTarget.style.boxShadow = "0 2px 8px var(--primary)"
+          }
+        >
       <h2>{project.title || "Sem título"}</h2>
       <p>{project.description || "Sem descrição"}</p>
 
-      <div className="project-info">
+      <div className="flex justify-between text-[1rem] text-[var(--text-lighter)] mt-3">
         <span>BPM: {project.bpm || "--"}</span>
         <span>
           {project.created_at
@@ -25,12 +45,32 @@ const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFor
         </span>
       </div>
 
-      <div className="button-info">
-        <Link href={`/editor/${(isYourProfile) ? "" : "view"}/${project.id}`} className="button-card-project">
+      <div className="flex items-center justify-start pt-2">
+        <Link
+          href={`/editor/${isYourProfile ? "" : "view"}/${project.id}`}
+          className="
+            mr-4
+            bg-[var(--primary)]
+            p-3
+            rounded-full
+            h-12
+            w-12
+            flex
+            items-center
+            justify-center
+            border-none
+            transition
+            duration-300
+            ease-in-out
+            hover:bg-[var(--primary-light)]
+            hover:shadow-md
+            hover:fill-[var(--text)]
+          "
+        >
           <svg
             fill="#ffffff"
             viewBox="0 0 32 32"
-            style={{ fillRule: "evenodd", clipRule: "evenodd", strokeLinejoin: "round", strokeMiterlimit: 2 }}
+            className="h-[30px] w-[30px] stroke-[var(--text)]"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path d="M5.991,12.003l-0.001,0c-1.105,0 -2.002,0.897 -2.002,2.002c-0,1.105 0.897,2.002 2.002,2.002c1.104,-0 2.001,-0.897 2.001,-2.002l0,-7.122c0,-0 6.001,-0.75 6.001,-0.75l0.003,3.867c-1.105,0 -2.002,0.897 -2.002,2.002c0,1.105 0.897,2.001 2.002,2.001c1.105,0 2.002,-0.896 2.002,-2.001l-0.006,-7.003c0,-0.286 -0.123,-0.559 -0.338,-0.749c-0.215,-0.19 -0.501,-0.278 -0.786,-0.242l-8,1c-0.5,0.062 -0.876,0.488 -0.876,0.992l0,6.003Z"></path>
@@ -39,32 +79,71 @@ const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFor
         </Link>
 
         <button
-          className="button-card-project"
           onClick={() => handleClickFork(project)}
+          className="
+            mr-4
+            bg-[var(--primary)]
+            p-3
+            rounded-full
+            h-12
+            w-12
+            flex
+            items-center
+            justify-center
+            border-none
+            transition
+            duration-300
+            ease-in-out
+            hover:bg-[var(--primary-light)]
+            hover:shadow-md
+            hover:fill-[var(--text)]
+          "
         >
           <svg
             fill="#ffffff"
             viewBox="0 0 1920 1920"
+            className="h-[30px] w-[30px] stroke-[var(--text)]"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path d="M1468.183 451.76v1468.184H0V451.76h1468.183ZM1920 0v1468.296h-338.812V338.812H451.704V0H1920ZM338.812 1016.446h790.56V903.509h-790.56v112.937Zm0 225.874h564.686v-112.937H338.812v112.937Zm0 225.988h790.56v-113.05h-790.56v113.05Z" />
           </svg>
         </button>
 
-          <button
-              className="button-card-project"
-              onClick={() => handleClickFork(project)}
-              style={{
-                display: (isYourProfile)
-                    ? "block"
-                    : "none"
-              }}
+        <button
+          onClick={() => handleClickFork(project)}
+          className={`
+            mr-4
+            bg-[var(--primary)]
+            p-3
+            rounded-full
+            h-12
+            w-12
+            flex
+            items-center
+            justify-center
+            border-none
+            transition
+            duration-300
+            ease-in-out
+            hover:bg-[var(--primary-light)]
+            hover:shadow-md
+            hover:fill-[var(--text)]
+            ${isYourProfile ? "block" : "hidden"}
+          `}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="22"
+            width="37"
+            fill="#4c4e30"
+            viewBox="0 0 50 50"
           >
-            <span><svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" height="22" width="37" fill="#4c4e30" viewBox="0 0 50 50"><path d="M 40 0 C 34.53125 0 30.066406 4.421875 30 9.875 L 15.90625 16.9375 C 14.25 15.71875 12.207031 15 10 15 C 4.488281 15 0 19.488281 0 25 C 0 30.511719 4.488281 35 10 35 C 12.207031 35 14.25 34.28125 15.90625 33.0625 L 30 40.125 C 30.066406 45.578125 34.53125 50 40 50 C 45.511719 50 50 45.511719 50 40 C 50 34.488281 45.511719 30 40 30 C 37.875 30 35.902344 30.675781 34.28125 31.8125 L 20.625 25 L 34.28125 18.1875 C 35.902344 19.324219 37.875 20 40 20 C 45.511719 20 50 15.511719 50 10 C 50 4.488281 45.511719 0 40 0 Z M 40 2 C 44.429688 2 48 5.570313 48 10 C 48 14.429688 44.429688 18 40 18 C 38.363281 18 36.859375 17.492188 35.59375 16.65625 C 35.46875 16.238281 35.089844 15.949219 34.65625 15.9375 C 34.652344 15.933594 34.628906 15.941406 34.625 15.9375 C 33.230469 14.675781 32.292969 12.910156 32.0625 10.9375 C 32.273438 10.585938 32.25 10.140625 32 9.8125 C 32.101563 5.472656 35.632813 2 40 2 Z M 30.21875 12 C 30.589844 13.808594 31.449219 15.4375 32.65625 16.75 L 19.8125 23.1875 C 19.472656 21.359375 18.65625 19.710938 17.46875 18.375 Z M 10 17 C 11.851563 17 13.554688 17.609375 14.90625 18.65625 C 14.917969 18.664063 14.925781 18.679688 14.9375 18.6875 C 14.945313 18.707031 14.957031 18.730469 14.96875 18.75 C 15.054688 18.855469 15.160156 18.9375 15.28125 19 C 15.285156 19.003906 15.308594 18.996094 15.3125 19 C 16.808594 20.328125 17.796875 22.222656 17.96875 24.34375 C 17.855469 24.617188 17.867188 24.925781 18 25.1875 C 17.980469 25.269531 17.96875 25.351563 17.96875 25.4375 C 17.847656 27.65625 16.839844 29.628906 15.28125 31 C 15.1875 31.058594 15.101563 31.132813 15.03125 31.21875 C 13.65625 32.332031 11.914063 33 10 33 C 5.570313 33 2 29.429688 2 25 C 2 20.570313 5.570313 17 10 17 Z M 19.8125 26.8125 L 32.65625 33.25 C 31.449219 34.5625 30.589844 36.191406 30.21875 38 L 17.46875 31.625 C 18.65625 30.289063 19.472656 28.640625 19.8125 26.8125 Z M 40 32 C 44.429688 32 48 35.570313 48 40 C 48 44.429688 44.429688 48 40 48 C 35.570313 48 32 44.429688 32 40 C 32 37.59375 33.046875 35.433594 34.71875 33.96875 C 34.742188 33.949219 34.761719 33.929688 34.78125 33.90625 C 34.785156 33.902344 34.808594 33.910156 34.8125 33.90625 C 34.972656 33.839844 35.113281 33.730469 35.21875 33.59375 C 36.554688 32.597656 38.199219 32 40 32 Z"></path></svg></span>
-          </button>
-
+            <path d="..."></path>
+          </svg>
+        </button>
       </div>
     </div>
+
   );
 };
 
