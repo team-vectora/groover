@@ -250,6 +250,7 @@ def list_invitations():
     for inv in invitations:
         project = Project.get_project(str(inv['project_id']), str(inv['from_user_id']))
         from_user = User.get_user(str(inv['from_user_id']))
+        to_user = User.get_user(str(inv['to_user_id']))
         
         serialized.append({
             'id': str(inv['_id']),
@@ -261,6 +262,11 @@ def list_invitations():
                 'id': str(inv['from_user_id']),
                 'username': from_user.get('username') if from_user else 'Unknown User'
             },
+            'to_user': {
+                'id': str(inv['to_user_id']),
+                'username': to_user.get('username') if to_user else 'Unknown User'
+            },
+            'status': inv['status'],
             'created_at': inv['created_at']
         })
     
@@ -297,7 +303,7 @@ def respond_invitation(invitation_id):
             user_id=user_id
         )
     
-    return jsonify({'message': f'Invitation {response}ed'}), 200
+        return jsonify({'message': f'Invitation {response}ed'}), 200
 
 
 

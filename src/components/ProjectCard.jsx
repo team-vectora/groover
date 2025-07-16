@@ -1,9 +1,11 @@
-    import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import React from "react";
 import Link from "next/link";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faShareNodes } from '@fortawesome/free-solid-svg-icons';
 
-const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFork }) => {
+const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFork, handleClickShare }) => {
         useEffect(() => {
              console.log(project)
          }, []);
@@ -43,11 +45,15 @@ const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFor
             ? new Date(project?.created_at).toLocaleDateString()
             : "--"}
         </span>
+
+        <span>
+          {project.created_by ? project.created_by.username : "--"}
+        </span>
       </div>
 
       <div className="flex items-center justify-start pt-2">
         <Link
-          href={`/editor/${isYourProfile ? "" : "view"}/${project.id}`}
+          href={`/editor/${isYourProfile ? "" : "view/"}${project.id}`}
           className="
             mr-4
             bg-[var(--primary)]
@@ -109,39 +115,21 @@ const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFor
           </svg>
         </button>
 
-        <button
-          onClick={() => handleClickFork(project)}
-          className={`
-            mr-4
-            bg-[var(--primary)]
-            p-3
-            rounded-full
-            h-12
-            w-12
-            flex
-            items-center
-            justify-center
-            border-none
-            transition
-            duration-300
-            ease-in-out
-            hover:bg-[var(--primary-light)]
-            hover:shadow-md
-            hover:fill-[var(--text)]
-            ${isYourProfile ? "block" : "hidden"}
-          `}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="22"
-            width="37"
-            fill="#4c4e30"
-            viewBox="0 0 50 50"
+          <button
+              className="button-card-project"
+              onClick={() => handleClickShare(project)}
+              style={{
+                display: (isYourProfile)
+                    ? "block"
+                    : "none"
+              }}
           >
-            <path d="..."></path>
-          </svg>
-        </button>
+            <FontAwesomeIcon icon={faShareNodes} />
+          </button>
+
       </div>
+
+
     </div>
 
   );

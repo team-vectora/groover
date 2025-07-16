@@ -20,7 +20,7 @@ class User:
             'email': email,
             'created_at': datetime.now(),
             'active': False,
-            'genres': genres_dict 
+            'genres': genres_dict
         }
         return mongo.db.users.insert_one(user).inserted_id
 
@@ -84,7 +84,6 @@ class User:
 
             update_fields['genres'] = genres
 
-
         if not update_fields:
             return {"error": "Nenhum dado para atualizar"}, 400
 
@@ -97,7 +96,6 @@ class User:
             return {"error": "User not found"}, 404
 
         return {"message": "User updated successfully"}, 200
-
 
     @staticmethod
     def get_similar_users(user_id, limit=20):
@@ -134,7 +132,6 @@ class User:
         return similar_users
 
 
-
 class Project:
     @staticmethod
     def create_project(user_id, project_data):
@@ -153,10 +150,10 @@ class Project:
             'created_by': user_id,
             'updated_at': datetime.now(),
             'last_updated_by': user_id
-            #sem current_music_id mas o Music também vai cuidar papai
+            # sem current_music_id mas o Music também vai cuidar papai
         }
         return str(mongo.db.projects.insert_one(project).inserted_id)
-    
+
     @staticmethod
     def create_project_fork(project_data):
         return str(mongo.db.projects.insert_one(project_data).inserted_id)
@@ -184,7 +181,7 @@ class Project:
     def get_project(project_id, user_id):
         # Baita de uma cabanagem pra depois o jsonify nn ficar chorando
         # ain ObjectID nao é serializável ain ain, vou dar erro ai, ain ain
-        
+
         project = mongo.db.projects.find_one({
             '_id': ObjectId(project_id),
             'user_id': user_id
@@ -199,8 +196,8 @@ class Project:
                     version['update_by'] = str(version.get('update_by', ''))
 
             if 'midi' in project:
-                         midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
-                         project['midi'] = f"data:audio/midi;base64,{midi_b64}"
+                midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
+                project['midi'] = f"data:audio/midi;base64,{midi_b64}"
 
             project['created_by'] = str(project.get('created_by', ''))
             project['last_updated_by'] = str(project.get('last_updated_by', ''))
@@ -246,8 +243,8 @@ class Project:
                     version['update_by'] = User.get_user(version['update_by'])
 
             if 'midi' in project:
-                                     midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
-                                     project['midi'] = f"data:audio/midi;base64,{midi_b64}"
+                midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
+                project['midi'] = f"data:audio/midi;base64,{midi_b64}"
 
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
@@ -266,7 +263,12 @@ class Project:
             print(f"No projects found for user {username} with ID {user_id_str}")
             return []
 
-        projects = mongo.db.projects.find({'user_id': user_id_str})
+        projects = mongo.db.projects.find({
+            '$or': [
+                {'collaborators': {'$in': [ObjectId(user_id_str)]}},
+                {'user_id': user_id_str}
+            ]
+        })
 
         result = []
         for p in projects:
@@ -307,10 +309,10 @@ class Project:
         return [{
             'id': str(p['_id']),
             'midi': (lambda project:
-                                    f"data:audio/midi;base64," + base64.b64encode(project['midi']).decode('utf-8')
-                                    if 'midi' in project
-                                    else None
-                            )(p),
+                     f"data:audio/midi;base64," + base64.b64encode(project['midi']).decode('utf-8')
+                     if 'midi' in project
+                     else None
+                     )(p),
             'title': p.get('title'),
             'bpm': p.get('bpm'),
             'tempo': p.get('tempo'),
@@ -345,8 +347,7 @@ class Project:
             }
         )
         return result.modified_count > 0
-    
-    
+
 
 class Music:
     @staticmethod
@@ -391,6 +392,7 @@ class Music:
 
         return music
 
+
 # Adicionar nova coleção de convites
 class Invitation:
     @staticmethod
@@ -407,14 +409,14 @@ class Invitation:
     @staticmethod
     def find_by_id(invitation_id):
         return mongo.db.invitations.find_one({'_id': ObjectId(invitation_id)})
-    
+
     @staticmethod
     def find_pending_by_user(user_id):
         return list(mongo.db.invitations.find({
             'to_user_id': ObjectId(user_id),
             'status': 'pending'
         }))
-    
+
     @staticmethod
     def update_status(invitation_id, status):
         result = mongo.db.invitations.update_one(
@@ -874,22 +876,24 @@ class Post:
             return {'error': 'Post não encontrado'}, 404
 
         post_oid = ObjectId(post_id)
-        
+
         if user_id in post.get('likes', []):
             mongo.db.posts.update_one(
                 {'_id': post_oid},
-                {'$pull': {'likes': user_id}}  
+                {'$pull': {'likes': user_id}}
             )
-               
+
             return {'message': 'Like removido'}, 200
         else:
             mongo.db.posts.update_one(
                 {'_id': post_oid},
-                {'$push': {'likes': user_id}}  
+                {'$push': {'likes': user_id}}
             )
-            
+
             return {'message': 'Post curtido com sucesso'}, 200
 
+
+# FAzer bunitinho neh? Separar seguidor da entidade usuario
 class Followers:
 
     @staticmethod
@@ -922,7 +926,6 @@ class Followers:
             "follow_id": str(result.inserted_id)
         }
 
-
     @staticmethod
     def get_followers(user_id):
         return list(mongo.db.followers.find({"follower_id": ObjectId(user_id)}))
@@ -933,7 +936,6 @@ class Followers:
 
     @staticmethod
     def is_following(follower_id, following_id):
-
 
         follower_oid = ObjectId(follower_id)
         following_oid = ObjectId(following_id)

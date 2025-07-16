@@ -16,6 +16,9 @@ import { MidiContext } from "../../contexts/MidiContext";
 
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import useShareProject from "../../hooks/useShareProject";
+import Invite from "../../components/Invite";
+import SharePopUp from "../../components/SharePopUp";
 
 export default function Profile() {
   const router = useRouter();
@@ -32,6 +35,7 @@ export default function Profile() {
   const [invites, setInvites] = useState([]);
   const [genres, setGenres] = useState([]);
   const [id, setId] = useState(null);
+  const [projectClicked, setProjectClicked] = useState(null);
   const [followers, setFollowers] = useState(0);
   const [followings, setFollowings] = useState(0);
 
@@ -43,11 +47,14 @@ export default function Profile() {
 
   const [openPop, setOpenPop] = useState(false);
   const [configPop, setConfigPop] = useState(false);
+  const [sharePop, setSharePop] = useState(false);
+  const [response, setResponse] = useState("");
 
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
 
   const { likePost, error: likeError } = useLikePost(token, () => fetchPosts(token));
   const { forkProject, loading: forkLoading } = useForkProject(token);
+  const { shareProject, loading: shareLoading } = useShareProject(token);
 
   useEffect(() => {
       const storedFollowing = JSON.parse(localStorage.getItem("following") || "[]");
@@ -103,6 +110,7 @@ export default function Profile() {
     fetchUserProjects(token, user);
     fetchPosts(token);
     fetchUserData(user);
+    fetchInvites(token);
   }, [router, user]);
 
 
@@ -144,8 +152,85 @@ export default function Profile() {
     }
   };
 
+  const fetchInvites = async (token) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:5000/api/invitations`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Erro ao carregar invites");
+       const data = await res.json();
+      console.log("Oia os invites")
+      console.log(data)
+       setInvites(data)
+    } catch (err) {
+      setError("Erro ao buscar posts");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleClickFork = async (project) => {
     await forkProject(project.id);
+  };
+
+  const handleClickShare = async (project) => {
+    setSharePop(true);
+    setProjectClicked(project);
+  };
+
+  const handleClickAccept = async (inviteId) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`http://localhost:5000/api/invitations/${inviteId}/respond`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          "response": "accept"
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.ok) throw new Error("Erro ao aceitar convite");
+
+      setResponse("Aceito!");
+
+    } catch (err) {
+      setError("Erro ao aceitar convite");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClickReject = async (inviteId) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`http://localhost:5000/api/invitations/${inviteId}/respond`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          "response": "reject"
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.ok) throw new Error("Erro ao aceitar convite");
+
+      setResponse("Recusado");
+
+    } catch (err) {
+      setError("Erro ao aceitar convite");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleNewProject = () => router.push("/editor/new");
@@ -198,9 +283,12 @@ export default function Profile() {
               {projects.map((project) => (
                 <ProjectCard
                   key={project.id}
+                  isYourProfile={project.created_by._id === id}
                   project={project}
                   setCurrentProject={setCurrentProject}
+                  handleClickShare={handleClickShare}
                   handleClickFork={handleClickFork}
+                  setProjectClicked={setProjectClicked}
                 />
               ))}
             </div>
@@ -211,9 +299,12 @@ export default function Profile() {
           <p className="empty-text">Você não tem convite</p>
         ) : (
           invites.map((invite) => (
-            <div key={invite.id} className="invite-card">
-              <p className="invite-text">{invite.text}</p>
-            </div>
+              <Invite
+                  invite={invite}
+                  response={response}
+                  handleClickAccept={handleClickAccept}
+                  handleClickReject={handleClickReject}
+              />
           ))
         );
       default:
@@ -303,11 +394,18 @@ return (
       favoriteTags={genres}
     />
 
-    <nav className="tabs-nav">
-      <button className={activeTab === "posts" ? "tab active" : "tab"} onClick={() => setActiveTab("posts")}>My Posts</button>
-      <button className={activeTab === "musics" ? "tab active" : "tab"} onClick={() => setActiveTab("musics")}>My Musics</button>
-      <button className={activeTab === "invites" ? "tab active" : "tab"} onClick={() => setActiveTab("invites")}>Invites</button>
-    </nav>
+        <SharePopUp
+            open={sharePop}
+            onClose={() => setConfigPop(false)}
+            project={projectClicked}
+        />
+
+
+      <nav className="tabs-nav">
+        <button className={activeTab === "posts" ? "tab active" : "tab"} onClick={() => setActiveTab("posts")}>My Posts</button>
+        <button className={activeTab === "musics" ? "tab active" : "tab"} onClick={() => setActiveTab("musics")}>My Musics</button>
+        <button className={activeTab === "invites" ? "tab active" : "tab"} onClick={() => setActiveTab("invites")}>Invites</button>
+      </nav>
 
     <section className="tab-content">{renderTabContent()}</section>
   </div>
