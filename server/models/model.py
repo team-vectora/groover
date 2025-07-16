@@ -217,6 +217,9 @@ class Project:
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
 
+            if 'collaborators' in project:
+                project['collaborators'] = [str(id_collab) for id_collab in project['collaborators']]
+
             project['created_by'] = str(project.get('created_by', ''))
             project['last_updated_by'] = str(project.get('last_updated_by', ''))
         return project
@@ -242,6 +245,9 @@ class Project:
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
 
+            if 'collaborators' in project:
+                project['collaborators'] = [str(id_collab) for id_collab in project['collaborators']]
+
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
         return project
@@ -263,6 +269,9 @@ class Project:
             if 'midi' in project:
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
+
+            if 'collaborators' in project:
+                project['collaborators'] = [str(id_collab) for id_collab in project['collaborators']]
 
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
