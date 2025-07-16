@@ -190,7 +190,7 @@ class Project:
         update_data['last_updated_by'] = user_id
 
         result = mongo.db.projects.update_one(
-            {'_id': ObjectId(project_id), 'user_id': user_id},
+            {'_id': ObjectId(project_id)},
             {'$set': update_data}
         )
         return result.modified_count > 0
@@ -311,6 +311,7 @@ class Project:
             result.append({
                 'id': str(p['_id']),
                 'midi': midi_data,
+                'collaborators': [str(id_collab) for id_collab in p['collaborators']],
                 'title': p.get('title', 'Untitled'),
                 'bpm': p.get('bpm', 0),
                 'tempo': p.get('tempo', ''),

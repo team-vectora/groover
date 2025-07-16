@@ -297,6 +297,7 @@ export default function Profile() {
                 <ProjectCard
                   key={project.id}
                   isYourProfile={project.created_by._id === id}
+                  profileId={id}
                   project={project}
                   setCurrentProject={setCurrentProject}
                   handleClickShare={handleClickShare}

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShareNodes } from '@fortawesome/free-solid-svg-icons';
 
-const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFork, handleClickShare }) => {
+const ProjectCard = ({ profileId, isYourProfile, project, setCurrentProject, handleClickFork, handleClickShare }) => {
         useEffect(() => {
              console.log(project)
          }, []);
@@ -53,7 +53,7 @@ const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFor
 
       <div className="flex items-center justify-start pt-2">
         <Link
-          href={`/editor/${isYourProfile ? "" : "view/"}${project.id}`}
+          href={`/editor/${project.created_by?._id === profileId || project.collaborators.includes(profileId) ? "" : "view/"}${project.id}`}
           className="
             mr-4
             bg-[var(--primary)]

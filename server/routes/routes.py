@@ -112,6 +112,7 @@ def config_user():
     print(music_tags)
     return jsonify(result), status_code
 
+
 @auth_bp.route('/projects', methods=['POST'])
 @jwt_required()
 def save_project():
@@ -144,7 +145,7 @@ def save_project():
             )
 
         success = Project.update_project(project_id, user_id, project_data)
-        project = Project.get_project_full_data(project_id, user_id)
+        project = Project.get_project_full_data_without_user_id(project_id)
 
         if success:
             return jsonify(project), 200
