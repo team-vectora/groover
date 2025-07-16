@@ -54,8 +54,6 @@ def signin():
         identity=str(user['_id']), 
         expires_delta=expires
     )
-    followings = Followers.get_followings(user['_id'])
-    print(followings)
 
     if 'avatar' not in user.keys():
         user['avatar'] = None
@@ -64,7 +62,9 @@ def signin():
         'access_token': access_token,
         'user_id': str(user['_id']),
         'username': user['username'],
-        'avatar': user['avatar']
+        'avatar': user['avatar'],
+        "following": user['following'],
+        "followers": user['followers']
     }), 200
 
 @auth_bp.route("/user/<username>", methods=["GET"])
@@ -76,6 +76,13 @@ def get_user_by_username(username):
     user["_id"] = str(user["_id"])
     return jsonify(user), 200
 
+@auth_bp.route("/user/similar", methods=["GET"])
+def get_users_similar():
+    users = User.get_similar_users(user_id=get_jwt_identity())
+    if not users:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify(users), 200
 
 
 @auth_bp.route('/config', methods=['PUT'])
@@ -435,7 +442,7 @@ def fork_project():
         return jsonify({"error": "Project doesn't have music to copy"}), 400
 
     layers = music.get('layers', [])
-    midi_base64 = project.get('midi')  # corrigido aqui
+    midi_base64 = project.get('midi')
     midi_bytes = base64.b64decode(midi_base64) if midi_base64 else None
 
     new_project_id = Project.create_project(

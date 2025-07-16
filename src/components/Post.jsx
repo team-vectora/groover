@@ -8,7 +8,7 @@
     import FollowButton from "./FollowButton";
     import ProjectCard from "./ProjectCard";
 
-    export default function Post({ post, userId, handleClick, setCurrentProject, handleClickFork }) {
+    export default function Post({ post, userId, handleClick, setCurrentProject, handleClickFork, following }) {
       const isLiked = post.likes.includes(userId);
       const [currentImageIndex, setCurrentImageIndex] = useState(0);
       const avatarUrl = post.user?.avatar || "/img/default_avatar.png";
@@ -73,7 +73,10 @@
               </Link>
               <h3 >{new Date(post.created_at).toLocaleString()}</h3>
             </div>
-            <FollowButton followingId={post.user?.id} userId={userId} />
+            {post.user?._id && (
+              <FollowButton followingId={post.user._id} userId={userId} following={following} />
+            )}
+
           </div>
 
           <h3 className="break-words w-full mt-5">{post.caption}</h3>

@@ -36,6 +36,8 @@ const LoginPage = () => {
                 localStorage.setItem('username', data.username);
                 localStorage.setItem('id', data.user_id);
                 localStorage.setItem('avatar', data.avatar);
+                localStorage.setItem('following', JSON.stringify(data.following));
+
                 router.push('/feed');
             } else {
                  notifyError(data.error || 'Erro no login');

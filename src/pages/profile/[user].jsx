@@ -32,6 +32,8 @@ export default function Profile() {
   const [invites, setInvites] = useState([]);
   const [genres, setGenres] = useState([]);
   const [id, setId] = useState(null);
+  const [followers, setFollowers] = useState(0);
+  const [followings, setFollowings] = useState(0);
 
   const [activeTab, setActiveTab] = useState("posts");
 
@@ -61,6 +63,9 @@ export default function Profile() {
       const data = await res.json();
       if (data.avatar) setAvatarUrl(data.avatar);
       if (data.bio) setBio(data.bio);
+      if (data.followers) setFollowers(data.followers);
+      if (data.following) setFollowings(data.following);
+
     } catch (err) {
       console.error("Erro:", err);
     }
@@ -219,6 +224,11 @@ export default function Profile() {
         />
         <div className="flex flex-col">
             <h1 className="profile-title">Olá, {user}</h1>
+            <div className="flex">
+                <p>Seguidores: {followers.length}</p>
+                <p>Seguindo: {followings.length}</p>
+            </div>
+
             <h3 className="text-x">{bio}</h3>
             <ul className="flex flex-wrap gap-2 mt-4">
               {Object.entries(genres)
@@ -233,10 +243,7 @@ export default function Profile() {
                   </li>
                 ))}
             </ul>
-
         </div>
-
-
 
         {username === user && (
           <button

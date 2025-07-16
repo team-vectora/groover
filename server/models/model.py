@@ -23,17 +23,37 @@ class User:
             'genres': genres_dict 
         }
         return mongo.db.users.insert_one(user).inserted_id
-    
+
     @staticmethod
     def find_by_username(username):
-        return mongo.db.users.find_one({'username': username})
-    
+        user = mongo.db.users.find_one({'username': username})
+        if user:
+            user['_id'] = str(user['_id'])
+            user['followers'] = User.get_followers(user['_id'])
+            user['following'] = User.get_following(user['_id'])
+        return user
+
     @staticmethod
     def get_user(user_id):
         user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
         if user:
             user['_id'] = str(user['_id'])
+
+            user['followers'] = User.get_followers(user_id)
+            user['following'] = User.get_following(user_id)
         return user
+
+    @staticmethod
+    def get_followers(user_id):
+        followers_cursor = mongo.db.followers.find({'following_id': ObjectId(user_id)})
+        followers = [str(f['follower_id']) for f in followers_cursor]
+        return followers
+
+    @staticmethod
+    def get_following(user_id):
+        following_cursor = mongo.db.followers.find({'follower_id': ObjectId(user_id)})
+        following = [str(f['following_id']) for f in following_cursor]
+        return following
 
     @staticmethod
     def config_user(user_id, avatar=None, bio=None, music_tags=None):
@@ -77,6 +97,44 @@ class User:
             return {"error": "User not found"}, 404
 
         return {"message": "User updated successfully"}, 200
+
+    class User:
+        @staticmethod
+        def get_similar_users(user_id, limit=20):
+            user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
+            if not user:
+                return []
+
+            user_genres = user.get('genres', {})
+            user_vector = [user_genres.get(g, 0) for g in GENRES]
+
+            following_cursor = mongo.db.followers.find({'follower_id': ObjectId(user_id)})
+            following_ids = [f['following_id'] for f in following_cursor]
+
+            excluded_ids = following_ids + [ObjectId(user_id)]
+
+            users = list(mongo.db.users.find({'_id': {'$nin': excluded_ids}}))
+
+            similar_users = []
+
+            for u in users:
+                u_genres = u.get('genres', {})
+                u_vector = [u_genres.get(g, 0) for g in GENRES]
+                similarity = cosine_similarity(user_vector, u_vector)
+                if similarity >= 0.5:
+                    similar_users.append({
+                        '_id': str(u['_id']),
+                        'username': u.get('username'),
+                        'avatar': u.get('avatar'),
+                        'bio': u.get('bio'),
+                        'similarity': similarity
+                    })
+
+            similar_users = sorted(similar_users, key=lambda x: x['similarity'], reverse=True)[:limit]
+
+            return similar_users
+
+
 
 class Project:
     @staticmethod
@@ -387,7 +445,7 @@ class Post:
 
     @staticmethod
     def get_posts_with_user_and_project(user_id, similarity_threshold=0.5, limit=25):
-        # Busca vetor de gêneros do usuário
+
         user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
         if not user:
             return []
@@ -462,7 +520,7 @@ class Post:
                 '$sort': {'created_at': -1}
             },
             {
-                '$limit': limit * 3  # Puxa mais que o limite pra filtrar depois
+                '$limit': limit * 3
             }
         ]
 
@@ -470,15 +528,16 @@ class Post:
 
         filtered_posts = []
         for post in raw_posts:
-            user_genres = user.get('genres', {})
+            # Pega o user do post
+            post_user_genres = post['user'].get('genres', {})
+            if isinstance(post_user_genres, list):
+                post_user_genres = {genre: 1 for genre in post_user_genres}
 
-            if isinstance(user_genres, list):
-                user_genres = {genre: 1 for genre in user_genres}
+            post_vector = [post_user_genres.get(g, 0) for g in GENRES]
 
-            user_vector = [user_genres.get(g, 0) for g in GENRES]
+            similarity = cosine_similarity(user_vector, post_vector)
+            print(f"Similarity: {similarity}, User: {user_vector}, PostUser: {post_vector}")
 
-            similarity = cosine_similarity(user_vector, user_vector)
-            print(user_vector)
             if similarity >= similarity_threshold:
                 if 'likes' in post:
                     post['likes'] = [str(like) if isinstance(like, ObjectId) else like for like in post['likes']]
@@ -715,10 +774,8 @@ class Followers:
 
     @staticmethod
     def create_follow(follower_id, following_id):
-
         if follower_id == following_id:
-            raise ValueError("Cant follow itself.")
-
+            raise ValueError("Can't follow itself.")
 
         existing = mongo.db.followers.find_one({
             "follower_id": ObjectId(follower_id),
@@ -726,16 +783,24 @@ class Followers:
         })
 
         if existing:
-            pass
-            # unfollow
+            mongo.db.followers.delete_one({
+                "_id": existing["_id"]
+            })
+            return {
+                "status": "unfollowed",
+                "follow_id": str(existing["_id"])
+            }
 
         follow = {
-            "follower_id": follower_id,
-            "following_id": following_id,
-            "created_at": datetime.now()
+            "follower_id": ObjectId(follower_id),
+            "following_id": ObjectId(following_id),
+            "created_at": datetime.utcnow()
         }
-        print(follow)
-        return mongo.db.followers.insert_one(follow).inserted_id
+        result = mongo.db.followers.insert_one(follow)
+        return {
+            "status": "followed",
+            "follow_id": str(result.inserted_id)
+        }
 
 
     @staticmethod

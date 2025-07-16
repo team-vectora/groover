@@ -12,6 +12,7 @@ function Feed() {
   const router = useRouter();
 
   const [token, setToken] = useState("");
+  const [following, setFollowing] = useState(0);
   const [inputToken, setInputToken] = useState("");
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -21,14 +22,16 @@ function Feed() {
 
   const { likePost, error: likeError } = useLikePost(token, () => fetchPosts(token));
 
-  // Use o hook de fork
   const { forkProject, loading: forkLoading } = useForkProject(token);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
+
     if (storedToken == null) {
       router.push("/login");
     } else {
+      const storedFollowing = JSON.parse(localStorage.getItem('following') || '[]');
+      setFollowing(storedFollowing);
       setToken(storedToken);
       fetchPosts(storedToken);
     }
@@ -86,7 +89,8 @@ function Feed() {
             post={post}
             handleClick={() => likePost(post._id)}
             setCurrentProject={setCurrentProject}
-            handleClickFork={forkProject} // <-- aqui passa forkProject
+            handleClickFork={forkProject}
+            following={following}
           />
         ))}
       </div>
