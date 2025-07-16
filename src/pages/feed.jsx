@@ -99,40 +99,57 @@ function Feed() {
     }
   };
 
-  return (
-    <div>
-      <FeedCaption />
+return (
+  <div className="pb-16">
+    <FeedCaption />
 
-      {/* Renderiza SimilarUsers só se userId existir */}
-      {userId && (
-        <SimilarUsers users={similarUsers} following={following} userId={userId} />
-      )}
+    {loading && <p>Carregando posts...</p>}
+    {(error || likeError) && <p style={{ color: "red" }}>{error || likeError}</p>}
+    {!loading && posts.length === 0 && <p>Nenhum post encontrado.</p>}
 
-      {loading && <p>Carregando posts...</p>}
-      {(error || likeError) && <p style={{ color: "red" }}>{error || likeError}</p>}
-      {!loading && posts.length === 0 && <p>Nenhum post encontrado.</p>}
+<div className="flex justify-center items-start gap-6">
+  <div className="w-1/5 hidden md:block similar-users-sticky">
+    {userId && (
+      <SimilarUsers users={similarUsers} following={following} userId={userId} />
+    )}
+  </div>
 
-      <div className="post-container">
-        <ToastContainer
-          position="top-center"
-          toastStyle={{ textAlign: 'center', fontSize: '1.2rem' }}
+  <div className="w-full md:w-2/5">
+    <div className="post-container">
+      <ToastContainer
+        position="top-center"
+        toastStyle={{ textAlign: 'center', fontSize: '1.2rem' }}
+      />
+      {posts.map((post) => (
+        <Post
+          key={post._id}
+          userId={userId}
+          post={post}
+          handleClick={() => likePost(post._id)}
+          setCurrentProject={setCurrentProject}
+          handleClickFork={handleClickFork}
+          following={following}
         />
-        {posts.map((post) => (
-          <Post
-            key={post._id}
-            userId={userId}
-            post={post}
-            handleClick={() => likePost(post._id)}
-            setCurrentProject={setCurrentProject}
-            handleClickFork={handleClickFork}
-            following={following}
-          />
-        ))}
-      </div>
+      ))}
+    </div>
+  </div>
 
+  <div className="w-1/5 hidden md:block similar-users-sticky">
+    {userId && (
+      <SimilarUsers users={similarUsers} following={following} userId={userId} />
+    )}
+  </div>
+</div>
+
+
+    {/* Player MIDI abaixo */}
+    <div className="mt-6">
       <MidiPlayer project={currentProject} />
     </div>
-  );
+  </div>
+);
+
+
 }
 
 export default Feed;

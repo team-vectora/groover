@@ -176,7 +176,6 @@ def get_project(project_id):
 @auth_bp.route('/projects/user/<username>', methods=['GET'])
 @jwt_required()
 def list_projects_by_username(username):
-    print("oi")
     projects = Project.get_user_projects_by_username(username)
 
     if not projects:
@@ -316,6 +315,7 @@ def create_post():
     caption = data.get('caption', "")
     photos = data.get('photos', [])
     project_id = data.get('project_id', None)
+    genres = data.get('genres', None)
 
 
     post_id = Post.create(
@@ -323,6 +323,7 @@ def create_post():
         project_id=project_id,
         photos=photos,
         caption=caption,
+        genres=genres
     )
 
     return jsonify({'message': 'Post created', 'post_id': str(post_id)}), 201
@@ -376,7 +377,6 @@ def post_like():
 
     if not post_id:
         return jsonify({'error': 'missing post_id'}), 400
-    print(post_id)
     response, status = Post.like(post_id, user_id)
     
     return jsonify(response), status

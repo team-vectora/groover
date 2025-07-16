@@ -57,7 +57,7 @@ const GENRES = [
 ];
 
 
-const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfilePic, favoriteTags = [] }) => {
+const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfilePic, favoriteTags = [], selectedTags }) => {
 
   const router = useRouter();
 

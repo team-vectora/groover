@@ -56,6 +56,24 @@ class User:
         return following
 
     @staticmethod
+    def recommendation_change(genres, user_id):
+        user = User.get_user(user_id)
+
+        if not user:
+            return
+
+        user_oid = ObjectId(user_id)
+
+        user_genres = user.get('genres', {})
+
+        for genre in genres:
+            if genre in GENRES:
+                mongo.db.users.update_one(
+                    {'_id': user_oid},
+                    {'$inc': {f'genres.{genre}': 5}}
+                )
+
+    @staticmethod
     def config_user(user_id, avatar=None, bio=None, music_tags=None):
         user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
         if not user:
@@ -118,7 +136,7 @@ class User:
             u_genres = u.get('genres', {})
             u_vector = [u_genres.get(g, 0) for g in GENRES]
             similarity = cosine_similarity(user_vector, u_vector)
-            if similarity >= 0.8:
+            if similarity >= 0.6:
                 similar_users.append({
                     '_id': str(u['_id']),
                     'username': u.get('username'),
@@ -428,8 +446,7 @@ class Invitation:
 
 class Post:
     @staticmethod
-    def create(user_id, project_id=None, photos=None, caption=None):
-        genres_dict = {genre: 0 for genre in GENRES}
+    def create(user_id, project_id=None, photos=None, caption=None, genres=None):
 
         post = {
             'user_id': ObjectId(user_id),
@@ -439,7 +456,7 @@ class Post:
             'likes': [],
             'comments': [],
             'project_id': ObjectId(project_id) if project_id else None,
-            'genres': genres_dict
+            'genres': genres if genres else []
         }
 
         return mongo.db.posts.insert_one(post).inserted_id
@@ -561,7 +578,6 @@ class Post:
             post_vector = [post_user_genres.get(g, 0) for g in GENRES]
 
             similarity = cosine_similarity(user_vector, post_vector)
-            print(f"Similarity: {similarity}, User: {user_vector}, PostUser: {post_vector}")
 
             if similarity >= similarity_threshold:
                 if 'likes' in post:
@@ -889,6 +905,9 @@ class Post:
                 {'_id': post_oid},
                 {'$push': {'likes': user_id}}
             )
+
+            genres = post.get('genres', [])
+            User.recommendation_change(genres, user_id)
 
             return {'message': 'Post curtido com sucesso'}, 200
 

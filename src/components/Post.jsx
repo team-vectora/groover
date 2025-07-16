@@ -12,9 +12,6 @@ import { useRouter } from "next/navigation";
 
     export default function Post({ post, userId, handleClick, setCurrentProject, handleClickFork, following }) {
       const router = useRouter();
-        useEffect(() => {
-             console.log(post.project)
-         }, []);
 
       const isLiked = post.likes.includes(userId);
       const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -86,8 +83,19 @@ import { useRouter } from "next/navigation";
 
           </div>
 
-          <h3 className="break-words w-full mt-5">{post.caption}</h3>
-
+          <h3 className="break-words w-full mt-3">{post.caption}</h3>
+            {post.genres && post.genres.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {post.genres.map((genre) => (
+                  <span
+                    key={genre}
+                    className="px-3 py-1 rounded-full bg-[#4c4e30] text-[#e6e8e3] text-sm m-0"
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
+            )}
           {post.photos && post.photos.length > 0 && (
             <div className="post-images-container" style={{ position: 'relative' }}>
               {post.photos.length > 1 && (
@@ -230,7 +238,7 @@ import { useRouter } from "next/navigation";
             />
 
         )}
-        <div className="flex justify-center mt-10"  >
+        <div className="flex justify-center mt-5"  >
               <button
                 onClick={() => {
                   if (!isAnimating) {

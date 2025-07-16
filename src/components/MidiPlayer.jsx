@@ -157,7 +157,10 @@ const MidiPlayer = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 w-full z-50 bg-[#1e1e1e] text-white px-3 py-2 border-t border-[#a97f52]">
+    <div
+      className="fixed bottom-0 left-0 w-full z-50 px-3 py-2 border-t "
+      style={{ backgroundColor: "#0a090d", color: "#e6e8e3", borderColor: "#a97f52" }}
+    >
       <div className="flex justify-center items-center gap-4 mb-2">
         <button
           onClick={handlePlayPause}
@@ -165,10 +168,11 @@ const MidiPlayer = () => {
           className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors
             ${
               isPlaying
-                ? "bg-red-600 hover:bg-red-700"
-                : "bg-green-600 hover:bg-green-700"
+                ? "bg-[#61673e] hover:bg-[#4c4e30]"
+                : "bg-[#a97f52] hover:bg-[#c1915d]"
             }
-            ${!midi ? "opacity-50 cursor-not-allowed" : ""}`}
+            ${!midi ? "opacity-50 cursor-not-allowed" : ""}
+          `}
           aria-label={isPlaying ? "Pausar" : "Tocar"}
           title={isPlaying ? "Pausar" : "Tocar"}
         >
@@ -178,14 +182,13 @@ const MidiPlayer = () => {
         <button
           onClick={handleStop}
           disabled={!midi || (!isPlaying && progress === 0)}
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-[#4c4e30] hover:bg-[#61673e] disabled:opacity-50 transition-colors"
           aria-label="Parar"
           title="Parar"
         >
           {StopIcon}
         </button>
       </div>
-
 
       <input
         type="range"
@@ -195,14 +198,13 @@ const MidiPlayer = () => {
         value={progress}
         onChange={handleSeek}
         disabled={!midi}
-        className={`w-full accent-[#a97f52] cursor-pointer rounded-lg h-1
-          ${!midi ? "cursor-not-allowed opacity-50" : ""}
-        `}
+        className={`w-full cursor-pointer rounded-lg h-1 accent-[#a97f52] ${
+          !midi ? "cursor-not-allowed opacity-50" : ""
+        }`}
         aria-label="Seek slider"
       />
 
-
-      <div className="flex justify-between mt-1 font-mono text-xs select-none">
+      <div className="flex justify-between mt-1 font-mono text-xs select-none" style={{ color: "#e6e8e3" }}>
         <span className="truncate max-w-xs" title={currentProject?.title}>
           {currentProject?.title || "Nenhum projeto selecionado"}
         </span>
@@ -211,6 +213,7 @@ const MidiPlayer = () => {
         </span>
       </div>
     </div>
+
   );
 };
 
