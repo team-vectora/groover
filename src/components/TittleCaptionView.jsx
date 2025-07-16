@@ -1,9 +1,12 @@
 "use client";
 import Image from 'next/image';
-import { useEffect, useState } from "react";
+import React , { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import {faCodeFork} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import Link from "next/link";
 
-const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSave, t, setLang, lang, title }) => {
+const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onFork, t, setLang, lang, title }) => {
 
   const [username, setUsername] = useState('');
   const router = useRouter();
@@ -41,20 +44,9 @@ const TittleCaption = ({ onPlaySong, onPlayActivePage, onExport, onImport, onSav
           <button className="header-button" onClick={onExport}>
             ↕ {t("export")}
           </button>
-          <label className="header-button import">
-            ↓ {t("import")}
-            <input
-              type="file"
-              accept="application/midi"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) onImport(file);
-              }}
-            />
 
-          </label>
-          <button className="header-button" onClick={onSave}>
-            ⎙ {t("save")}
+          <button className="header-button" onClick={onFork}>
+            <FontAwesomeIcon icon={faCodeFork} /> {t("Fork")}
           </button>
 
 

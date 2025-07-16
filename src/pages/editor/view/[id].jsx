@@ -15,6 +15,8 @@ import SelectRitmo from "../../../components/SelectRitmo";
 import SaveMusicPopUp from "../../../components/SaveMusicPopUp.jsx";
 import ReactDOM from 'react-dom';
 import {navigate} from "next/dist/client/components/segment-cache";
+import TittleCaptionView from "../../../components/TittleCaptionView";
+import useForkProject from "../../../hooks/useForkProject";
 
 function EditorPage() {
   const router = useRouter();
@@ -676,12 +678,11 @@ function EditorPage() {
     }
 
     const projectData = toJson();
-    if (projectId) projectData.id = projectId;
 
     const midiFile = midiBlob();
     const midiBase64 = await blobToBase64(midiFile);
     projectData.midi = midiBase64;
-    console.log(projectData.midi)
+
     try {
       const response = await fetch('http://localhost:5000/api/projects', {
         method: 'POST',
@@ -695,24 +696,7 @@ function EditorPage() {
       const data = await response.json();
       console.log("Resposta do salvamento:", data);
 
-      if (!projectId) {
-        // Redireciona para a nova URL com o ID recebido
-        await router.push(`/editor/${data._id}`);
-      }
-
-      setCurrentMusicId(data.current_music_id._id);
-      setLastVersionId(data.current_music_id._id)
-      setVersions(data.music_versions);
-
-      // Atualiza estados básicos
-      setBpm(data.bpm ?? 120);
-      setInstrument(data.instrument ?? 'piano');
-      setVolume(data.volume ?? -10);
-      setTitle(data.title ?? '');
-      setDescription(data.description ?? '');
-
-      // Fecha o popup
-      handleClosePopup();
+      await router.push(`/editor/${data._id}`);
 
     } catch (error) {
       console.error('Erro:', error);
@@ -956,17 +940,17 @@ function EditorPage() {
   // Render
   return (
     <div className="app-container">
-      <TittleCaption
+      <TittleCaptionView
         onPlaySong={playSong}
         onPlayActivePage={() => playSelectedNotesActivePage(activePage)}
         onExport={exportToMIDI}
-        onImport={importFromMIDI}
-        onSave={showPopup}
+        onFork={showPopup}
         setLang={setLang}
         lang={lang}
         t={t}
+        title={title}
       />
-      <SaveMusicPopUp onSave={handleSave} open={openPop} onCancel={handleClosePopup} description={description} title={title} setDescription={setDescription} setTitle={setTitle}></SaveMusicPopUp>
+      <SaveMusicPopUp saveOrFork={"Criar Fork"} onSave={handleSave} open={openPop} onCancel={handleClosePopup} description={description} title={title} setDescription={setDescription} setTitle={setTitle}></SaveMusicPopUp>
       <div id="home">
         <div className="data">
           <div className="control-panel">

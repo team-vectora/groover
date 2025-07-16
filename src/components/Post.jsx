@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
     import FollowButton from "./FollowButton";
     import ProjectCard from "./ProjectCard";
 
-    export default function Post({ post, userId, handleClick, setCurrentProject, handleClickFork, following }) {
+    export default function Post({ post, userId, profileId, handleClick, setCurrentProject, handleClickFork, following }) {
       const router = useRouter();
 
       const isLiked = post.likes.includes(userId);
@@ -233,6 +233,7 @@ import { useRouter } from "next/navigation";
         {post?.project &&(
             <ProjectCard
                 project={post.project}
+                profileId={profileId}
                 setCurrentProject={setCurrentProject}
                 handleClickFork={handleClickFork}
             />

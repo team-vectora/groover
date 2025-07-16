@@ -53,7 +53,7 @@ const ProjectCard = ({ profileId, isYourProfile, project, setCurrentProject, han
 
       <div className="flex items-center justify-start pt-2">
         <Link
-          href={`/editor/${project.created_by?._id === profileId || project.collaborators.includes(profileId) ? "" : "view/"}${project.id}`}
+          href={`/editor/${project.created_by?._id === profileId || project.collaborators?.includes(profileId) ? "" : "view/"}${project.id}`}
           className="
             mr-4
             bg-[var(--primary)]

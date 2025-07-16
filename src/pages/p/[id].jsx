@@ -66,7 +66,7 @@ function PostPage() {
                 toastStyle={{ textAlign: 'center', fontSize: '1.2rem' }}
               />
       {likeError && <p style={{ color: "red" }}>{likeError}</p>}
-      <Post userId={userId} post={post} handleClick={likePost}  setCurrentProject={setCurrentProject}  following={following} handleClickFork={handleClickFork} />
+      <Post userId={userId} profileId={localStorage.getItem("id")} post={post} handleClick={likePost}  setCurrentProject={setCurrentProject}  following={following} handleClickFork={handleClickFork} />
     </div>
   );
 }

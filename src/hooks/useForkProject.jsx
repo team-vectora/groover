@@ -19,7 +19,11 @@ export default function useForkProject(token) {
 
       if (!response.ok) throw new Error("Erro ao fazer fork");
 
+      const data = await response.json();
+
       toast.success("Projeto forkado", { theme: "dark", autoClose: 3000 });
+
+      return data.fork_id;
     } catch (err) {
       toast.error(err.message, { theme: "dark", autoClose: 3000 });
     } finally {

@@ -11,6 +11,7 @@ const SaveMusicPopUp = ({
   setTitle,
   description,
   setDescription,
+    saveOrFork,
 }) => {
   return (
     <Popup open={open} closeOnDocumentClick={false}   contentStyle={{ background: "transparent", boxShadow: "none", border:"none"}}>
@@ -54,7 +55,7 @@ const SaveMusicPopUp = ({
             type="submit"
             className="bg-[#a97f52] hover:bg-[#c1915d] text-white px-4 py-2 rounded transition duration-300"
           >
-            Salvar
+            {saveOrFork || "Salvar"}
           </button>
         </form>
       </div>

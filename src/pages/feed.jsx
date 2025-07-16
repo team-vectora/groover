@@ -125,6 +125,7 @@ return (
           key={post._id}
           userId={userId}
           post={post}
+          profileId={localStorage.getItem("id")}
           handleClick={() => likePost(post._id)}
           setCurrentProject={setCurrentProject}
           handleClickFork={handleClickFork}

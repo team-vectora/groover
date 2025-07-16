@@ -961,6 +961,7 @@ function EditorPage() {
         setLang={setLang}
         lang={lang}
         t={t}
+        title={title}
       />
       <SaveMusicPopUp onSave={handleSave} open={openPop} onCancel={handleClosePopup} description={description} title={title} setDescription={setDescription} setTitle={setTitle}></SaveMusicPopUp>
       <div id="home">

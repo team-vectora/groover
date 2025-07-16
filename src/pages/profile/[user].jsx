@@ -273,6 +273,7 @@ export default function Profile() {
                   key={post.id}
                   post={post}
                   userId={id}
+                  profileId={localStorage.getItem("id")}
                   handleClick={() => likePost(post._id)}
                   setCurrentProject={setCurrentProject}
                   handleClickFork={handleClickFork}
