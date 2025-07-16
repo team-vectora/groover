@@ -9,7 +9,6 @@ export default function SimilarUsers({ users = [], following, userId }) {
   if (!users || users.length === 0) {
     return (
       <p className="text-center text-[#61673e] mt-4">
-        Nenhum usuário similar encontrado.
       </p>
     );
   }

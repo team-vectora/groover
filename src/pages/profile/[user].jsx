@@ -402,14 +402,16 @@ export default function Profile() {
 
       <nav className="tabs-nav">
         <button className={activeTab === "posts" ? "tab active" : "tab"} onClick={() => setActiveTab("posts")}>
-          My Posts
+          Posts
         </button>
         <button className={activeTab === "musics" ? "tab active" : "tab"} onClick={() => setActiveTab("musics")}>
-          My Musics
+          Musics
         </button>
-        <button className={activeTab === "invites" ? "tab active" : "tab"} onClick={() => setActiveTab("invites")}>
-          Invites
-        </button>
+        {username === user &&
+            (<button className={activeTab === "invites" ? "tab active" : "tab"} onClick={() => setActiveTab("invites")}>
+              Invites
+            </button>)
+            }
       </nav>
 
       <section className="tab-content">{renderTabContent()}</section>

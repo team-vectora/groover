@@ -66,6 +66,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef(null);
   const [changedBio, setChangedBio] =useState("")
+  const [changedProfilePic, setChangedProfilePic] = useState(profilePic);
 
   useEffect(() => {
     if (favoriteTags.length > 0) {
@@ -99,52 +100,53 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setIsSubmitting(true);
 
-    const token = localStorage.getItem("token");
-    let profilePicUrl = profilePic;
+      const token = localStorage.getItem("token");
+      let profilePicUrl = changedProfilePic;
 
-    try {
-      if (profilePic instanceof File) {
-        profilePicUrl = await uploadToCloudinary(profilePic);
+      try {
+        if (changedProfilePic instanceof File) {
+          profilePicUrl = await uploadToCloudinary(changedProfilePic);
+        }
+
+        const res = await fetch("http://localhost:5000/api/config", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            avatar: profilePicUrl,
+            music_tags: musicTags,
+            bio: changedBio,
+          }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem("avatar", profilePicUrl);
+          alert("Perfil atualizado com sucesso!");
+          router.reload();
+          onClose();
+        } else {
+          alert(data.error || "Erro ao atualizar");
+        }
+      } catch (error) {
+        console.error("Erro:", error);
+        alert("Erro ao conectar com a API");
+      } finally {
+        setIsSubmitting(false);
       }
+    };
 
-      const res = await fetch("http://localhost:5000/api/config", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          avatar: profilePicUrl,
-          music_tags: musicTags,
-          bio: changedBio,
-        }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem("avatar", profilePicUrl);
-        alert("Perfil atualizado com sucesso!");
-        router.reload();
-        onClose();
-      } else {
-        alert(data.error || "Erro ao atualizar");
-      }
-    } catch (error) {
-      console.error("Erro:", error);
-      alert("Erro ao conectar com a API");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfilePic(file);
+      setChangedProfilePic(file);
       setPreviewUrl(URL.createObjectURL(file));
     }
   };
