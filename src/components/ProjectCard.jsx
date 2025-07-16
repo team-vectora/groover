@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 
-const ProjectCard = ({ owner, project, setCurrentProject, handleClickFork }) => {
+const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFork }) => {
   return (
     <div
       key={project.id}
@@ -17,7 +17,7 @@ const ProjectCard = ({ owner, project, setCurrentProject, handleClickFork }) => 
       </div>
 
       <div className="button-info">
-        <Link href={`/editor/view/${project.id}`} className="button-card-project">
+        <Link href={`/editor/${(isYourProfile) ? "" : view}/${project.id}`} className="button-card-project">
           <svg
             fill="#ffffff"
             viewBox="0 0 32 32"
@@ -41,11 +41,12 @@ const ProjectCard = ({ owner, project, setCurrentProject, handleClickFork }) => 
             <path d="M1468.183 451.76v1468.184H0V451.76h1468.183ZM1920 0v1468.296h-338.812V338.812H451.704V0H1920ZM338.812 1016.446h790.56V903.509h-790.56v112.937Zm0 225.874h564.686v-112.937H338.812v112.937Zm0 225.988h790.56v-113.05h-790.56v113.05Z" />
           </svg>
         </button>
+
           <button
               className="button-card-project"
               onClick={() => handleClickFork(project)}
               style={{
-                display: (project.collaborators?.includes(owner) || project.create_by?._id === owner)
+                display: (isYourProfile)
                     ? "block"
                     : "none"
               }}
