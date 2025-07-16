@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 
-const ProjectCard = ({ userId, project, setCurrentProject, handleClickFork }) => {
+const ProjectCard = ({ owner, project, setCurrentProject, handleClickFork }) => {
   return (
     <div
       key={project.id}
@@ -45,7 +45,7 @@ const ProjectCard = ({ userId, project, setCurrentProject, handleClickFork }) =>
               className="button-card-project"
               onClick={() => handleClickFork(project)}
               style={{
-                display: (project.collaborators?.includes(userId) || project.create_by._id === userId)
+                display: (project.collaborators?.includes(owner) || project.create_by?._id === owner)
                     ? "block"
                     : "none"
               }}

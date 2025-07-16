@@ -13,6 +13,46 @@ function base64ToArrayBuffer(base64) {
   return bytes.buffer;
 }
 
+const PlayIcon = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-4 h-4"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v18l15-9L5 3z" />
+  </svg>
+);
+
+const PauseIcon = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-4 h-4"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <rect x="6" y="4" width="4" height="16" rx="1" />
+    <rect x="14" y="4" width="4" height="16" rx="1" />
+  </svg>
+);
+
+const StopIcon = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-4 h-4"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <rect x="6" y="6" width="12" height="12" rx="2" ry="2" />
+  </svg>
+);
+
 const MidiPlayer = () => {
   const synthRef = useRef(null);
   const { currentProject } = useContext(MidiContext);
@@ -117,29 +157,36 @@ const MidiPlayer = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 w-full z-50 bg-[#1e1e1e] text-white px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between border-t border-[#a97f52]">
-      <div className="flex items-center gap-4 mb-2 sm:mb-0">
-        <h2 className="text-xl">{currentProject?.title}</h2>
+    <div className="fixed bottom-0 left-0 w-full z-50 bg-[#1e1e1e] text-white px-3 py-2 border-t border-[#a97f52]">
+      {/* Botões minimalistas centralizados em cima */}
+      <div className="flex justify-center items-center gap-4 mb-2">
         <button
           onClick={handlePlayPause}
           disabled={!midi}
-          className={`px-4 py-2 rounded text-white font-semibold transition ${
-            isPlaying ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"
-          } ${!midi ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors
+            ${
+              isPlaying
+                ? "bg-red-600 hover:bg-red-700"
+                : "bg-green-600 hover:bg-green-700"
+            }
+            ${!midi ? "opacity-50 cursor-not-allowed" : ""}`}
+          aria-label={isPlaying ? "Pausar" : "Tocar"}
+          title={isPlaying ? "Pausar" : "Tocar"}
         >
-          {isPlaying ? "Pause" : "Play"}
+          {isPlaying ? PauseIcon : PlayIcon}
         </button>
+
         <button
           onClick={handleStop}
           disabled={!midi || (!isPlaying && progress === 0)}
-          className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 disabled:opacity-50 font-semibold transition"
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          aria-label="Parar"
+          title="Parar"
         >
-          Stop
+          {StopIcon}
         </button>
-        <div className="text-sm font-mono">
-          {midi ? `${formatTime(progress)} / ${formatTime(duration)}` : ""}
-        </div>
       </div>
+
 
       <input
         type="range"
@@ -149,9 +196,23 @@ const MidiPlayer = () => {
         value={progress}
         onChange={handleSeek}
         disabled={!midi}
-        className={`w-full sm:w-1/2 accent-[#a97f52] cursor-pointer ${!midi ? "cursor-not-allowed" : ""}`}
+        className={`w-full accent-[#a97f52] cursor-pointer rounded-lg h-1
+          ${!midi ? "cursor-not-allowed opacity-50" : ""}
+        `}
+        aria-label="Seek slider"
       />
+
+      {/* Informações pequenas abaixo da barra */}
+      <div className="flex justify-between mt-1 font-mono text-xs select-none">
+        <span className="truncate max-w-xs" title={currentProject?.title}>
+          {currentProject?.title || "Nenhum projeto selecionado"}
+        </span>
+        <span>
+          {midi ? `${formatTime(progress)} / ${formatTime(duration)}` : "00:00 / 00:00"}
+        </span>
+      </div>
     </div>
   );
-}
+};
+
 export default MidiPlayer;

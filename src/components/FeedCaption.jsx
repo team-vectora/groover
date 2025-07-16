@@ -5,16 +5,20 @@ import { useRouter } from "next/navigation";
 
 const FeedCaption = () => {
   const [username, setUsername] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('/img/default_avatar.png'); // Inicialize com o valor padrão
   const router = useRouter();
 
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
-    const avatarUrl = localStorage.getItem('avatar');
-    console.log(avatarUrl)
-    if (storedUsername && avatarUrl) {
+    const avatarUrlStorage = localStorage.getItem('avatar');
+
+    if (storedUsername) {
       setUsername(storedUsername);
-      setAvatarUrl(avatarUrl);
+    }
+
+    // Só atualiza se existir um avatar no localStorage
+    if (avatarUrlStorage) {
+      setAvatarUrl(avatarUrlStorage);
     }
   }, []);
 
@@ -33,27 +37,25 @@ const FeedCaption = () => {
         height={120}
         quality={100}
       />
-    <div>
+      <div>
         Bandas(seila)
         Feed
         Eventos
-    </div>
-    <div
-      onClick={handleProfileClick}
-      className="flex flex-col items-center cursor-pointer"
-    >
-      <Image
-        src={avatarUrl}
-        height={60}
-        width={60}
-        className="w-13 h-13 sm:w-13 sm:h-13 rounded-full object-cover border border-[#61673e] mb-2 hover:bg-[#c1915d] transition duration-300 ease-in-out cursor-pointer"
-        alt="Avatar"
-        unoptimized={true}
-      />
-      <span><u>{username}</u></span>
-    </div>
-
-
+      </div>
+      <div
+        onClick={handleProfileClick}
+        className="flex flex-col items-center cursor-pointer"
+      >
+        <Image
+          src={avatarUrl}
+          height={60}
+          width={60}
+          className="w-13 h-13 sm:w-13 sm:h-13 rounded-full object-cover border border-[#61673e] mb-2 hover:bg-[#c1915d] transition duration-300 ease-in-out cursor-pointer"
+          alt="Avatar"
+          unoptimized={true}
+        />
+        <span><u>{username}</u></span>
+      </div>
     </header>
   );
 };

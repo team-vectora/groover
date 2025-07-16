@@ -1,5 +1,5 @@
 import base64
-
+from bson.binary import Binary
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import (
     jwt_required, 
@@ -88,6 +88,9 @@ def config_user():
     bio = data.get("bio")
     music_tags = data.get("music_tags")
 
+    if len(bio) > 50:
+        return jsonify({'error': 'Bio bigger than expected'}), 400
+
     if music_tags is not None and len(music_tags) > 5:
         music_tags = music_tags[:5]
 
@@ -97,7 +100,8 @@ def config_user():
         bio=bio,
         music_tags=music_tags
     )
-
+    print(result)
+    print(music_tags)
     return jsonify(result), status_code
 
 @auth_bp.route('/projects', methods=['POST'])
@@ -169,10 +173,6 @@ def list_projects_by_username(username):
 
     if not projects:
         return jsonify([]), 200
-
-    for project in projects:
-        print("oi")
-        print( project.get('midi'))
 
     return jsonify(projects), 200
 
@@ -331,7 +331,9 @@ def upload_image():
 @auth_bp.route('/post', methods=['GET'])
 @jwt_required()
 def get_posts():
-    posts = Post.get_posts_with_user_and_project()
+    user_id = get_jwt_identity()
+
+    posts = Post.get_posts_with_user_and_project(user_id)
     return jsonify(posts), 200
 
 
@@ -430,15 +432,17 @@ def fork_project():
 
     music = project.get('current_music_id')
     if not music:
-        return jsonify({"error": "Projct doesnt have music to copy"}), 400
+        return jsonify({"error": "Project doesn't have music to copy"}), 400
 
     layers = music.get('layers', [])
+    midi_base64 = project.get('midi')  # corrigido aqui
+    midi_bytes = base64.b64decode(midi_base64) if midi_base64 else None
 
     new_project_id = Project.create_project(
         user_id,
         {
             'title': project.get('title', '') + ' (Fork)',
-            'midi': project.get('midi', ''),
+            'midi': Binary(midi_bytes) if midi_bytes else None,
             'description': project.get('description', ''),
             'bpm': project.get('bpm', 120),
             'instrument': project.get('instrument', 'piano'),
@@ -446,7 +450,7 @@ def fork_project():
             'tempo': project.get('tempo', None)
         }
     )
-    
+
     Music.create_music(
         new_project_id,
         layers,

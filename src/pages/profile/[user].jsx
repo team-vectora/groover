@@ -107,7 +107,7 @@ export default function Profile() {
     }
   };
 
-  // Buscar posts do usuário
+
   const fetchPosts = async (token) => {
     setLoading(true);
     try {
@@ -118,6 +118,7 @@ export default function Profile() {
       const data = await res.json();
       setPosts(data);
       setGenres(data.length > 0 ? data[0].user.genres : []);
+
     } catch (err) {
       setError("Erro ao buscar posts");
     } finally {
@@ -135,9 +136,20 @@ export default function Profile() {
     switch (activeTab) {
       case "posts":
         return (
-          <>
-            <button className="new_project" onClick={() => setOpenPop(true)}>Novo Post</button>
-            <PostFormPopUp open={openPop} onClose={() => setOpenPop(false)} user={user} projects={projects} />
+            <>
+              {username === user && (
+                <>
+                    <button
+                      className="new_project flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition duration-300 transform hover:scale-110 hover:bg-[#c1915d] bg-[#a97f52] text-black text-3xl font-bold"
+                      onClick={() => setOpenPop(true)}
+                      title="Novo Post"
+                    >
+                      +
+                    </button>
+                    <PostFormPopUp open={openPop} onClose={() => setOpenPop(false)} user={user} projects={projects} />
+                </>
+              )}
+
             {likeError && <p style={{ color: "red" }}>{likeError}</p>}
             {posts.length === 0 ? (
               <p className="empty-text">Você não tem posts ainda.</p>
@@ -158,11 +170,15 @@ export default function Profile() {
       case "musics":
         return (
           <>
-            <button className="new_project" onClick={handleNewProject}>Novo Projeto</button>
+           {username === user && (
+                <>
+                    <button className="new_project" onClick={handleNewProject}>Novo Projeto</button>
+                </>
+            )}
             <div className="projects-grid">
               {projects.map((project) => (
                 <ProjectCard
-                    owner={userId}
+                  owner={id}
                   key={project.id}
                   project={project}
                   setCurrentProject={setCurrentProject}
@@ -201,8 +217,26 @@ export default function Profile() {
           width={120}
           alt="Avatar"
         />
-        <h1 className="profile-title">Olá, {user}</h1>
-        <h1 className="profile-title">{bio}</h1>
+        <div className="flex flex-col">
+            <h1 className="profile-title">Olá, {user}</h1>
+            <h3 className="text-x">{bio}</h3>
+            <ul className="flex flex-wrap gap-2 mt-4">
+              {Object.entries(genres)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([genre]) => (
+                  <li
+                    key={genre}
+                    className="px-3 py-1 bg-[#61673e] text-white rounded-full shadow text-sm font-semibold"
+                  >
+                    {genre.charAt(0).toUpperCase() + genre.slice(1)}
+                  </li>
+                ))}
+            </ul>
+
+        </div>
+
+
 
         {username === user && (
           <button
@@ -231,9 +265,9 @@ export default function Profile() {
           onClose={() => setConfigPop(false)}
           username={username}
           bio={bio}
-          setBio={setBio}
           profilePic={avatarUrl}
           setProfilePic={setAvatarUrl}
+          favoriteTags={genres}
         />
       </div>
 

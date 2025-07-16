@@ -4,6 +4,8 @@ from utils.db import mongo
 from utils.genres import GENRES
 from bson import Binary
 import base64
+from utils.similarity import cosine_similarity
+
 
 class User:
     @staticmethod
@@ -35,7 +37,6 @@ class User:
 
     @staticmethod
     def config_user(user_id, avatar=None, bio=None, music_tags=None):
-
         user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
         if not user:
             return {"error": "User not found"}, 404
@@ -48,6 +49,7 @@ class User:
             update_fields['bio'] = bio
 
         if music_tags is not None:
+            music_tags = [tag for tag in music_tags if tag in GENRES]
 
             old_tags = set([genre for genre, score in user.get('genres', {}).items() if score >= 100])
             new_tags = set(music_tags)
@@ -58,9 +60,10 @@ class User:
                 genres[tag] = genres.get(tag, 0) + 100
 
             for tag in old_tags - new_tags:
-                genres[tag] = max(genres.get(tag, 0) - 100, 0)  # evita valor negativo
+                genres[tag] = max(genres.get(tag, 0) - 100, 0)
 
             update_fields['genres'] = genres
+
 
         if not update_fields:
             return {"error": "Nenhum dado para atualizar"}, 400
@@ -73,8 +76,7 @@ class User:
         if result.matched_count == 0:
             return {"error": "User not found"}, 404
 
-          
-
+        return {"message": "User updated successfully"}, 200
 
 class Project:
     @staticmethod
@@ -199,33 +201,42 @@ class Project:
         user = User.find_by_username(username)
         if not user:
             return []
-        
+
         user_id_str = str(user['_id'])
-        
+
         project_count = mongo.db.projects.count_documents({'user_id': user_id_str})
         if project_count == 0:
-            print(f"Nenhum projeto encontrado para o usuário {username} com ID {user_id_str}")
+            print(f"No projects found for user {username} with ID {user_id_str}")
             return []
-        
+
         projects = mongo.db.projects.find({'user_id': user_id_str})
 
-        return [{
-            'id': str(p['_id']),
-            'midi': (lambda project:
-                        f"data:audio/midi;base64," + base64.b64encode(project['midi']).decode('utf-8')
-                        if 'midi' in project
-                        else None
-                )(p),
-            'title': p.get('title', 'Sem título'),
-            'bpm': p.get('bpm', 0),
-            'tempo': p.get('tempo', ''),
-            'description': p.get('description', ''),
-            'created_at': p.get('created_at', ''),
-            'updated_at': p.get('updated_at', ''),
-            'created_by': User.get_user(p.get('created_by', '')),
-            'last_updated_by': User.get_user(p.get('last_updated_by', '')),
-            'is_owner': True  # Como estamos filtrando por user_id, sempre será True
-        } for p in projects]
+        result = []
+        for p in projects:
+            # Handle MIDI data conversion
+            midi_data = p.get('midi')
+            if midi_data is not None:
+                try:
+                    midi_data = f"data:audio/midi;base64,{base64.b64encode(midi_data).decode('utf-8')}"
+                except Exception as e:
+                    print(f"Error encoding MIDI for project {p['_id']}: {str(e)}")
+                    midi_data = None
+
+            result.append({
+                'id': str(p['_id']),
+                'midi': midi_data,
+                'title': p.get('title', 'Untitled'),
+                'bpm': p.get('bpm', 0),
+                'tempo': p.get('tempo', ''),
+                'description': p.get('description', ''),
+                'created_at': p.get('created_at', ''),
+                'updated_at': p.get('updated_at', ''),
+                'created_by': User.get_user(p.get('created_by', '')),
+                'last_updated_by': User.get_user(p.get('last_updated_by', '')),
+                'is_owner': True
+            })
+
+        return result
 
     @staticmethod
     def get_user_projects(user_id):
@@ -375,7 +386,15 @@ class Post:
         return mongo.db.posts.insert_one(post).inserted_id
 
     @staticmethod
-    def get_posts_with_user_and_project():
+    def get_posts_with_user_and_project(user_id, similarity_threshold=0.5, limit=25):
+        # Busca vetor de gêneros do usuário
+        user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
+        if not user:
+            return []
+
+        user_genres = user.get('genres', {})
+        user_vector = [user_genres.get(g, 0) for g in GENRES]
+
         pipeline = [
             {
                 '$lookup': {
@@ -418,7 +437,7 @@ class Post:
                         '_id': {'$toString': '$user._id'},
                         'username': '$user.username',
                         'avatar': '$user.avatar',
-                        'genres': '$user.genres',
+                        'genres': '$user.genres'
                     },
                     'project': {
                         '$cond': {
@@ -438,23 +457,46 @@ class Post:
                         }
                     }
                 }
+            },
+            {
+                '$sort': {'created_at': -1}
+            },
+            {
+                '$limit': limit * 3  # Puxa mais que o limite pra filtrar depois
             }
         ]
 
-        posts = list(mongo.db.posts.aggregate(pipeline))
+        raw_posts = list(mongo.db.posts.aggregate(pipeline))
 
-        for post in posts:
+        filtered_posts = []
+        for post in raw_posts:
+            user_genres = user.get('genres', {})
 
-            if 'likes' in post:
-                post['likes'] = [str(like) if isinstance(like, ObjectId) else like for like in post['likes']]
+            if isinstance(user_genres, list):
+                user_genres = {genre: 1 for genre in user_genres}
 
-            if post.get('project') and post['project'] and 'midi' in post['project'] and post['project']['midi']:
-                midi_b64 = base64.b64encode(post['project']['midi']).decode('utf-8')
-                post['project']['midi'] = f"data:audio/midi;base64,{midi_b64}"
-            elif post.get('project') and post['project']:
-                post['project']['midi'] = None
+            user_vector = [user_genres.get(g, 0) for g in GENRES]
 
-        return posts
+            similarity = cosine_similarity(user_vector, user_vector)
+            print(user_vector)
+            if similarity >= similarity_threshold:
+                if 'likes' in post:
+                    post['likes'] = [str(like) if isinstance(like, ObjectId) else like for like in post['likes']]
+
+                if post.get('project') and post['project'] and 'midi' in post['project'] and post['project']['midi']:
+                    midi_b64 = base64.b64encode(post['project']['midi']).decode('utf-8')
+                    post['project']['midi'] = f"data:audio/midi;base64,{midi_b64}"
+                elif post.get('project') and post['project']:
+                    post['project']['midi'] = None
+
+                filtered_posts.append(post)
+
+                if len(filtered_posts) == limit:
+                    break
+
+        return filtered_posts
+
+
 
     @staticmethod
     def get_post(post_id):
@@ -606,7 +648,8 @@ class Post:
                         '_id': {'$toString': '$user._id'},
                         'username': '$user.username',
                         'email': '$user.email',
-                        'avatar': '$user.avatar'
+                        'avatar': '$user.avatar',
+                        'genres': '$user.genres'
                     },
                     'project': {
                         '$cond': {

@@ -95,7 +95,8 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
       }}
     >
       <div
-        className="rounded-xl overflow-hidden shadow-lg w-full max-w-md mx-auto"
+        className="rounded-xl overflow-hidden shadow-lg w-[448px] mx-auto"
+
         style={{ backgroundColor: "#121113" }}
       >
 

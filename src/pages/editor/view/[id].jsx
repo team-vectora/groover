@@ -1,15 +1,18 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import PianoRoll from "../../components/PianoRoll.jsx";
 import * as Tone from "tone";
 import { Midi } from '@tonejs/midi';
-import TittleCaption from "../../components/TittleCaption.jsx";
-import ChangeVolume from "../../components/ChangeVolume.jsx";
-import translations from "../../locales/language.js";
-import ChangeInstrument from "../../components/ChangeInstrument.jsx";
-import SelectRitmo from "../../components/SelectRitmo";
+
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
-import SaveMusicPopUp from "../../components/SaveMusicPopUp.jsx";
+
+import translations from "../../../locales/language.js";
+
+import TittleCaption from "../../../components/TittleCaption.jsx";
+import ChangeVolume from "../../../components/ChangeVolume.jsx";
+import PianoRoll from "../../../components/PianoRoll.jsx";
+import ChangeInstrument from "../../../components/ChangeInstrument.jsx";
+import SelectRitmo from "../../../components/SelectRitmo";
+import SaveMusicPopUp from "../../../components/SaveMusicPopUp.jsx";
 import ReactDOM from 'react-dom';
 import {navigate} from "next/dist/client/components/segment-cache";
 
