@@ -500,7 +500,7 @@ class Post:
                         '$cond': {
                             'if': {'$ifNull': ['$project', False]},
                             'then': {
-                                '_id': {'$toString': '$project._id'},
+                                'id': {'$toString': '$project._id'},
                                 'user_id': {'$toString': '$project.user_id'},
                                 'title': {'$ifNull': ['$project.title', 'New Project']},
                                 'description': {'$ifNull': ['$project.description', '']},
@@ -555,18 +555,102 @@ class Post:
 
         return filtered_posts
 
-
-
-    @staticmethod
-    def get_post(post_id):
-        post = mongo.db.posts.find_one({'_id': ObjectId(post_id)})
-        if post:
-            post['_id'] = str(post['_id'])
-        return post
-
     @staticmethod
     def get_posts():
         return list(mongo.db.posts.find())
+
+    @staticmethod
+    def get_post(post_id):
+        pipeline = [
+            {
+                '$match': {
+                    '_id': ObjectId(post_id)
+                }
+            },
+            {
+                '$lookup': {
+                    'from': 'users',
+                    'localField': 'user_id',
+                    'foreignField': '_id',
+                    'as': 'user'
+                }
+            },
+            {
+                '$unwind': {
+                    'path': '$user',
+                    'preserveNullAndEmptyArrays': True
+                }
+            },
+            {
+                '$lookup': {
+                    'from': 'projects',
+                    'localField': 'project_id',
+                    'foreignField': '_id',
+                    'as': 'project'
+                }
+            },
+            {
+                '$unwind': {
+                    'path': '$project',
+                    'preserveNullAndEmptyArrays': True
+                }
+            },
+            {
+                '$project': {
+                    '_id': {'$toString': '$_id'},
+                    'caption': 1,
+                    'photos': 1,
+                    'created_at': 1,
+                    'likes': 1,
+                    'comments': 1,
+                    'genres': 1,
+                    'user': {
+                        '_id': {'$toString': '$user._id'},
+                        'username': '$user.username',
+                        'email': '$user.email',
+                        'avatar': '$user.avatar'
+                    },
+                    'project': {
+                        '$cond': {
+                            'if': {'$ifNull': ['$project', False]},
+                            'then': {
+                                'id': {'$toString': '$project._id'},
+                                'user_id': {'$toString': '$project.user_id'},
+                                'title': {'$ifNull': ['$project.title', 'New Project']},
+                                'description': {'$ifNull': ['$project.description', '']},
+                                'bpm': '$project.bpm',
+                                'instrument': {'$ifNull': ['$project.instrument', 'piano']},
+                                'volume': {'$ifNull': ['$project.volume', -10]},
+                                'tempo': '$project.tempo',
+                                'midi': '$project.midi',
+                                'created_at': '$project.created_at'
+                            },
+                            'else': None
+                        }
+                    }
+                }
+            }
+        ]
+
+        result = list(mongo.db.posts.aggregate(pipeline))
+
+        if not result:
+            return None
+
+        post = result[0]
+
+        if 'likes' in post:
+            post['likes'] = [str(like) if isinstance(like, ObjectId) else like for like in post['likes']]
+
+        if post.get('project') and post['project'] and 'midi' in post['project'] and post['project']['midi']:
+            midi_b64 = base64.b64encode(post['project']['midi']).decode('utf-8')
+            post['project']['midi'] = f"data:audio/midi;base64,{midi_b64}"
+        elif post.get('project') and post['project']:
+            post['project']['midi'] = None
+
+        return post
+
+
 
     @staticmethod
     def get_posts_by_user_id(user_id):
@@ -623,7 +707,7 @@ class Post:
                         '$cond': {
                             'if': {'$ifNull': ['$project', False]},
                             'then': {
-                                '_id': {'$toString': '$project._id'},
+                                'id': {'$toString': '$project._id'},
                                 'user_id': {'$toString': '$project.user_id'},
                                 'title': {'$ifNull': ['$project.title', 'New Project']},
                                 'description': {'$ifNull': ['$project.description', '']},
@@ -715,7 +799,7 @@ class Post:
                         '$cond': {
                             'if': {'$ifNull': ['$project', False]},
                             'then': {
-                                '_id': {'$toString': '$project._id'},
+                                'id': {'$toString': '$project._id'},
                                 'user_id': {'$toString': '$project.user_id'},
                                 'title': {'$ifNull': ['$project.title', 'New Project']},
                                 'description': {'$ifNull': ['$project.description', '']},
@@ -771,7 +855,6 @@ class Post:
             
             return {'message': 'Post curtido com sucesso'}, 200
 
-# FAzer bunitinho neh? Separar seguidor da entidade usuario
 class Followers:
 
     @staticmethod

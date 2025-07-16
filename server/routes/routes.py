@@ -349,27 +349,8 @@ def get_posts():
 def get_post_by_id(id):
 
     post = Post.get_post(id)
-    serialized = []
 
-    user = User.get_user(post.get('user_id'))
-
-    user_data = {
-        'id': str(user['_id']),
-        'username': user.get('username'),
-        'avatar': user.get('avatar')
-    } if user else None
-
-    serialized.append({
-        'id': str(post.get('_id', '')),
-        'user': user_data,
-        'caption': post.get('caption', ''),
-        'photos': post.get('photos', []),
-        'created_at': post.get('created_at'),
-        'likes': post.get('likes', []),
-        'comments': post.get('comments', []),
-    })
-
-    return jsonify(serialized), 200
+    return jsonify(post), 200
 
 @auth_bp.route('/post/username/<username>', methods=['GET'])
 @jwt_required()
@@ -443,7 +424,12 @@ def fork_project():
 
     layers = music.get('layers', [])
     midi_base64 = project.get('midi')
+
+    if midi_base64 and midi_base64.startswith('data:audio/midi;base64,'):
+        midi_base64 = midi_base64.split(',')[1]
+
     midi_bytes = base64.b64decode(midi_base64) if midi_base64 else None
+
 
     new_project_id = Project.create_project(
         user_id,
