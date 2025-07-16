@@ -112,7 +112,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
           profilePicUrl = await uploadToCloudinary(changedProfilePic);
         }
 
-        const res = await fetch("http://localhost:5000/api/config", {
+        const res = await fetch("https://groover-api.onrender.com/api/config", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",

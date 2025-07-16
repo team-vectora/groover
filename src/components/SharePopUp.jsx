@@ -13,7 +13,7 @@ const SharePopUp = ({ open, onClose, project }) => {
       const token = localStorage.getItem("token");
       console.log("Usernameeeee inputttttt")
       console.log(usernameInput)
-      const response = await fetch(`http://localhost:5000/api/projects/${project.id}/invite`, {
+      const response = await fetch(`https://groover-api.onrender.com/api/projects/${project.id}/invite`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

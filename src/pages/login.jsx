@@ -16,7 +16,7 @@ const LoginPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:5000/api/signin', {
+            const response = await fetch('https://groover-api.onrender.com/api/signin', {
                 method: 'POST',
                 headers: {
                 'Content-Type': 'application/json',

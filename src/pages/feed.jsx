@@ -54,7 +54,7 @@ function Feed() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:5000/api/post", {
+      const res = await fetch("https://groover-api.onrender.com/api/post", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -82,7 +82,7 @@ function Feed() {
 
   const fetchSimilarUsers = async (token) => {
     try {
-      const res = await fetch("http://localhost:5000/api/user/similar", {
+      const res = await fetch("https://groover-api.onrender.com/api/user/similar", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

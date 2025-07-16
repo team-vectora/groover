@@ -8,7 +8,7 @@ export default function useForkProject(token) {
     setLoading(true);
     try {
         console.log(projectId)
-      const response = await fetch(`http://localhost:5000/api/fork`, {
+      const response = await fetch(`https://groover-api.onrender.com/api/fork`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

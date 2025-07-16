@@ -50,7 +50,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
         );
       }
 
-      const response = await fetch("http://localhost:5000/api/post", {
+      const response = await fetch("https://groover-api.onrender.com/api/post", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

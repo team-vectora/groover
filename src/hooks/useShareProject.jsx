@@ -7,7 +7,7 @@ export default function useShareProject(token) {
   const shareProject = async (username) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/invite`, {
+      const response = await fetch(`https://groover-api.onrender.com/api/invite`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

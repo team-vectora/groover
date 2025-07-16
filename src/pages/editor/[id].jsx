@@ -679,7 +679,7 @@ function EditorPage() {
     projectData.midi = midiBase64;
     console.log(projectData.midi)
     try {
-      const response = await fetch('http://localhost:5000/api/projects', {
+      const response = await fetch('https://groover-api.onrender.com/api/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -812,7 +812,7 @@ function EditorPage() {
     console.log(projectId)
 
     try {
-      const response = await fetch(`http://localhost:5000/api/projects/${projectId}`, {
+      const response = await fetch(`https://groover-api.onrender.com/api/projects/${projectId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${tokenJWT}`

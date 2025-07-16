@@ -35,7 +35,7 @@ function PostPage() {
       };
   const fetchPost = async (postId, token) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/post/${postId}`, {
+      const res = await fetch(`https://groover-api.onrender.com/api/post/${postId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

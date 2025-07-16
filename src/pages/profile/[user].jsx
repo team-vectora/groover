@@ -71,7 +71,7 @@ export default function Profile() {
     if (!username || !token) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/user/${username}`, {
+      const res = await fetch(`https://groover-api.onrender.com/api/user/${username}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -114,7 +114,7 @@ export default function Profile() {
 
   const fetchUserProjects = async (token, user) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/projects/user/${user}`, {
+      const response = await fetch(`https://groover-api.onrender.com/api/projects/user/${user}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error("Erro ao carregar projetos");
@@ -133,7 +133,7 @@ export default function Profile() {
   const fetchPosts = async (token) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/post/username/${user}`, {
+      const res = await fetch(`https://groover-api.onrender.com/api/post/username/${user}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Erro ao carregar posts");
@@ -151,7 +151,7 @@ export default function Profile() {
   const fetchInvites = async (token) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/invitations`, {
+      const res = await fetch(`https://groover-api.onrender.com/api/invitations`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Erro ao carregar invites");
@@ -178,7 +178,7 @@ export default function Profile() {
   const handleClickAccept = async (inviteId) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/invitations/${inviteId}/respond`, {
+      const response = await fetch(`https://groover-api.onrender.com/api/invitations/${inviteId}/respond`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -204,7 +204,7 @@ export default function Profile() {
   const handleClickReject = async (inviteId) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/invitations/${inviteId}/respond`, {
+      const response = await fetch(`https://groover-api.onrender.com/api/invitations/${inviteId}/respond`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
