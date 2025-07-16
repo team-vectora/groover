@@ -1,7 +1,12 @@
+    import { useState, useEffect } from 'react';
+
 import React from "react";
 import Link from "next/link";
 
 const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFork }) => {
+        useEffect(() => {
+             console.log(project)
+         }, []);
   return (
     <div
       key={project.id}
@@ -21,7 +26,7 @@ const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickFor
       </div>
 
       <div className="button-info">
-        <Link href={`/editor/${(isYourProfile) ? "" : view}/${project.id}`} className="button-card-project">
+        <Link href={`/editor/${(isYourProfile) ? "" : "view"}/${project.id}`} className="button-card-project">
           <svg
             fill="#ffffff"
             viewBox="0 0 32 32"

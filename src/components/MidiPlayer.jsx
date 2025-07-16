@@ -158,7 +158,6 @@ const MidiPlayer = () => {
 
   return (
     <div className="fixed bottom-0 left-0 w-full z-50 bg-[#1e1e1e] text-white px-3 py-2 border-t border-[#a97f52]">
-      {/* Botões minimalistas centralizados em cima */}
       <div className="flex justify-center items-center gap-4 mb-2">
         <button
           onClick={handlePlayPause}
@@ -202,7 +201,7 @@ const MidiPlayer = () => {
         aria-label="Seek slider"
       />
 
-      {/* Informações pequenas abaixo da barra */}
+
       <div className="flex justify-between mt-1 font-mono text-xs select-none">
         <span className="truncate max-w-xs" title={currentProject?.title}>
           {currentProject?.title || "Nenhum projeto selecionado"}

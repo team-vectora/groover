@@ -1,14 +1,21 @@
     "use client";
 
-    import { useState } from 'react';
+    import { useState, useEffect } from 'react';
 
     import Link from "next/link";
     import Image from 'next/image';
+
+import { useRouter } from "next/navigation";
 
     import FollowButton from "./FollowButton";
     import ProjectCard from "./ProjectCard";
 
     export default function Post({ post, userId, handleClick, setCurrentProject, handleClickFork, following }) {
+      const router = useRouter();
+        useEffect(() => {
+             console.log(post.project)
+         }, []);
+
       const isLiked = post.likes.includes(userId);
       const [currentImageIndex, setCurrentImageIndex] = useState(0);
       const avatarUrl = post.user?.avatar || "/img/default_avatar.png";
@@ -82,7 +89,6 @@
           <h3 className="break-words w-full mt-5">{post.caption}</h3>
         {post?.project &&(
             <ProjectCard
-                owner={post.posted_by}
                 project={post.project}
                 setCurrentProject={setCurrentProject}
                 handleClickFork={handleClickFork}
@@ -268,7 +274,7 @@
 
                 <h2 className="content">{post.likes?.length || 0}</h2>
               </button>
-              <button className="like-button">
+              <button className="like-button"       onClick={() => router.push(`/p/${post._id}`)}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="#4c4e30" viewBox="0 0 24 24" height="22" width="37">
                 <path d="M20 2H4C2.9 2 2 2.9 2 4V18L6 14H20C21.1 14 22 13.1 22 12V4C22 2.9 21.1 2 20 2Z"/>
               </svg>
@@ -285,11 +291,6 @@
                         </svg>
                       </span>
               </button>
-
-
-
-
-
         </div>
         </div>
       );

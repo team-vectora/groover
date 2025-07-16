@@ -7,13 +7,14 @@ export default function useForkProject(token) {
   const forkProject = async (projectId) => {
     setLoading(true);
     try {
+        console.log(projectId)
       const response = await fetch(`http://localhost:5000/api/fork`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ project_id: projectId }),
+        body: JSON.stringify({ project_id: projectId })
       });
 
       if (!response.ok) throw new Error("Erro ao fazer fork");

@@ -1,8 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Post from "../../components/Post";
 import { useRouter } from "next/router";
 import useLikePost from "../../hooks/useLikePost";
+import { MidiContext } from "../../contexts/MidiContext";
+import useForkProject from "../../hooks/useForkProject";
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 function PostPage() {
   const router = useRouter();
@@ -11,10 +15,13 @@ function PostPage() {
   const [post, setPost] = useState(null);
   const [userId, setUserId] = useState(null);
   const [token, setToken] = useState(null);
+  const [following, setFollowing] = useState(null);
+  const { currentProject, setCurrentProject } = useContext(MidiContext);
 
   useEffect(() => {
     setUserId(localStorage.getItem("id"));
     setToken(localStorage.getItem("token"));
+    setFollowing(localStorage.getItem("following"));
   }, []);
 
   useEffect(() => {
@@ -22,7 +29,10 @@ function PostPage() {
       fetchPost(id, token);
     }
   }, [id, token]);
-
+      const { forkProject, loading: forkLoading } = useForkProject(token);
+      const handleClickFork = async (project) => {
+        await forkProject(project.id);
+      };
   const fetchPost = async (postId, token) => {
     try {
       const res = await fetch(`http://localhost:5000/api/post/${postId}`, {
@@ -51,8 +61,12 @@ function PostPage() {
 
   return (
     <div className="flex h-screen justify-center align-center pt-20">
+              <ToastContainer
+                position="top-center"
+                toastStyle={{ textAlign: 'center', fontSize: '1.2rem' }}
+              />
       {likeError && <p style={{ color: "red" }}>{likeError}</p>}
-      <Post userId={userId} post={post[0]} handleClick={likePost} />
+      <Post userId={userId} post={post} handleClick={likePost}  setCurrentProject={setCurrentProject}  following={following} handleClickFork={handleClickFork} />
     </div>
   );
 }

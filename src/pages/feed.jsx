@@ -22,7 +22,9 @@ function Feed() {
 
   const { likePost, error: likeError } = useLikePost(token, () => fetchPosts(token));
   const { forkProject, loading: forkLoading } = useForkProject(token);
-
+  const handleClickFork = async (project) => {
+    await forkProject(project.id);
+  };
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
 
@@ -91,7 +93,6 @@ function Feed() {
     <div>
       <FeedCaption />
 
-      {/* Lista de usuários similares */}
       <section>
         <h2>Usuários similares para seguir</h2>
         {similarUsers.length === 0 && <p>Nenhum usuário similar encontrado.</p>}
@@ -133,7 +134,7 @@ function Feed() {
             post={post}
             handleClick={() => likePost(post._id)}
             setCurrentProject={setCurrentProject}
-            handleClickFork={forkProject}
+            handleClickFork={handleClickFork}
             following={following}
           />
         ))}

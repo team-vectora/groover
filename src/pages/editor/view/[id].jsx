@@ -41,6 +41,7 @@ function EditorPage() {
 
   acousticInstruments.forEach(name => {
     instruments[name] = () => new Tone.Sampler({
+
       urls: { C4: "C4.mp3" },
       baseUrl: `https://nbrosowsky.github.io/tonejs-instruments/samples/${name}/`,
     }).toDestination();

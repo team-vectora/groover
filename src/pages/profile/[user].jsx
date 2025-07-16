@@ -192,7 +192,6 @@ export default function Profile() {
             <div className="projects-grid">
               {projects.map((project) => (
                 <ProjectCard
-                  owner={id}
                   key={project.id}
                   project={project}
                   setCurrentProject={setCurrentProject}
