@@ -35,6 +35,8 @@ export default function Profile() {
   const [followers, setFollowers] = useState(0);
   const [followings, setFollowings] = useState(0);
 
+  const [followingsUserLoged, setFollowingsUserLoged] = useState(0);
+
   const [activeTab, setActiveTab] = useState("posts");
 
   const { currentProject, setCurrentProject } = useContext(MidiContext);
@@ -46,6 +48,12 @@ export default function Profile() {
 
   const { likePost, error: likeError } = useLikePost(token, () => fetchPosts(token));
   const { forkProject, loading: forkLoading } = useForkProject(token);
+
+  useEffect(() => {
+      const storedFollowing = JSON.parse(localStorage.getItem("following") || "[]");
+      setFollowingsUserLoged(storedFollowing);
+  }, []);
+
 
   const fetchUserData = async (username) => {
     if (!username || !token) return;
@@ -167,6 +175,7 @@ export default function Profile() {
                   handleClick={() => likePost(post._id)}
                   setCurrentProject={setCurrentProject}
                   handleClickFork={handleClickFork}
+                  following={followingsUserLoged}
                 />
               ))
             )}

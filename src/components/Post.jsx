@@ -14,9 +14,9 @@
       const avatarUrl = post.user?.avatar || "/img/default_avatar.png";
 
       const [showHeart, setShowHeart] = useState(false);
+
       const [isAnimating, setIsAnimating] = useState(false);
       const [heartPos, setHeartPos] = useState({ x: 0, y: 0 });
-
 
       const nextImage = () => {
         setCurrentImageIndex((prevIndex) =>
@@ -80,7 +80,15 @@
           </div>
 
           <h3 className="break-words w-full mt-5">{post.caption}</h3>
+        {post?.project &&(
+            <ProjectCard
+                owner={post.posted_by}
+                project={post.project}
+                setCurrentProject={setCurrentProject}
+                handleClickFork={handleClickFork}
+            />
 
+        )}
           {post.photos && post.photos.length > 0 && (
             <div className="post-images-container" style={{ position: 'relative' }}>
               {post.photos.length > 1 && (
@@ -216,15 +224,6 @@
             </div>
           )}
 
-        {post?.project &&(
-            <ProjectCard
-                owner={post.posted_by}
-                project={post.project}
-                setCurrentProject={setCurrentProject}
-                handleClickFork={handleClickFork}
-            />
-
-        )}
         <div className="flex justify-center mt-10"  >
               <button
                 onClick={() => {

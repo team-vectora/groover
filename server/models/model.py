@@ -98,41 +98,40 @@ class User:
 
         return {"message": "User updated successfully"}, 200
 
-    class User:
-        @staticmethod
-        def get_similar_users(user_id, limit=20):
-            user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
-            if not user:
-                return []
 
-            user_genres = user.get('genres', {})
-            user_vector = [user_genres.get(g, 0) for g in GENRES]
+    @staticmethod
+    def get_similar_users(user_id, limit=20):
+        user = User.get_user(user_id)
+        if not user:
+            return []
 
-            following_cursor = mongo.db.followers.find({'follower_id': ObjectId(user_id)})
-            following_ids = [f['following_id'] for f in following_cursor]
+        user_genres = user.get('genres', {})
+        user_vector = [user_genres.get(g, 0) for g in GENRES]
 
-            excluded_ids = following_ids + [ObjectId(user_id)]
+        following_ids = [ObjectId(f) for f in user.get('following', [])]
 
-            users = list(mongo.db.users.find({'_id': {'$nin': excluded_ids}}))
+        excluded_ids = following_ids + [ObjectId(user_id)]
 
-            similar_users = []
+        users = list(mongo.db.users.find({'_id': {'$nin': excluded_ids}}))
 
-            for u in users:
-                u_genres = u.get('genres', {})
-                u_vector = [u_genres.get(g, 0) for g in GENRES]
-                similarity = cosine_similarity(user_vector, u_vector)
-                if similarity >= 0.5:
-                    similar_users.append({
-                        '_id': str(u['_id']),
-                        'username': u.get('username'),
-                        'avatar': u.get('avatar'),
-                        'bio': u.get('bio'),
-                        'similarity': similarity
-                    })
+        similar_users = []
 
-            similar_users = sorted(similar_users, key=lambda x: x['similarity'], reverse=True)[:limit]
+        for u in users:
+            u_genres = u.get('genres', {})
+            u_vector = [u_genres.get(g, 0) for g in GENRES]
+            similarity = cosine_similarity(user_vector, u_vector)
+            if similarity >= 0.5:
+                similar_users.append({
+                    '_id': str(u['_id']),
+                    'username': u.get('username'),
+                    'avatar': u.get('avatar'),
+                    'bio': u.get('bio'),
+                    'similarity': similarity
+                })
 
-            return similar_users
+        similar_users = sorted(similar_users, key=lambda x: x['similarity'], reverse=True)[:limit]
+
+        return similar_users
 
 
 
@@ -509,7 +508,8 @@ class Post:
                                 'instrument': {'$ifNull': ['$project.instrument', 'piano']},
                                 'volume': {'$ifNull': ['$project.volume', -10]},
                                 'tempo': '$project.tempo',
-                                'midi': '$project.midi'
+                                'midi': '$project.midi',
+                                'created_at': '$project.created_at'
                             },
                             'else': None
                         }
@@ -631,7 +631,8 @@ class Post:
                                 'instrument': {'$ifNull': ['$project.instrument', 'piano']},
                                 'volume': {'$ifNull': ['$project.volume', -10]},
                                 'tempo': '$project.tempo',
-                                'midi': '$project.midi'
+                                'midi': '$project.midi',
+                                'created_at': '$project.created_at'
                             },
                             'else': None
                         }
@@ -722,7 +723,8 @@ class Post:
                                 'instrument': {'$ifNull': ['$project.instrument', 'piano']},
                                 'volume': {'$ifNull': ['$project.volume', -10]},
                                 'tempo': '$project.tempo',
-                                'midi': '$project.midi'
+                                'midi': '$project.midi',
+                                'created_at': '$project.created_at'
                             },
                             'else': None
                         }
