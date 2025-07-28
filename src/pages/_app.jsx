@@ -1,9 +1,4 @@
 import '../global.css';
-import './editor.css';
-import './login.css';
-import '../components/piano.css';
-import './profile.css';
-import './feed.css';
 
 import { MidiProvider } from "../contexts/MidiContext";
 import MidiPlayer from "../components/MidiPlayer";
