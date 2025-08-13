@@ -1,0 +1,186 @@
+.profile-container {
+    background-color: var(--background);
+    padding: 1.5rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 100%;
+    margin: 0;
+    background-color: var(--background);
+}
+
+.profile-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+.profile-title {
+    font-size: 2rem;
+}
+
+.new_project {
+    color: var(--text-lighter);
+    border: 2px solid var(--primary);
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: auto;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom:1rem;
+}
+
+.new_project:hover {
+    background-color: var(--primary);
+}
+
+.tabs-nav {
+    width: 100%;
+    display: flex;
+    margin-bottom: 0;
+    background: transparent;
+    border-bottom: 1px solid var(--text-lighter);
+    padding-bottom: 4px;
+    gap: 0;
+}
+
+.tabs-nav .tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-lighter);
+    font-weight: 700;
+    padding: 1rem 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    margin: 0;
+}
+
+.tabs-nav .tab:hover {
+    color: var(--primary);
+}
+
+.tabs-nav .tab.active {
+    color: var(--primary);
+}
+
+.tabs-nav .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 3px 3px 0 0;
+}
+
+.color {
+    width: 100%;
+    background-color: var(--primary);
+    height: 4px;
+    margin: 0;
+}
+
+.tab-content {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.projects-grid {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    /* Aumentei para 320px */
+    gap: 1.5rem;
+    /* aumentei o gap para ficar mais espaçado */
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.project-card {
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px var(--primary);
+    transition: box-shadow 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    font-size: 1.1rem;
+    width: 20rem;
+    background-color: var(--bg-darker);
+}
+
+.project-card:hover {
+    box-shadow: 0 8px 12px var(--primary);
+}
+
+.project-card svg {
+    height: 30px;
+    width: 30px;
+    stroke: var(--text);
+}
+
+.project-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+    color: var(--text-lighter);
+    margin-top: 0.75rem;
+}
+
+.collab-badge {
+    margin-top: 0.75rem;
+    padding: 0.3rem 0.7rem;
+    background-color: var(--primary);
+    color: var(--text-lighter);
+    font-weight: 600;
+    border-radius: 4px;
+    width: fit-content;
+    font-size: 1rem;
+}
+
+.button-card-project {
+    margin-right: 1rem;
+    background-color: var(--primary);
+    padding: 0.7rem;
+    border-radius: 100%;
+    height: 3rem;
+    width: 3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    transition:  300ms all ease-in-out;
+}
+
+.button-card-project:hover {
+    background-color: var(--primary-light);
+    box-shadow: 0 4px 10px var(--primary-light);
+    fill: var(--text);
+}
+
+.button-info {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 0.5rem;
+}
