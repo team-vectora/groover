@@ -1,10 +1,13 @@
 import { useState } from "react";
 
 export default function useLogin() {
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const login = async ({ username, senha }) => {
-    setError("");
+    setErrors({});
+    setLoading(true);
+
     try {
       const response = await fetch('http://localhost:5000/api/signin', {
         method: 'POST',
@@ -13,6 +16,8 @@ export default function useLogin() {
       });
 
       const data = await response.json();
+      setLoading(false);
+
       if (response.ok) {
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('username', data.username);
@@ -22,14 +27,26 @@ export default function useLogin() {
 
         return { success: true, data };
       } else {
-        setError(data.error || 'Erro no login');
-        return { success: false, error: data.error || 'Erro no login' };
+        // Tratamento de erros do backend
+        const backendErrors = {};
+
+        if (data.error.includes('Invalid credentials')) {
+          backendErrors.general = "Nome de usuário ou senha incorreto";
+        } else if (data.error.includes('Username and password are required')) {
+          backendErrors.general = "Insira um usuário e senha";
+        } else {
+          backendErrors.general = data.error || "Erro no login";
+        }
+
+        setErrors(backendErrors);
+        return { success: false, errors: backendErrors };
       }
     } catch (err) {
-      setError('Erro ao conectar com a API');
-      return { success: false, error: 'Erro ao conectar com a API' };
+      setLoading(false);
+      setErrors({ general: "Erro ao conectar com o servidor" });
+      return { success: false, errors: { general: "Erro ao conectar com o servidor" } };
     }
   };
 
-  return { login, error };
+  return { login, errors, loading };
 }

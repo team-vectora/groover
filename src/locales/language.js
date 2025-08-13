@@ -7,7 +7,7 @@ const translations = {
     pageOf: "Page {current} of {total}",
     soundPages: "Sound Pages",
     addNewPages: "Add new pages",
-    uploadAudio: "Upload an audio (?)",
+    uploadAudio: "Upload an editor (?)",
     playSong: "PLAY SONG",
     playPage: "PLAY PAGE",
     export: "EXPORT",

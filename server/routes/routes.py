@@ -24,6 +24,9 @@ def signup():
     
     if User.find_by_username(data['username']):
         return jsonify({'error': 'Username already exists'}), 409
+
+    if User.find_by_email(data['email']):
+        return jsonify({'error': 'Email already used'}), 409
     
     hashed_pw = generate_password_hash(data['password'])
     user_id = User.create(

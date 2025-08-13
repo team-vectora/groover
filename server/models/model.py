@@ -34,6 +34,15 @@ class User:
         return user
 
     @staticmethod
+    def find_by_email(email):
+        user = mongo.db.users.find_one({'email': email})
+        if user:
+            user['_id'] = str(user['_id'])
+            user['followers'] = User.get_followers(user['_id'])
+            user['following'] = User.get_following(user['_id'])
+        return user
+
+    @staticmethod
     def get_user(user_id):
         user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
         if user:
