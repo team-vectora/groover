@@ -75,7 +75,6 @@ export default function Post({
         setIsAnimating(true);
         setShowHeart(true);
 
-        // Chamada para dar like
         likePost(post._id);
 
         setTimeout(() => {
@@ -84,12 +83,17 @@ export default function Post({
         }, 1000);
     };
 
+    // Função para lidar com clique no projeto
+    const handleProjectClick = (project) => {
+        setCurrentProject(project);
+    };
+
     return (
-        <div className="flex flex-col gap-4 bg-[#1b1b1b] rounded-lg p-5 w-full max-w-2xl mx-auto border border-[#61673e] mb-10">
+        <div className="flex flex-col gap-4 bg-[#121113] rounded-lg p-5 w-full max-w-2xl mx-auto border border-[#4c4e30] mb-10 shadow-lg hover:shadow-xl transition-shadow">
             {/* Cabeçalho do post */}
             <div className="flex items-center gap-4">
                 <Image
-                    className="rounded-full object-cover border border-[#61673e] hover:bg-[#c1915d] transition duration-300 cursor-pointer"
+                    className="rounded-full object-cover border-2 border-[#4c4e30] hover:border-[#c1915d] transition duration-300 cursor-pointer"
                     src={avatarUrl}
                     height={60}
                     width={60}
@@ -98,9 +102,9 @@ export default function Post({
                 />
                 <div className="flex-1">
                     <Link href={`/profile/${post.user?.username}`} className="hover:underline">
-                        <p className="font-medium">{post.user?.username || "Usuário desconhecido"}</p>
+                        <p className="font-medium text-[#e6e8e3]">{post.user?.username || "Usuário desconhecido"}</p>
                     </Link>
-                    <p className="text-xs text-gray-400">{new Date(post.created_at).toLocaleString()}</p>
+                    <p className="text-xs text-[#a97f52]">{new Date(post.created_at).toLocaleString()}</p>
                 </div>
                 {post.user?._id && (
                     <FollowButton
@@ -112,7 +116,7 @@ export default function Post({
             </div>
 
             {/* Legenda */}
-            <p className="break-words">{post.caption}</p>
+            <p className="break-words text-[#e6e8e3]">{post.caption}</p>
 
             {/* Gêneros */}
             {post.genres?.length > 0 && (
@@ -120,22 +124,22 @@ export default function Post({
                     {post.genres.map((genre) => (
                         <span
                             key={genre}
-                            className="px-3 py-1 rounded-full bg-[#4c4e30] text-[#e6e8e3] text-sm"
+                            className="px-3 py-1 rounded-full bg-[#4c4e30] text-[#e6e8e3] text-sm font-medium"
                         >
-              {genre}
-            </span>
+                            {genre}
+                        </span>
                     ))}
                 </div>
             )}
 
             {/* Galeria de imagens */}
             {post.photos?.length > 0 && (
-                <div className="relative w-full">
+                <div className="relative w-full group">
                     {/* Botão anterior */}
                     {post.photos.length > 1 && (
                         <button
                             onClick={prevImage}
-                            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-[#61673e] text-white w-10 h-10 rounded-full flex items-center justify-center z-10"
+                            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-[#4c4e30] bg-opacity-80 text-white w-10 h-10 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                             <FontAwesomeIcon icon={faChevronLeft} />
                         </button>
@@ -149,7 +153,7 @@ export default function Post({
                         <img
                             src={post.photos[currentImageIndex]}
                             alt={`Post image ${currentImageIndex + 1}`}
-                            className="w-full h-full object-contain rounded-lg"
+                            className="w-full h-full object-contain rounded-lg border border-[#4c4e30]"
                         />
 
                         {/* Animação de coração */}
@@ -160,7 +164,7 @@ export default function Post({
                     {post.photos.length > 1 && (
                         <button
                             onClick={nextImage}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#61673e] text-white w-10 h-10 rounded-full flex items-center justify-center z-10"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#4c4e30] bg-opacity-80 text-white w-10 h-10 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                             <FontAwesomeIcon icon={faChevronRight} />
                         </button>
@@ -173,7 +177,7 @@ export default function Post({
                                 <button
                                     key={index}
                                     onClick={() => goToImage(index)}
-                                    className={`w-3 h-3 rounded-full ${index === currentImageIndex ? 'bg-green-600' : 'bg-gray-400'}`}
+                                    className={`w-3 h-3 rounded-full ${index === currentImageIndex ? 'bg-[#a97f52]' : 'bg-[#4c4e30]'}`}
                                 />
                             ))}
                         </div>
@@ -183,12 +187,14 @@ export default function Post({
 
             {/* Projeto associado */}
             {post.project && (
-                <ProjectCard
-                    project={post.project}
-                    profileId={profileId}
-                    setCurrentProject={setCurrentProject}
-                    handleClickFork={handleClickFork}
-                />
+                <div onClick={() => handleProjectClick(post.project)}>
+                    <ProjectCard
+                        project={post.project}
+                        profileId={profileId}
+                        setCurrentProject={setCurrentProject}
+                        handleClickFork={handleClickFork}
+                    />
+                </div>
             )}
 
             {/* Botões de interação */}
@@ -196,21 +202,27 @@ export default function Post({
                 <button
                     onClick={() => !isAnimating && likePost(post._id)}
                     disabled={isAnimating}
-                    className={`flex items-center gap-2 ${isAnimating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`flex items-center gap-2 ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'hover:text-[#c1915d]'} transition-colors`}
                 >
                     <FontAwesomeIcon
                         icon={faHeart}
-                        className={isLiked ? 'text-[#4c4e30]' : 'text-[#f6f5f4]'}
+                        className={isLiked ? 'text-[#a97f52]' : 'text-[#e6e8e3]'}
                     />
-                    <span>{post.likes?.length || 0}</span>
+                    <span className="text-[#e6e8e3]">{post.likes?.length || 0}</span>
                 </button>
 
-                <button onClick={() => router.push(`/p/${post._id}`)}>
-                    <FontAwesomeIcon icon={faComment} className="text-[#4c4e30]" />
+                <button
+                    onClick={() => router.push(`/p/${post._id}`)}
+                    className="hover:text-[#c1915d] transition-colors"
+                >
+                    <FontAwesomeIcon icon={faComment} className="text-[#e6e8e3]" />
                 </button>
 
-                <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/p/${post._id}`)}>
-                    <FontAwesomeIcon icon={faShareAlt} className="text-[#4c4e30]" />
+                <button
+                    onClick={() => navigator.clipboard.writeText(`${window.location.origin}/p/${post._id}`)}
+                    className="hover:text-[#c1915d] transition-colors"
+                >
+                    <FontAwesomeIcon icon={faShareAlt} className="text-[#e6e8e3]" />
                 </button>
             </div>
         </div>

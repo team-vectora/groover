@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const FollowButton = ({ followingId, userId, following }) => {
   const [isFollowing, setIsFollowing] = useState(() =>
-    Array.isArray(following) ? following.includes(followingId) : false
+      Array.isArray(following) ? following.includes(followingId) : false
   );
   const [loading, setLoading] = useState(false);
 
@@ -21,28 +21,25 @@ const FollowButton = ({ followingId, userId, following }) => {
       });
 
       const data = await response.json();
-      console.log(data);
 
-    if (response.ok) {
-      const newIsFollowing = !isFollowing;
-      setIsFollowing(newIsFollowing);
+      if (response.ok) {
+        const newIsFollowing = !isFollowing;
+        setIsFollowing(newIsFollowing);
 
-      let updatedFollowing = Array.isArray(following) ? [...following] : [];
+        let updatedFollowing = Array.isArray(following) ? [...following] : [];
 
-      if (newIsFollowing) {
-        if (!updatedFollowing.includes(followingId)) {
-          updatedFollowing.push(followingId);
+        if (newIsFollowing) {
+          if (!updatedFollowing.includes(followingId)) {
+            updatedFollowing.push(followingId);
+          }
+        } else {
+          updatedFollowing = updatedFollowing.filter(id => id !== followingId);
         }
+
+        localStorage.setItem('following', JSON.stringify(updatedFollowing));
       } else {
-        updatedFollowing = updatedFollowing.filter(id => id !== followingId);
+        alert(data.error || 'Erro ao seguir/deixar de seguir');
       }
-
-      localStorage.setItem('following', JSON.stringify(updatedFollowing));
-
-      alert(newIsFollowing ? 'Agora você está seguindo!' : 'Você deixou de seguir!');
-    } else {
-      alert(data.error || 'Erro ao seguir/deixar de seguir');
-    }
 
     } catch (error) {
       console.error('Erro:', error);
@@ -53,9 +50,19 @@ const FollowButton = ({ followingId, userId, following }) => {
   };
 
   return userId == followingId ? null : (
-    <button onClick={handleClick} className="follow_button">
-      {isFollowing ? 'Seguindo' : loading ? 'Carregando...' : 'Seguir'}
-    </button>
+      <button
+          onClick={handleClick}
+          disabled={loading}
+          className={`
+        px-4 py-2 rounded-full text-sm font-medium transition-colors
+        ${isFollowing
+              ? 'bg-[#4c4e30] text-[#e6e8e3] border border-[#4c4e30] hover:bg-[#61673e]'
+              : 'bg-transparent text-[#e6e8e3] border border-[#a97f52] hover:bg-[#a97f52]'}
+        ${loading ? 'opacity-70 cursor-not-allowed' : ''}
+      `}
+      >
+        {loading ? 'Carregando...' : isFollowing ? 'Seguindo' : 'Seguir'}
+      </button>
   );
 };
 

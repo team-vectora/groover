@@ -8,7 +8,7 @@ export default function SimilarUsers({ users = [], userId }) {
   const pageSize = 3;
 
   if (!users || users.length === 0) {
-    return null; // Não mostra nada se não houver usuários
+    return <p className="text-center py-4">Carregando sugestões...</p>;
   }
 
   const startIndex = page * pageSize;

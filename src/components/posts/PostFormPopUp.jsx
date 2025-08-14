@@ -1,9 +1,7 @@
-"use client";
-
-import Popup from "reactjs-popup";
-import "reactjs-popup/dist/index.css";
-import { useState, useRef } from "react";
-import { uploadToCloudinary } from "../../lib/util/upload.jsx";
+import { useState, useRef } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { uploadToCloudinary } from '../../lib/util/upload';
 
 const GENRES = [
   "rock", "pop", "jazz", "blues", "rap", "hip hop", "r&b", "reggae",
@@ -46,7 +44,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
 
       if (images.length > 0) {
         photoUrls = await Promise.all(
-          images.map((file) => uploadToCloudinary(file))
+            images.map((file) => uploadToCloudinary(file))
         );
       }
 
@@ -106,236 +104,152 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
     setPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  return (
-    <Popup
-      open={open}
-      closeOnDocumentClick={false}
-      onClose={onClose}
-      modal
-      nested
-      contentStyle={{
-        background: "transparent",
-        border: "none",
-        width: "auto",
-        maxWidth: "600px",
-      }}
-    >
-      <div
-        className="rounded-xl overflow-hidden shadow-lg w-[448px] mx-auto"
-        style={{ backgroundColor: "#121113" }}
-      >
-        <div
-          className="flex justify-between items-center px-5 py-4 border-b"
-          style={{ backgroundColor: "#070608", borderColor: "#4c4e30" }}
-        >
-          <h3 style={{ color: "#c1915d" }} className="text-lg font-semibold">
-            Criar Nova Publicação
-          </h3>
-          <button
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="text-2xl transition-colors"
-            style={{ color: "#e6e8e3" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#a97f52")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#e6e8e3")}
-            aria-label="Fechar"
-          >
-            &times;
-          </button>
-        </div>
+  if (!open) return null;
 
-        <form onSubmit={handleSubmit} className="p-5">
-          {/* Legenda */}
-          <div className="mb-5">
-            <textarea
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              placeholder="Escreva uma legenda..."
-              rows={4}
-              maxLength={500}
-              className="w-full p-3 rounded-md resize-none font-sans focus:outline-none"
-              style={{
-                backgroundColor: "#070608",
-                borderColor: "#4c4e30",
-                color: "#e6e8e3",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "#a97f52")}
-              onBlur={(e) => (e.target.style.borderColor = "#4c4e30")}
-            />
-            <div
-              className="text-right text-xs select-none"
-              style={{ color: "#61673e", marginTop: "4px" }}
-            >
-              {caption.length}/500
+  return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-auto">
+        <div className="bg-[#121113] rounded-xl w-full max-w-6xl border border-[#4c4e30] flex flex-col md:flex-row overflow-hidden">
+
+          {/* Form (agora à esquerda) */}
+          <div className="md:w-1/2 p-5 flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-[#c1915d]">
+                Criar Nova Publicação
+              </h3>
+
+              <button
+                  onClick={onClose}
+                  disabled={isSubmitting}
+                  className="text-gray-400 hover:text-white"
+              >
+                <FontAwesomeIcon icon={faTimes} size="lg" />
+              </button>
             </div>
+
+            <div className="mb-5">
+              <textarea
+                  value={caption}
+                  onChange={(e) => setCaption(e.target.value)}
+                  placeholder="Escreva uma legenda..."
+                  rows={4}
+                  maxLength={500}
+                  className="w-full p-3 bg-[#070608] border border-[#4c4e30] rounded-md text-white focus:outline-none focus:border-[#c1915d]"
+              />
+              <div className="text-right text-xs text-[#61673e] mt-1">
+                {caption.length}/500
+              </div>
+            </div>
+
+            <label className="block mb-2 text-sm text-gray-300">Escolha até 5 tags musicais</label>
+            <div className="grid grid-cols-3 md:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 mb-4 bg-[#070608] border border-[#4c4e30] rounded-md">
+              {GENRES.map((genre) => (
+                  <button
+                      key={genre}
+                      type="button"
+                      className={`px-2 py-1 rounded-full text-center transition ${
+                          selectedGenres.includes(genre)
+                              ? "bg-[#4c4e30] text-white font-semibold"
+                              : "bg-[#121113] text-[#e6e8e3] hover:bg-[#1b1b1b]"
+                      }`}
+                      onClick={() => toggleGenre(genre)}
+                  >
+                    {genre.charAt(0).toUpperCase() + genre.slice(1)}
+                  </button>
+              ))}
+            </div>
+
+            <button
+                type="submit"
+                disabled={isSubmitting || (!caption && images.length === 0)}
+                className={`w-full py-3 rounded-md font-semibold flex justify-center items-center mt-auto ${
+                    isSubmitting || (!caption && images.length === 0)
+                        ? "bg-[#c1915d] cursor-not-allowed opacity-70"
+                        : "bg-[#a97f52] hover:bg-[#c1915d]"
+                }`}
+                onClick={handleSubmit}
+            >
+              {isSubmitting ? (
+                  <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+              ) : "Publicar"}
+            </button>
           </div>
 
-          {/* Imagens */}
-          <div className="mb-5">
+          {/* Preview + Projeto (agora à direita) */}
+          <div className="md:w-1/2 p-5 border-t md:border-t-0 md:border-l border-[#4c4e30] flex flex-col items-center">
+            {/* Preview de imagens */}
             {previews.length > 0 ? (
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                {previews.map((preview, index) => (
-                  <div
-                    key={index}
-                    className="relative rounded-md overflow-hidden aspect-square"
-                    style={{ border: "1px solid #4c4e30" }}
-                  >
-                    <img
-                      src={preview.url}
-                      alt={preview.name}
-                      className="object-cover w-full h-full"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center text-white text-lg transition-colors"
-                      style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#b91c1c")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.7)")
-                      }
-                      aria-label={`Remover imagem ${index + 1}`}
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ))}
-              </div>
+                <div className="grid grid-cols-2 md:grid-cols-2 gap-3 mb-4 w-full">
+                  {previews.map((preview, index) => (
+                      <div key={index} className="relative rounded-md overflow-hidden aspect-square border border-[#4c4e30]">
+                        <img
+                            src={preview.url}
+                            alt={preview.name}
+                            className="object-cover w-full h-full"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black bg-opacity-70 text-white hover:bg-red-600 flex items-center justify-center"
+                        >
+                          <FontAwesomeIcon icon={faTimes} size="xs" />
+                        </button>
+                      </div>
+                  ))}
+                </div>
             ) : (
-              <div
-                className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-md mb-4 text-center"
-                style={{ borderColor: "#4c4e30", color: "#61673e" }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  className="w-12 h-12 mb-3"
-                  style={{ color: "#4c4e30" }}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-                <p>Adicione fotos ao seu post</p>
-              </div>
+                <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-[#4c4e30] rounded-md mb-4 text-[#61673e] w-full">
+                  <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      className="w-12 h-12 mb-3 text-[#4c4e30]"
+                  >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <p>Adicione fotos ao seu post</p>
+                </div>
             )}
 
+            {/* Selecionar imagens */}
             <label
-              htmlFor="file-upload"
-              className="inline-block px-4 py-2 rounded-md cursor-pointer select-none transition-colors"
-              style={{ backgroundColor: "#4c4e30", color: "#ffffff" }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#61673e")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "#4c4e30")
-              }
+                htmlFor="file-upload"
+                className="inline-block px-4 py-2 rounded-md cursor-pointer select-none bg-[#4c4e30] text-white hover:bg-[#61673e] mb-4"
             >
               Selecionar Imagens
             </label>
             <input
-              id="file-upload"
-              type="file"
-              ref={fileInputRef}
-              accept="image/*"
-              multiple
-              onChange={handleImageChange}
-              className="hidden"
+                id="file-upload"
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+                className="hidden"
             />
-          </div>
 
-          {/* Projeto */}
-          <div className="mb-5">
-            <label
-              htmlFor="project-select"
-              className="block mb-2 text-sm font-medium"
-              style={{ color: "#e6e8e3" }}
-            >
-              Projeto (opcional)
-            </label>
+            {/* Projeto */}
+            <label className="block mb-2 text-sm text-gray-300 w-full">Projeto (opcional)</label>
             <select
-              id="project-select"
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              className="w-full p-3 rounded-md font-sans focus:outline-none"
-              style={{
-                backgroundColor: "#070608",
-                borderColor: "#4c4e30",
-                color: "#e6e8e3",
-              }}
+                value={selectedProject}
+                onChange={(e) => setSelectedProject(e.target.value)}
+                className="w-full p-3 bg-[#070608] border border-[#4c4e30] rounded-md text-white focus:outline-none focus:border-[#c1915d]"
             >
               <option value="">Nenhum projeto</option>
               {projects.map((proj) => (
-                <option key={proj.id} value={proj.id}>
-                  {proj.title}
-                </option>
+                  <option key={proj.id} value={proj.id}>{proj.title}</option>
               ))}
             </select>
           </div>
-
-          {/* Gêneros */}
-          <div className="mb-5">
-            <label
-              className="block mb-2 text-sm font-medium"
-              style={{ color: "#e6e8e3" }}
-            >
-              Escolha até 5 tags musicais
-            </label>
-            <div
-              className="grid grid-cols-2 max-h-40 overflow-y-auto gap-2 border border-[#61673e] rounded p-2 bg-[#070608]"
-              style={{ scrollbarWidth: "thin" }}
-            >
-              {GENRES.map((genre) => (
-                <label
-                  key={genre}
-                  className={`cursor-pointer select-none px-2 py-1 rounded-full text-center transition duration-300 ease-in-out ${
-                    selectedGenres.includes(genre)
-                      ? "bg-[#4c4e30] text-black font-semibold"
-                      : "bg-[#121113] text-[#e6e8e3]"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    className="hidden"
-                    checked={selectedGenres.includes(genre)}
-                    onChange={() => toggleGenre(genre)}
-                  />
-                  {genre.charAt(0).toUpperCase() + genre.slice(1)}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting || (!caption && images.length === 0)}
-            className="w-full py-3 rounded-md font-semibold transition-colors flex justify-center items-center"
-            style={{
-              backgroundColor: isSubmitting ? "#c1915d" : "#a97f52",
-              color: "#0a090d",
-              cursor: isSubmitting ? "not-allowed" : "pointer",
-            }}
-          >
-            {isSubmitting ? (
-              <span
-                className="w-5 h-5 border-4 border-[#0a090d] border-t-transparent rounded-full animate-spin"
-                aria-label="Carregando"
-              />
-            ) : (
-              "Publicar"
-            )}
-          </button>
-        </form>
+        </div>
       </div>
-    </Popup>
   );
+
 };
 
 export default PostFormPopUp;

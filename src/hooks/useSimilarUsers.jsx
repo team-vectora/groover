@@ -10,7 +10,7 @@ export default function useSimilarUsers(token) {
 
         setLoading(true);
         try {
-            const res = await fetch("https://groover-api.onrender.com/api/user/similar", {
+            const res = await fetch("http://localhost:5000/api/user/similar", {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -19,6 +19,9 @@ export default function useSimilarUsers(token) {
             }
 
             const data = await res.json();
+
+            console.log("Usuarios similares achados: " + data)
+
             setSimilarUsers(data);
         } catch (err) {
             setError(err.message);

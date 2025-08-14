@@ -1,11 +1,12 @@
-import {useEffect , useState} from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faHome, 
-  faUser, 
-  faMusic, 
+import {
+  faHome,
+  faUser,
+  faMusic,
   faCalendar,
+  faPlus,
   faSignOutAlt
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -29,55 +30,68 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="fixed top-0 left-0 h-full w-64 bg-[#121113] p-4 border-r border-[#4c4e30]">
-      <div className="flex justify-center mb-8">
-        <img 
-          src="/img/groover_logo.png" 
-          alt="Groover Logo" 
-          className="w-32"
-        />
-      </div>
+      <aside className="fixed top-0 left-0 h-full w-64 bg-[#121113] p-4 border-r border-[#4c4e30] flex flex-col">
+        <div className="flex justify-center mb-8">
+          <img
+              src="/img/groover_logo.png"
+              alt="Groover Logo"
+              className="w-32"
+          />
+        </div>
 
-      <nav className="mb-8">
-        <ul className="space-y-2">
-          {navItems.map((item) => (
-            <li key={item.path}>
+        <nav className="mb-4">
+          <ul className="space-y-2">
+            {navItems.map((item) => (
+                <li key={item.path}>
+                  <button
+                      onClick={() => router.push(item.path)}
+                      className="flex items-center w-full p-3 hover:bg-[#1b1b1b] rounded-lg transition-colors"
+                  >
+                    <FontAwesomeIcon icon={item.icon} className="mr-3" />
+                    <span>{item.label}</span>
+                  </button>
+                </li>
+            ))}
+
+            {/* Botão Nova Postagem */}
+            <li>
               <button
-                onClick={() => router.push(item.path)}
-                className="flex items-center w-full p-3 hover:bg-[#1b1b1b] rounded-lg transition-colors"
+                  onClick={() => router.push(`/profile/${username}?newPost=true`)}
+                  className="flex items-center w-full p-3 bg-[#a97f52] hover:bg-[#c1915d] text-white rounded-lg transition-colors mt-2"
               >
-                <FontAwesomeIcon icon={item.icon} className="mr-3" />
-                <span>{item.label}</span>
+                <FontAwesomeIcon icon={faPlus} className="mr-3" />
+                <span>Nova Postagem</span>
               </button>
             </li>
-          ))}
-        </ul>
-      </nav>
+          </ul>
+        </nav>
 
-      <div className="mt-auto border-t border-[#4c4e30] pt-4">
-        <div 
-          className="flex items-center cursor-pointer p-2 hover:bg-[#1b1b1b] rounded-lg"
-          onClick={() => router.push(`/profile/${username}`)}
-        >
-          <img 
-            src={avatarUrl} 
-            alt="Avatar"
-            className="w-10 h-10 rounded-full object-cover border border-[#4c4e30] mr-3"
-          />
-          <span className="font-medium">{username}</span>
+        {/* Seção de perfil e logout logo abaixo do menu */}
+        <div className="border-t border-[#4c4e30] pt-4">
+          <div
+              className="flex items-center cursor-pointer p-2 hover:bg-[#1b1b1b] rounded-lg"
+              onClick={() => router.push(`/profile/${username}`)}
+          >
+            <img
+                src={avatarUrl}
+                alt="Avatar"
+                className="w-10 h-10 rounded-full object-cover border border-[#4c4e30] mr-3"
+            />
+            <span className="font-medium">{username}</span>
+          </div>
+          <button
+              onClick={() => {
+                localStorage.removeItem('token');
+                router.push('/logout');
+              }}
+              className="flex items-center w-full p-2 mt-2 hover:bg-[#1b1b1b] rounded-lg text-red-400"
+          >
+            <FontAwesomeIcon icon={faSignOutAlt} className="mr-3" />
+            <span>Sair</span>
+          </button>
         </div>
-        <button 
-          onClick={() => {
-            localStorage.removeItem('token');
-            router.push('/login');
-          }}
-          className="flex items-center w-full p-2 mt-2 hover:bg-[#1b1b1b] rounded-lg text-red-400"
-        >
-          <FontAwesomeIcon icon={faSignOutAlt} className="mr-3" />
-          <span>Sair</span>
-        </button>
-      </div>
-    </aside>
+      </aside>
+
   );
 };
 

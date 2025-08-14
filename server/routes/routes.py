@@ -79,6 +79,7 @@ def get_user_by_username(username):
     user["_id"] = str(user["_id"])
     return jsonify(user), 200
 
+
 @auth_bp.route("/user/similar", methods=["GET"])
 @jwt_required()
 def get_users_similar():
