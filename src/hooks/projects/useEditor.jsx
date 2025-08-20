@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import * as Tone from "tone";
 import { Midi } from '@tonejs/midi';
-import PlaybackEngine from "./PlaybackEngine";
+import PlaybackEngine from "../editor/PaybackEngine";
 import ProjectManager from "./ProjectManager";
 
 const notes = [

@@ -7,12 +7,7 @@ import { useRouter } from "next/router";
 
 import translations from "../../../../locales/language.js";
 
-import HeaderEditor from "../../../../components/editor/HeaderEditor.jsx";
-import ChangeVolume from "../../../../components/editor/controls/ChangeVolume.jsx";
-import PianoRoll from "../../../../components/editor/PianoRoll.jsx";
-import ChangeInstrument from "../../../../components/editor/controls/ChangeInstrument.jsx";
-import SelectRitmo from "../../../../components/editor/controls/SelectRitmo";
-import SaveMusicPopUp from "../../../../components/editor/SaveMusicPopUp.jsx";
+import { HeaderEditor, ChangeVolume, PianoRoll, ChangeInstrument, SelectRitmo, SaveMusicPopUp } from "../../../../components";
 
 function EditorPage() {
   const router = useRouter();

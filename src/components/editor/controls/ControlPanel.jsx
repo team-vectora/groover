@@ -1,9 +1,5 @@
 "use client";
-import ChangeInstrument from "./controls/ChangeInstrument";
-import ChangeVolume from "./controls/ChangeVolume";
-import ChangeBpm from "./controls/ChangeBpm";
-import SelectRitmo from "./controls/SelectRitmo";
-import VersionsManager from "./VersionsManager";
+import { ChangeInstrument, ChangeVolume, ChangeBpm, SelectRitmo, VersionManager } from "../../.";
 
 const ControlPanel = ({
                           instrument,

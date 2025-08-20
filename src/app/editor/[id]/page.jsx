@@ -1,11 +1,8 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import HeaderEditor from "../../../components/editor/HeaderEditor.jsx";
-import PianoRoll from "../../../components/editor/PianoRoll.jsx";
-import SaveMusicPopUp from "../../../components/editor/SaveMusicPopUp.jsx";
-import ControlPanel from "../../../components/editor/ControlPanel.jsx";
-import useEditor from "../../../hooks/useEditor";
+import { HeaderEditor, PianoRoll, SaveMusicPopUp, ControlPanel } from "../../../components";
+import { useEditor } from "../../../hooks";
 import translations from "../../../locales/language.js";
 
 function EditorPage() {

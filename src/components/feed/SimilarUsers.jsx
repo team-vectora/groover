@@ -43,10 +43,10 @@ export default function SimilarUsers({ users = [], userId }) {
                     <Link href={`/profile/${user?.username}`} className="text-[#e6e8e3] hover:underline">
                       <h3 className="text-lg font-medium">{user.username}</h3>
                     </Link>
-                    <p className="text-[#e6e8e3] text-sm line-clamp-1">
-                      {user.bio || "Sem biografia"}
-                    </p>
-                    <p className="text-[#a97f52] text-sm">
+                      <p className="text-[#e6e8e3] text-sm line-clamp-2 max-w-[100px]">
+                          {user.bio || "Sem biografia"}
+                      </p>
+                      <p className="text-[#a97f52] text-sm">
                       {(user.similarity * 100).toFixed(0)}% de match
                     </p>
                   </div>

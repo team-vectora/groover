@@ -30,7 +30,7 @@ const Sidebar = () => {
   ];
 
   return (
-      <aside className="fixed top-0 left-0 h-full w-64 bg-[#121113] p-4 border-r border-[#4c4e30] flex flex-col">
+      <aside className="sticky top-0 left-0 h-fit w-64 p-4 flex flex-col">
         <div className="flex justify-center mb-8">
           <img
               src="/img/groover_logo.png"

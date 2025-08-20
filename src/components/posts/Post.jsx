@@ -1,11 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from "next/link";
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faHeart,
     faComment,
     faShareAlt,
     faChevronLeft,
@@ -13,45 +12,118 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import FollowButton from "../feed/FollowButton";
 import ProjectCard from "../profile/ProjectCard";
-import useLikePost from "../../hooks/useLikePost";
+import { useAuth, useLikePost } from "../../hooks";
 
-const HeartAnimation = ({ position }) => {
+// Componente de animação do coração com SVGs originais
+const HeartAnimation = ({ position, showHeart }) => {
+    if (!showHeart) return null;
+
     return (
         <div
-            className="absolute pointer-events-none animate-ping"
+            className="absolute pointer-events-none"
             style={{
                 top: position.y,
                 left: position.x,
-                transform: 'translate(-50%, -50%)',
-                animationDuration: '1000ms'
+                transform: "translate(-50%, -50%)",
+                zIndex: 20
             }}
         >
-            <FontAwesomeIcon
-                icon={faHeart}
-                className="text-[#a97f52] text-5xl opacity-80"
-            />
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="#a97f52"
+                viewBox="0 0 24 24"
+                className="w-20 h-20 opacity-80 animate-ping duration-1000"
+            >
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28
+                    2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81
+                    4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22
+                    5.42 22 8.5c0 3.78-3.4 6.86-8.55
+                    11.54L12 21.35z" />
+            </svg>
+
+            <div className="absolute">
+                <svg
+                    fill="#4c4e30"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 364.59 364.591"
+                    className="w-6 h-6 absolute top-8 left-12 animate-ping"
+                >
+                    <path d="M360.655,258.05V25c0-13.807-11.191-25-25-25H130.09c-13.807,0-25,11.193-25,25v206.27
+                    c-10.569-3.184-22.145-4.271-34.058-2.768C29.527,233.738-0.293,268.3,4.427,305.695c4.719,37.396,42.189,63.464,83.694,58.226
+                    c40.015-5.049,66.969-37.146,66.969-73.181V50h155.564v146.794c-10.591-3.2-22.19-4.297-34.134-2.79
+                    c-41.504,5.237-71.323,39.798-66.604,77.193s42.188,63.464,83.694,58.227C332.951,324.458,360.655,293.275,360.655,258.05z"/>
+                </svg>
+
+                <svg
+                    fill="#4c4e30"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 364.59 364.591"
+                    className="w-5 h-5 absolute bottom-8 right-12 animate-ping"
+                >
+                    <path d="M360.655,258.05V25c0-13.807-11.191-25-25-25H130.09c-13.807,0-25,11.193-25,25v206.27
+                    c-10.569-3.184-22.145-4.271-34.058-2.768C29.527,233.738-0.293,268.3,4.427,305.695c4.719,37.396,42.189,63.464,83.694,58.226
+                    c40.015-5.049,66.969-37.146,66.969-73.181V50h155.564v146.794c-10.591-3.2-22.19-4.297-34.134-2.79
+                    c-41.504,5.237-71.323,39.798-66.604,77.193s42.188,63.464,83.694,58.227C332.951,324.458,360.655,293.275,360.655,258.05z"/>
+                </svg>
+            </div>
         </div>
     );
 };
 
 export default function Post({
                                  post,
+                                 token,
                                  userId,
                                  profileId,
                                  setCurrentProject,
                                  handleClickFork,
-                                 following
                              }) {
     const router = useRouter();
-    const { likePost } = useLikePost();
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showHeart, setShowHeart] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
     const [heartPos, setHeartPos] = useState({ x: 0, y: 0 });
 
+    const [isLiked, setIsLiked] = useState(post.likes.includes(userId));
+    const [likesCount, setLikesCount] = useState(post.likes.length);
+
+    // Estado para controlar o follow localmente
+    const [isFollowing, setIsFollowing] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const following = JSON.parse(localStorage.getItem("following") || "[]");
+            return following.includes(post.user?._id);
+        }
+        return false;
+    });
+
+    // Escutar eventos de atualização de follow
+    useEffect(() => {
+        const handleFollowingUpdate = (event) => {
+            if (event.detail.userId === post.user?._id) {
+                setIsFollowing(event.detail.isFollowing);
+            }
+        };
+
+        window.addEventListener('followingUpdated', handleFollowingUpdate);
+
+        return () => {
+            window.removeEventListener('followingUpdated', handleFollowingUpdate);
+        };
+    }, [post.user?._id]);
+
+
     const avatarUrl = post.user?.avatar || "/img/default_avatar.png";
-    const isLiked = post.likes?.includes(userId) || false;
+
+
+    const { likePost } = useLikePost(token, () => {
+        if (isLiked) {
+            setLikesCount(prev => prev - 1);
+        } else {
+            setLikesCount(prev => prev + 1);
+        }
+        setIsLiked(!isLiked);
+    });
 
     const nextImage = () => setCurrentImageIndex(prev =>
         prev === post.photos.length - 1 ? 0 : prev + 1
@@ -63,15 +135,15 @@ export default function Post({
 
     const goToImage = index => setCurrentImageIndex(index);
 
+    // Lógica de animação do coração com SVGs originais
     const handleLikeImage = (e) => {
         if (isAnimating) return;
 
         const rect = e.currentTarget.getBoundingClientRect();
-        setHeartPos({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
-        });
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
 
+        setHeartPos({ x, y });
         setIsAnimating(true);
         setShowHeart(true);
 
@@ -83,9 +155,19 @@ export default function Post({
         }, 1000);
     };
 
+    const handleLikeClick = () => {
+        if (!isAnimating) {
+            likePost(post._id);
+        }
+    };
+
     // Função para lidar com clique no projeto
     const handleProjectClick = (project) => {
         setCurrentProject(project);
+    };
+
+    const handleShareClick = () => {
+        navigator.clipboard.writeText(`${window.location.origin}/p/${post._id}`);
     };
 
     return (
@@ -110,7 +192,8 @@ export default function Post({
                     <FollowButton
                         followingId={post.user._id}
                         userId={userId}
-                        following={following}
+                        isFollowing={isFollowing}
+                        setIsFollowing={setIsFollowing}
                     />
                 )}
             </div>
@@ -156,8 +239,8 @@ export default function Post({
                             className="w-full h-full object-contain rounded-lg border border-[#4c4e30]"
                         />
 
-                        {/* Animação de coração */}
-                        {showHeart && <HeartAnimation position={heartPos} />}
+                        {/* Animação de coração com SVGs originais */}
+                        <HeartAnimation position={heartPos} showHeart={showHeart} />
                     </div>
 
                     {/* Botão próximo */}
@@ -177,7 +260,7 @@ export default function Post({
                                 <button
                                     key={index}
                                     onClick={() => goToImage(index)}
-                                    className={`w-3 h-3 rounded-full ${index === currentImageIndex ? 'bg-[#a97f52]' : 'bg-[#4c4e30]'}`}
+                                    className={`w-3 h-3 rounded-full transition-colors ${index === currentImageIndex ? 'bg-[#a97f52]' : 'bg-[#4c4e30]'}`}
                                 />
                             ))}
                         </div>
@@ -198,31 +281,56 @@ export default function Post({
             )}
 
             {/* Botões de interação */}
-            <div className="flex justify-center gap-8 mt-4">
+            <div className="flex justify-center gap-8 mt-4 ">
                 <button
-                    onClick={() => !isAnimating && likePost(post._id)}
+                    onClick={handleLikeClick}
                     disabled={isAnimating}
-                    className={`flex items-center gap-2 ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'hover:text-[#c1915d]'} transition-colors`}
+                    className={`flex items-center gap-2 ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'hover:text-[#c1915d]'} transition-colors hover:cursor-pointer`}
                 >
-                    <FontAwesomeIcon
-                        icon={faHeart}
-                        className={isLiked ? 'text-[#a97f52]' : 'text-[#e6e8e3]'}
-                    />
-                    <span className="text-[#e6e8e3]">{post.likes?.length || 0}</span>
+                    {isLiked ? (
+                        <svg
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-6 h-6"
+                            fill="#4c4e30"
+                        >
+                            <path fill="none" d="M0 0H24V24H0z" />
+                            <path d="M12.001 4.529c2.349-2.109 5.979-2.039
+                                8.242.228 2.262 2.268 2.34 5.88.236
+                                8.236l-8.48 8.492-8.478-8.492c-2.104-2.356-2.025-5.974.236-8.236
+                                2.265-2.264 5.888-2.34 8.244-.228z"
+                            />
+                        </svg>
+                    ) : (
+                        <svg
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-6 h-6"
+                            fill="#e6e8e3"
+                        >
+                            <path fill="none" d="M0 0H24V24H0z" />
+                            <path d="M12.001 4.529c2.349-2.109 5.979-2.039
+                                8.242.228 2.262 2.268 2.34 5.88.236
+                                8.236l-8.48 8.492-8.478-8.492c-2.104-2.356-2.025-5.974.236-8.236
+                                2.265-2.264 5.888-2.34 8.244-.228z"
+                            />
+                        </svg>
+                    )}
+                    <span className="text-[#e6e8e3]">{likesCount}</span>
                 </button>
 
                 <button
                     onClick={() => router.push(`/p/${post._id}`)}
-                    className="hover:text-[#c1915d] transition-colors"
+                    className="hover:text-[#c1915d] transition-colors flex items-center gap-2"
                 >
-                    <FontAwesomeIcon icon={faComment} className="text-[#e6e8e3]" />
+                    <FontAwesomeIcon icon={faComment} className="text-[#e6e8e3] hover:cursor-pointer" />
                 </button>
 
                 <button
-                    onClick={() => navigator.clipboard.writeText(`${window.location.origin}/p/${post._id}`)}
-                    className="hover:text-[#c1915d] transition-colors"
+                    onClick={handleShareClick}
+                    className="hover:text-[#c1915d] transition-colors flex items-center gap-2"
                 >
-                    <FontAwesomeIcon icon={faShareAlt} className="text-[#e6e8e3]" />
+                    <FontAwesomeIcon icon={faShareAlt} className="text-[#e6e8e3] hover:cursor-pointer" />
                 </button>
             </div>
         </div>

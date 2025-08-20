@@ -54,15 +54,11 @@ class User:
 
     @staticmethod
     def get_followers(user_id):
-        followers_cursor = mongo.db.followers.find({'following_id': ObjectId(user_id)})
-        followers = [str(f['follower_id']) for f in followers_cursor]
-        return followers
+        return Followers.get_followers(user_id)
 
     @staticmethod
     def get_following(user_id):
-        following_cursor = mongo.db.followers.find({'follower_id': ObjectId(user_id)})
-        following = [str(f['following_id']) for f in following_cursor]
-        return following
+        return Followers.get_followings(user_id)    
 
     @staticmethod
     def recommendation_change(genres, user_id):
@@ -945,9 +941,8 @@ class Followers:
         })
 
         if existing:
-            mongo.db.followers.delete_one({
-                "_id": existing["_id"]
-            })
+            # unfollow
+            mongo.db.followers.delete_one({"_id": existing["_id"]})
             return {
                 "status": "unfollowed",
                 "follow_id": str(existing["_id"])
@@ -966,21 +961,23 @@ class Followers:
 
     @staticmethod
     def get_followers(user_id):
-        return list(mongo.db.followers.find({"follower_id": ObjectId(user_id)}))
+        # retorna lista de ids (strings) de quem segue user_id
+        cursor = mongo.db.followers.find({"following_id": ObjectId(user_id)})
+        return [str(f['follower_id']) for f in cursor]
 
     @staticmethod
     def get_followings(user_id):
-        return list(mongo.db.followers.find({"following_id": ObjectId(user_id)}))
+        # retorna lista de ids (strings) que user_id segue
+        cursor = mongo.db.followers.find({"follower_id": ObjectId(user_id)})
+        return [str(f['following_id']) for f in cursor]
 
     @staticmethod
     def is_following(follower_id, following_id):
-
         follower_oid = ObjectId(follower_id)
         following_oid = ObjectId(following_id)
-
         existing = mongo.db.followers.find_one({
             "follower_id": follower_oid,
             "following_id": following_oid
         })
-
         return bool(existing)
+

@@ -389,19 +389,23 @@ def post_like():
 @auth_bp.route('/follow', methods=['POST'])
 @jwt_required()
 def post_follower():
-    user_id =get_jwt_identity()
-    data = request.get_json()
+    user_id = get_jwt_identity()
+    data = request.get_json() or {}
 
     following_id = data.get('following_id')
-    print(user_id)
+    if not following_id:
+        return jsonify({'error': 'missing following_id'}), 400
+
     try:
-        follow_id = Followers.create_follow(user_id, following_id)
-        return jsonify({
-            "message": "Sucess",
-            "follow_id": str(follow_id)
-        }), 201
+        result = Followers.create_follow(user_id, following_id)
+        # result já é um dict: {"status": "...", "follow_id": "..."}
+        status_code = 201 if result.get('status') == 'followed' else 200
+        return jsonify(result), status_code
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
-        return jsonify({"error"}), 500
+        return jsonify({'error': str(e)}), 500
+
 
 @auth_bp.route('/follow/<string:following_id>', methods=['GET'])
 @jwt_required()

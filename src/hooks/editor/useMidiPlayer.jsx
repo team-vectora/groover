@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import * as Tone from "tone";
 import { Midi } from "@tonejs/midi";
-import { MidiContext } from "../contexts/MidiContext";
+import { MidiContext } from "../../contexts/MidiContext";
 
 function base64ToArrayBuffer(base64) {
     const binaryString = window.atob(base64);

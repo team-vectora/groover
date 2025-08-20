@@ -5,19 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { MidiContext } from '../../../../contexts/MidiContext';
-import useAuth from '../../../../hooks/useAuth';
-import useProfile from '../../../../hooks/useProfile';
-import ProfileHeader from '../../../../components/profile/ProfileHeader';
-import ProfileTabs from '../../../../components/profile/ProfileTabs';
-import Post from '../../../../components/posts/Post';
-import ProjectCard from '../../../../components/profile/ProjectCard';
-import Invite from '../../../../components/profile/Invite';
-import PostFormPopUp from '../../../../components/posts/PostFormPopUp';
-import ConfigUserPopUp from '../../../../components/profile/ConfigUserPopUp';
-import SharePopUp from '../../../../components/profile/SharePopUp';
-import useLikePost from '../../../../hooks/useLikePost';
-import useForkProject from '../../../../hooks/useForkProject';
-import useShareProject from '../../../../hooks/useShareProject';
+import { useAuth, useProfile, useLikePost, useForkProject, useShareProject } from '../../../../hooks';
+import { ProfileHeader, ProfileTabs, Post, ProjectCard, Invite, PostFormPopUp, ConfigUserPopUp, SharePopUp } from '../../../../components';
 
 export default function ProfilePage({ params }) {
   const { user: username } = params;
@@ -103,6 +92,7 @@ export default function ProfilePage({ params }) {
                   posts.map(post => (
                       <Post
                           key={post._id}
+                          token={token}
                           post={post}
                           userId={userId}
                           setCurrentProject={setCurrentProject}

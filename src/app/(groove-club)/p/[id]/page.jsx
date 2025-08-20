@@ -1,10 +1,9 @@
 "use client";
 import { useState, useEffect, useContext } from "react";
-import Post from "../../../../components/posts/Post";
+import { Post } from "../../../../components";
 import { useRouter } from "next/router";
-import useLikePost from "../../../../hooks/useLikePost";
+import { useLikePost, useForkProject } from "../../../../hooks";
 import { MidiContext } from "../../../../contexts/MidiContext";
-import useForkProject from "../../../../hooks/useForkProject";
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
@@ -66,7 +65,8 @@ function PostPage() {
                 toastStyle={{ textAlign: 'center', fontSize: '1.2rem' }}
               />
       {likeError && <p style={{ color: "red" }}>{likeError}</p>}
-      <Post userId={userId} profileId={localStorage.getItem("id")} post={post} handleClick={likePost}  setCurrentProject={setCurrentProject}  following={following} handleClickFork={handleClickFork} />
+      <Post
+          onToggle={() => toggleFollow(user.id)} token={token} userId={userId} profileId={localStorage.getItem("id")} post={post} handleClick={likePost}  setCurrentProject={setCurrentProject} handleClickFork={handleClickFork} />
     </div>
   );
 }

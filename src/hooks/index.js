@@ -1,0 +1,22 @@
+// Exportações de autenticação
+export { default as useAuth } from './auth/useAuth';
+export { default as useLogin } from './auth/useLogin';
+export { default as useSignUp } from './auth/useSignUp';
+export { default as useProfile } from './auth/useProfile';
+
+// Exportações de posts
+export { default as usePosts } from './posts/usePosts';
+export { default as useLikePost } from './posts/useLikePost';
+export { default as useSimilarUsers } from './posts/useSimilarUsers';
+export { default as useFollow } from './posts/useFollow';
+export { default as useFollowing } from './posts/useFollowing';
+
+// Exportações de projetos
+export { default as useEditor } from './projects/useEditor';
+export { default as useForkProject } from './projects/useForkProject';
+export { default as useShareProject } from './projects/useShareProject';
+export { default as ProjectManager } from './projects/ProjectManager';
+
+// Exportações de editor
+export { default as useMidiPlayer } from './editor/useMidiPlayer';
+export { default as PaybackEngine } from './editor/PaybackEngine';
