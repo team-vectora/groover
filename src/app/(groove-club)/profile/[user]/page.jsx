@@ -1,5 +1,6 @@
 'use client';
 
+import React from "react";
 import { useState, useContext, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ToastContainer } from 'react-toastify';
@@ -9,7 +10,7 @@ import { useAuth, useProfile, useLikePost, useForkProject, useShareProject } fro
 import { ProfileHeader, ProfileTabs, Post, ProjectCard, Invite, PostFormPopUp, ConfigUserPopUp, SharePopUp } from '../../../../components';
 
 export default function ProfilePage({ params }) {
-  const { user: username } = params;
+      const { user: username } = React.use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token, userId, username: currentUsername } = useAuth();

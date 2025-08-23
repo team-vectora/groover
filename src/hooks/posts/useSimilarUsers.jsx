@@ -10,7 +10,7 @@ export default function useSimilarUsers(token) {
 
         setLoading(true);
         try {
-            const res = await fetch("http://localhost:5000/api/user/similar", {
+            const res = await fetch("http://localhost:5000/api/users/similar", {
                 headers: { Authorization: `Bearer ${token}` },
             });
 

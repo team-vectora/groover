@@ -1,15 +1,15 @@
 "use client";
 import { useState, useEffect, useContext } from "react";
 import { Post } from "../../../../components";
-import { useRouter } from "next/router";
+import { useParams } from "next/navigation";
 import { useLikePost, useForkProject } from "../../../../hooks";
 import { MidiContext } from "../../../../contexts/MidiContext";
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
 function PostPage() {
-  const router = useRouter();
-  const { id } = router.query;
+    const params = useParams();
+    const { id } = params;
 
   const [post, setPost] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -34,7 +34,7 @@ function PostPage() {
       };
   const fetchPost = async (postId, token) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/post/${postId}`, {
+      const res = await fetch(`http://localhost:5000/api/posts/${postId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

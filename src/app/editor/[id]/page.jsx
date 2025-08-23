@@ -1,13 +1,13 @@
 "use client";
 import { useEffect } from "react";
-import { useRouter } from "next/router";
+import { useRouter, useParams } from "next/navigation";
 import { HeaderEditor, PianoRoll, SaveMusicPopUp, ControlPanel } from "../../../components";
 import { useEditor } from "../../../hooks";
 import translations from "../../../locales/language.js";
 
 function EditorPage() {
-  const router = useRouter();
-  const { id } = router.query;
+    const params = useParams();
+    const { id } = params;
 
   const {
     // Estados

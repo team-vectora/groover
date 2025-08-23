@@ -9,7 +9,6 @@ import {
   faPlus,
   faSignOutAlt
 } from '@fortawesome/free-solid-svg-icons';
-
 const Sidebar = () => {
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('/img/default_avatar.png');
@@ -25,7 +24,6 @@ const Sidebar = () => {
   const navItems = [
     { icon: faHome, label: "Feed", path: "/feed" },
     { icon: faMusic, label: "Editor", path: "/editor" },
-    { icon: faUser, label: "Perfil", path: `/profile/${username}` },
     { icon: faCalendar, label: "Eventos", path: "/events" },
   ];
 
@@ -39,15 +37,16 @@ const Sidebar = () => {
           />
         </div>
 
-        <nav className="mb-4">
+        <nav className="mb-4 ">
           <ul className="space-y-2">
             {navItems.map((item) => (
-                <li key={item.path}>
+                <li key={item.path} >
                   <button
                       onClick={() => router.push(item.path)}
                       className="flex items-center w-full p-3 hover:bg-[#1b1b1b] rounded-lg transition-colors"
                   >
-                    <FontAwesomeIcon icon={item.icon} className="mr-3" />
+                    <FontAwesomeIcon icon={item.icon} className="mr-3 w-6 h-6" />
+
                     <span>{item.label}</span>
                   </button>
                 </li>
@@ -59,7 +58,7 @@ const Sidebar = () => {
                   onClick={() => router.push(`/profile/${username}?newPost=true`)}
                   className="flex items-center w-full p-3 bg-[#a97f52] hover:bg-[#c1915d] text-white rounded-lg transition-colors mt-2"
               >
-                <FontAwesomeIcon icon={faPlus} className="mr-3" />
+                <FontAwesomeIcon icon={faPlus} className="mr-12 w-6 h-6" />
                 <span>Nova Postagem</span>
               </button>
             </li>
@@ -86,7 +85,7 @@ const Sidebar = () => {
               }}
               className="flex items-center w-full p-2 mt-2 hover:bg-[#1b1b1b] rounded-lg text-red-400"
           >
-            <FontAwesomeIcon icon={faSignOutAlt} className="mr-3" />
+            <FontAwesomeIcon icon={faSignOutAlt} className="mr-12 w-6 h-6"  />
             <span>Sair</span>
           </button>
         </div>

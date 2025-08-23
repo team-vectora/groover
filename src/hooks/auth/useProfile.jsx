@@ -16,7 +16,7 @@ export default function useProfile(username, token) {
 
             try {
                 // Fetch user data
-                const userRes = await fetch(`http://localhost:5000/api/user/${username}`, {
+                const userRes = await fetch(`http://localhost:5000/api/users/${username}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
@@ -24,7 +24,7 @@ export default function useProfile(username, token) {
                 const userData = await userRes.json();
 
                 // Fetch posts
-                const postsRes = await fetch(`http://localhost:5000/api/post/username/${username}`, {
+                const postsRes = await fetch(`http://localhost:5000/api/posts/username/${username}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const postsData = await postsRes.json();

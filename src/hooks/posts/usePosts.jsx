@@ -10,7 +10,7 @@ export default function usePosts(token) {
 
         setLoading(true);
         try {
-            const res = await fetch("http://localhost:5000/api/post", {
+            const res = await fetch("http://localhost:5000/api/posts", {
                 headers: { Authorization: `Bearer ${token}` },
             });
 

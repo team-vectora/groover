@@ -5,7 +5,7 @@ export default function useLikePost(token, onSuccess) {
 
   const likePost = async (post_id) => {
     try {
-      const res = await fetch("http://localhost:5000/api/post/like", {
+      const res = await fetch("http://localhost:5000/api/posts/like", {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

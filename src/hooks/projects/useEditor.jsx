@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter, useParams } from "next/navigation"; // ✅ troca aqui
 import * as Tone from "tone";
 import { Midi } from '@tonejs/midi';
 import PlaybackEngine from "../editor/PaybackEngine";
@@ -21,7 +21,8 @@ const acousticInstruments = [
 ];
 
 export default function useEditor(id) {
-    const router = useRouter();
+    const params = useParams();
+    const editorId = id ?? params.id;
     const [loading, setLoading] = useState(true);
     const [activeCol, setActiveCol] = useState(null);
     const [activeSubIndex, setActiveSubIndex] = useState(0);

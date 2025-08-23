@@ -14,7 +14,7 @@ export default function useFollow() {
                 throw new Error("Token de autenticação não encontrado");
             }
 
-            const response = await fetch('http://localhost:5000/api/follow', {
+            const response = await fetch('http://localhost:5000/api/users/follow', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
