@@ -19,4 +19,4 @@ export { default as ProjectManager } from './projects/ProjectManager';
 
 // Exportações de editor
 export { default as useMidiPlayer } from './editor/useMidiPlayer';
-export { default as PaybackEngine } from './editor/PaybackEngine';
+export { default as PlaybackEngine } from './editor/PlaybackEngine';

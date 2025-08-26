@@ -1,115 +1,96 @@
 'use client';
 import Image from 'next/image';
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { faCodeFork } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCodeFork } from "@fortawesome/free-solid-svg-icons";
+import translations from "../../locales/language";
 
 const HeaderEditor = ({
-                  mode = 'editor', // 'editor' | 'view'
-                  onPlaySong,
-                  onPlayActivePage,
-                  onExport,
-                  onImport,
-                  onSave,
-                  onFork,
-                  t,
-                  setLang,
-                  lang,
-                  title
-                }) => {
-  const [username, setUsername] = useState('');
-  const router = useRouter();
+                          mode = 'editor', onPlaySong, onPlayActivePage, onExport,
+                          onImport, onSave, onFork, setLang, lang, title
+                      }) => {
+    const [username, setUsername] = useState('');
 
-  useEffect(() => {
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
-  }, []);
+    useEffect(() => {
+        const storedUsername = localStorage.getItem('username');
+        if (storedUsername) {
+            setUsername(storedUsername);
+        }
+    }, []);
 
-  const userData = {
-    name: username,
-    role: "Produtor Musical",
-    avatar: ""
-  };
+    const t = (key, params) => {
+        let text = translations[lang]?.[key] || key;
+        if (params) {
+            Object.entries(params).forEach(([k, v]) => {
+                text = text.replace(`{${k}}`, v);
+            });
+        }
+        return text;
+    };
 
-  return (
-      <header className="app-header">
-        <div className="header-logo-container">
-          <Image src="/img/groover_logo.png" alt="Logo" width={100} height={200} />
-          <h1 className="header-logo-text">GROOVER</h1>
-          <h2 className="header-logo-text">{title}</h2>
-        </div>
+    return (
+        <header className="bg-bg-darker flex items-center justify-between p-3 border-b border-primary flex-shrink-0">
+            {/* Lado Esquerdo: Logo e Título */}
+            <div className="flex items-center gap-4">
+                <Image src="/img/groover_logo.png" alt="Logo" width={50} height={50} />
+                <div>
+                    <h1 className="text-lg font-bold text-text-lighter">GROOVER</h1>
+                    <h2 className="text-sm text-gray-400">{title || 'Novo Projeto'}</h2>
+                </div>
+            </div>
 
-        <div className="header-user-profile">
-          <div className="header-actions">
-            {/* Botões comuns a ambos os modos */}
-            <button className="header-button" onClick={onPlaySong}>
-              ▶ {t("playSong")}
-            </button>
+            {/* Lado Direito: Ações e Perfil */}
+            <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                    {/* Botões de Ação */}
+                    <button className="px-3 py-2 text-sm font-semibold rounded-md border-2 border-primary hover:bg-primary/30 transition" onClick={onPlaySong}>
+                        ▶ {t("playSong")}
+                    </button>
+                    <button className="px-3 py-2 text-sm font-semibold rounded-md border-2 border-primary hover:bg-primary/30 transition" onClick={onPlayActivePage}>
+                        ▶ {t("playPage")}
+                    </button>
 
-            <button className="header-button" onClick={onPlayActivePage}>
-              ▶ {t("playPage")}
-            </button>
+                    {mode === 'editor' && (
+                        <>
+                            <button className="px-3 py-2 text-sm font-semibold rounded-md border-2 border-primary hover:bg-primary/30 transition" onClick={onExport}>
+                                ↕ {t("export")}
+                            </button>
+                            <label className="px-3 py-2 text-sm font-semibold rounded-md border-2 border-accent hover:bg-accent/30 transition cursor-pointer">
+                                ↓ {t("import")}
+                                <input type="file" className="hidden" accept=".mid, .midi" onChange={(e) => e.target.files && onImport(e.target.files[0])} />
+                            </label>
+                            <button className="px-3 py-2 text-sm font-semibold rounded-md bg-primary hover:bg-primary-light transition" onClick={onSave}>
+                                ⎙ {t("save")}
+                            </button>
+                        </>
+                    )}
+                    {mode === 'view' && (
+                        <button className="px-3 py-2 text-sm font-semibold rounded-md border-2 border-accent hover:bg-accent/30 transition" onClick={onFork}>
+                            <FontAwesomeIcon icon={faCodeFork} className="mr-2" /> {t("Fork")}
+                        </button>
+                    )}
+                </div>
 
-            {/* Botões específicos do editor */}
-            {mode === 'editor' && (
-                <>
-                  <button className="header-button" onClick={onExport}>
-                    ↕ {t("export")}
-                  </button>
-                  <label className="header-button import">
-                    ↓ {t("import")}
-                    <input
-                        type="file"
-                        accept="application/midi"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) onImport(file);
-                        }}
-                    />
-                  </label>
-                  <button className="header-button" onClick={onSave}>
-                    ⎙ {t("save")}
-                  </button>
-                </>
-            )}
-
-            {/* Botão específico da view */}
-            {mode === 'view' && (
-                <button className="header-button" onClick={onFork}>
-                  <FontAwesomeIcon icon={faCodeFork} /> {t("Fork")}
+                {/* Seletor de Idioma */}
+                <button
+                    className="text-2xl"
+                    onClick={() => setLang(lang === "pt" ? "en" : "pt")}
+                    title={lang === "pt" ? "Switch to English" : "Mudar para Português"}
+                >
+                    {lang === "pt" ? "🇧🇷" : "🇺🇸"}
                 </button>
-            )}
-          </div>
 
-          <div className="language-switcher">
-            <button
-                className="header-button"
-                onClick={() => setLang(lang === "pt" ? "en" : "pt")}
-                aria-label="Switch Language"
-                title={lang === "pt" ? "Switch to English" : "Mudar para Português"}
-            >
-              {lang === "pt" ? "🇧🇷" : "🇺🇸"}
-            </button>
-          </div>
-
-          <div className="header-user-info">
-            <h3 className="header-user-name">{userData.name}</h3>
-            <span className="header-user-role">{userData.role}</span>
-          </div>
-
-          {userData.avatar && (
-              <img
-                  src={userData.avatar}
-                  alt="Avatar"
-                  className="header-user-avatar"
-              />
-          )}
-        </div>
-      </header>
-  );
+                {/* Perfil do Usuário */}
+                <div className="flex items-center gap-3 text-right">
+                    <div>
+                        <h3 className="font-semibold text-sm">{username}</h3>
+                        <p className="text-xs text-gray-400">Produtor Musical</p>
+                    </div>
+                    {/* <Image src="/img/default_avatar.png" alt="Avatar" width={40} height={40} className="rounded-full border-2 border-primary" /> */}
+                </div>
+            </div>
+        </header>
+    );
 };
 
 export default HeaderEditor;

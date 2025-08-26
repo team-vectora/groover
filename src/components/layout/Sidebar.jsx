@@ -58,7 +58,7 @@ const Sidebar = () => {
                   onClick={() => router.push(`/profile/${username}?newPost=true`)}
                   className="flex items-center w-full p-3 bg-[#a97f52] hover:bg-[#c1915d] text-white rounded-lg transition-colors mt-2"
               >
-                <FontAwesomeIcon icon={faPlus} className="mr-12 w-6 h-6" />
+                <FontAwesomeIcon icon={faPlus} className="mr-3 w-6 h-6" />
                 <span>Nova Postagem</span>
               </button>
             </li>
@@ -85,7 +85,7 @@ const Sidebar = () => {
               }}
               className="flex items-center w-full p-2 mt-2 hover:bg-[#1b1b1b] rounded-lg text-red-400"
           >
-            <FontAwesomeIcon icon={faSignOutAlt} className="mr-12 w-6 h-6"  />
+            <FontAwesomeIcon icon={faSignOutAlt} className="mr-3 w-6 h-6"  />
             <span>Sair</span>
           </button>
         </div>

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User
+from models import User, Followers
 
 users_bp = Blueprint('users', __name__)
 
@@ -69,3 +69,4 @@ def check_follow_status(following_id):
         return jsonify({"is_following": is_following})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+        
