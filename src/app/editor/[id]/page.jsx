@@ -1,107 +1,86 @@
 "use client";
-import { useParams } from "next/navigation";
-import { useEditor } from "../../../hooks";
-import { HeaderEditor, PianoRoll, SaveMusicPopUp, ControlPanel } from "../../../components";
+import { useRouter, useParams } from "next/navigation";
+import { useAuth, useProjectStates, useTonePlayer, useProjectAPI } from '../../../hooks';
+import { HeaderEditor, SaveMusicPopUp, EditorLayout } from '../../../components';
+import { useEffect, useState, useCallback } from "react";
 
-function EditorPage() {
+export default function EditorPage() {
+    const router = useRouter();
     const params = useParams();
     const { id } = params;
 
-    const {
-        loading, openPop, title, description, lang, instrument, instruments,
-        volume, bpm, rhythm, versions, currentMusicId, lastVersionId, pages,
-        activePage, selectedColumn, activeCol, activeSubIndex, cols, notes, synthRef,
-        t, renderKeys, playSong, playSelectedNotesActivePage, exportToMIDI,
-        importFromMIDI, showPopup, handleSave, handleClosePopup, setTitle,
-        setDescription, setLang, setInstrument, setVolume, setBpm, setRhythm,
-        handleVersionChange, addPage, movePage, setSelectedColumn, setPages, createSubNote
-    } = useEditor(id);
+    const { state: projectState, actions: projectActions, projectData } = useProjectStates();
+    const { authData, loading: authLoading } = useAuth();
+    const { synthRef, playerState, playerActions } = useTonePlayer(projectState);
+    const { apiState, apiActions } = useProjectAPI(projectData, authData.token, id);
 
-    if (loading) {
-        return <div className="flex items-center justify-center h-screen bg-background text-foreground">Carregando...</div>;
+    const [lang, setLang] = useState("pt");
+    const [openPop, setOpenPop] = useState(false);
+
+    useEffect(() => {
+        if (!authLoading && !authData.token) {
+            router.push("/login");
+        }
+    }, [authData, authLoading, router]);
+
+    useEffect(() => {
+        if (apiState.project) {
+            projectActions.loadProjectData(apiState.project);
+        }
+    }, [apiState.project, projectActions.loadProjectData]);
+
+    const handlePlay = useCallback((scope) => {
+        const targetPages = scope === 'song' ? projectState.pages : [projectState.pages[projectState.activePage]];
+        const sequence = playerActions.createPlaybackSequence(targetPages);
+
+        const onVisuals = (matrixIndex, colIndex, subIndex) => {
+            if (scope === 'song') projectActions.setActivePage(matrixIndex);
+            playerActions.setActiveCol(colIndex);
+            playerActions.setActiveSubIndex(subIndex);
+        };
+        const onEnd = () => {
+            playerActions.setActiveCol(null);
+            playerActions.setActiveSubIndex(null);
+        };
+
+        playerActions.runPlayback(sequence, onVisuals, onEnd);
+    }, [projectState.pages, projectState.activePage, playerActions, projectActions.setActivePage]);
+
+    if (authLoading || apiState.loading) {
+        return <div className="flex items-center justify-center h-screen">Carregando...</div>;
     }
 
     return (
-        <div className="flex flex-col h-screen bg-background text-foreground font-sans">
+        <div className="flex flex-col min-h-screen bg-background text-foreground">
             <HeaderEditor
-                onPlaySong={playSong}
-                onPlayActivePage={() => playSelectedNotesActivePage(activePage)}
-                onExport={exportToMIDI}
-                onImport={importFromMIDI}
-                onSave={showPopup}
+                onPlaySong={() => handlePlay('song')}
+                onPlayActivePage={() => handlePlay('page')}
+                onExport={apiActions.exportToMIDI}
+                onImport={apiActions.importFromMIDI}
+                onSave={() => setOpenPop(true)}
                 setLang={setLang}
                 lang={lang}
-                t={t}
-                title={title}
+                title={projectState.title}
             />
-
             <SaveMusicPopUp
-                onSave={handleSave}
                 open={openPop}
-                onCancel={handleClosePopup}
-                description={description}
-                title={title}
-                setDescription={setDescription}
-                setTitle={setTitle}
+                onSave={() => { apiActions.handleSave(); setOpenPop(false); }}
+                onCancel={() => setOpenPop(false)}
+                title={projectState.title}
+                setTitle={projectActions.setTitle}
+                description={projectState.description}
+                setDescription={projectActions.setDescription}
             />
-
-            <main className="flex flex-1 overflow-hidden p-4 gap-4">
-                {/* Painel de Controle (Esquerda) */}
-                <div className="w-64 flex-shrink-0 bg-bg-secondary rounded-lg border border-primary overflow-y-auto">
-                    <ControlPanel
-                        instruments={instruments}
-                        instrument={instrument}
-                        setInstrument={setInstrument}
-                        volume={volume}
-                        setVolume={setVolume}
-                        bpm={bpm}
-                        setBpm={setBpm}
-                        rhythm={rhythm}
-                        setRhythm={setRhythm}
-                        versions={versions}
-                        currentMusicId={currentMusicId}
-                        handleVersionChange={handleVersionChange}
-                        t={t}
-                        lastVersionId={lastVersionId}
-                        activePage={activePage}
-                        pages={pages}
-                        movePage={movePage}
-                        addPage={addPage}
-                        selectedColumn={selectedColumn}
-                        setSelectedColumn={setSelectedColumn}
-                    />
-                </div>
-
-                {/* Área de Edição (Direita) */}
-                <div className="flex-1 flex flex-col min-w-0">
-                    <div className="flex-1 flex overflow-hidden border-2 border-primary rounded-lg">
-                        {/* Div para as Teclas do Piano (fixas) */}
-                        <div className="sticky left-0 z-10 bg-bg-darker">
-                            {renderKeys()}
-                        </div>
-                        {/* Container do Piano Roll (com scroll) */}
-                        <div className="overflow-x-auto w-full">
-                            <PianoRoll
-                                synthRef={synthRef}
-                                bpm={bpm}
-                                pages={pages}
-                                setPages={setPages}
-                                activeCol={activeCol}
-                                activeSubIndex={activeSubIndex}
-                                cols={cols}
-                                rows={notes.length}
-                                notes={notes}
-                                activePage={activePage}
-                                selectedColumn={selectedColumn}
-                                setSelectedColumn={setSelectedColumn}
-                                createSubNote={createSubNote}
-                            />
-                        </div>
-                    </div>
-                </div>
-            </main>
+            <EditorLayout
+                projectState={projectState}
+                projectActions={projectActions}
+                playerState={playerState}
+                playerActions={playerActions}
+                apiState={apiState}
+                apiActions={apiActions}
+                synthRef={synthRef}
+                lang={lang}
+            />
         </div>
     );
 }
-
-export default EditorPage;

@@ -12,11 +12,11 @@ export { default as useFollow } from './posts/useFollow';
 export { default as useFollowing } from './posts/useFollowing';
 
 // Exportações de projetos
-export { default as useEditor } from './projects/useEditor';
 export { default as useForkProject } from './projects/useForkProject';
 export { default as useShareProject } from './projects/useShareProject';
-export { default as ProjectManager } from './projects/ProjectManager';
 
 // Exportações de editor
 export { default as useMidiPlayer } from './editor/useMidiPlayer';
-export { default as PlaybackEngine } from './editor/PlaybackEngine';
+export { default as useProjectStates } from './editor/useProjectStates';
+export { default as useProjectAPI } from './editor/useProjectAPI';
+export { default as useTonePlayer } from './editor/useTonePlayer';

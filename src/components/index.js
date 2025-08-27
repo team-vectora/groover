@@ -9,6 +9,8 @@ export { default as VersionManager } from './editor/controls/VersionManager';
 export { default as HeaderEditor } from './editor/HeaderEditor';
 export { default as PianoRoll } from './editor/PianoRoll';
 export { default as SaveMusicPopUp } from './editor/SaveMusicPopUp';
+export { default as EditorLayout } from './editor/EditorLayout';
+export { default as PianoKeys } from './editor/PianoKeys';
 
 // Feed
 export { default as FeedCaption } from './feed/FeedCaption';
