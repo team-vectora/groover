@@ -17,6 +17,7 @@ export { default as SimilarUsers } from './feed/SimilarUsers';
 
 // Layout
 export { default as PlayerWrapper } from './layout/PlayerWrapper';
+export { default as MusicNotesDetail } from './layout/MusicNotesDetail';
 export { default as Sidebar } from './layout/Sidebar';
 
 // Posts

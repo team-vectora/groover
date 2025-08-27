@@ -41,7 +41,7 @@ const LoginPage = () => {
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5 z-20 relative">
                 <div>
                     <label htmlFor="username" className="block mb-1 font-medium text-text-lighter">Username</label>
                     <input

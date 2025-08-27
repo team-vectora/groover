@@ -10,7 +10,7 @@ from models import User
 
 class Post:
     @staticmethod
-    def create(user_id, project_id=None, photos=None, caption=None, genres=None):
+    def create(user_id, project_id=None, photos=None, caption=None, genres=None, is_comment=False):
 
         post = {
             'user_id': ObjectId(user_id),
@@ -18,6 +18,7 @@ class Post:
             'caption': caption if caption else "",
             'created_at': datetime.now(),
             'likes': [],
+            'is_comment': is_comment,
             'comments': [],
             'project_id': ObjectId(project_id) if project_id else None,
             'genres': genres if genres else []
