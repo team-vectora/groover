@@ -23,7 +23,7 @@ const Sidebar = () => {
 
   const navItems = [
     { icon: faHome, label: "Feed", path: "/feed" },
-    { icon: faMusic, label: "Editor", path: "/editor" },
+    { icon: faMusic, label: "Editor", path: "/editor/new" },
     { icon: faCalendar, label: "Eventos", path: "/events" },
   ];
 

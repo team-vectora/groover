@@ -65,6 +65,15 @@ export const useProjectState = () => {
         title, description, bpm, instrument, volume, pages,
     };
 
+    const toJson = useCallback(() => ({
+        title,
+        description,
+        bpm,
+        instrument,
+        volume,
+        layers: pages, // converte pages → layers (o backend espera layers)
+    }), [title, description, bpm, instrument, volume, pages]);
+
     const loadProjectData = useCallback((data) => {
         setTitle(data.title ?? "Novo Projeto");
         setDescription(data.description ?? "");

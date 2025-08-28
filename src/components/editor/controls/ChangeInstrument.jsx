@@ -1,61 +1,35 @@
 "use client";
-import { useState } from "react";
 
-const ChangeInstrument = ({ instrument, instruments, setInstrument, synthRef }) => {
-  const [loading, setLoading] = useState(false);
+const ChangeInstrument = ({ instrument, instruments, setInstrument }) => {
 
-  const handleInstrumentChange = async (e) => {
+  const handleInstrumentChange = (e) => {
     const newInstrument = e.target.value;
-
-    if (synthRef.current) {
-      synthRef.current.dispose();
-    }
-
-    setLoading(true);
-
-    const newSynth = instruments[newInstrument]();
-
-    // Se o instrumento for sampler, espera carregar os samples
-    if (typeof newSynth.load === "function") {
-      await newSynth.load();
-    }
-
-    newSynth.toDestination();
-    synthRef.current = newSynth;
     setInstrument(newInstrument);
-
-    setLoading(false);
   };
 
   return (
-    <>
-      <h3>Instrumento</h3>
-      <div className="control-item">
-        <label htmlFor="instruments">Selecione um instrumento:</label>
-        <select
-          id="instruments"
-          className="control-select"
-          value={instrument}
-          onChange={handleInstrumentChange}
-          disabled={loading} // desabilita enquanto carrega
-        >
-          {Object.keys(instruments).map((inst) => (
-            <option key={inst} value={inst}>
-              {inst.charAt(0).toUpperCase() + inst.slice(1).replace("-", " ")}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Aviso de carregamento */}
-      {loading && (
-        <div className="loading-overlay">
-          <div className="loading-message">
-            Carregando samples do instrumento...
-          </div>
+      <>
+        {/* Estes estilos devem ser convertidos para Tailwind se ainda não foram */}
+        <h3 className="text-sm font-bold uppercase text-accent mb-2">Instrumento</h3>
+        <div className="control-item mb-2">
+          <label htmlFor="instruments" className="block mb-2 text-sm font-medium">
+            Selecione um instrumento:
+          </label>
+          <select
+              id="instruments"
+              className="w-full p-2 bg-bg-secondary border border-primary rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+              value={instrument}
+              onChange={handleInstrumentChange}
+          >
+            {/* Garante que 'instruments' é um objeto antes de mapear */}
+            {instruments && Object.keys(instruments).map((inst) => (
+                <option key={inst} value={inst}>
+                  {inst.charAt(0).toUpperCase() + inst.slice(1).replace(/-/g, " ")}
+                </option>
+            ))}
+          </select>
         </div>
-      )}
-    </>
+      </>
   );
 };
 

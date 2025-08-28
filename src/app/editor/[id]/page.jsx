@@ -10,18 +10,18 @@ export default function EditorPage() {
     const { id } = params;
 
     const { state: projectState, actions: projectActions, projectData } = useProjectStates();
-    const { authData, loading: authLoading } = useAuth();
+    const { token, loading: authLoading } = useAuth();
     const { synthRef, playerState, playerActions } = useTonePlayer(projectState);
-    const { apiState, apiActions } = useProjectAPI(projectData, authData.token, id);
+    const { apiState, apiActions } = useProjectAPI(projectData, token, id);
 
     const [lang, setLang] = useState("pt");
     const [openPop, setOpenPop] = useState(false);
 
     useEffect(() => {
-        if (!authLoading && !authData.token) {
+        if (!authLoading && !token) {
             router.push("/login");
         }
-    }, [authData, authLoading, router]);
+    }, [token, authLoading, router]);
 
     useEffect(() => {
         if (apiState.project) {
@@ -64,7 +64,7 @@ export default function EditorPage() {
             />
             <SaveMusicPopUp
                 open={openPop}
-                onSave={() => { apiActions.handleSave(); setOpenPop(false); }}
+                onSave={() => { apiActions.handleSave(projectData); setOpenPop(false); }}
                 onCancel={() => setOpenPop(false)}
                 title={projectState.title}
                 setTitle={projectActions.setTitle}
