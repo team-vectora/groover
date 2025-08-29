@@ -12,7 +12,7 @@ export default function EditorPage() {
     const { state: projectState, actions: projectActions, projectData } = useProjectStates();
     const { token, loading: authLoading } = useAuth();
     const { synthRef, playerState, playerActions } = useTonePlayer(projectState);
-    const { apiState, apiActions } = useProjectAPI(projectData, token);
+    const { apiState, apiActions } = useProjectAPI(id);
 
     const [lang, setLang] = useState("pt");
     const [openPop, setOpenPop] = useState(false);
@@ -27,7 +27,10 @@ export default function EditorPage() {
         if (apiState.project) {
             projectActions.loadProjectData(apiState.project);
         }
-    }, [apiState.project, projectActions.loadProjectData]);
+        if (apiState.version) {
+            projectActions.loadVersionData(apiState.version);
+        }
+    }, [apiState.project, apiState.version, projectActions.loadProjectData, projectActions.loadVersionData]);
 
     const handlePlay = useCallback((scope) => {
         const targetPages = scope === 'song' ? projectState.pages : [projectState.pages[projectState.activePage]];

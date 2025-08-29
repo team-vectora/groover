@@ -72,3 +72,11 @@ def post_like():
     response, status = Post.like(post_id, user_id)
     return jsonify(response), status
 
+
+@posts_bp.route('/alguemmeajuda', methods=['POST'])
+@jwt_required()
+def save_project_quadro():
+    print("Entrou")
+    return 201
+
+

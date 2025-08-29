@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from 'react';
-import { NOTES, ROWS, INITIAL_COLS } from '../../constants'; // Arquivo de constantes
+import { ROWS, INITIAL_COLS } from '../../constants'; // Arquivo de constantes
 
 // ✅ FUNÇÕES ATUALIZADAS: Criam a nova estrutura de dados compacta
 const createNote = (duration = 1) => Array(duration).fill(null);
@@ -92,11 +92,21 @@ export const useProjectState = () => {
         }
     }, []);
 
+    const loadVersionData = useCallback((data) => {
+        if (data.layers && data.layers.length > 0) {
+            const rehydratedPages = rehydrateLayers(data.layers, ROWS);
+            setPages(rehydratedPages);
+            setActivePage(0);
+        } else {
+            setPages([createNewMatrix()]);
+        }
+    }, []);
+
     return {
         state: { title, description, bpm, instrument, volume, rhythm, pages, activePage, selectedColumn },
         actions: {
             setTitle, setDescription, setBpm, setInstrument, setVolume, setRhythm,
-            setPages, setActivePage, setSelectedColumn, addPage, movePage, loadProjectData
+            setPages, setActivePage, setSelectedColumn, addPage, movePage, loadProjectData, loadVersionData
         },
         projectData,
     };

@@ -52,19 +52,21 @@ const toJson = (data) => ({
     bpm: data.bpm || 120,
     instrument: data.instrument || "piano",
     volume: data.volume || -10,
-    layers: ["oq vc quer de mim"] //convertPagesToLayers(data.pages),
+    layers: convertPagesToLayers(data.pages),
 });
 
-export const useProjectAPI = (token, projectId) => {
+export const useProjectAPI = (projectId) => {
     const router = useRouter();
 
     // Estados principais da API
     const [loading, setLoading] = useState(true);
     const [project, setProject] = useState(null);
+    const [version, setVersion] = useState(null);
     const [versions, setVersions] = useState([]);
     const [currentMusicId, setCurrentMusicId] = useState("");
     const [lastVersionId, setLastVersionId] = useState("");
     const {actions: statesActions} = useProjectStates();
+    const token = localStorage.getItem('token');
 
     // 🔹 Carregar dados iniciais
     useEffect(() => {
@@ -89,7 +91,10 @@ export const useProjectAPI = (token, projectId) => {
 
                 const data = await response.json();
 
-                setProject(data.current_music_id);
+                console.log(data)
+
+                setProject(data);
+                setVersion(data.current_music_id);
                 setVersions(data.music_versions);
                 setCurrentMusicId(data.current_music_id._id);
                 setLastVersionId(data.current_music_id._id);
@@ -111,9 +116,9 @@ export const useProjectAPI = (token, projectId) => {
 
             const payload = toJson(projectData);
             const midiBlob = exportToMIDI(projectData, true); // oia a sacanagem, export to midi espera PAGES
-            //payload.midi = await blobToBase64(midiBlob);        // mas o back espera LAYERS
-            console.log("PAYLOAD")
-            console.log(JSON.stringify(payload))
+            payload.midi = await blobToBase64(midiBlob);        // mas o back espera LAYERS
+            console.log("PAYLOAD");
+            console.log(JSON.stringify(payload));
 
             if (projectId !== "new") {
                 payload.id = projectId;
@@ -138,11 +143,12 @@ export const useProjectAPI = (token, projectId) => {
 
                 const data = await response.json();
 
-                if (projectId === "new" && data.current_music_id?._id) {
-                    router.push(`/editor/${data.current_music_id._id}`);
+                if (projectId === "new" && data?._id) {
+                    router.push(`/editor/${data._id}`);
                 }
 
-                setProject(data.current_music_id);
+                setProject(data);
+                setVersion(data.current_music_id);
                 setVersions(data.music_versions);
                 setCurrentMusicId(data.current_music_id._id);
                 setLastVersionId(data.current_music_id._id);
@@ -213,7 +219,7 @@ export const useProjectAPI = (token, projectId) => {
             if (selectedVersion) {
                 console.log("VERSION: ");
                 console.log(selectedVersion);
-                setProject(selectedVersion.music_id);
+                setVersion(selectedVersion.music_id);
                 setCurrentMusicId(musicId);
             }
         },
@@ -221,7 +227,7 @@ export const useProjectAPI = (token, projectId) => {
     );
 
     return {
-        apiState: { loading, project, versions, currentMusicId, lastVersionId },
+        apiState: { loading, project, version, versions, currentMusicId, lastVersionId },
         apiActions: { handleSave, exportToMIDI, handleVersionChange },
     };
 };

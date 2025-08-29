@@ -10,19 +10,16 @@ projects_bp = Blueprint('projects', __name__)
 @projects_bp.route('', methods=['POST'])
 @jwt_required()
 def save_project():
-    print("Entrou")
     user_id = get_jwt_identity()
     data = request.get_json()
+    print(data)
 
-    print("Entrou")
     if not data:
         return jsonify({'error': 'No data provided'}), 400
 
-    print("Entrou")
     midi_base64 = data.get('midi')
     midi_binary = base64.b64decode(midi_base64) if midi_base64 else None
 
-    print("Entrou")
     project_data = {
         'title': data.get('title', 'New Project'),
         'midi': midi_binary,
@@ -32,23 +29,20 @@ def save_project():
         'volume': data.get('volume', -10)
     }
 
-    print("Entrou")
-    if 'id' in data:
-        print("Entrou")
-        project_id = data['id']
+    if 'id' in data.keys():
+        project_id = data.get('id')
+        print(project_id)
         if data.get('layers'):
             Music.create_music(project_id=project_id, layers=data.get('layers'), user_id=user_id)
-        print("Entrou")
         success = Project.update_project(project_id, user_id, project_data)
         project = Project.get_project_full_data_without_user_id(project_id)
         if success:
             return jsonify(project), 200
         return jsonify({'error': 'Project not found or update failed'}), 404
     else:
-        print("Entrou")
         project_id = Project.create_project(user_id, project_data)
+        print(project_id)
         Music.create_music(project_id, data.get('layers'), user_id)
-        print("Entrou")
         project = Project.get_project_full_data(project_id, user_id)
         return jsonify(project), 201
 
@@ -56,6 +50,7 @@ def save_project():
 @projects_bp.route('/<project_id>', methods=['GET'])
 @jwt_required()
 def get_project(project_id):
+    print("entrou aqui")
     project = Project.get_project_full_data_without_user_id(project_id)
     if project:
         return jsonify(project), 200
