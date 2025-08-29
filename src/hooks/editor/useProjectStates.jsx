@@ -2,17 +2,27 @@
 import { useState, useEffect, useCallback } from 'react';
 import { NOTES, ROWS, INITIAL_COLS } from '../../constants'; // Arquivo de constantes
 
-const createSubNote = (name = null) => ({ name, isSeparated: false });
-const createNote = (duration = 1) => ({
-    name: null,
-    duration,
-    subNotes: Array(duration).fill(null).map(() => createSubNote()),
-});
+// ✅ FUNÇÕES ATUALIZADAS: Criam a nova estrutura de dados compacta
+const createNote = (duration = 1) => Array(duration).fill(null);
 
 const createNewMatrix = () =>
     Array.from({ length: INITIAL_COLS }, () =>
         Array.from({ length: ROWS }, () => createNote())
     );
+
+// ✅ NOVA FUNÇÃO: Garante que a estrutura de dados seja segura para iteração
+const rehydrateLayers = (layers, rows) => {
+    if (!layers) return [];
+    return layers.map(page =>
+        (page || []).map(column =>
+            (column || Array.from({ length: rows }, () => [null])).map(note => {
+                // Se uma nota for nula vinda do backend, transforma em um array com um sub-note nulo
+                // para que a UI possa renderizar a célula e o ritmo possa ser aplicado.
+                return note || [null];
+            })
+        )
+    );
+};
 
 export const useProjectState = () => {
     const [title, setTitle] = useState("Novo Projeto");
@@ -26,6 +36,7 @@ export const useProjectState = () => {
     const [activePage, setActivePage] = useState(0);
     const [selectedColumn, setSelectedColumn] = useState(null);
 
+    // ✅ ATUALIZADO: Lida com a nova estrutura de nota (que é um array)
     useEffect(() => {
         if (selectedColumn === null) return;
 
@@ -33,12 +44,12 @@ export const useProjectState = () => {
             const newPages = [...prevPages];
             const currentMatrix = [...newPages[activePage]];
 
-            const updatedCol = currentMatrix[selectedColumn].map(note => {
-                const oldSubNotes = note.subNotes || [];
+            const updatedCol = currentMatrix[selectedColumn].map(noteArray => {
+                const oldSubNotes = noteArray || [null];
                 const newSubNotes = Array.from({ length: rhythm }, (_, i) =>
-                    oldSubNotes[i] || createSubNote()
+                    oldSubNotes[i] || null
                 );
-                return { ...note, subNotes: newSubNotes };
+                return newSubNotes;
             });
 
             currentMatrix[selectedColumn] = updatedCol;
@@ -65,15 +76,7 @@ export const useProjectState = () => {
         title, description, bpm, instrument, volume, pages,
     };
 
-    const toJson = useCallback(() => ({
-        title,
-        description,
-        bpm,
-        instrument,
-        volume,
-        layers: pages, // converte pages → layers (o backend espera layers)
-    }), [title, description, bpm, instrument, volume, pages]);
-
+    // ✅ ATUALIZADO: Reidrata os dados compactos vindos da API
     const loadProjectData = useCallback((data) => {
         setTitle(data.title ?? "Novo Projeto");
         setDescription(data.description ?? "");
@@ -81,7 +84,8 @@ export const useProjectState = () => {
         setInstrument(data.instrument ?? 'piano');
         setVolume(data.volume ?? -10);
         if (data.layers && data.layers.length > 0) {
-            setPages(data.layers);
+            const rehydratedPages = rehydrateLayers(data.layers, ROWS);
+            setPages(rehydratedPages);
             setActivePage(0);
         } else {
             setPages([createNewMatrix()]);

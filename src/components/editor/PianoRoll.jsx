@@ -20,29 +20,33 @@ const PianoRoll = ({
         setSelectedColumn(colIndex === selectedColumn ? null : colIndex);
     };
 
+    // ✅ ATUALIZADO: Manipula a criação e remoção de sub-notas na nova estrutura
     const handleSubNoteClick = (e, rowIndex, colIndex, subIndex) => {
         e.stopPropagation();
         setPages((prevPages) => {
             const newPages = JSON.parse(JSON.stringify(prevPages));
-            const note = newPages[activePage][colIndex][rowIndex];
+            const noteArray = newPages[activePage][colIndex][rowIndex];
             const noteName = notes[rowIndex];
-            const subNote = note.subNotes[subIndex];
-            if (subNote && subNote.name) {
-                subNote.name = null;
+            const subNote = noteArray[subIndex];
+
+            if (subNote?.name) {
+                noteArray[subIndex] = null; // Transforma o objeto em null
             } else {
-                note.subNotes[subIndex] = { name: noteName, isSeparated: false };
+                noteArray[subIndex] = { name: noteName, isSeparated: false }; // Cria o objeto
             }
             return newPages;
         });
         synthRef.current?.triggerAttackRelease(notes[rowIndex], "32n");
     };
 
+    // ✅ ATUALIZADO: Manipula a propriedade 'isSeparated'
     const handleSubNoteRightClick = (e, rowIndex, colIndex, subIndex) => {
         e.preventDefault();
         e.stopPropagation();
         setPages((prevPages) => {
             const newPages = JSON.parse(JSON.stringify(prevPages));
-            const subNote = newPages[activePage][colIndex][rowIndex].subNotes[subIndex];
+            const subNote = newPages[activePage][colIndex][rowIndex][subIndex];
+            // Só funciona se a sub-nota já existir (não for nula)
             if (subNote) {
                 subNote.isSeparated = !subNote.isSeparated;
             }
@@ -50,6 +54,7 @@ const PianoRoll = ({
         });
     };
 
+    // ✅ ATUALIZADO: Renderiza a UI com base na nova estrutura
     const tableMaker = () => {
         const currentMatrix = pages?.[activePage];
         if (!currentMatrix) return null;
@@ -60,21 +65,20 @@ const PianoRoll = ({
                 {Array.from({ length: rows }).map((_, rowIndex) => (
                     <tr key={`row-${rowIndex}`} className={`${notes[rowIndex].startsWith("C") && !notes[rowIndex].startsWith("C#") ? 'border-t-2 border-primary' : ''}`}>
                         {Array.from({ length: cols }).map((_, colIndex) => {
-                            const note = currentMatrix[colIndex]?.[rowIndex];
-                            if (!note || !note.subNotes) {
+                            const note = currentMatrix[colIndex]?.[rowIndex]; // 'note' é o array de sub-notas
+                            if (!note) { // Checagem simplificada
                                 return <td key={`cell-${rowIndex}-${colIndex}`} className="border-t border-bg-darker h-[30px] min-w-[120px] p-0"></td>;
                             }
 
                             return (
                                 <td
                                     key={`cell-${rowIndex}-${colIndex}`}
-                                    // FIX (Seleção de Coluna): Adicionando anel de destaque
                                     className={`relative border-t border-bg-darker h-[30px] min-w-[120px] p-0 cursor-pointer 
                                             ${selectedColumn === colIndex ? 'ring-2 ring-accent z-10' : ''}`}
                                     onDoubleClick={() => handleDoubleClick(colIndex)}
                                 >
                                     <div className="flex w-full h-full">
-                                        {note.subNotes.map((subNote, subIndex) => (
+                                        {note.map((subNote, subIndex) => (
                                             <div
                                                 key={`subnote-${rowIndex}-${colIndex}-${subIndex}`}
                                                 className={`
@@ -84,7 +88,7 @@ const PianoRoll = ({
                                                         ${activeCol === colIndex && activeSubIndex === subIndex ? 'bg-primary-light animate-pulse' : ''}
                                                         ${subNote?.isSeparated ? 'opacity-70 border-l-2 border-bg-darker' : ''} 
                                                     `}
-                                                style={{ width: `${100 / note.subNotes.length}%` }}
+                                                style={{ width: `${100 / note.length}%` }}
                                                 onClick={(e) => handleSubNoteClick(e, rowIndex, colIndex, subIndex)}
                                                 onContextMenu={(e) => handleSubNoteRightClick(e, rowIndex, colIndex, subIndex)}
                                             />

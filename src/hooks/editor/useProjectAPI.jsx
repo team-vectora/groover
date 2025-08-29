@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Midi } from "@tonejs/midi";
 import * as Tone from "tone";
+import {useProjectStates} from "../../hooks";
 
 // 🔹 Utilitário: converte Blob → Base64
 const blobToBase64 = (blob) => {
@@ -15,13 +16,43 @@ const blobToBase64 = (blob) => {
     });
 };
 
+// ✅ FUNÇÃO ATUALIZADA: Implementa a compactação dos dados para o backend
+const convertPagesToLayers = (pages) => {
+    if (!pages) return [];
+    return pages.map(page =>
+        page.map(column =>
+            column.map(noteArray => { // 'noteArray' é o array de sub-notas do cliente
+                if (!noteArray || noteArray.length === 0) return null;
+
+                const compactedSubNotes = noteArray.map(subNote => {
+                    if (!subNote?.name) {
+                        return null; // Colapsa {name: null, ...} para null
+                    }
+                    return { // Mantém apenas as propriedades relevantes
+                        name: subNote.name,
+                        isSeparated: subNote.isSeparated || false,
+                    };
+                });
+
+                // Se todas as sub-notas forem nulas, colapsa o array inteiro para null
+                if (compactedSubNotes.every(sn => sn === null)) {
+                    return null;
+                }
+
+                return compactedSubNotes;
+            })
+        )
+    );
+};
+
+
 const toJson = (data) => ({
-    title: data.title,
-    description: data.description,
-    bpm: data.bpm,
-    instrument: data.instrument,
-    volume: data.volume,
-    layers: data.pages,   // 🔹 ajuste importante
+    title: data.title || "Novo Projeto",
+    description: data.description || "",
+    bpm: data.bpm || 120,
+    instrument: data.instrument || "piano",
+    volume: data.volume || -10,
+    layers: ["oq vc quer de mim"] //convertPagesToLayers(data.pages),
 });
 
 export const useProjectAPI = (token, projectId) => {
@@ -33,6 +64,7 @@ export const useProjectAPI = (token, projectId) => {
     const [versions, setVersions] = useState([]);
     const [currentMusicId, setCurrentMusicId] = useState("");
     const [lastVersionId, setLastVersionId] = useState("");
+    const {actions: statesActions} = useProjectStates();
 
     // 🔹 Carregar dados iniciais
     useEffect(() => {
@@ -52,6 +84,7 @@ export const useProjectAPI = (token, projectId) => {
                     router.push("/login");
                     return;
                 }
+
                 if (!response.ok) throw new Error("Falha ao carregar o projeto.");
 
                 const data = await response.json();
@@ -61,13 +94,6 @@ export const useProjectAPI = (token, projectId) => {
                 setCurrentMusicId(data.current_music_id._id);
                 setLastVersionId(data.current_music_id._id);
 
-                setProjectId(projectId);
-
-                setBpm(data.bpm ?? 120);
-                setInstrument(data.instrument ?? 'piano');
-                setVolume(data.volume ?? -10);
-                setTitle(data.title ?? '');
-                setDescription(data.description ?? '');
             } catch (error) {
                 console.error("Erro ao carregar projeto:", error);
             } finally {
@@ -76,7 +102,7 @@ export const useProjectAPI = (token, projectId) => {
         };
 
         loadInitialData();
-    }, []);
+    }, [router.isReady]);
 
     // 🔹 Salvar projeto
     const handleSave = useCallback(
@@ -85,7 +111,13 @@ export const useProjectAPI = (token, projectId) => {
 
             const payload = toJson(projectData);
             const midiBlob = exportToMIDI(projectData, true); // oia a sacanagem, export to midi espera PAGES
-            payload.midi = await blobToBase64(midiBlob);        // mas o back espera LAYERS
+            //payload.midi = await blobToBase64(midiBlob);        // mas o back espera LAYERS
+            console.log("PAYLOAD")
+            console.log(JSON.stringify(payload))
+
+            if (projectId !== "new") {
+                payload.id = projectId;
+            }
 
             try {
                 const response = await fetch("http://localhost:5000/api/projects", {
@@ -96,6 +128,11 @@ export const useProjectAPI = (token, projectId) => {
                     },
                     body: JSON.stringify(payload),
                 });
+
+                if (response.status === 401) {
+                    router.push("/login");
+                    return;
+                }
 
                 if (!response.ok) throw new Error("Falha ao salvar o projeto.");
 
@@ -131,13 +168,13 @@ export const useProjectAPI = (token, projectId) => {
                 const colDuration = Tone.Time("4n").toSeconds();
                 const subNotesCount = Math.max(
                     1,
-                    ...col.map((note) => note?.subNotes?.length || 1)
+                    ...col.map((note) => note?.length || 1) // ✅ Modificado
                 );
                 const subDuration = colDuration / subNotesCount;
 
                 col.forEach((noteRow) => {
-                    (noteRow.subNotes || []).forEach((subNote, subIndex) => {
-                        if (subNote.name) {
+                    (noteRow || []).forEach((subNote, subIndex) => { // ✅ Modificado
+                        if (subNote?.name) { // ✅ Modificado
                             try {
                                 track.addNote({
                                     name: subNote.name,
@@ -174,6 +211,8 @@ export const useProjectAPI = (token, projectId) => {
         (musicId) => {
             const selectedVersion = versions.find((v) => v.music_id._id === musicId);
             if (selectedVersion) {
+                console.log("VERSION: ");
+                console.log(selectedVersion);
                 setProject(selectedVersion.music_id);
                 setCurrentMusicId(musicId);
             }

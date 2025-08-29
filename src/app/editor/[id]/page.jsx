@@ -12,7 +12,7 @@ export default function EditorPage() {
     const { state: projectState, actions: projectActions, projectData } = useProjectStates();
     const { token, loading: authLoading } = useAuth();
     const { synthRef, playerState, playerActions } = useTonePlayer(projectState);
-    const { apiState, apiActions } = useProjectAPI(projectData, token, id);
+    const { apiState, apiActions } = useProjectAPI(projectData, token);
 
     const [lang, setLang] = useState("pt");
     const [openPop, setOpenPop] = useState(false);

@@ -1,3 +1,5 @@
+// Arquivo: useTonePlayer.js
+
 "use client";
 import { useState, useEffect, useRef, useCallback } from 'react';
 import * as Tone from "tone";
@@ -5,10 +7,11 @@ import { ACOUSTIC_INSTRUMENTS, NOTES } from '../../constants';
 
 const instruments = {};
 ACOUSTIC_INSTRUMENTS.forEach(name => {
+    // A criação do sampler agora retorna o objeto diretamente, sem o .toDestination()
     instruments[name] = () => new Tone.Sampler({
         urls: { C4: "C4.mp3" },
         baseUrl: `https://nbrosowsky.github.io/tonejs-instruments/samples/${name}/`,
-    }).toDestination();
+    });
 });
 
 export const useTonePlayer = (projectState) => {
@@ -17,24 +20,48 @@ export const useTonePlayer = (projectState) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [activeCol, setActiveCol] = useState(null);
     const [activeSubIndex, setActiveSubIndex] = useState(null);
+    // ✅ 1. Adicionado estado para controlar o carregamento do instrumento
+    const [isInstrumentLoading, setIsInstrumentLoading] = useState(true);
 
+    // ✅ 2. O useEffect agora é assíncrono para esperar o instrumento carregar
     useEffect(() => {
-        synthRef.current?.dispose();
-        const newSynth = instruments[instrument]();
-        if (newSynth) {
-            newSynth.volume.value = volume;
-            synthRef.current = newSynth;
-        }
-    }, [instrument, volume]);
+        const loadInstrument = async () => {
+            try {
+                setIsInstrumentLoading(true); // Avisa que o carregamento começou
+
+                // Garante que qualquer instrumento antigo seja liberado da memória
+                synthRef.current?.dispose();
+
+                const newSynth = instruments[instrument]();
+
+                // Conecta o sampler ao destino de áudio e ESPERA ele carregar
+                await newSynth.toDestination();
+
+                // Apenas depois de carregado, atualizamos o estado
+                newSynth.volume.value = volume;
+                synthRef.current = newSynth;
+
+            } catch (error) {
+                console.error("Erro ao carregar o instrumento:", error);
+            } finally {
+                setIsInstrumentLoading(false); // Avisa que o carregamento terminou (com sucesso ou erro)
+            }
+        };
+
+        loadInstrument();
+
+    }, [instrument, volume]); // Roda sempre que o instrumento ou volume mudar
 
     useEffect(() => {
         Tone.getTransport().bpm.value = bpm;
     }, [bpm]);
 
+    // ✅ 3. Adicionada uma verificação para não tocar se o instrumento estiver carregando
     const playNotePiano = useCallback(async (note) => {
+        if (isInstrumentLoading || !synthRef.current) return;
         await Tone.start();
-        synthRef.current?.triggerAttackRelease(note, "8n");
-    }, []);
+        synthRef.current.triggerAttackRelease(note, "8n");
+    }, [isInstrumentLoading]); // Adicionada dependência do estado de loading
 
     const createPlaybackSequence = (targetPages) => {
         const allSubNotes = [];
@@ -42,10 +69,10 @@ export const useTonePlayer = (projectState) => {
         targetPages.forEach((matrix, matrixIndex) => {
             matrix.forEach((col, colIndex) => {
                 const colDuration = Tone.Time("4n").toSeconds();
-                const subNotesCount = Math.max(1, ...col.map(note => note?.subNotes?.length || 1));
+                const subNotesCount = Math.max(1, ...col.map(note => note?.length || 1));
                 const subDuration = colDuration / subNotesCount;
                 col.forEach((note, rowIndex) => {
-                    (note?.subNotes || []).forEach((subNote, subIndex) => {
+                    (note || []).forEach((subNote, subIndex) => {
                         const startTime = currentTime + (subIndex * subDuration);
                         allSubNotes.push({
                             matrixIndex, rowIndex, colIndex, subIndex, subNote,
@@ -60,7 +87,6 @@ export const useTonePlayer = (projectState) => {
         return allSubNotes;
     };
 
-    // ✅ LÓGICA DE PLAYBACK RESTAURADA FIELMENTE DO CÓDIGO ORIGINAL
     const scheduleEventsBasedOnOriginalLogic = (sequence, onScheduleVisuals) => {
         let lastEventTime = 0;
 
@@ -74,29 +100,26 @@ export const useTonePlayer = (projectState) => {
             if (subNote?.name) {
                 const currentMatrix = pages[matrixIndex];
 
-                // Função auxiliar para encontrar notas em posições específicas
                 const findNoteAt = (r, c, s) => sequence.find(item => item.rowIndex === r && item.colIndex === c && item.subIndex === s && item.matrixIndex === matrixIndex);
 
-                // Lógica de shouldStart
                 const prevSubNoteInSameCol = subIndex > 0 ? findNoteAt(rowIndex, colIndex, subIndex - 1) : null;
-                const lastSubNoteInPrevCol = colIndex > 0 ? findNoteAt(rowIndex, colIndex - 1, (pages[matrixIndex][colIndex-1][rowIndex]?.subNotes.length || 1) - 1) : null;
+                const lastSubNoteInPrevCol = colIndex > 0 ? findNoteAt(rowIndex, colIndex - 1, (pages[matrixIndex][colIndex - 1][rowIndex]?.length || 1) - 1) : null;
 
                 const shouldStart = (
                     (colIndex === 0 && subIndex === 0) ||
-                    subNote.isSeparated ||
-                    (prevSubNoteInSameCol && !prevSubNoteInSameCol.subNote.name) ||
-                    (lastSubNoteInPrevCol && !lastSubNoteInPrevCol.subNote.name)
+                    subNote?.isSeparated ||
+                    (prevSubNoteInSameCol && !prevSubNoteInSameCol.subNote?.name) ||
+                    (lastSubNoteInPrevCol && !lastSubNoteInPrevCol.subNote?.name)
                 );
 
-                // Lógica de shouldEnd
-                const nextSubNoteInSameCol = subIndex < (currentMatrix[colIndex][rowIndex]?.subNotes.length || 1) - 1 ? findNoteAt(rowIndex, colIndex, subIndex + 1) : null;
+                const nextSubNoteInSameCol = subIndex < (currentMatrix[colIndex][rowIndex]?.length || 1) - 1 ? findNoteAt(rowIndex, colIndex, subIndex + 1) : null;
                 const firstSubNoteInNextCol = colIndex < currentMatrix.length - 1 ? findNoteAt(rowIndex, colIndex + 1, 0) : null;
 
                 const shouldEnd = (
-                    (colIndex === currentMatrix.length - 1 && subIndex === (currentMatrix[colIndex][rowIndex]?.subNotes.length || 1) - 1) ||
-                    (nextSubNoteInSameCol && !nextSubNoteInSameCol.subNote.name) ||
-                    (firstSubNoteInNextCol && !firstSubNoteInNextCol.subNote.name) ||
-                    (nextSubNoteInSameCol && nextSubNoteInSameCol.subNote.isSeparated)
+                    (colIndex === currentMatrix.length - 1 && subIndex === (currentMatrix[colIndex][rowIndex]?.length || 1) - 1) ||
+                    (nextSubNoteInSameCol && !nextSubNoteInSameCol.subNote?.name) ||
+                    (firstSubNoteInNextCol && !firstSubNoteInNextCol.subNote?.name) ||
+                    (nextSubNoteInSameCol && nextSubNoteInSameCol.subNote?.isSeparated)
                 );
 
                 if (shouldStart) {
@@ -115,8 +138,9 @@ export const useTonePlayer = (projectState) => {
         return lastEventTime;
     };
 
+    // ✅ 4. Adicionada uma verificação para não dar play se o instrumento estiver carregando
     const runPlayback = async (sequence, onVisuals, onEnd) => {
-        if (isPlaying) return;
+        if (isPlaying || isInstrumentLoading || !synthRef.current) return;
         setIsPlaying(true);
         try {
             await Tone.start();
@@ -131,7 +155,7 @@ export const useTonePlayer = (projectState) => {
                 synthRef.current?.releaseAll();
                 setIsPlaying(false);
                 onEnd();
-            }, (lastEventTime + 0.2) * 1000); // Aumentei um pouco o tempo para garantir que a última nota termine
+            }, (lastEventTime + 0.2) * 1000);
 
         } catch (error) {
             console.error('Erro na reprodução:', error);
@@ -141,7 +165,8 @@ export const useTonePlayer = (projectState) => {
 
     return {
         synthRef,
-        playerState: { isPlaying, activeCol, activeSubIndex, instruments },
+        // ✅ 5. Exportado o novo estado para a UI poder utilizá-lo
+        playerState: { isPlaying, activeCol, activeSubIndex, instruments, isInstrumentLoading },
         playerActions: { playNotePiano, runPlayback, createPlaybackSequence, setActiveCol, setActiveSubIndex }
     };
 };
