@@ -4,6 +4,7 @@ from flask_jwt_extended import JWTManager
 from utils.db import mongo
 
 from routes.auth import auth_bp
+from routes.notification import notifications_bp
 from routes.users import users_bp
 from routes.posts import posts_bp
 from routes.projects import projects_bp
@@ -42,6 +43,7 @@ def create_app():
     app.register_blueprint(posts_bp, url_prefix='/api/posts')
     app.register_blueprint(projects_bp, url_prefix='/api/projects')
     app.register_blueprint(invitations_bp, url_prefix='/api/invitations')
+    app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
 
     print("=== ROTAS REGISTRADAS ===")
     for rule in app.url_map.iter_rules():

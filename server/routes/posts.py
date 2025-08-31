@@ -3,6 +3,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Post
 import cloudinary.uploader
 
+from models.notification import Notification
+
 posts_bp = Blueprint('posts', __name__)
 
 @posts_bp.route('', methods=['POST'])
@@ -70,6 +72,12 @@ def post_like():
         return jsonify({'error': 'missing post_id'}), 400
 
     response, status = Post.like(post_id, user_id)
+
+    user_id_owner = data.get('owner_id')
+    print("MEU ID"+user_id)
+    print("ID DO NOTIFICAOD"+user_id_owner)
+    noti = Notification.create(user_id=user_id_owner, type="like")
+    print(noti)
     return jsonify(response), status
 
 
