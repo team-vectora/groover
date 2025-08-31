@@ -1,54 +1,47 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faHeart,
-  faComment,
-  faCodeBranch,
-  faStar,
-} from "@fortawesome/free-solid-svg-icons";
+"use client";
 
-export default function NotificationItem({ notification, lang = "pt" }) {
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHeart, faComment, faCodeBranch, faStar, faEye } from "@fortawesome/free-solid-svg-icons";
+import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
+
+export default function NotificationItem({ notification }) {
+  const { t } = useTranslation();
+  const router = useRouter();
+
   const icons = {
-    curtida: faHeart,
-    comentario: faComment,
+    like: faHeart,
+    comment: faComment,
     fork: faCodeBranch,
     recomendacao: faStar,
+    view: faEye,
   };
 
-  const templates = {
-    pt: {
-      curtida: "{actor} curtiu seu post",
-      comentario: "{actor} comentou: {content}",
-      fork: "{actor} fez fork do seu projeto",
-      recomendacao: "{actor} recomendou seu projeto",
-    },
-    en: {
-      curtida: "{actor} liked your post",
-      comentario: "{actor} commented: {content}",
-      fork: "{actor} forked your project",
-      recomendacao: "{actor} recommended your project",
-    },
+  const { type, actor, content, post_id, created_at } = notification;
+
+  const message = t(type, { user: actor || "Alguém", content: content || "" });
+
+  const handleClick = () => {
+    if (post_id) {
+      router.push(`/p/${post_id}`);
+    }
   };
-
-  const { type, actor_name, content, created_at } = notification;
-
-  const template =
-    templates[lang]?.[type] || templates["pt"].curtida;
-  const message = template
-    .replace("{actor}", actor_name || "Alguém")
-    .replace("{content}", content || "");
 
   return (
-    <li className="flex items-start gap-3 p-3 rounded-lg bg-[#1b1b1b] hover:bg-[#222] cursor-pointer transition">
-      <FontAwesomeIcon
-        icon={icons[type] || faStar}
-        className="text-[#a97f52] w-5 h-5 mt-1"
-      />
-      <div className="flex flex-col">
+    <li
+      onClick={handleClick}
+      className="flex items-start gap-3 p-3 rounded-lg bg-[#1b1b1b] hover:bg-[#222] cursor-pointer transition"
+    >
+      <FontAwesomeIcon icon={icons[type] || faStar} className="text-[#a97f52] w-5 h-5 mt-1" />
+
+      <div className="flex flex-col flex-1">
         <span className="text-sm">{message}</span>
         <span className="text-xs text-gray-400">
-          {new Date(created_at).toLocaleString(lang === "pt" ? "pt-BR" : "en-US")}
+          {new Date(created_at).toLocaleString(t("locale", "pt-BR"))}
         </span>
       </div>
+
+      <FontAwesomeIcon icon={faEye} className="text-[#a97f52] w-5 h-5 mt-1 ml-auto" />
     </li>
   );
 }

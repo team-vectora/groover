@@ -3,7 +3,7 @@ import { useState } from "react";
 export default function useLikePost(token, onSuccess) {
   const [error, setError] = useState("");
 
-  const likePost = async (post_id) => {
+  const likePost = async (post_id, owner_id) => {
     try {
       const res = await fetch("http://localhost:5000/api/posts/like", {
         method: 'POST',
@@ -11,7 +11,7 @@ export default function useLikePost(token, onSuccess) {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ post_id }),
+        body: JSON.stringify({ post_id, owner_id }),
       });
 
       if (!res.ok) {

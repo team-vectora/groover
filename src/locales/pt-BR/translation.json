@@ -1,0 +1,10 @@
+{
+  "notifications": "Notificações",
+  "new_post": "Nova Postagem",
+  "no_notifications": "Nenhuma notificação",
+  "like": "{{user}} curtiu seu post",
+  "comment": "{{user}} comentou: {{content}}",
+  "fork": "{{user}} fez um fork no seu projeto",
+  "recomendacao": "{{user}} recomendou você",
+  "locale": "pt-BR"
+}

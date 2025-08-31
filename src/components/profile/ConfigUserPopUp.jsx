@@ -106,7 +106,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
   if (!open) return null;
 
   return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black bg-opacity-0 flex items-center justify-center z-50 p-4">
         <div className="bg-[#121113] rounded-xl w-full max-w-md border border-[#4c4e30]">
           <div className="flex justify-between items-center px-5 py-4 border-b border-[#4c4e30]">
             <h3 className="text-lg font-semibold text-[#c1915d]">

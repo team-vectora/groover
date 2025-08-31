@@ -157,7 +157,8 @@ export default function Post({
 
     const handleLikeClick = () => {
         if (!isAnimating) {
-            likePost(post._id);
+            console.log(post)
+            likePost(post._id, post.user._id);
         }
     };
 

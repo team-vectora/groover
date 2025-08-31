@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import Post
+from models import Post, User
 import cloudinary.uploader
 
 from models.notification import Notification
@@ -74,10 +74,10 @@ def post_like():
     response, status = Post.like(post_id, user_id)
 
     user_id_owner = data.get('owner_id')
-    print("MEU ID"+user_id)
-    print("ID DO NOTIFICAOD"+user_id_owner)
-    noti = Notification.create(user_id=user_id_owner, type="like")
-    print(noti)
+    user = User.get_user(user_id)
+
+    Notification.create(user_id=user_id_owner, type="like", actor=user["username"], post_id=post_id)
+
     return jsonify(response), status
 
 
