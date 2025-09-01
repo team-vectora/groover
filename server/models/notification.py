@@ -46,3 +46,15 @@ class Notification:
         return list(
             mongo.db.notifications.find().sort('created_at', -1)
         )
+
+    @staticmethod
+    def check_notification(notification_id):
+        result = mongo.db.notifications.update_one(
+            {"_id": ObjectId(notification_id)},
+            {"$set": {"read": True}}
+        )
+
+        if result.modified_count > 0:
+            return True
+        return False
+

@@ -4,6 +4,7 @@ from models import Invitation, Project, User
 
 invitations_bp = Blueprint('invitations', __name__)
 
+# Mudar urgente
 @invitations_bp.route('', methods=['GET'])
 @jwt_required()
 def list_invitations():
