@@ -8,7 +8,6 @@ const PianoRoll = ({
                        activePage,
                        activeCol,
                        activeSubIndex,
-                       cols,
                        notes,
                        rows,
                        selectedColumn,
@@ -60,20 +59,23 @@ const PianoRoll = ({
         if (!currentMatrix) return null;
 
         return (
-            <table className="border-collapse w-max">
+            // ✅ Tabela com layout fixo para preencher 100% da largura
+            <table className="border-collapse w-full table-fixed">
                 <tbody>
                 {Array.from({ length: rows }).map((_, rowIndex) => (
                     <tr key={`row-${rowIndex}`} className={`${notes[rowIndex].startsWith("C") && !notes[rowIndex].startsWith("C#") ? 'border-t-2 border-primary' : ''}`}>
-                        {Array.from({ length: cols }).map((_, colIndex) => {
-                            const note = currentMatrix[colIndex]?.[rowIndex]; // 'note' é o array de sub-notas
-                            if (!note) { // Checagem simplificada
-                                return <td key={`cell-${rowIndex}-${colIndex}`} className="border-t border-bg-darker h-[30px] min-w-[120px] p-0"></td>;
+                        {/* ✅ Loop fixo para renderizar sempre 10 colunas */}
+                        {Array.from({ length: 10 }).map((_, colIndex) => {
+                            const note = currentMatrix[colIndex]?.[rowIndex];
+                            if (!note) {
+                                return <td key={`cell-${rowIndex}-${colIndex}`} className="border-t border-bg-darker h-[30px] p-0"></td>;
                             }
 
                             return (
                                 <td
                                     key={`cell-${rowIndex}-${colIndex}`}
-                                    className={`relative border-t border-bg-darker h-[30px] min-w-[120px] p-0 cursor-pointer 
+                                    // ✅ Removida a largura mínima para permitir que a célula seja responsiva
+                                    className={`relative border-t border-bg-darker h-[30px] p-0 cursor-pointer 
                                             ${selectedColumn === colIndex ? 'ring-2 ring-accent z-10' : ''}`}
                                     onDoubleClick={() => handleDoubleClick(colIndex)}
                                 >

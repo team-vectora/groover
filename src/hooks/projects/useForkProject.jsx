@@ -1,13 +1,15 @@
+// src/hooks/projects/useForkProject.jsx
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 export default function useForkProject(token) {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const forkProject = async (projectId) => {
     setLoading(true);
     try {
-        console.log(projectId)
       const response = await fetch(`http://localhost:5000/api/projects/fork`, {
         method: "POST",
         headers: {
@@ -20,12 +22,15 @@ export default function useForkProject(token) {
       if (!response.ok) throw new Error("Erro ao fazer fork");
 
       const data = await response.json();
+      toast.success("Projeto copiado para seu perfil!");
 
-      toast.success("Projeto forkado", { theme: "dark", autoClose: 3000 });
+      // ✅ Redireciona para o editor do novo projeto
+      if (data.new_project_id) {
+        router.push(`/editor/${data.new_project_id}`);
+      }
 
-      return data.fork_id;
     } catch (err) {
-      toast.error(err.message, { theme: "dark", autoClose: 3000 });
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

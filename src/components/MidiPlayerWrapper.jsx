@@ -15,6 +15,7 @@ export default function MidiPlayerWrapper({ children }) {
       "/logon",
       "/signup",
       "/feed",
+      "/editor",
       "/",
       "/controls",
       "/controls/view",

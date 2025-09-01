@@ -1,6 +1,8 @@
 "use client";
 import { ChangeInstrument, ChangeVolume, ChangeBpm, SelectRitmo, VersionManager } from "../../"; // Assumindo que os componentes estão no mesmo diretório ou exportados por um index.js
-import translations from "../../../locales/language"; // Ajuste o caminho se necessário
+import translations from "../../../locales/language";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faTrash, faArrowLeft, faArrowRight, faPlus} from "@fortawesome/free-solid-svg-icons"; // Ajuste o caminho se necessário
 
 const ControlPanel = ({
                           instrument, setInstrument, instruments,
@@ -8,7 +10,7 @@ const ControlPanel = ({
                           bpm, setBpm,
                           rhythm, setRhythm,
                           versions, currentMusicId, handleVersionChange, lastVersionId,
-                          activePage, pages, movePage, addPage,
+                          activePage, pages, movePage, addPage, deletePage,
                           lang
                       }) => {
     const t = (key, params) => {
@@ -46,9 +48,15 @@ const ControlPanel = ({
                     {t("pageOf", { current: activePage + 1, total: pages.length || 1 })}
                 </p>
                 <div className="flex justify-center items-center gap-3">
-                    <button onClick={() => movePage(-1)} className="w-10 h-10 rounded-full border-2 border-primary hover:bg-primary/30 transition text-lg">⬅</button>
-                    <button onClick={addPage} className="w-10 h-10 rounded-full border-2 border-primary hover:bg-primary/30 transition text-lg font-bold">+</button>
-                    <button onClick={() => movePage(1)} className="w-10 h-10 rounded-full border-2 border-primary hover:bg-primary/30 transition text-lg">⮕</button>
+                    <button onClick={() => movePage(-1)} className="w-10 h-10 rounded-full border-2 border-primary hover:bg-primary/30 transition text-lg"><FontAwesomeIcon icon={faArrowLeft} /></button>
+                    <button onClick={addPage} className="w-10 h-10 rounded-full border-2 border-primary hover:bg-primary/30 transition text-lg font-bold"><FontAwesomeIcon icon={faPlus} /></button>
+                    <button onClick={() => movePage(1)} className="w-10 h-10 rounded-full border-2 border-primary hover:bg-primary/30 transition text-lg"><FontAwesomeIcon icon={faArrowRight} /></button>
+                    <button
+                        onClick={deletePage}
+                        title="Excluir Página Atual"
+                        className="w-10 h-10 rounded-full border-2 border-red-500/50 text-red-500/80 hover:bg-red-500/30 hover:text-red-500 transition text-lg">
+                    <FontAwesomeIcon icon={faTrash} />
+                </button>
                 </div>
             </div>
         </div>

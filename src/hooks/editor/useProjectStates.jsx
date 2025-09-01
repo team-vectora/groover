@@ -24,6 +24,11 @@ const rehydrateLayers = (layers, rows) => {
     );
 };
 
+const createNewPage = () =>
+    Array.from({ length: 10 }, () =>
+        Array.from({ length: ROWS }, () => createNote())
+    );
+
 export const useProjectState = () => {
     const [title, setTitle] = useState("Novo Projeto");
     const [description, setDescription] = useState("");
@@ -72,6 +77,31 @@ export const useProjectState = () => {
         });
     }, [pages.length]);
 
+    const deletePage = useCallback((pageIndex) => {
+        setPages(prev => {
+            if (prev.length <= 1) {
+                alert("Não é possível excluir a última página.");
+                return prev;
+            }
+            const newPages = prev.filter((_, index) => index !== pageIndex);
+
+            // Ajusta a página ativa se necessário
+            if (activePage >= newPages.length) {
+                setActivePage(newPages.length - 1);
+            }
+            return newPages;
+        });
+    }, [activePage]);
+
+    const clearPage = useCallback((pageIndex) => {
+        setPages(prevPages => {
+            const newPages = [...prevPages];
+            // Substitui a página no índice especificado por uma nova e vazia
+            newPages[pageIndex] = createNewPage();
+            return newPages;
+        });
+    }, []);
+
     const projectData = {
         title, description, bpm, instrument, volume, pages,
     };
@@ -106,7 +136,8 @@ export const useProjectState = () => {
         state: { title, description, bpm, instrument, volume, rhythm, pages, activePage, selectedColumn },
         actions: {
             setTitle, setDescription, setBpm, setInstrument, setVolume, setRhythm,
-            setPages, setActivePage, setSelectedColumn, addPage, movePage, loadProjectData, loadVersionData
+            setPages, setActivePage, setSelectedColumn, addPage, movePage, deletePage, loadProjectData, loadVersionData,
+            clearPage,
         },
         projectData,
     };

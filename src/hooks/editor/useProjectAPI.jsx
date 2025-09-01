@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Midi } from "@tonejs/midi";
 import * as Tone from "tone";
-import {useProjectStates} from "../../hooks";
+import { useProjectStates, useAuth } from "../../hooks";
+import { NOTES } from "../../constants";
 
 // 🔹 Utilitário: converte Blob → Base64
 const blobToBase64 = (blob) => {
@@ -55,7 +56,7 @@ const toJson = (data) => ({
     layers: convertPagesToLayers(data.pages),
 });
 
-export const useProjectAPI = (projectId) => {
+export const useProjectAPI = (projectId, projectActions) => {
     const router = useRouter();
 
     // Estados principais da API
@@ -163,7 +164,7 @@ export const useProjectAPI = (projectId) => {
     );
 
     // 🔹 Exportar para MIDI
-    const exportToMIDI = useCallback((projectData, returnBlob = false) => {
+    const exportToMIDI = (projectData, returnBlob = false) => {
         const midi = new Midi();
         const track = midi.addTrack();
         midi.header.setTempo(projectData.bpm);
@@ -210,7 +211,40 @@ export const useProjectAPI = (projectId) => {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    }, []);
+    };
+
+    const importFromMIDI = useCallback(async (file) => {
+        if (!file) return;
+
+        try {
+            const midiData = await Midi.fromUrl(URL.createObjectURL(file));
+            const duration = midiData.duration;
+            const colDuration = duration / 10; // Dividir a música em 10 colunas
+
+            // Cria uma nova matriz de página zerada
+            const newPage = Array.from({ length: 10 }, () =>
+                Array.from({ length: NOTES.length }, () => [null])
+            );
+
+            midiData.tracks.forEach(track => {
+                track.notes.forEach(note => {
+                    const colIndex = Math.min(9, Math.floor(note.time / colDuration));
+                    const rowIndex = NOTES.indexOf(note.name);
+
+                    if (rowIndex > -1 && colIndex > -1) {
+                        newPage[colIndex][rowIndex] = [{ name: note.name, isSeparated: false }];
+                    }
+                });
+            });
+
+            projectActions.setPages([newPage]);
+            projectActions.setBpm(midiData.header.tempos[0]?.bpm || 120);
+
+        } catch (e) {
+            console.error("Erro ao importar MIDI:", e);
+            alert("Não foi possível ler o arquivo MIDI.");
+        }
+    }, [projectActions]);
 
     // 🔹 Alterar versão ativa
     const handleVersionChange = useCallback(
@@ -228,7 +262,7 @@ export const useProjectAPI = (projectId) => {
 
     return {
         apiState: { loading, project, version, versions, currentMusicId, lastVersionId },
-        apiActions: { handleSave, exportToMIDI, handleVersionChange },
+        apiActions: { handleSave, exportToMIDI, handleVersionChange, importFromMIDI },
     };
 };
 

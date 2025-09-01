@@ -11,6 +11,7 @@ export { default as PianoRoll } from './editor/PianoRoll';
 export { default as SaveMusicPopUp } from './editor/SaveMusicPopUp';
 export { default as EditorLayout } from './editor/EditorLayout';
 export { default as PianoKeys } from './editor/PianoKeys';
+export { default as ConfirmationPopUp } from './editor/ConfirmationPopUp';
 
 // Feed
 export { default as FeedCaption } from './feed/FeedCaption';

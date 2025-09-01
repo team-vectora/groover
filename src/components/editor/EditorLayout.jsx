@@ -5,7 +5,7 @@ const EditorLayout = ({
                           projectState, projectActions,
                           playerState, playerActions,
                           apiState, apiActions,
-                          synthRef, lang
+                          synthRef, lang, onDeletePage
                       }) => {
     return (
         <main className="flex flex-col md:flex-row flex-grow p-4 gap-4">
@@ -29,6 +29,7 @@ const EditorLayout = ({
                     pages={projectState.pages}
                     movePage={projectActions.movePage}
                     addPage={projectActions.addPage}
+                    deletePage={onDeletePage} // Passando a nova prop
                     lang={lang}
                 />
             </aside>
@@ -46,7 +47,6 @@ const EditorLayout = ({
                         activeSubIndex={playerState.activeSubIndex}
                         notes={NOTES}
                         rows={ROWS}
-                        cols={projectState.pages[projectState.activePage]?.[0]?.length || 10}
                         selectedColumn={projectState.selectedColumn}
                         setSelectedColumn={projectActions.setSelectedColumn}
                     />

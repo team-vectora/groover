@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHome,
   faMusic,
-  faCalendar,
+  faGear,
   faPlus,
   faSignOutAlt,
   faBell,
@@ -40,7 +40,6 @@ const Sidebar = () => {
   const navItems = [
     { icon: faHome, label: "Feed", path: "/feed" },
     { icon: faMusic, label: "Editor", path: "/editor/new" },
-    { icon: faCalendar, label: "Eventos", path: "/events" },
   ];
 
   return (
@@ -223,6 +222,13 @@ const Sidebar = () => {
             />
             <span className="font-medium">{username}</span>
           </div>
+          <button
+              onClick={() => {}}
+              className="flex items-center w-full p-2 mt-2 hover:bg-[#1b1b1b] rounded-lg "
+          >
+            <FontAwesomeIcon icon={faGear} className="mr-3 w-6 h-6" />
+            <span>Configurações</span>
+          </button>
           <button
             onClick={() => {
               localStorage.removeItem("token");

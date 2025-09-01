@@ -10,9 +10,7 @@ export default function RootLayout({ children }) {
     <html lang="pt-BR">
       <body>
         <MidiProvider>
-          <MidiPlayerWrapper>
             {children}
-          </MidiPlayerWrapper>
         </MidiProvider>
       </body>
     </html>
