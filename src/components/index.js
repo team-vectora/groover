@@ -24,9 +24,10 @@ export { default as MusicNotesDetail } from './layout/MusicNotesDetail';
 export { default as Sidebar } from './layout/Sidebar';
 
 // Posts
-export { default as MidiPlayer } from './posts/MidiPlayer';
 export { default as Post } from './posts/Post';
 export { default as PostFormPopUp } from './posts/PostFormPopUp';
+export { default as CommentForm } from './posts/CommentForm';
+export { default as CommentThread } from './posts/CommentThread';
 
 // Profile
 export { default as ConfigUserPopUp } from './profile/ConfigUserPopUp';
@@ -35,3 +36,4 @@ export { default as ProfileHeader } from './profile/ProfileHeader';
 export { default as ProfileTabs } from './profile/ProfileTabs';
 export { default as ProjectCard } from './profile/ProjectCard';
 export { default as SharePopUp } from './profile/SharePopUp';
+export { default as FollowListPopup } from './profile/FollowListPopup';

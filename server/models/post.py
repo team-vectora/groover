@@ -10,23 +10,27 @@ from models import User
 
 class Post:
     @staticmethod
-    def create(user_id, project_id=None, photos=None, caption=None, genres=None, is_comment=False):
-
+    def create(user_id, project_id=None, photos=None, caption=None, genres=None, is_comment=False, parent_post_id=None):
         post = {
             'user_id': ObjectId(user_id),
+            'project_id': ObjectId(project_id) if project_id else None,
+            'parent_post_id': ObjectId(parent_post_id) if parent_post_id else None,  # Novo campo
             'photos': photos if photos else [],
             'caption': caption if caption else "",
             'created_at': datetime.now(),
             'likes': [],
-            'is_comment': is_comment,
             'comments': [],
-            'project_id': ObjectId(project_id) if project_id else None,
+            'comment_count': 0,
+            'is_comment': is_comment,
             'genres': genres if genres else []
         }
-
+        # Se for um comentário, incrementa o contador no post pai
+        if parent_post_id:
+            mongo.db.posts.update_one(
+                {'_id': ObjectId(parent_post_id)},
+                {'$inc': {'comment_count': 1}}
+            )
         return mongo.db.posts.insert_one(post).inserted_id
-
-
 
     @staticmethod
     def get_posts_with_user_and_project(user_id, similarity_threshold=0.5, limit=25):
@@ -172,7 +176,6 @@ class Post:
 
         return filtered_posts
 
-
     @staticmethod
     def get_posts():
         return list(mongo.db.posts.find())
@@ -266,6 +269,8 @@ class Post:
         elif post.get('project') and post['project']:
             post['project']['midi'] = None
 
+        post['comments'] = Post.get_comments_for_post(post_id)
+
         return post
 
     @staticmethod
@@ -280,6 +285,30 @@ class Post:
             {'$push': {'comments': comment}}
         )
         return True
+
+    @staticmethod
+    def get_comments_for_post(post_id):
+        """Busca todos os posts que são comentários do post_id fornecido."""
+        pipeline = [
+            {'$match': {'parent_post_id': ObjectId(post_id)}},
+            {'$sort': {'created_at': 1}},  # Ordena do mais antigo para o mais novo
+            # ... (pipeline similar ao get_post para popular dados do usuário)
+            {'$lookup': {'from': 'users', 'localField': 'user_id', 'foreignField': '_id', 'as': 'user'}},
+            {'$unwind': '$user'},
+            {'$project': {
+                '_id': {'$toString': '$_id'},
+                'caption': 1, 'photos': 1, 'created_at': 1, 'likes': 1,
+                'user': {
+                    '_id': {'$toString': '$user._id'},
+                    'username': '$user.username',
+                    'avatar': '$user.avatar'
+                }
+            }}
+        ]
+        comments = list(mongo.db.posts.aggregate(pipeline))
+        for comment in comments:
+            comment['likes'] = [str(like) for like in comment.get('likes', [])]
+        return comments
 
 
     @staticmethod

@@ -87,4 +87,35 @@ def save_project_quadro():
     print("Entrou")
     return 201
 
+@posts_bp.route('/<post_id>/comment', methods=['POST'])
+@jwt_required()
+def add_comment_to_post(post_id):
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    if not data or not data.get('caption'):
+        return jsonify({'error': 'O texto do comentário é obrigatório'}), 400
+
+    # Cria um novo post que é um comentário
+    comment_id = Post.create(
+        user_id=user_id,
+        parent_post_id=post_id,
+        caption=data.get('caption'),
+        is_comment=True
+    )
+
+    # Notificar o dono do post original
+    original_post = Post.get_post(post_id)
+    if original_post and str(original_post['user']['_id']) != user_id:
+        actor_user = User.get_user(user_id)
+        Notification.create(
+            user_id=str(original_post['user']['_id']),
+            actor=actor_user['username'],
+            type="comment",
+            post_id=post_id,
+            content=data.get('caption')
+        )
+
+    return jsonify({'message': 'Comentário adicionado', 'comment_id': str(comment_id)}), 201
+
 

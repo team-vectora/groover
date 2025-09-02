@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Midi } from "@tonejs/midi";
 import * as Tone from "tone";
 import { useProjectStates, useAuth } from "../../hooks";
-import { NOTES } from "../../constants";
+import {NOTES , ROWS} from "../../constants";
 
 // 🔹 Utilitário: converte Blob → Base64
 const blobToBase64 = (blob) => {
@@ -55,6 +55,13 @@ const toJson = (data) => ({
     volume: data.volume || -10,
     layers: convertPagesToLayers(data.pages),
 });
+
+const createNote = (duration = 1) => Array(duration).fill(null);
+
+const createNewPage = () =>
+    Array.from({ length: 10 }, () =>
+        Array.from({ length: ROWS }, () => createNote())
+    );
 
 export const useProjectAPI = (projectId, projectActions) => {
     const router = useRouter();
@@ -218,26 +225,35 @@ export const useProjectAPI = (projectId, projectActions) => {
 
         try {
             const midiData = await Midi.fromUrl(URL.createObjectURL(file));
-            const duration = midiData.duration;
-            const colDuration = duration / 10; // Dividir a música em 10 colunas
+            const newPages = [];
+            let currentPage = createNewPage(); // Função auxiliar para criar página vazia
+            let currentCols = 0;
 
-            // Cria uma nova matriz de página zerada
-            const newPage = Array.from({ length: 10 }, () =>
-                Array.from({ length: NOTES.length }, () => [null])
-            );
+            const totalColsPerPage = 10;
 
             midiData.tracks.forEach(track => {
                 track.notes.forEach(note => {
-                    const colIndex = Math.min(9, Math.floor(note.time / colDuration));
+                    const noteEnd = note.time + note.duration;
+                    const colIndex = Math.floor(note.time / (Tone.Time('4n').toSeconds()));
+                    const pageIndex = Math.floor(colIndex / totalColsPerPage);
+                    const localColIndex = colIndex % totalColsPerPage;
+
+                    // Adiciona novas páginas se necessário
+                    while (newPages.length <= pageIndex) {
+                        newPages.push(createNewPage());
+                    }
+
                     const rowIndex = NOTES.indexOf(note.name);
 
-                    if (rowIndex > -1 && colIndex > -1) {
-                        newPage[colIndex][rowIndex] = [{ name: note.name, isSeparated: false }];
+                    if (rowIndex > -1) {
+                        // Garante que a nota seja inserida
+                        if(!newPages[pageIndex][localColIndex]) newPages[pageIndex][localColIndex] = Array.from({ length: NOTES.length }, () => [null]);
+                        newPages[pageIndex][localColIndex][rowIndex] = [{ name: note.name, isSeparated: false }];
                     }
                 });
             });
 
-            projectActions.setPages([newPage]);
+            projectActions.setPages(newPages.length > 0 ? newPages : [createNewPage()]);
             projectActions.setBpm(midiData.header.tempos[0]?.bpm || 120);
 
         } catch (e) {

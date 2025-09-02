@@ -170,3 +170,26 @@ class User:
                 'avatar': user.get('avatar')
             })
         return users
+
+    @staticmethod
+    def get_user_details_by_ids(user_ids):
+        """Busca detalhes básicos de uma lista de usuários por seus IDs."""
+        if not user_ids:
+            return []
+
+        user_object_ids = [ObjectId(uid) for uid in user_ids]
+
+        users_cursor = mongo.db.users.find(
+            {'_id': {'$in': user_object_ids}},
+            {'username': 1, 'avatar': 1, 'bio': 1}  # Projeção para retornar apenas campos necessários
+        )
+
+        users = []
+        for user in users_cursor:
+            users.append({
+                'id': str(user['_id']),
+                'username': user['username'],
+                'avatar': user.get('avatar'),
+                'bio': user.get('bio', '')
+            })
+        return users

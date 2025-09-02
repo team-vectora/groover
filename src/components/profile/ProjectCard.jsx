@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShareNodes, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { faShareNodes, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons';
 
-const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickShare }) => {
+const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickShare, handleClickDelete }) => {
     return (
         <div
             key={project.id}
@@ -39,15 +39,18 @@ const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickSha
                 </Link>
 
                 {isYourProfile && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleClickShare(project);
-                        }}
-                        className="bg-accent hover:bg-accent-light p-3 rounded-full h-12 w-12 flex items-center justify-center transition duration-300 ease-in-out hover:shadow-md"
-                    >
-                        <FontAwesomeIcon icon={faShareNodes} className="text-text-lighter text-lg" />
-                    </button>
+                    <>
+                        <button onClick={(e) => { e.stopPropagation(); handleClickShare(project); }} /* ... */ >
+                            <FontAwesomeIcon icon={faShareNodes} /* ... */ />
+                        </button>
+                        {/* Botão de Excluir */}
+                        <button
+                            onClick={(e) => { e.stopPropagation(); handleClickDelete(project.id); }}
+                            className="bg-red-600/80 hover:bg-red-600 p-3 rounded-full h-12 w-12 flex items-center justify-center transition duration-300 ease-in-out hover:shadow-md"
+                        >
+                            <FontAwesomeIcon icon={faTrash} className="text-text-lighter text-lg" />
+                        </button>
+                    </>
                 )}
             </div>
         </div>

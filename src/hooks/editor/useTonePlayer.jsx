@@ -142,8 +142,17 @@ export const useTonePlayer = (projectState) => {
                     const prevEvent = arr[index - 1];
                     const nextEvent = arr[index + 1];
 
-                    const shouldStart = currentEvent.subNote.isSeparated || !prevEvent || prevEvent.rowIndex !== currentEvent.rowIndex || prevEvent.globalColIndex !== currentEvent.globalColIndex - (currentEvent.subIndex === 0 ? 1 : 0);
-                    const shouldEnd = !nextEvent || nextEvent.subNote.isSeparated || nextEvent.rowIndex !== currentEvent.rowIndex || nextEvent.globalColIndex !== currentEvent.globalColIndex + (currentEvent.subIndex === currentEvent.totalSubNotesInCol - 1 ? 1 : 0);
+                    // Condição para iniciar uma nota
+                    const shouldStart = currentEvent.subNote.isSeparated || !prevEvent ||
+                        prevEvent.rowIndex !== currentEvent.rowIndex || // A nota anterior é de outra linha?
+                        prevEvent.globalColIndex !== currentEvent.globalColIndex || // A nota anterior é de outra coluna?
+                        (prevEvent.globalColIndex === currentEvent.globalColIndex && prevEvent.subIndex !== currentEvent.subIndex - 1); // Existe um silêncio entre as sub-notas?
+
+                    // Condição para parar uma nota
+                    const shouldEnd = !nextEvent || nextEvent.subNote.isSeparated ||
+                        nextEvent.rowIndex !== currentEvent.rowIndex || // A próxima nota é de outra linha?
+                        nextEvent.globalColIndex !== currentEvent.globalColIndex || // A próxima nota é de outra coluna?
+                        (nextEvent.globalColIndex === currentEvent.globalColIndex && nextEvent.subIndex !== currentEvent.subIndex + 1); // Existe um silêncio após a sub-nota?
 
                     return { ...currentEvent, shouldStart, shouldEnd };
                 });

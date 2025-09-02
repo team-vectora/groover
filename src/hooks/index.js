@@ -9,12 +9,13 @@ export { default as usePosts } from './posts/usePosts';
 export { default as useLikePost } from './posts/useLikePost';
 export { default as useSimilarUsers } from './posts/useSimilarUsers';
 export { default as useFollow } from './posts/useFollow';
-export { default as useFollowing } from './posts/useFollowing';
+export { default as useOutsideClick } from './posts/useOutsideClick';
 
 // Exportações de projetos
 export { default as useForkProject } from './projects/useForkProject';
 export { default as useShareProject } from './projects/useShareProject';
 export { default as useHandleInvite } from './projects/useHandleInvite';
+export { default as useDeleteProject } from './projects/useDeleteProject';
 
 // Exportações de editor
 export { default as useMidiPlayer } from './editor/useMidiPlayer';

@@ -6,7 +6,9 @@ const ProfileHeader = ({
                            user,
                            isCurrentUser,
                            onEdit,
-                           onLogout
+                           onLogout,
+    onFollowersClick,
+    onFollowingClick,
                        }) => {
     const getFavoriteGenres = () => {
         if (!user?.genres || Object.keys(user.genres).length === 0) return [];
@@ -47,11 +49,11 @@ const ProfileHeader = ({
                     <p className="text-gray-300 mb-4">{user?.bio}</p>
 
                     <div className="flex justify-center md:justify-start gap-6 mb-4">
-                        <div>
+                        <div onClick={onFollowersClick} className="cursor-pointer">
                             <span className="font-bold">{user?.followers?.length || 0}</span>
                             <span className="text-gray-400 ml-1">Seguidores</span>
                         </div>
-                        <div>
+                        <div onClick={onFollowingClick} className="cursor-pointer">
                             <span className="font-bold">{user?.following?.length || 0}</span>
                             <span className="text-gray-400 ml-1">Seguindo</span>
                         </div>

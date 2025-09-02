@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faPlay, faPause, faStop, faDownload, faUpload, faFloppyDisk,
-    faUser, faMusic, faCodeFork, faHouse, faEraser
+    faUser, faMusic, faCodeFork, faHouse, faEraser, faArrowTurnDown
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from '../../hooks';
 
@@ -25,6 +25,9 @@ const HeaderEditor = ({
                         <FontAwesomeIcon icon={faHouse} className="h-5 w-5 mb-1" />
                     </Link>
                 </div>
+                <Link href={`/profile/${username}?tab=musics`} className="text-gray-400 hover:text-accent transition-colors" title="Voltar aos projetos">
+                    <FontAwesomeIcon icon={faArrowTurnDown} className="h-5 w-5" />
+                </Link>
                 <Image src="/img/groover_logo.png" alt="Logo" width={50} height={50} />
                 <div>
                     <h1 className="text-lg font-bold text-text-lighter">GROOVER</h1>

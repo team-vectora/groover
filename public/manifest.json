@@ -1,0 +1,21 @@
+{
+  "name": "Groover",
+  "short_name": "Groover",
+  "description": "Sua plataforma de colaboração musical.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a090d",
+  "theme_color": "#a97f52",
+  "icons": [
+    {
+      "src": "/img/groover_logo_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/groover_logo_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -16,6 +16,7 @@ import {
 import useNotifications from "../../hooks/posts/useNotifications";
 import NotificationItem from "../posts/NotificationItem";
 import Image from "next/image";
+import { useOutsideClick } from "../../hooks";
 
 const Sidebar = () => {
   const [username, setUsername] = useState("");
@@ -46,6 +47,8 @@ const Sidebar = () => {
     { icon: faHome, label: "Feed", path: "/feed" },
     { icon: faMusic, label: "Editor", path: "/editor/new" },
   ];
+
+  const notifRef = useOutsideClick(() => setIsNotifOpen(false))
 
   return (
     <>
@@ -163,7 +166,7 @@ const Sidebar = () => {
             ))}
 
             {/* Notificações */}
-            <li className="relative ">
+            <li className="relative " ref={notifRef}>
               <button
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
                 className="flex items-center w-full p-3 hover:bg-[#1b1b1b] rounded-lg transition-colors"
@@ -231,7 +234,7 @@ const Sidebar = () => {
             <span className="font-medium">{username}</span>
           </div>
           <button
-              onClick={() => {}}
+              onClick={() => {router.push("/settings")}}
               className="flex items-center w-full p-2 mt-2 hover:bg-[#1b1b1b] rounded-lg "
           >
             <FontAwesomeIcon icon={faGear} className="mr-3 w-6 h-6" />

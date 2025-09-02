@@ -1,7 +1,0 @@
-{
-  "notifications": "Notifications",
-  "new_post": "New Post",
-  "no_notifications": "No notifications",
-  "like": "{{user}} liked your post",
-  "comment": "{{user}} commented: {{content}}"
-}

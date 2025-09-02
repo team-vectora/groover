@@ -86,4 +86,25 @@ def search_users():
 
     return jsonify(users), 200
 
+
+@users_bp.route('/<username>/followers', methods=['GET'])
+@jwt_required()
+def get_followers_list(username):
+    user = User.find_by_username(username)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    followers_details = User.get_user_details_by_ids(user['followers'])
+    return jsonify(followers_details), 200
+
+
+@users_bp.route('/<username>/following', methods=['GET'])
+@jwt_required()
+def get_following_list(username):
+    user = User.find_by_username(username)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    following_details = User.get_user_details_by_ids(user['following'])
+    return jsonify(following_details), 200
         

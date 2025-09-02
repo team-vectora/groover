@@ -66,7 +66,7 @@ const PianoRoll = ({
             <table className="border-collapse w-full table-fixed">
                 <tbody>
                 {Array.from({ length: rows }).map((_, rowIndex) => (
-                    <tr key={`row-${rowIndex}`} className={`${notes[rowIndex].startsWith("C") && !notes[rowIndex].startsWith("C#") ? 'border-t-2 border-primary' : ''}`}>
+                    <tr key={`row-${rowIndex}`} className={`${notes[rowIndex].startsWith("C") && !notes[rowIndex].startsWith("C#") ? 'bg-primary/10' : ''}`}>
                         {Array.from({ length: 10 }).map((_, colIndex) => {
                             const note = currentMatrix[colIndex]?.[rowIndex];
                             if (!note) {

@@ -1,6 +1,6 @@
 "use client";
 import { ChangeInstrument, ChangeVolume, ChangeBpm, SelectRitmo, VersionManager } from "../../"; // Assumindo que os componentes estão no mesmo diretório ou exportados por um index.js
-import translations from "../../../locales/language";
+import translations from "../../../../public/locales/language";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faTrash, faArrowLeft, faArrowRight, faPlus} from "@fortawesome/free-solid-svg-icons"; // Ajuste o caminho se necessário
 

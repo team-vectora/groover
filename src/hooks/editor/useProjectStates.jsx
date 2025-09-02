@@ -12,16 +12,26 @@ const createNewMatrix = () =>
 
 // ✅ NOVA FUNÇÃO: Garante que a estrutura de dados seja segura para iteração
 const rehydrateLayers = (layers, rows) => {
-    if (!layers) return [];
-    return layers.map(page =>
-        (page || []).map(column =>
-            (column || Array.from({ length: rows }, () => [null])).map(note => {
-                // Se uma nota for nula vinda do backend, transforma em um array com um sub-note nulo
-                // para que a UI possa renderizar a célula e o ritmo possa ser aplicado.
-                return note || [null];
-            })
-        )
-    );
+    if (!layers || layers.length === 0) return [];
+
+    return layers.map(page => {
+        if (!page) return [];
+
+        return page.map(column => {
+            // Encontra o maior número de subdivisões nesta coluna para usá-lo como base
+            const maxSubdivisions = Math.max(1, ...column.map(noteArray => Array.isArray(noteArray) ? noteArray.length : 1));
+
+            return (column || []).map(noteArray => {
+                // Se a célula for nula (problema das versões antigas),
+                // cria um array de nulos com o tamanho correto da subdivisão da coluna.
+                if (noteArray === null) {
+                    return Array(maxSubdivisions).fill(null);
+                }
+                // Garante que o que veio é um array
+                return Array.isArray(noteArray) ? noteArray : [noteArray];
+            });
+        });
+    });
 };
 
 const createNewPage = () =>

@@ -1,73 +1,54 @@
-"use client";
+// src/app/(groove-club)/p/[id]/page.jsx
+'use client';
 import { useState, useEffect, useContext } from "react";
-import { Post } from "../../../../components";
+import { Post, CommentForm, CommentThread } from "../../../../components"; // Novos componentes
 import { useParams } from "next/navigation";
-import { useLikePost, useForkProject } from "../../../../hooks";
+import { useAuth } from "../../../../hooks";
 import { MidiContext } from "../../../../contexts/MidiContext";
-import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function PostPage() {
-    const params = useParams();
-    const { id } = params;
-
+  const { id: postId } = useParams();
   const [post, setPost] = useState(null);
-  const [userId, setUserId] = useState(null);
-  const [token, setToken] = useState(null);
-  const [following, setFollowing] = useState(null);
-  const { currentProject, setCurrentProject } = useContext(MidiContext);
+  const { token, userId } = useAuth();
+  const { setCurrentProject } = useContext(MidiContext);
 
-  useEffect(() => {
-    setUserId(localStorage.getItem("id"));
-    setToken(localStorage.getItem("token"));
-    setFollowing(localStorage.getItem("following"));
-  }, []);
-
-  useEffect(() => {
-    if (id && token) {
-      fetchPost(id, token);
-    }
-  }, [id, token]);
-      const { forkProject, loading: forkLoading } = useForkProject(token);
-      const handleClickFork = async (project) => {
-        await forkProject(project.id);
-      };
-  const fetchPost = async (postId, token) => {
+  const fetchPost = async () => {
+    if (!postId || !token) return;
     try {
       const res = await fetch(`http://localhost:5000/api/posts/${postId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` }
       });
-
-      if (!res.ok) {
-        const text = await res.text();
-        alert(`Erro na API: ${res.status} - ${text}`);
-        return;
-      }
       const data = await res.json();
-      console.log("data")
-      console.log(data)
       setPost(data);
     } catch (err) {
-      alert("Erro na comunicação com a API.");
+      console.error("Erro ao buscar post:", err);
     }
   };
 
-  const { likePost, error: likeError } = useLikePost(token, () => fetchPost(id, token));
+  useEffect(() => {
+    fetchPost();
+  }, [postId, token]);
 
-  if (!post) return <p>Carregando post...</p>;
+  if (!post) return <p className="text-center py-10">Carregando post...</p>;
 
   return (
-    <div className="flex h-screen justify-center align-center pt-20">
-              <ToastContainer
-                position="top-center"
-                toastStyle={{ textAlign: 'center', fontSize: '1.2rem' }}
-              />
-      {likeError && <p style={{ color: "red" }}>{likeError}</p>}
-      <Post
-          onToggle={() => toggleFollow(user.id)} token={token} userId={userId} profileId={localStorage.getItem("id")} post={post} handleClick={likePost}  setCurrentProject={setCurrentProject} handleClickFork={handleClickFork} />
-    </div>
+      <div className="py-8">
+        <ToastContainer position="top-center" />
+        {/* Post Principal */}
+        <Post
+            post={post}
+            token={token}
+            userId={userId}
+            setCurrentProject={setCurrentProject}
+        />
+        {/* Formulário para novo comentário */}
+        <CommentForm postId={postId} token={token} onCommentAdded={fetchPost} />
+
+        {/* Thread de Comentários */}
+        <CommentThread comments={post.comments} />
+      </div>
   );
 }
 

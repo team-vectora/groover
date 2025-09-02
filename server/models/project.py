@@ -5,8 +5,9 @@ from utils.genres import GENRES
 from bson import Binary
 import base64
 from utils.similarity import cosine_similarity
-from .music import  Music
-from .user import  User
+from .music import Music
+from .user import User
+
 
 class Project:
     @staticmethod
@@ -232,3 +233,25 @@ class Project:
             }
         )
         return result.modified_count > 0
+
+    @staticmethod
+    def delete_project(project_id, user_id):
+        """Exclui um projeto se o usuário for o proprietário."""
+        project = mongo.db.projects.find_one({
+            '_id': ObjectId(project_id),
+            'user_id': user_id  # Garante que apenas o dono possa excluir
+        })
+
+        if not project:
+            return 0  # Retorna 0 se o projeto não for encontrado ou o usuário não tiver permissão
+
+        # Opcional: excluir músicas associadas para limpar o DB
+        if 'music_versions' in project and project['music_versions']:
+            music_ids = [v['music_id'] for v in project['music_versions']]
+            mongo.db.musics.delete_many({'_id': {'$in': music_ids}})
+
+        # Opcional: excluir convites pendentes
+        mongo.db.invitations.delete_many({'project_id': ObjectId(project_id)})
+
+        result = mongo.db.projects.delete_one({'_id': ObjectId(project_id)})
+        return result.deleted_count

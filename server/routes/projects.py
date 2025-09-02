@@ -188,3 +188,16 @@ def fork_project():
         'message': 'Fork created',
         'new_project_id': new_project_id
     }), 201
+
+
+@projects_bp.route('/<project_id>', methods=['DELETE'])
+@jwt_required()
+def delete_project(project_id):
+    user_id = get_jwt_identity()
+
+    deleted_count = Project.delete_project(project_id, user_id)
+
+    if deleted_count > 0:
+        return jsonify({'message': 'Project deleted successfully'}), 200
+    else:
+        return jsonify({'error': 'Project not found or permission denied'}), 404
