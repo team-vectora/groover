@@ -14,6 +14,7 @@ export { default as useFollowing } from './posts/useFollowing';
 // Exportações de projetos
 export { default as useForkProject } from './projects/useForkProject';
 export { default as useShareProject } from './projects/useShareProject';
+export { default as useHandleInvite } from './projects/useHandleInvite';
 
 // Exportações de editor
 export { default as useMidiPlayer } from './editor/useMidiPlayer';

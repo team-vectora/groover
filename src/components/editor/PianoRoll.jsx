@@ -13,14 +13,17 @@ const PianoRoll = ({
                        selectedColumn,
                        setSelectedColumn,
                        setPages,
+                       isCurrentUserProject,
                    }) => {
 
     const handleDoubleClick = (colIndex) => {
+        if (!isCurrentUserProject) return;
         setSelectedColumn(colIndex === selectedColumn ? null : colIndex);
     };
 
     // ✅ ATUALIZADO: Manipula a criação e remoção de sub-notas na nova estrutura
     const handleSubNoteClick = (e, rowIndex, colIndex, subIndex) => {
+        if (!isCurrentUserProject) return;
         e.stopPropagation();
         setPages((prevPages) => {
             const newPages = JSON.parse(JSON.stringify(prevPages));
@@ -40,6 +43,7 @@ const PianoRoll = ({
 
     // ✅ ATUALIZADO: Manipula a propriedade 'isSeparated'
     const handleSubNoteRightClick = (e, rowIndex, colIndex, subIndex) => {
+        if (!isCurrentUserProject) return;
         e.preventDefault();
         e.stopPropagation();
         setPages((prevPages) => {
@@ -59,12 +63,10 @@ const PianoRoll = ({
         if (!currentMatrix) return null;
 
         return (
-            // ✅ Tabela com layout fixo para preencher 100% da largura
             <table className="border-collapse w-full table-fixed">
                 <tbody>
                 {Array.from({ length: rows }).map((_, rowIndex) => (
                     <tr key={`row-${rowIndex}`} className={`${notes[rowIndex].startsWith("C") && !notes[rowIndex].startsWith("C#") ? 'border-t-2 border-primary' : ''}`}>
-                        {/* ✅ Loop fixo para renderizar sempre 10 colunas */}
                         {Array.from({ length: 10 }).map((_, colIndex) => {
                             const note = currentMatrix[colIndex]?.[rowIndex];
                             if (!note) {
@@ -74,8 +76,8 @@ const PianoRoll = ({
                             return (
                                 <td
                                     key={`cell-${rowIndex}-${colIndex}`}
-                                    // ✅ Removida a largura mínima para permitir que a célula seja responsiva
-                                    className={`relative border-t border-bg-darker h-[30px] p-0 cursor-pointer 
+                                    className={`relative border-t border-bg-darker h-[30px] p-0
+                                            ${isCurrentUserProject ? 'cursor-pointer' : 'cursor-not-allowed'} // ✅ Cursor atualizado
                                             ${selectedColumn === colIndex ? 'ring-2 ring-accent z-10' : ''}`}
                                     onDoubleClick={() => handleDoubleClick(colIndex)}
                                 >
@@ -86,7 +88,7 @@ const PianoRoll = ({
                                                 className={`
                                                         h-full box-border transition-colors duration-100
                                                         border-r border-primary/20
-                                                        ${subNote?.name ? 'bg-accent' : 'hover:bg-accent/40'}
+                                                        ${subNote?.name ? 'bg-accent' : (isCurrentUserProject ? 'hover:bg-accent/40' : '')} // ✅ Hover atualizado
                                                         ${activeCol === colIndex && activeSubIndex === subIndex ? 'bg-primary-light animate-pulse' : ''}
                                                         ${subNote?.isSeparated ? 'opacity-70 border-l-2 border-bg-darker' : ''} 
                                                     `}

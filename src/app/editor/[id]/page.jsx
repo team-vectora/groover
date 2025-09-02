@@ -22,7 +22,11 @@ export default function EditorPage() {
     const [openPop, setOpenPop] = useState(false);
     const [confirmationAction, setConfirmationAction] = useState(null); // pode ser 'clear', 'delete', ou null
 
-    const isCurrentUserProject = apiState.project?.created_by?._id === userId;
+    const isOwner = projectData.ownerId === userId;
+    const isCollaborator = projectData.collaborators.includes(userId);
+    const isNewProject = projectId === "new";
+
+    const isCurrentUserProject = isOwner || isCollaborator || isNewProject; // fica mais legível
 
     useEffect(() => {
         if (!authLoading && !token) {
@@ -128,6 +132,7 @@ export default function EditorPage() {
                 synthRef={synthRef}
                 lang={lang}
                 onDeletePage={handleDeletePage}
+                isCurrentUserProject={isCurrentUserProject}
             />
             <ConfirmationPopUp
                 open={!!confirmationAction}

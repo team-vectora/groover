@@ -69,4 +69,21 @@ def check_follow_status(following_id):
         return jsonify({"is_following": is_following})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@users_bp.route("/search", methods=["GET"])
+@jwt_required()
+def search_users():
+    query = request.args.get('q', '')
+    if len(query) < 5:
+        return jsonify([]), 200  # Retorna vazio se a busca for muito curta
+
+    current_user_id = get_jwt_identity()
+
+    # Busca por usuários que começam com a query, excluindo o próprio usuário
+    # O 'i' no regex torna a busca case-insensitive
+    users = User.find_by_query(query, current_user_id)
+
+    return jsonify(users), 200
+
         

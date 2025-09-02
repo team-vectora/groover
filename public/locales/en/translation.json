@@ -3,5 +3,9 @@
   "new_post": "New Post",
   "no_notifications": "No notifications",
   "like": "{{user}} liked your post",
-  "comment": "{{user}} commented: {{content}}"
+  "comment": "{{user}} commented: {{content}}",
+  "invite_accepted": "{{user}} accepted your invitation to the project: {{content}}",
+  "invite_rejected": "{{user}} rejected your invitation to the project: {{content}}",
+  "invitation_received": "{{user}} sent you an invitation to the project: {{content}}",
+  "collaborator_update": "{{user}} modified your project: {{content}}"
 }

@@ -64,7 +64,7 @@ export default function SimilarUsers({ users = [], userId }) {
                     >
                         <div className="flex items-center">
                             <Image
-                                src={user.avatar || "/default-avatar.png"}
+                                src={user.avatar || "/img/default_avatar.png"}
                                 alt={user.username}
                                 width={48}
                                 height={48}

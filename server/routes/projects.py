@@ -1,6 +1,7 @@
+from bson import ObjectId
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import Project, Music, User, Invitation
+from models import Project, Music, User, Invitation, Notification
 import base64
 from bson.binary import Binary
 
@@ -31,7 +32,19 @@ def save_project():
 
     if 'id' in data.keys():
         project_id = data.get('id')
-        print(project_id)
+        project = Project.get_project(project_id)  # Pega o projeto para verificar o dono
+
+        # Lógica de notificação para o dono do projeto
+        if str(project.get('user_id')) != user_id:
+            actor_user = User.get_user(user_id)
+            Notification.create(
+                user_id=str(project.get('user_id')),
+                actor=actor_user['username'],
+                type="collaborator_update",
+                project_id=project_id,
+                content=project.get('title')
+            )
+
         if data.get('layers'):
             Music.create_music(project_id=project_id, layers=data.get('layers'), user_id=user_id)
         success = Project.update_project(project_id, user_id, project_data)
@@ -87,8 +100,8 @@ def invite_user(project_id):
     if not data or not data.get('username'):
         return jsonify({'error': 'Username is required'}), 400
 
-    project = Project.get_project(project_id, user_id)
-    if not project:
+    project = Project.get_project(project_id)
+    if not project or str(project['user_id']) != user_id:  # Apenas o dono pode convidar
         return jsonify({'error': 'Project not found or permission denied'}), 404
 
     invited_user = User.find_by_username(data['username'])
@@ -99,14 +112,29 @@ def invite_user(project_id):
     if invited_user_id == user_id:
         return jsonify({'error': 'Cannot invite yourself'}), 400
 
+    if ObjectId(invited_user_id) in project.get('collaborators', []):
+        return jsonify({'error': 'User is already a collaborator'}), 400
+
+    # ✨ Nova Validação: Impede convites duplicados
+    if Invitation.find_pending_invitation(project_id, invited_user_id):
+        return jsonify({'error': 'An invitation has already been sent to this user for this project'}), 409
+
     invitation_id = Invitation.create_invitation(
         project_id=project_id,
         from_user_id=user_id,
         to_user_id=invited_user_id
     )
 
-    return jsonify({'message': 'Invitation sent', 'invitation_id': str(invitation_id)}), 201
+    user = User.get_user(user_id)
+    Notification.create(
+        user_id=invited_user_id,
+        actor=user['username'],
+        type="invitation_received",
+        project_id=project_id,
+        content=project.get('title')
+    )
 
+    return jsonify({'message': 'Invitation sent', 'invitation_id': str(invitation_id)}), 201
 
 @projects_bp.route('/fork', methods=['POST'])
 @jwt_required()
@@ -118,21 +146,23 @@ def fork_project():
     if not project_id:
         return jsonify({"error": "project_id not found"}), 400
 
-    project = Project.get_project_full_data_without_user_id(project_id)
+    project = Project.get_project(project_id)
     if not project:
         return jsonify({"error": "Project not found"}), 404
 
-    music = project.get('current_music_id')
+    music = Music.get_music(project.get('current_music_id'))
     if not music:
         return jsonify({"error": "Project doesn't have music to copy"}), 400
 
     layers = music.get('layers', [])
-    midi_base64 = project.get('midi')
+    midi_base64 = project.get('midi', '')
 
     if midi_base64 and midi_base64.startswith('data:audio/midi;base64,'):
         midi_base64 = midi_base64.split(',')[1]
 
     midi_bytes = base64.b64decode(midi_base64) if midi_base64 else None
+
+    print(project)
 
     new_project_id = Project.create_project(
         user_id,
@@ -143,7 +173,8 @@ def fork_project():
             'bpm': project.get('bpm', 120),
             'instrument': project.get('instrument', 'piano'),
             'volume': project.get('volume', -10),
-            'tempo': project.get('tempo', None)
+            'tempo': project.get('tempo', None),
+            'music_versions': project.get('music_versions', [])
         }
     )
 

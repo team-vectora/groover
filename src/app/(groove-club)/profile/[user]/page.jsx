@@ -14,7 +14,7 @@ export default function ProfilePage({ params }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token, userId, username: currentUsername } = useAuth();
-  const { user, posts, projects, invites, loading, error } = useProfile(username, token);
+  const { user, posts, projects, invites, loading, error, refetch } = useProfile(username, token);
 
   const { setCurrentProject } = useContext(MidiContext);
   const [activeTab, setActiveTab] = useState('posts');
@@ -22,7 +22,6 @@ export default function ProfilePage({ params }) {
   const [openConfig, setOpenConfig] = useState(false);
   const [shareProject, setShareProject] = useState(null);
 
-  const { likePost } = useLikePost(token);
   const { forkProject } = useForkProject(token);
   const { shareProject: shareProjectApi } = useShareProject(token);
 
@@ -36,6 +35,15 @@ export default function ProfilePage({ params }) {
       router.replace(`/profile/${username}`);
     }
   }, [searchParams, isCurrentUser, router, username]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'invites' || tab === 'musics' || tab === 'posts') {
+      setActiveTab(tab);
+      router.replace(`/profile/${username}`, undefined, { shallow: true });
+    }
+  }, [searchParams, router, username]);
+
 
   const handleForkProject = async (project) => {
     await forkProject(project.id);
@@ -51,6 +59,8 @@ export default function ProfilePage({ params }) {
     localStorage.removeItem('username');
     router.push('/login');
   };
+
+
 
   if (loading) return <div className="text-center py-8">Carregando perfil...</div>;
   if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
@@ -142,7 +152,7 @@ export default function ProfilePage({ params }) {
               ) : (
                   <div className="space-y-4">
                     {invites.map(invite => (
-                        <Invite key={invite.id} invite={invite} />
+                        <Invite key={invite.id} invite={invite} onActionComplete={refetch} />
                     ))}
                   </div>
               )}

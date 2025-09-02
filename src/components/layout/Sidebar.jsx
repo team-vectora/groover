@@ -15,23 +15,28 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import useNotifications from "../../hooks/posts/useNotifications";
 import NotificationItem from "../posts/NotificationItem";
+import Image from "next/image";
 
 const Sidebar = () => {
   const [username, setUsername] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("/img/default_avatar.png");
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("/img/default_avatar.png");
   const [isMenuOpen, setIsMenuOpen] = useState(false); // controle menu mobile
   const [token, setToken] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
-    const avatarUrlStorage = localStorage.getItem("avatar");
+    const storedAvatar = localStorage.getItem("avatar");
     const storedToken = localStorage.getItem("token");
 
     if (storedUsername) setUsername(storedUsername);
-    if (avatarUrlStorage) setAvatarUrl(avatarUrlStorage);
     if (storedToken) setToken(storedToken);
+
+    if (storedAvatar && storedAvatar !== "null") {
+      setAvatarUrl(storedAvatar);
+    }
+
   }, []);
 
   const { notifications, loading, error, refetch, checkNotification } =
@@ -113,10 +118,13 @@ const Sidebar = () => {
               setIsMenuOpen(false);
             }}
           >
-            <img
-              src={avatarUrl}
-              alt="Avatar"
-              className="w-10 h-10 rounded-full object-cover border border-[#4c4e30] mr-3"
+            <Image
+                src={avatarUrl}
+                alt="Avatar"
+                width={10}
+                height={10}
+                quality={100}
+                className="rounded-full object-cover border border-[#4c4e30] mr-3"
             />
             <span className="font-medium">{username}</span>
           </div>

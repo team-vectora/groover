@@ -1,11 +1,10 @@
+# models/invitation.py
+
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.db import mongo
-from utils.genres import GENRES
-from bson import Binary
 
 
-# Adicionar nova coleção de convites
 class Invitation:
     @staticmethod
     def create_invitation(project_id, from_user_id, to_user_id):
@@ -17,6 +16,15 @@ class Invitation:
             'created_at': datetime.now()
         }
         return mongo.db.invitations.insert_one(invitation).inserted_id
+
+    @staticmethod
+    def find_pending_invitation(project_id, to_user_id):
+        """Verifica se já existe um convite pendente para um usuário em um projeto."""
+        return mongo.db.invitations.find_one({
+            'project_id': ObjectId(project_id),
+            'to_user_id': ObjectId(to_user_id),
+            'status': 'pending'
+        })
 
     @staticmethod
     def find_by_id(invitation_id):

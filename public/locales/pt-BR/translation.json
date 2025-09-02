@@ -6,5 +6,9 @@
   "comment": "{{user}} comentou: {{content}}",
   "fork": "{{user}} fez um fork no seu projeto",
   "recomendacao": "{{user}} recomendou você",
-  "locale": "pt-BR"
+  "locale": "pt-BR",
+  "invite_accepted": "{{user}} aceitou seu convite para o projeto: {{content}}",
+  "invite_rejected": "{{user}} recusou seu convite para o projeto: {{content}}",
+  "invitation_received": "{{user}} te enviou um convite para o projeto: {{content}}",
+  "collaborator_update": "{{user}} modificou seu projeto: {{content}}"
 }

@@ -4,10 +4,10 @@ import { toast } from "react-toastify";
 export default function useShareProject(token) {
   const [loading, setLoading] = useState(false);
 
-  const shareProject = async (username) => {
+  const shareProject = async (projectId, username) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/invite`, {
+      const response = await fetch(`http://localhost:5000/api/projects/${projectId}/invite`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -16,7 +16,11 @@ export default function useShareProject(token) {
         body: JSON.stringify({ username: username }),
       });
 
-      if (!response.ok) throw new Error("Erro ao compartilhar");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao compartilhar");
+      }
 
       toast.success("Projeto compartilhado", { theme: "dark", autoClose: 3000 });
     } catch (err) {

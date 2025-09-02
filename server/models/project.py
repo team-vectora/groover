@@ -21,7 +21,7 @@ class Project:
             'instrument': project_data.get('instrument', 'piano'),
             'volume': project_data.get('volume', -10),
             'tempo': project_data.get('tempo'),
-            'music_versions': [],  # Inicializa vazio, Music cuidará disso depois
+            'music_versions': project_data.get('music_versions', []),  # Inicializa vazio, Music cuidará disso depois
             'created_at': datetime.now(),
             'created_by': user_id,
             'updated_at': datetime.now(),
@@ -54,13 +54,12 @@ class Project:
         return result.modified_count > 0
 
     @staticmethod
-    def get_project(project_id, user_id):
+    def get_project(project_id):
         # Baita de uma cabanagem pra depois o jsonify nn ficar chorando
         # ain ObjectID nao é serializável ain ain, vou dar erro ai, ain ain
 
         project = mongo.db.projects.find_one({
-            '_id': ObjectId(project_id),
-            'user_id': user_id
+            '_id': ObjectId(project_id)
         })
         if project:
             project['_id'] = str(project['_id'])

@@ -153,3 +153,20 @@ class User:
         similar_users = sorted(similar_users, key=lambda x: x['similarity'], reverse=True)[:limit]
 
         return similar_users
+
+    @staticmethod
+    def find_by_query(query, exclude_user_id):
+        """Busca usuários por nome de usuário (autocomplete)."""
+        users_cursor = mongo.db.users.find({
+            'username': {'$regex': f'^{query}', '$options': 'i'},
+            '_id': {'$ne': ObjectId(exclude_user_id)}
+        }).limit(10)
+
+        users = []
+        for user in users_cursor:
+            users.append({
+                'id': str(user['_id']),
+                'username': user['username'],
+                'avatar': user.get('avatar')
+            })
+        return users

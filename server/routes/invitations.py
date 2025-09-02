@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import Invitation, Project, User
+from models import Invitation, Project, User, Notification
 
 invitations_bp = Blueprint('invitations', __name__)
 
-# Mudar urgente
+
 @invitations_bp.route('', methods=['GET'])
 @jwt_required()
 def list_invitations():
@@ -13,8 +13,7 @@ def list_invitations():
 
     serialized = []
     for inv in invitations:
-
-        project = Project.get_project(str(inv['project_id']), str(inv['from_user_id']))
+        project = Project.get_project(str(inv['project_id']))
         from_user = User.get_user(str(inv['from_user_id']))
         to_user = User.get_user(str(inv['to_user_id']))
 
@@ -59,14 +58,29 @@ def respond_invitation(invitation_id):
     if response not in ['accept', 'reject']:
         return jsonify({'error': 'Invalid response'}), 400
 
-    # Atualizar status do convite
-    Invitation.update_status(invitation_id, response + 'ed')
+    new_status = 'accepted' if response == 'accept' else 'rejected'
+    Invitation.update_status(invitation_id, new_status)
+
+    project_id = str(invitation['project_id'])
+    from_user_id = str(invitation['from_user_id'])
+
+    # Notificar o dono do projeto sobre a resposta
+    project = Project.get_project(project_id)
+    user = User.get_user(user_id)
+
+    notification_type = "invite_accepted" if response == 'accept' else "invite_rejected"
+    Notification.create(
+        user_id=from_user_id,
+        actor=user['username'],
+        type=notification_type,
+        project_id=project_id,
+        content=project.get('title')
+    )
 
     if response == 'accept':
-        # Adicionar usuário como colaborador
         Project.add_collaborator(
-            project_id=str(invitation['project_id']),
+            project_id=project_id,
             user_id=user_id
         )
 
-    return jsonify({'message': f'Invitation {response}ed'}), 200
+    return jsonify({'message': f'Invitation {new_status}'}), 200

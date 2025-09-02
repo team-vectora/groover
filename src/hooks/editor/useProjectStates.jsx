@@ -36,6 +36,8 @@ export const useProjectState = () => {
     const [instrument, setInstrument] = useState('piano');
     const [volume, setVolume] = useState(-10);
     const [rhythm, setRhythm] = useState(1);
+    const [collaborators, setCollaborators] = useState([]);
+    const [ownerId, setOwnerId] = useState(null);
 
     const [pages, setPages] = useState([createNewMatrix()]);
     const [activePage, setActivePage] = useState(0);
@@ -103,7 +105,7 @@ export const useProjectState = () => {
     }, []);
 
     const projectData = {
-        title, description, bpm, instrument, volume, pages,
+        title, description, bpm, instrument, volume, pages, collaborators, ownerId
     };
 
     // ✅ ATUALIZADO: Reidrata os dados compactos vindos da API
@@ -120,6 +122,9 @@ export const useProjectState = () => {
         } else {
             setPages([createNewMatrix()]);
         }
+        setCollaborators(data.collaborators ?? [])
+        setOwnerId(data.created_by._id ?? null)
+
     }, []);
 
     const loadVersionData = useCallback((data) => {

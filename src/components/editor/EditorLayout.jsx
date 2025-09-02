@@ -5,7 +5,7 @@ const EditorLayout = ({
                           projectState, projectActions,
                           playerState, playerActions,
                           apiState, apiActions,
-                          synthRef, lang, onDeletePage
+                          synthRef, lang, onDeletePage, isCurrentUserProject
                       }) => {
     return (
         <main className="flex flex-col md:flex-row flex-grow p-4 gap-4">
@@ -49,6 +49,7 @@ const EditorLayout = ({
                         rows={ROWS}
                         selectedColumn={projectState.selectedColumn}
                         setSelectedColumn={projectActions.setSelectedColumn}
+                        isCurrentUserProject={isCurrentUserProject}
                     />
                 </div>
             </section>
