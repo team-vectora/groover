@@ -2,11 +2,13 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
+import useOutsideClick from '../../hooks/posts/useOutsideClick';
 
 const FollowListPopup = ({ title, users, onClose, isLoading }) => {
+    const popupRef = useOutsideClick(onClose);
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-            <div className="bg-bg-secondary rounded-xl w-full max-w-md border border-primary">
+            <div ref={popupRef} className="bg-bg-secondary rounded-xl w-full max-w-md border border-primary">
                 <div className="flex justify-between items-center px-5 py-4 border-b border-primary">
                     <h3 className="text-lg font-semibold text-accent-light">{title}</h3>
                     <button onClick={onClose} className="text-gray-400 hover:text-white">

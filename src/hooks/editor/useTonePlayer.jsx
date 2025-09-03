@@ -142,17 +142,39 @@ export const useTonePlayer = (projectState) => {
                     const prevEvent = arr[index - 1];
                     const nextEvent = arr[index + 1];
 
-                    // Condição para iniciar uma nota
-                    const shouldStart = currentEvent.subNote.isSeparated || !prevEvent ||
-                        prevEvent.rowIndex !== currentEvent.rowIndex || // A nota anterior é de outra linha?
-                        prevEvent.globalColIndex !== currentEvent.globalColIndex || // A nota anterior é de outra coluna?
-                        (prevEvent.globalColIndex === currentEvent.globalColIndex && prevEvent.subIndex !== currentEvent.subIndex - 1); // Existe um silêncio entre as sub-notas?
+                    // --- CONDIÇÕES PARA INICIAR UMA NOTA (shouldStart) ---
+                    const isSeparated = currentEvent.subNote.isSeparated;
+                    const isFirstNote = !prevEvent;
+                    const isDifferentRow = prevEvent && prevEvent.rowIndex !== currentEvent.rowIndex;
+                    const hasSilenceBefore = prevEvent && (prevEvent.globalColIndex === currentEvent.globalColIndex && prevEvent.subIndex !== currentEvent.subIndex - 1);
 
-                    // Condição para parar uma nota
-                    const shouldEnd = !nextEvent || nextEvent.subNote.isSeparated ||
-                        nextEvent.rowIndex !== currentEvent.rowIndex || // A próxima nota é de outra linha?
-                        nextEvent.globalColIndex !== currentEvent.globalColIndex || // A próxima nota é de outra coluna?
-                        (nextEvent.globalColIndex === currentEvent.globalColIndex && nextEvent.subIndex !== currentEvent.subIndex + 1); // Existe um silêncio após a sub-nota?
+                    const shouldStart = isSeparated || isFirstNote || isDifferentRow || hasSilenceBefore;
+
+                    // --- CONDIÇÕES PARA PARAR UMA NOTA (shouldEnd) ---
+                    const isLastNote = !nextEvent;
+                    const nextIsSeparated = nextEvent && nextEvent.subNote.isSeparated;
+                    const nextIsDifferentRow = nextEvent && nextEvent.rowIndex !== currentEvent.rowIndex;
+                    const hasSilenceAfter = nextEvent && (nextEvent.globalColIndex === currentEvent.globalColIndex && nextEvent.subIndex !== currentEvent.subIndex + 1);
+
+                    const shouldEnd = isLastNote || nextIsSeparated || nextIsDifferentRow || hasSilenceAfter;
+
+                    // --- LOG DETALHADO ---
+                    console.group(`Nota: ${currentEvent.noteName} (Col: ${currentEvent.globalColIndex}, Sub: ${currentEvent.subIndex})`);
+
+                    console.log(`%c--- Verificando shouldStart: ${shouldStart} ---`, 'color: skyblue');
+                    console.log(`É uma nota separada? (isSeparated):`, isSeparated);
+                    console.log(`É a primeira nota da sequência? (isFirstNote):`, isFirstNote);
+                    console.log(`A nota anterior é de outra linha? (isDifferentRow):`, isDifferentRow);
+                    console.log(`Existe um silêncio antes? (hasSilenceBefore):`, hasSilenceBefore);
+
+                    console.log(`%c--- Verificando shouldEnd: ${shouldEnd} ---`, 'color: lightgreen');
+                    console.log(`É a última nota da sequência? (isLastNote):`, isLastNote);
+                    console.log(`A próxima nota é separada? (nextIsSeparated):`, nextIsSeparated);
+                    console.log(`A próxima nota é de outra linha? (nextIsDifferentRow):`, nextIsDifferentRow);
+                    console.log(`Existe um silêncio depois? (hasSilenceAfter):`, hasSilenceAfter);
+
+                    console.groupEnd();
+
 
                     return { ...currentEvent, shouldStart, shouldEnd };
                 });

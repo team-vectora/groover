@@ -124,7 +124,7 @@ class Project:
                     version['music_id'] = Music.get_music(version['music_id'])
                     version['update_by'] = User.get_user(version['update_by'])
 
-            if 'midi' in project:
+            if 'midi' in project and project['midi']:
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
 
@@ -166,10 +166,14 @@ class Project:
                     print(f"Error encoding MIDI for project {p['_id']}: {str(e)}")
                     midi_data = None
 
+            list_collaborators = []
+            if 'collaborators' in p.keys():
+                list_collaborators = p['collaborators']
+
             result.append({
                 'id': str(p['_id']),
                 'midi': midi_data,
-                'collaborators': [str(id_collab) for id_collab in p['collaborators']],
+                'collaborators': [str(id_collab) for id_collab in list_collaborators],
                 'title': p.get('title', 'Untitled'),
                 'bpm': p.get('bpm', 0),
                 'tempo': p.get('tempo', ''),

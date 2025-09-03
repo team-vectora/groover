@@ -88,6 +88,8 @@ export default function Post({
     const [isLiked, setIsLiked] = useState(post.likes.includes(userId));
     const [likesCount, setLikesCount] = useState(post.likes.length);
 
+    const commentsCount = post.comment_count
+
     // Estado para controlar o follow localmente
     const [isFollowing, setIsFollowing] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -172,7 +174,7 @@ export default function Post({
     };
 
     return (
-        <div className="flex flex-col gap-4 bg-[#121113] rounded-lg p-5 w-full max-w-2xl mx-auto border border-[#4c4e30] mb-10 shadow-lg hover:shadow-xl transition-shadow">
+        <div className="flex flex-col gap-4 bg-[#121113] rounded-lg p-5 w-full mx-auto border border-[#4c4e30] mb-10 shadow-lg hover:shadow-xl transition-shadow">
             {/* Cabeçalho do post */}
             <div className="flex items-center gap-4">
                 <Image
@@ -325,6 +327,7 @@ export default function Post({
                     className="hover:text-[#c1915d] transition-colors flex items-center gap-2"
                 >
                     <FontAwesomeIcon icon={faComment} className="text-[#e6e8e3] hover:cursor-pointer" />
+                    <span className="text-[#e6e8e3]">{commentsCount}</span>
                 </button>
 
                 <button

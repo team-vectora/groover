@@ -16,7 +16,7 @@ export default function RootLayout({ children }) {
   return (
 
 
-          <div className="grid grid-cols-[1fr_250px_minmax(500px,1000px)_300px_1fr] min-h-screen gap-5">
+          <div className="grid grid-cols-[1fr_250px_minmax(500px,850px)_400px_1fr] min-h-screen gap-5">
               {/* Sidebar */}
               <div className="col-start-2 flex-shrink-0 sticky top-0 h-full bg-[#121113] border-r border-[#4c4e30]">
                   <Sidebar />
@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
               {/* Feed */}
               {/* Feed */}
               <main className="col-start-3 px-4 py-4 flex justify-center">
-                  <div className="max-w-4xl">
+                  <div className="w-full">
                       {children}
                   </div>
               </main>
@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
               <PlayerWrapper />
 
               {/* Sugestões */}
-              <div className="w-80 flex-shrink-0 sticky top-24 h-fit">
+              <div className="w-full flex-shrink-0 sticky top-24 h-fit">
                   {similarLoading ? (
                       <p className="text-center py-4">Carregando sugestões...</p>
                   ) : (

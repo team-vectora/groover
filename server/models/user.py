@@ -44,6 +44,9 @@ class User:
 
     @staticmethod
     def get_user(user_id):
+        if not user_id:
+            return None
+
         user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
         if user:
             user['_id'] = str(user['_id'])

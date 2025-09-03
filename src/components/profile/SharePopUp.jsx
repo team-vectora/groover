@@ -3,12 +3,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
+import useOutsideClick from '../../hooks/posts/useOutsideClick';
 
 const SharePopup = ({ open, onClose, project, onShare }) => {
   const [username, setUsername] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const popupRef = useOutsideClick(onClose);
   // Debounce para a busca
   const debounce = (func, delay) => {
     let timeout;
@@ -68,7 +69,7 @@ const SharePopup = ({ open, onClose, project, onShare }) => {
 
   return (
       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-        <div className="bg-bg-secondary rounded-xl w-full max-w-md border border-primary">
+        <div ref={popupRef} className="bg-bg-secondary rounded-xl w-full max-w-md border border-primary">
           <div className="flex justify-between items-center px-5 py-4 border-b border-primary">
             <h3 className="text-lg font-semibold text-accent-light">
               Convidar para: {project.title}

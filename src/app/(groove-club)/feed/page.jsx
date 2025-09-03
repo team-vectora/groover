@@ -14,7 +14,7 @@ const FeedPage = () => {
     return (
         <div className="flex gap-10">
             {/* Conteúdo principal do feed */}
-            <div className="flex-1 max-w-2xl">
+            <div className="flex-1 w-full">
                 <ToastContainer position="top-center" />
 
                 {loading && <p className="text-center py-4">Carregando posts...</p>}

@@ -40,7 +40,7 @@ const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickSha
 
                 {isYourProfile && (
                     <>
-                        <button onClick={(e) => { e.stopPropagation(); handleClickShare(project); }} /* ... */ >
+                        <button onClick={(e) => { e.stopPropagation(); handleClickShare(project); }} className="bg-primary hover:bg-primary-light p-3 rounded-full h-12 w-12 flex items-center justify-center transition duration-300 ease-in-out hover:shadow-md" >
                             <FontAwesomeIcon icon={faShareNodes} /* ... */ />
                         </button>
                         {/* Botão de Excluir */}

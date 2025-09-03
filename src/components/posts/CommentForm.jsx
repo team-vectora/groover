@@ -28,7 +28,7 @@ const CommentForm = ({ postId, token, onCommentAdded }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="mt-6 p-4 bg-bg-secondary rounded-lg border border-primary">
+        <form onSubmit={handleSubmit} className="mt-6 max-w-2xl mx-auto p-4 bg-bg-secondary rounded-lg border border-primary">
             <textarea
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}

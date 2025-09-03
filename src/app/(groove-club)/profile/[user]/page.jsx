@@ -6,9 +6,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { MidiContext } from '../../../../contexts/MidiContext';
-import { useAuth, useProfile, useForkProject, useShareProject, useDeleteProject, useOutsideClick } from '../../../../hooks';
+import { useAuth, useProfile, useForkProject, useShareProject, useDeleteProject } from '../../../../hooks';
 import { ProfileHeader, ProfileTabs, Post, ProjectCard, Invite,
-          PostFormPopUp, ConfigUserPopUp, SharePopUp, ConfirmationPopUp, FollowListPopup } from '../../../../components';
+  PostFormPopUp, ConfigUserPopUp, SharePopUp, ConfirmationPopUp, FollowListPopup } from '../../../../components';
 
 export default function ProfilePage({ params }) {
   const { user: username } = params;
@@ -30,12 +30,6 @@ export default function ProfilePage({ params }) {
   const { deleteProject } = useDeleteProject(token);
 
   const isCurrentUser = currentUsername === username;
-
-  // ✨ Refs para detectar cliques fora dos popups
-  const postFormRef = useOutsideClick(() => setOpenPostForm(false));
-  const configRef = useOutsideClick(() => setOpenConfig(false));
-  const shareRef = useOutsideClick(() => setShareProject(null));
-  const followListRef = useOutsideClick(() => setFollowList({ ...followList, open: false }));
 
   useEffect(() => {
     if (searchParams.get('newPost') === 'true' && isCurrentUser) {
@@ -185,51 +179,43 @@ export default function ProfilePage({ params }) {
             </div>
         )}
 
-        {/* Popups com detecção de clique externo */}
-        <div ref={postFormRef}>
-          {openPostForm && (
-              <PostFormPopUp
-                  open={openPostForm}
-                  onClose={() => setOpenPostForm(false)}
-                  projects={projects}
-              />
-          )}
-        </div>
+        {/* Popups */}
+        {openPostForm && (
+            <PostFormPopUp
+                open={openPostForm}
+                onClose={() => setOpenPostForm(false)}
+                projects={projects}
+            />
+        )}
 
-        <div ref={configRef}>
-          {openConfig && (
-              <ConfigUserPopUp
-                  open={openConfig}
-                  onClose={() => setOpenConfig(false)}
-                  username={currentUsername}
-                  bio={user.bio}
-                  profilePic={user.avatar}
-                  favoriteTags={Object.keys(user.genres || {})}
-              />
-          )}
-        </div>
+        {openConfig && (
+            <ConfigUserPopUp
+                open={openConfig}
+                onClose={() => setOpenConfig(false)}
+                username={currentUsername}
+                bio={user.bio}
+                profilePic={user.avatar}
+                favoriteTags={Object.keys(user.genres || {})}
+            />
+        )}
 
-        <div ref={shareRef}>
-          {shareProject && (
-              <SharePopUp
-                  open={!!shareProject}
-                  onClose={() => setShareProject(null)}
-                  project={shareProject}
-                  onShare={shareProjectApi}
-              />
-          )}
-        </div>
+        {shareProject && (
+            <SharePopUp
+                open={!!shareProject}
+                onClose={() => setShareProject(null)}
+                project={shareProject}
+                onShare={shareProjectApi}
+            />
+        )}
 
-        <div ref={followListRef}>
-          {followList.open && (
-              <FollowListPopup
-                  title={followList.type === 'followers' ? 'Seguidores' : 'Seguindo'}
-                  users={followList.users}
-                  isLoading={followList.isLoading}
-                  onClose={() => setFollowList({ open: false, type: '', users: [], isLoading: false })}
-              />
-          )}
-        </div>
+        {followList.open && (
+            <FollowListPopup
+                title={followList.type === 'followers' ? 'Seguidores' : 'Seguindo'}
+                users={followList.users}
+                isLoading={followList.isLoading}
+                onClose={() => setFollowList({ open: false, type: '', users: [], isLoading: false })}
+            />
+        )}
 
         {projectToDelete && (
             <ConfirmationPopUp

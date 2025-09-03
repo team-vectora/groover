@@ -33,7 +33,7 @@ class Post:
         return mongo.db.posts.insert_one(post).inserted_id
 
     @staticmethod
-    def get_posts_with_user_and_project(user_id, similarity_threshold=0.5, limit=25):
+    def get_posts_with_user_and_project(user_id, similarity_threshold=0.5, limit=50): # Limite aumentado
 
         def encode_midi_field(post):
             if post.get('project') and post['project'] and 'midi' in post['project'] and post['project']['midi']:
@@ -65,6 +65,11 @@ class Post:
         user_vector = [user_genres.get(g, 0) for g in GENRES]
 
         pipeline = [
+            {
+                '$match': {
+                    'is_comment': False
+                }
+            },
             {
                 '$lookup': {
                     'from': 'users',
@@ -101,6 +106,7 @@ class Post:
                     'created_at': 1,
                     'likes': 1,
                     'comments': 1,
+                    'comment_count': 1,
                     'genres': 1,
                     'user': {
                         '_id': {'$toString': '$user._id'},
@@ -159,7 +165,7 @@ class Post:
                 if len(filtered_posts) == limit:
                     break
 
-        if len(filtered_posts) < 5:
+        if len(filtered_posts) < 15: # Condição de fallback aumentada
             fallback_posts = []
             for post in raw_posts:
                 if 'likes' in post:
@@ -224,6 +230,7 @@ class Post:
                     'created_at': 1,
                     'likes': 1,
                     'comments': 1,
+                    'comment_count': 1,
                     'genres': 1,
                     'user': {
                         '_id': {'$toString': '$user._id'},
@@ -320,6 +327,9 @@ class Post:
                 }
             },
             {
+                '$sort': {'created_at': -1}  # Adicionado para ordenar
+            },
+            {
                 '$lookup': {
                     'from': 'users',
                     'localField': 'user_id',
@@ -355,6 +365,7 @@ class Post:
                     'created_at': 1,
                     'likes': 1,
                     'comments': 1,
+                    'comment_count': 1,
                     'genres': 1,
                     'user': {
                         '_id': {'$toString': '$user._id'},
@@ -411,6 +422,9 @@ class Post:
                 }
             },
             {
+                '$sort': {'created_at': -1}  # Adicionado para ordenar
+            },
+            {
                 '$lookup': {
                     'from': 'users',
                     'localField': 'user_id',
@@ -446,6 +460,7 @@ class Post:
                     'created_at': 1,
                     'likes': 1,
                     'comments': 1,
+                    'comment_count': 1,
                     'genres': 1,
                     'user': {
                         '_id': {'$toString': '$user._id'},
@@ -516,4 +531,3 @@ class Post:
             User.recommendation_change(genres, user_id)
 
             return {'message': 'Post curtido com sucesso'}, 200
-

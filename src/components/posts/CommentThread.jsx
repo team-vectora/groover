@@ -8,7 +8,7 @@ const CommentThread = ({ comments }) => {
     }
 
     return (
-        <div className="mt-8 border-t border-primary pt-6">
+        <div className="mt-8 max-w-2xl mx-auto border-t border-primary pt-6">
             <h2 className="text-xl font-semibold mb-4">Comentários</h2>
             <ul className="space-y-5">
                 {comments.map(comment => (

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { uploadToCloudinary } from '../../lib/util/upload';
+import useOutsideClick from '../../hooks/posts/useOutsideClick';
 
 const GENRES = [
   "rock", "pop", "jazz", "blues", "rap", "hip hop", "r&b", "reggae",
@@ -21,6 +22,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedGenres, setSelectedGenres] = useState([]);
+  const popupRef = useOutsideClick(onClose);
 
   const toggleGenre = (genre) => {
     if (selectedGenres.includes(genre)) {
@@ -108,7 +110,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
 
   return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-auto">
-        <div className="bg-[#121113] rounded-xl w-full max-w-6xl border border-[#4c4e30] flex flex-col md:flex-row overflow-hidden">
+        <div ref={popupRef} className="bg-[#121113] rounded-xl w-full max-w-6xl border border-[#4c4e30] flex flex-col md:flex-row overflow-hidden">
 
           {/* Form (agora à esquerda) */}
           <div className="md:w-1/2 p-5 flex flex-col">

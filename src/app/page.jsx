@@ -80,7 +80,7 @@ export default function Home() {
         Login
         <span className="arrow">→</span>
       </Link>
-      <Link href="/siginup" className="cta-button">
+      <Link href="/signup" className="cta-button">
         Logon
         <span className="arrow">→</span>
       </Link>

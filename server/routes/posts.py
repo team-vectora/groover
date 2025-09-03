@@ -118,4 +118,3 @@ def add_comment_to_post(post_id):
 
     return jsonify({'message': 'Comentário adicionado', 'comment_id': str(comment_id)}), 201
 
-
