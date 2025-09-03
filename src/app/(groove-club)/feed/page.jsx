@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const FeedPage = () => {
     const { token, userId } = useAuth();
-    const { posts, loading, error } = usePosts(token);
+    const { posts, loading, error, refetch } = usePosts(token);
     const { setCurrentProject } = useContext(MidiContext);
 
     return (
@@ -29,6 +29,7 @@ const FeedPage = () => {
                             post={post}
                             profileId={userId}
                             setCurrentProject={setCurrentProject}
+                            onPostCreated={refetch} // Adicionado para refetch
                         />
                     ))}
                 </div>

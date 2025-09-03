@@ -8,7 +8,8 @@ import {
     faComment,
     faShareAlt,
     faChevronLeft,
-    faChevronRight
+    faChevronRight,
+    faArrowUp
 } from '@fortawesome/free-solid-svg-icons';
 import FollowButton from "../feed/FollowButton";
 import ProjectCard from "../profile/ProjectCard";
@@ -77,6 +78,7 @@ export default function Post({
                                  profileId,
                                  setCurrentProject,
                                  handleClickFork,
+                                onPostCreated,
                              }) {
     const router = useRouter();
 
@@ -200,6 +202,13 @@ export default function Post({
                     />
                 )}
             </div>
+
+            {post.parent_post_id && (
+                <Link href={`/p/${post.parent_post_id}`} className="text-accent text-sm hover:underline">
+                    <FontAwesomeIcon icon={faArrowUp} className="mr-2" />
+                    Ver thread
+                </Link>
+            )}
 
             {/* Legenda */}
             <p className="break-words text-[#e6e8e3]">{post.caption}</p>

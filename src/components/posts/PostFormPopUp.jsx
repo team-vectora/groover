@@ -1,20 +1,13 @@
-import { useState, useRef } from 'react';
+'use client'
+
+import { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { uploadToCloudinary } from '../../lib/util/upload';
+import { GENRES } from '../../constants'
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
 
-const GENRES = [
-  "rock", "pop", "jazz", "blues", "rap", "hip hop", "r&b", "reggae",
-  "samba", "mpb", "bossa nova", "funk", "sertanejo", "forró", "axé",
-  "pagode", "indie", "metal", "heavy metal", "trap", "lo-fi", "electronic",
-  "house", "techno", "trance", "drum and bass", "dubstep", "k-pop", "j-pop",
-  "classical", "opera", "gospel", "country", "folk", "punk", "hardcore",
-  "grunge", "soul", "disco", "reggaeton", "cumbia", "tango", "flamenco",
-  "chillout", "ambient", "experimental"
-];
-
-const PostFormPopUp = ({ open, onClose, projects }) => {
+const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = null, initialCaption = '', onCommentAdded, onPostCreated }) => {
   const [caption, setCaption] = useState("");
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -23,6 +16,10 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedGenres, setSelectedGenres] = useState([]);
   const popupRef = useOutsideClick(onClose);
+
+  useEffect(() => {
+    setCaption(initialCaption);
+  }, [initialCaption]);
 
   const toggleGenre = (genre) => {
     if (selectedGenres.includes(genre)) {
@@ -50,18 +47,21 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
         );
       }
 
-      const response = await fetch("http://localhost:5000/api/posts", {
+      const url = isComment ? `http://localhost:5000/api/posts/${postId}/comment` : "http://localhost:5000/api/posts";
+      const body = {
+        caption,
+        photos: photoUrls,
+        project_id: selectedProject,
+        genres: selectedGenres,
+      };
+
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          caption,
-          photos: photoUrls,
-          project_id: selectedProject,
-          genres: selectedGenres,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
@@ -73,6 +73,9 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
         setSelectedGenres([]);
         if (fileInputRef.current) fileInputRef.current.value = "";
         onClose();
+        if (isComment && onCommentAdded) {
+          onCommentAdded();
+        }
       } else {
         alert(data.error || "Erro ao criar post");
       }
@@ -116,7 +119,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
           <div className="md:w-1/2 p-5 flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-[#c1915d]">
-                Criar Nova Publicação
+                {isComment ? 'Adicionar Comentário' : 'Criar Nova Publicação'}
               </h3>
 
               <button
@@ -132,7 +135,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
               <textarea
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
-                  placeholder="Escreva uma legenda..."
+                  placeholder={isComment ? "Escreva seu comentário..." : "Escreva uma legenda..."}
                   rows={4}
                   maxLength={500}
                   className="w-full p-3 bg-[#070608] border border-[#4c4e30] rounded-md text-white focus:outline-none focus:border-[#c1915d]"
@@ -172,7 +175,7 @@ const PostFormPopUp = ({ open, onClose, projects }) => {
             >
               {isSubmitting ? (
                   <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
-              ) : "Publicar"}
+              ) : (isComment ? "Comentar" : "Publicar")}
             </button>
           </div>
 

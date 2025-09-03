@@ -101,7 +101,10 @@ def add_comment_to_post(post_id):
         user_id=user_id,
         parent_post_id=post_id,
         caption=data.get('caption'),
-        is_comment=True
+        is_comment=True,
+        photos=data.get('photos', []),
+        project_id=data.get('project_id', None),
+        genres=data.get('genres', [])
     )
 
     # Notificar o dono do post original

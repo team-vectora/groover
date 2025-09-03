@@ -134,6 +134,7 @@ export default function ProfilePage({ params }) {
                           userId={userId}
                           setCurrentProject={setCurrentProject}
                           handleClickFork={handleForkProject}
+                          onPostCreated={refetch} // Adicionado para refetch
                       />
                   ))
               )}
@@ -185,6 +186,7 @@ export default function ProfilePage({ params }) {
                 open={openPostForm}
                 onClose={() => setOpenPostForm(false)}
                 projects={projects}
+                onPostCreated={refetch} // Adicionado para refetch
             />
         )}
 

@@ -9,7 +9,8 @@ export async function uploadToCloudinary(file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch("http://localhost:5000/api/upload-image", {
+  // AQUI ESTÁ A CORREÇÃO: Adicionado '/posts' na URL
+  const res = await fetch("http://localhost:5000/api/posts/upload-image", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
