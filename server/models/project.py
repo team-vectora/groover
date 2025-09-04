@@ -143,17 +143,16 @@ class Project:
 
         user_id_str = str(user['_id'])
 
-        project_count = mongo.db.projects.count_documents({'user_id': user_id_str})
-        if project_count == 0:
-            print(f"No projects found for user {username} with ID {user_id_str}")
-            return []
-
         projects = mongo.db.projects.find({
             '$or': [
                 {'collaborators': {'$in': [ObjectId(user_id_str)]}},
                 {'user_id': user_id_str}
             ]
         })
+
+        if not projects :
+            print(f"No projects found for user {username} with ID {user_id_str}")
+            return []
 
         result = []
         for p in projects:

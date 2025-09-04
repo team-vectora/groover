@@ -6,7 +6,7 @@ import "../lib/i18n";
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="pt-BR">
+      <html lang="pt-BR" className="dark">
       <body>
         <MidiProvider>
             {children}

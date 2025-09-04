@@ -71,12 +71,6 @@ const ControlPanel = ({
                         </button>
                     </div>
                 </div>
-                <div className="pt-8">
-                    <Link href={`/profile/${username}?tab=musics`} className="flex items-center gap-2 text-gray-400 hover:text-accent transition-colors">
-                        <FontAwesomeIcon icon={faUser} />
-                        Voltar para o Perfil
-                    </Link>
-                </div>
             </div>
 
         </div>
