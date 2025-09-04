@@ -1,17 +1,17 @@
-// src/app/(groove-club)/search/page.jsx
 'use client';
 import { useState, useEffect } from 'react';
 import { useAuth, useDebounce } from '../../../hooks';
 import { GENRES } from '../../../constants';
 import { Post, ProjectCard, UserSearchResult } from '../../../components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 
 export default function SearchPage() {
     const { token } = useAuth();
     const [query, setQuery] = useState('');
     const [selectedTags, setSelectedTags] = useState([]);
-    const [searchType, setSearchType] = useState('all');
+    const [searchType, setSearchType] = useState('all'); // Estado para o tipo de busca
+    const [tagsExpanded, setTagsExpanded] = useState(false); // NOVO: Estado para expandir/recolher tags
     const [results, setResults] = useState({ users: [], posts: [], projects: [] });
     const [loading, setLoading] = useState(false);
 
@@ -26,6 +26,7 @@ export default function SearchPage() {
 
             setLoading(true);
             const tagsQuery = selectedTags.join(',');
+            // A requisição agora envia o 'searchType' para o backend
             const response = await fetch(`http://localhost:5000/api/search?q=${debouncedQuery}&tags=${tagsQuery}&type=${searchType}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -81,6 +82,13 @@ export default function SearchPage() {
         );
     };
 
+    // NOVO: Array para os botões de filtro de tipo
+    const filterButtons = [
+        { label: 'Todos', value: 'all' },
+        { label: 'Posts', value: 'posts' },
+        { label: 'Projetos', value: 'projects' },
+        { label: 'Pessoas', value: 'users' }
+    ];
 
     return (
         <div className="py-8">
@@ -96,21 +104,47 @@ export default function SearchPage() {
                 <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             </div>
 
+            {/* NOVO: Botões de filtro por tipo */}
+            <div className="flex items-center gap-2 mb-4">
+                <span className="font-semibold">Filtrar por:</span>
+                {filterButtons.map(btn => (
+                    <button
+                        key={btn.value}
+                        onClick={() => setSearchType(btn.value)}
+                        className={`px-3 py-1 rounded-full text-sm transition ${searchType === btn.value ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'}`}
+                    >
+                        {btn.label}
+                    </button>
+                ))}
+            </div>
+
             <div className="mb-6">
-                <h3 className="font-semibold mb-3">Filtrar por Gêneros</h3>
-                <div className="flex flex-wrap gap-2">
-                    {GENRES.map(genre => (
-                        <button
-                            key={genre}
-                            onClick={() => toggleTag(genre)}
-                            className={`px-3 py-1 rounded-full text-sm transition ${selectedTags.includes(genre) ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'}`}
-                        >
-                            {genre}
-                        </button>
-                    ))}
-                </div>
+                {/* NOVO: Botão para expandir/recolher tags */}
+                <button
+                    onClick={() => setTagsExpanded(!tagsExpanded)}
+                    className="font-semibold mb-3 flex items-center gap-2 text-foreground hover:text-accent transition"
+                >
+                    Filtrar por Gêneros
+                    <FontAwesomeIcon icon={tagsExpanded ? faChevronUp : faChevronDown} />
+                </button>
+
+                {/* As tags só aparecem se 'tagsExpanded' for true */}
+                {tagsExpanded && (
+                    <div className="flex flex-wrap gap-2 animate-fade-in">
+                        {GENRES.map(genre => (
+                            <button
+                                key={genre}
+                                onClick={() => toggleTag(genre)}
+                                className={`px-3 py-1 rounded-full text-sm transition ${selectedTags.includes(genre) ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'}`}
+                            >
+                                {genre}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
             {renderResults()}
         </div>
     );
 }
+
