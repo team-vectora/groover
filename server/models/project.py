@@ -259,3 +259,23 @@ class Project:
 
         result = mongo.db.projects.delete_one({'_id': ObjectId(project_id)})
         return result.deleted_count
+
+    @staticmethod
+    def search_projects(criteria):
+        """Busca projetos com base em um critério, garantindo a serialização."""
+        projects_cursor = mongo.db.projects.find(criteria).limit(50)
+        results = []
+        for p in projects_cursor:
+            created_by_user = User.get_user(str(p.get('created_by')))
+
+            results.append({
+                'id': str(p['_id']),
+                'title': p.get('title', 'Untitled'),
+                'description': p.get('description', ''),
+                'bpm': p.get('bpm'),
+                'created_at': p.get('created_at').isoformat() if p.get('created_at') else None,
+                'created_by': created_by_user,  # O get_user já retorna um dict serializável
+                'user_id': str(p.get('user_id')),
+                'collaborators': [str(c) for c in p.get('collaborators', [])]
+            })
+        return results

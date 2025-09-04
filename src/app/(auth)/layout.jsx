@@ -24,7 +24,7 @@ export default function AuthLayout({ children }) {
         <div className="w-full max-w-6xl flex justify-between items-center mx-auto py-4 px-2 sm:px-0">
           <div className="flex items-center space-x-3">
             <Image src="/img/groover_logo.png" alt="Logo" width={90} height={70} />
-            <span className="text-2xl sm:text-3xl font-bold">GrooveClub</span>
+            <span className="text-2xl sm:text-3xl font-bold">Groover</span>
           </div>
           <nav className="space-x-4 text-sm sm:text-base">
             <a href="/login" className="text-primary hover:text-primary-light transition">Entrar</a>

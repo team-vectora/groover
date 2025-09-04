@@ -25,3 +25,6 @@ export { default as useMidiPlayer } from './editor/useMidiPlayer';
 export { default as useProjectStates } from './editor/useProjectStates';
 export { default as useProjectAPI } from './editor/useProjectAPI';
 export { default as useTonePlayer } from './editor/useTonePlayer';
+
+// Exportações de search
+export { default as useDebounce } from './search/useDebounce';

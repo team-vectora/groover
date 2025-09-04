@@ -1,13 +1,10 @@
 'use client'
 import '../../styles/global.css'
-import { MidiProvider } from "../../contexts/MidiContext";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
 import { Sidebar, PlayerWrapper, SimilarUsers } from "../../components";
 import { useSimilarUsers, useAuth } from "../../hooks";
 
 export default function RootLayout({ children }) {
-  const pathname = usePathname();
   const { token, userId } = useAuth();
   const { similarUsers, loading: similarLoading } = useSimilarUsers(token);
 
@@ -16,9 +13,9 @@ export default function RootLayout({ children }) {
   return (
 
 
-          <div className="grid grid-cols-[1fr_250px_minmax(500px,850px)_400px_1fr] min-h-screen gap-5">
+        <div className="grid grid-cols-[1fr_250px_minmax(500px,850px)_400px_1fr] min-h-screen gap-5 bg-background text-foreground">
               {/* Sidebar */}
-              <div className="col-start-2 flex-shrink-0 sticky top-0 h-full bg-[#121113] border-r border-[#4c4e30]">
+              <div className="col-start-2 flex-shrink-0 sticky top-0 h-full bg-bg-secondary border-r border-primary-light/30">
                   <Sidebar />
               </div>
 

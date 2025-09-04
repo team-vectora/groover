@@ -9,7 +9,7 @@ from routes.users import users_bp
 from routes.posts import posts_bp
 from routes.projects import projects_bp
 from routes.invitations import invitations_bp
-from routes.upload import upload_bp
+from routes.search import search_bp
 from utils.config import Config
 import os
 import cloudinary
@@ -45,7 +45,7 @@ def create_app():
     app.register_blueprint(projects_bp, url_prefix='/api/projects')
     app.register_blueprint(invitations_bp, url_prefix='/api/invitations')
     app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
-    app.register_blueprint(upload_bp, url_prefix='/api/upload-image')
+    app.register_blueprint(search_bp, url_prefix='/api/search')
 
     print("=== ROTAS REGISTRADAS ===")
     for rule in app.url_map.iter_rules():

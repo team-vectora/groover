@@ -1,5 +1,49 @@
 @import "../../node_modules/tailwindcss";
 
+/* src/styles/global.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* :root -> Define as variáveis para o tema claro (light mode)
+  .dark -> Sobrescreve as variáveis quando a classe "dark" está no <html>
+*/
+:root {
+  --color-background: #f4f4f5; /* Cinza bem claro */
+  --color-foreground: #18181b; /* Cinza quase preto */
+
+  --color-bg-secondary: #ffffff; /* Branco */
+  --color-bg-darker: #e4e4e7; /* Cinza claro */
+
+  --color-primary: #5d5f41; /* Verde oliva escuro */
+  --color-primary-light: #7e8157; /* Verde oliva claro */
+
+  --color-accent: #c48a47; /* Laranja/marrom */
+  --color-accent-light: #d89b58; /* Laranja/marrom claro */
+
+  --color-text-lighter: #000000; /* Preto para textos em destaque */
+}
+
+.dark {
+  --color-background: #0a090d;
+  --color-foreground: #e6e8e3;
+  --color-bg-secondary: #121113;
+  --color-bg-darker: #070608;
+  --color-primary: #4c4e30;
+  --color-primary-light: #61673e;
+  --color-accent: #a97f52;
+  --color-accent-light: #c1915d;
+  --color-text-lighter: #ffffff;
+}
+
+body {
+  /* Usa a variável para que o fundo mude automaticamente */
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* O resto do seu CSS customizado pode continuar aqui */
+
 @theme {
   --color-background: #0a090d;
   --color-foreground: #e6e8e3;

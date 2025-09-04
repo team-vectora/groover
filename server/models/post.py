@@ -590,3 +590,39 @@ class Post:
 
         mongo.db.posts.delete_one({"_id": ObjectId(post_id)})
         return {"message": "Post deleted successfully"}, 200
+
+    @staticmethod
+    def search_posts(criteria):
+        """Busca posts com base em um critério, populando dados do usuário e projeto."""
+        pipeline = [
+            {'$match': criteria},
+            {'$sort': {'created_at': -1}},
+            {'$limit': 50},
+            {'$lookup': {'from': 'users', 'localField': 'user_id', 'foreignField': '_id', 'as': 'user'}},
+            {'$unwind': '$user'},
+            {'$lookup': {'from': 'projects', 'localField': 'project_id', 'foreignField': '_id', 'as': 'project'}},
+            {'$unwind': {'path': '$project', 'preserveNullAndEmptyArrays': True}},
+            {'$project': {
+                '_id': {'$toString': '$_id'},
+                'caption': 1, 'photos': 1, 'created_at': 1, 'likes': 1, 'comment_count': 1, 'genres': 1,
+                'user': {
+                    '_id': {'$toString': '$user._id'},
+                    'username': '$user.username',
+                    'avatar': '$user.avatar'
+                },
+                'project': {
+                    '$cond': {
+                        'if': {'$ifNull': ['$project', False]},
+                        'then': {
+                            'id': {'$toString': '$project._id'},
+                            'title': '$project.title',
+                        },
+                        'else': None
+                    }
+                }
+            }}
+        ]
+        posts = list(mongo.db.posts.aggregate(pipeline))
+        for post in posts:
+            post['likes'] = [str(like) for like in post.get('likes', [])]
+        return posts

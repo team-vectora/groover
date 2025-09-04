@@ -1,0 +1,116 @@
+// src/app/(groove-club)/search/page.jsx
+'use client';
+import { useState, useEffect } from 'react';
+import { useAuth, useDebounce } from '../../../hooks';
+import { GENRES } from '../../../constants';
+import { Post, ProjectCard, UserSearchResult } from '../../../components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
+
+export default function SearchPage() {
+    const { token } = useAuth();
+    const [query, setQuery] = useState('');
+    const [selectedTags, setSelectedTags] = useState([]);
+    const [searchType, setSearchType] = useState('all');
+    const [results, setResults] = useState({ users: [], posts: [], projects: [] });
+    const [loading, setLoading] = useState(false);
+
+    const debouncedQuery = useDebounce(query, 500);
+
+    useEffect(() => {
+        const performSearch = async () => {
+            if (!debouncedQuery && selectedTags.length === 0) {
+                setResults({ users: [], posts: [], projects: [] });
+                return;
+            }
+
+            setLoading(true);
+            const tagsQuery = selectedTags.join(',');
+            const response = await fetch(`http://localhost:5000/api/search?q=${debouncedQuery}&tags=${tagsQuery}&type=${searchType}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await response.json();
+            setResults(data);
+            setLoading(false);
+        };
+
+        if (token) {
+            performSearch();
+        }
+    }, [debouncedQuery, selectedTags, searchType, token]);
+
+    const toggleTag = (tag) => {
+        setSelectedTags(prev =>
+            prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+        );
+    };
+
+    const renderResults = () => {
+        if (loading) return <p className="text-center mt-8">Buscando...</p>;
+
+        const hasResults = results.users.length > 0 || results.posts.length > 0 || results.projects.length > 0;
+        if (!hasResults) return <p className="text-center mt-8 text-gray-400">Nenhum resultado encontrado.</p>;
+
+        return (
+            <div className="space-y-12 mt-8">
+                {results.users.length > 0 && (
+                    <section>
+                        <h2 className="text-2xl font-bold mb-4 text-accent-light">Usuários</h2>
+                        <div className="space-y-4">
+                            {results.users.map(user => <UserSearchResult key={user.id} user={user} />)}
+                        </div>
+                    </section>
+                )}
+                {results.posts.length > 0 && (
+                    <section>
+                        <h2 className="text-2xl font-bold mb-4 text-accent-light">Posts</h2>
+                        <div className="space-y-6">
+                            {results.posts.map(post => <Post key={post._id} post={post} />)}
+                        </div>
+                    </section>
+                )}
+                {results.projects.length > 0 && (
+                    <section>
+                        <h2 className="text-2xl font-bold mb-4 text-accent-light">Projetos</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {results.projects.map(project => <ProjectCard key={project._id} project={project} isYourProfile={false} />)}
+                        </div>
+                    </section>
+                )}
+            </div>
+        );
+    };
+
+
+    return (
+        <div className="py-8">
+            <h1 className="text-3xl font-bold mb-6">Busca</h1>
+            <div className="relative mb-4">
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Busque por posts, usuários, projetos..."
+                    className="w-full p-4 pl-12 bg-bg-secondary rounded-lg border border-primary focus:outline-none focus:ring-2 focus:ring-accent"
+                />
+                <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            </div>
+
+            <div className="mb-6">
+                <h3 className="font-semibold mb-3">Filtrar por Gêneros</h3>
+                <div className="flex flex-wrap gap-2">
+                    {GENRES.map(genre => (
+                        <button
+                            key={genre}
+                            onClick={() => toggleTag(genre)}
+                            className={`px-3 py-1 rounded-full text-sm transition ${selectedTags.includes(genre) ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'}`}
+                        >
+                            {genre}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            {renderResults()}
+        </div>
+    );
+}

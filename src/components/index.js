@@ -37,3 +37,6 @@ export { default as ProfileTabs } from './profile/ProfileTabs';
 export { default as ProjectCard } from './profile/ProjectCard';
 export { default as SharePopUp } from './profile/SharePopUp';
 export { default as FollowListPopup } from './profile/FollowListPopup';
+
+// Search
+export { default as UserSearchResult } from './search/UserSearchResult';

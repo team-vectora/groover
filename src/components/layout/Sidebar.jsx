@@ -12,6 +12,7 @@ import {
   faBell,
   faBars,
   faTimes,
+  faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 import useNotifications from "../../hooks/posts/useNotifications";
 import NotificationItem from "../posts/NotificationItem";
@@ -45,6 +46,7 @@ const Sidebar = () => {
 
   const navItems = [
     { icon: faHome, label: "Feed", path: "/feed" },
+    { icon: faSearch, label: "Buscar", path: "/search" }, // Adicionado
     { icon: faMusic, label: "Editor", path: "/editor/new" },
   ];
 
@@ -53,7 +55,7 @@ const Sidebar = () => {
   return (
       <>
         {/* header celular teste*/}
-        <div className="md:hidden flex items-center justify-between p-4 bg-[#111] border-b border-[#333]">
+        <div className="md:hidden flex items-center justify-between p-4 bg-bg-secondary border-b border-primary/50">
           <img src="/img/groover_logo.png" alt="Groover Logo" className="w-28" />
           <div className="flex items-center gap-4">
             {/* Botão Notificações */}
@@ -77,7 +79,7 @@ const Sidebar = () => {
           {/* Botão Fechar */}
           <button
               onClick={() => setIsMenuOpen(false)}
-              className="mb-6 text-white flex items-center gap-2"
+              className="mb-6 text-foreground flex items-center gap-2"
           >
             <FontAwesomeIcon icon={faTimes} />
             Fechar
