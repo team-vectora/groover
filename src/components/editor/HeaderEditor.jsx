@@ -17,22 +17,15 @@ const HeaderEditor = ({
     const { username, avatar } = useAuth();
 
     return (
-        <header className="bg-bg-darker flex items-center justify-between p-3 border-b border-primary flex-shrink-0">
+        <header className="bg-bg-darker flex items-center justify-between p-3 flex-shrink-0 w-full fixed z-2">
             {/* Lado Esquerdo: Logo, Navegação e Título */}
             <div className="flex items-center gap-6">
-                <div className="flex flex-col items-center">
-                    <Link href="/feed" className="text-gray-400 hover:text-accent transition-colors" title="Voltar ao Feed">
-                        <FontAwesomeIcon icon={faHouse} className="h-5 w-5 mb-1" />
-                    </Link>
-                </div>
-                <Link href={`/profile/${username}?tab=musics`} className="text-gray-400 hover:text-accent transition-colors" title="Voltar aos projetos">
-                    <FontAwesomeIcon icon={faArrowTurnDown} className="h-5 w-5" />
+                <Link href="/feed" className="text-gray-400 hover:text-accent transition-colors" title="Voltar ao Feed">
+                    <FontAwesomeIcon icon={faHouse} className="h-5 w-5 mb-1" />
                 </Link>
                 <Image src="/img/groover_logo.png" alt="Logo" width={50} height={50} />
-                <div>
-                    <h1 className="text-lg font-bold text-text-lighter">GROOVER</h1>
-                    <h2 className="text-sm text-gray-400 truncate max-w-[200px]">{title || 'Novo Projeto'}</h2>
-                </div>
+                <h1 className="text-lg font-bold text-text-lighter">GROOVER</h1>
+
             </div>
 
             {/* Centro: Controles do Player e Ações */}

@@ -1,3 +1,4 @@
+// src/app/(groove-club)/profile/[user]/page.jsx
 'use client'
 
 import React from "react";
@@ -27,7 +28,7 @@ export default function ProfilePage({ params }) {
 
   const { forkProject } = useForkProject(token);
   const { shareProject: shareProjectApi } = useShareProject(token);
-  const { deleteProject } = useDeleteProject(token);
+  const { deletePost } = useDeleteProject(token);
 
   const isCurrentUser = currentUsername === username;
 
@@ -60,7 +61,7 @@ export default function ProfilePage({ params }) {
 
   const confirmDelete = async () => {
     if (projectToDelete) {
-      await deleteProject(projectToDelete, () => {
+      await deletePost(projectToDelete, () => {
         refetch(); // Recarrega os dados do perfil após a exclusão
         setProjectToDelete(null);
       });
@@ -198,6 +199,7 @@ export default function ProfilePage({ params }) {
                 bio={user.bio}
                 profilePic={user.avatar}
                 favoriteTags={Object.keys(user.genres || {})}
+                onSuccess={refetch}
             />
         )}
 

@@ -1,3 +1,5 @@
+# routes/posts.py
+
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Post, User
@@ -121,3 +123,9 @@ def add_comment_to_post(post_id):
 
     return jsonify({'message': 'Comentário adicionado', 'comment_id': str(comment_id)}), 201
 
+@posts_bp.route('/<post_id>', methods=['DELETE'])
+@jwt_required()
+def delete_post_route(post_id):
+    user_id = get_jwt_identity()
+    response, status_code = Post.delete_post(post_id, user_id)
+    return jsonify(response), status_code

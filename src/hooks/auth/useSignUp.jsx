@@ -1,8 +1,11 @@
+// src/hooks/auth/useSignUp.jsx
 import { useState } from "react";
+import useLogin from "./useLogin"; // Importa o hook de login
 
 export default function useSignUp() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const { login } = useLogin(); // Instancia o hook de login
 
   const validateInputs = ({ username, email, senha }) => {
     const newErrors = {};
@@ -61,12 +64,15 @@ export default function useSignUp() {
       });
 
       const data = await response.json();
-      setLoading(false);
 
       if (response.ok) {
-        return { success: true, data };
+        // Se o cadastro foi bem-sucedido, faz o login automaticamente
+        const loginResult = await login({ username, senha });
+        setLoading(false);
+        return loginResult; // Retorna o resultado do login
       } else {
         // Tratamento de erros do backend
+        setLoading(false);
         const backendErrors = {};
 
         if (data.error.includes('Username already exists')) {

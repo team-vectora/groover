@@ -1,3 +1,5 @@
+// src/components/profile/ProjectCard.jsx
+
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShareNodes, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -24,7 +26,9 @@ const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickSha
                             ? new Date(project?.created_at).toLocaleDateString()
                             : "--"}
                     </span>
-                    <span className="font-semibold">{project.created_by ? project.created_by.username : "--"}</span>
+                    <Link href={`/profile/${project?.created_by?.username}`} onClick={(e) => e.stopPropagation()} className="font-semibold hover:underline">
+                        {project.created_by ? project.created_by.username : "--"}
+                    </Link>
                 </div>
             </div>
 

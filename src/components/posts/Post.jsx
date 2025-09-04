@@ -1,3 +1,5 @@
+// src/components/posts/Post.jsx
+
 'use client';
 import { useState, useEffect } from 'react';
 import Link from "next/link";
@@ -9,11 +11,14 @@ import {
     faShareAlt,
     faChevronLeft,
     faChevronRight,
-    faArrowUp
+    faArrowUp,
+    faEllipsisVertical,
+    faTrash
 } from '@fortawesome/free-solid-svg-icons';
 import FollowButton from "../feed/FollowButton";
 import ProjectCard from "../profile/ProjectCard";
-import { useAuth, useLikePost } from "../../hooks";
+import ConfirmationPopUp from '../editor/ConfirmationPopUp';
+import { useAuth, useLikePost, useDeletePost, useOutsideClick } from "../../hooks";
 
 // Componente de animação do coração com SVGs originais
 const HeartAnimation = ({ position, showHeart }) => {
@@ -78,7 +83,7 @@ export default function Post({
                                  profileId,
                                  setCurrentProject,
                                  handleClickFork,
-                                onPostCreated,
+                                 onPostCreated,
                              }) {
     const router = useRouter();
 
@@ -86,9 +91,14 @@ export default function Post({
     const [showHeart, setShowHeart] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
     const [heartPos, setHeartPos] = useState({ x: 0, y: 0 });
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
 
     const [isLiked, setIsLiked] = useState(post.likes.includes(userId));
     const [likesCount, setLikesCount] = useState(post.likes.length);
+    const { deletePost, loading: deleteLoading } = useDeletePost(token);
+    const menuRef = useOutsideClick(() => setIsMenuOpen(false));
 
     const commentsCount = post.comment_count
 
@@ -151,7 +161,7 @@ export default function Post({
         setIsAnimating(true);
         setShowHeart(true);
 
-        likePost(post._id);
+        likePost(post._id, post.user._id);
 
         setTimeout(() => {
             setShowHeart(false);
@@ -175,6 +185,16 @@ export default function Post({
         navigator.clipboard.writeText(`${window.location.origin}/p/${post._id}`);
     };
 
+    const handleDelete = () => {
+        setIsMenuOpen(false);
+        setIsConfirmOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        await deletePost(post._id, onPostCreated);
+        setIsConfirmOpen(false);
+    };
+
     return (
         <div className="flex flex-col gap-4 bg-[#121113] rounded-lg p-5 w-full mx-auto border border-[#4c4e30] mb-10 shadow-lg hover:shadow-xl transition-shadow">
             {/* Cabeçalho do post */}
@@ -187,28 +207,45 @@ export default function Post({
                     alt="Avatar"
                     unoptimized
                 />
-                <div className="flex-1">
+                <div className="flex-1 justify-items-start">
                     <Link href={`/profile/${post.user?.username}`} className="hover:underline">
                         <p className="font-medium text-[#e6e8e3]">{post.user?.username || "Usuário desconhecido"}</p>
                     </Link>
                     <p className="text-xs text-[#a97f52]">{new Date(post.created_at).toLocaleString()}</p>
                 </div>
-                {post.user?._id && (
-                    <FollowButton
-                        followingId={post.user._id}
-                        userId={userId}
-                        isFollowing={isFollowing}
-                        setIsFollowing={setIsFollowing}
-                    />
+                {userId !== post.user?._id && <FollowButton
+                    followingId={post.user._id}
+                    userId={userId}
+                    isFollowing={isFollowing}
+                    setIsFollowing={setIsFollowing}
+                />}
+                {userId === post.user?._id && (
+                    <div className="relative" ref={menuRef}>
+                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-400 hover:text-white  cursor-pointer">
+                            <FontAwesomeIcon icon={faEllipsisVertical} />
+                        </button>
+                        {isMenuOpen && (
+                            <div className="absolute right-0 mt-2 w-48 bg-bg-secondary border border-primary rounded-md shadow-lg z-10">
+                                <button
+                                    onClick={handleDelete}
+                                    className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-primary/20 flex items-center gap-2"
+                                >
+                                    <FontAwesomeIcon icon={faTrash} />
+                                    Apagar post
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
 
-            {post.parent_post_id && (
+            {post.parent_post_id && post.parent_post_id !== 'None' && (
                 <Link href={`/p/${post.parent_post_id}`} className="text-accent text-sm hover:underline">
                     <FontAwesomeIcon icon={faArrowUp} className="mr-2" />
                     Ver thread
                 </Link>
             )}
+
 
             {/* Legenda */}
             <p className="break-words text-[#e6e8e3]">{post.caption}</p>
@@ -304,7 +341,7 @@ export default function Post({
                             viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg"
                             className="w-6 h-6"
-                            fill="#4c4e30"
+                            fill="#a97f52"
                         >
                             <path fill="none" d="M0 0H24V24H0z" />
                             <path d="M12.001 4.529c2.349-2.109 5.979-2.039
@@ -345,6 +382,13 @@ export default function Post({
                 >
                     <FontAwesomeIcon icon={faShareAlt} className="text-[#e6e8e3] hover:cursor-pointer" />
                 </button>
+                <ConfirmationPopUp
+                    open={isConfirmOpen}
+                    onClose={() => setIsConfirmOpen(false)}
+                    onConfirm={confirmDelete}
+                    title="Apagar Post"
+                    message="Você tem certeza que deseja apagar este post?"
+                />
             </div>
         </div>
     );

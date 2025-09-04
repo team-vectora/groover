@@ -1,3 +1,5 @@
+# models/post.py
+
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.db import mongo
@@ -7,6 +9,7 @@ import base64
 from utils.similarity import cosine_similarity
 
 from models import User
+
 
 class Post:
     @staticmethod
@@ -33,7 +36,7 @@ class Post:
         return mongo.db.posts.insert_one(post).inserted_id
 
     @staticmethod
-    def get_posts_with_user_and_project(user_id, similarity_threshold=0.5, limit=50): # Limite aumentado
+    def get_posts_with_user_and_project(user_id, similarity_threshold=0.5, limit=50):  # Limite aumentado
 
         def encode_midi_field(post):
             if post.get('project') and post['project'] and 'midi' in post['project'] and post['project']['midi']:
@@ -108,6 +111,7 @@ class Post:
                     'comments': 1,
                     'comment_count': 1,
                     'genres': 1,
+                    'parent_post_id': {'$toString': '$parent_post_id'},
                     'user': {
                         '_id': {'$toString': '$user._id'},
                         'username': '$user.username',
@@ -165,7 +169,7 @@ class Post:
                 if len(filtered_posts) == limit:
                     break
 
-        if len(filtered_posts) < 15: # Condição de fallback aumentada
+        if len(filtered_posts) < 15:  # Condição de fallback aumentada
             fallback_posts = []
             for post in raw_posts:
                 if 'likes' in post:
@@ -232,6 +236,7 @@ class Post:
                     'comments': 1,
                     'comment_count': 1,
                     'genres': 1,
+                    'parent_post_id': {'$toString': '$parent_post_id'},
                     'user': {
                         '_id': {'$toString': '$user._id'},
                         'username': '$user.username',
@@ -286,7 +291,6 @@ class Post:
         if not post:
             return None
 
-
         mongo.db.posts.update_one(
             {'_id': ObjectId(post_id)},
             {'$push': {'comments': comment}}
@@ -298,17 +302,51 @@ class Post:
         """Busca todos os posts que são comentários do post_id fornecido."""
         pipeline = [
             {'$match': {'parent_post_id': ObjectId(post_id)}},
-            {'$sort': {'created_at': 1}},  # Ordena do mais antigo para o mais novo
-            # ... (pipeline similar ao get_post para popular dados do usuário)
-            {'$lookup': {'from': 'users', 'localField': 'user_id', 'foreignField': '_id', 'as': 'user'}},
+            {'$sort': {'created_at': 1}},
+            {
+                '$lookup': {
+                    'from': 'users',
+                    'localField': 'user_id',
+                    'foreignField': '_id',
+                    'as': 'user'
+                }
+            },
             {'$unwind': '$user'},
+            {
+                '$lookup': {
+                    'from': 'projects',
+                    'localField': 'project_id',
+                    'foreignField': '_id',
+                    'as': 'project'
+                }
+            },
+            {'$unwind': {'path': '$project', 'preserveNullAndEmptyArrays': True}},
             {'$project': {
                 '_id': {'$toString': '$_id'},
-                'caption': 1, 'photos': 1, 'created_at': 1, 'likes': 1,
+                'caption': 1, 'photos': 1, 'created_at': 1, 'likes': 1, 'comment_count': 1, 'genres': 1,
+                'parent_post_id': {'$toString': '$parent_post_id'},
                 'user': {
                     '_id': {'$toString': '$user._id'},
                     'username': '$user.username',
                     'avatar': '$user.avatar'
+                },
+                'project': {
+                    '$cond': {
+                        'if': {'$ifNull': ['$project', False]},
+                        'then': {
+                            'id': {'$toString': '$project._id'},
+                            'user_id': {'$toString': '$project.user_id'},
+                            'title': {'$ifNull': ['$project.title', 'New Project']},
+                            'description': {'$ifNull': ['$project.description', '']},
+                            'bpm': '$project.bpm',
+                            'instrument': {'$ifNull': ['$project.instrument', 'piano']},
+                            'volume': {'$ifNull': ['$project.volume', -10]},
+                            'tempo': '$project.tempo',
+                            'midi': '$project.midi',
+                            'created_at': '$project.created_at'
+                        },
+                        'else': None
+                    }
                 }
             }}
         ]
@@ -316,7 +354,6 @@ class Post:
         for comment in comments:
             comment['likes'] = [str(like) for like in comment.get('likes', [])]
         return comments
-
 
     @staticmethod
     def get_posts_by_user_id(user_id):
@@ -367,6 +404,7 @@ class Post:
                     'comments': 1,
                     'comment_count': 1,
                     'genres': 1,
+                    'parent_post_id': {'$toString': '$parent_post_id'},
                     'user': {
                         '_id': {'$toString': '$user._id'},
                         'username': '$user.username',
@@ -462,6 +500,7 @@ class Post:
                     'comments': 1,
                     'comment_count': 1,
                     'genres': 1,
+                    'parent_post_id': {'$toString': '$parent_post_id'},
                     'user': {
                         '_id': {'$toString': '$user._id'},
                         'username': '$user.username',
@@ -507,27 +546,47 @@ class Post:
 
     @staticmethod
     def like(post_id, user_id):
-        post = Post.get_post(post_id)
+        post = mongo.db.posts.find_one({'_id': ObjectId(post_id)})
 
         if not post:
             return {'error': 'Post não encontrado'}, 404
 
         post_oid = ObjectId(post_id)
+        user_oid = ObjectId(user_id)
 
-        if user_id in post.get('likes', []):
+        if user_oid in post.get('likes', []):
             mongo.db.posts.update_one(
                 {'_id': post_oid},
-                {'$pull': {'likes': user_id}}
+                {'$pull': {'likes': user_oid}}
             )
 
             return {'message': 'Like removido'}, 200
         else:
             mongo.db.posts.update_one(
                 {'_id': post_oid},
-                {'$push': {'likes': user_id}}
+                {'$push': {'likes': user_oid}}
             )
 
             genres = post.get('genres', [])
             User.recommendation_change(genres, user_id)
 
             return {'message': 'Post curtido com sucesso'}, 200
+
+    @staticmethod
+    def delete_post(post_id, user_id):
+        post = mongo.db.posts.find_one({"_id": ObjectId(post_id)})
+        if not post:
+            return {"error": "Post not found"}, 404
+
+        if str(post['user_id']) != user_id:
+            return {"error": "Forbidden"}, 403
+
+        # Se o post for um comentário, decrementar o contador do pai
+        if post.get('parent_post_id'):
+            mongo.db.posts.update_one(
+                {'_id': post['parent_post_id']},
+                {'$inc': {'comment_count': -1}}
+            )
+
+        mongo.db.posts.delete_one({"_id": ObjectId(post_id)})
+        return {"message": "Post deleted successfully"}, 200

@@ -56,7 +56,7 @@ const CommentForm = ({ postId, token, onCommentAdded, projects }) => {
                     isComment={true}
                     postId={postId}
                     initialCaption={caption}
-                    onCommentAdded={() => {
+                    onPostCreated={() => {
                         setCaption('');
                         onCommentAdded();
                     }}

@@ -1,3 +1,5 @@
+// src/components/posts/PostFormPopUp.jsx
+
 'use client'
 
 import { useState, useRef, useEffect } from 'react';
@@ -6,8 +8,10 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { uploadToCloudinary } from '../../lib/util/upload';
 import { GENRES } from '../../constants'
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
+import { toast } from 'react-toastify';
 
-const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = null, initialCaption = '', onCommentAdded, onPostCreated }) => {
+
+const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = null, initialCaption = '', onPostCreated }) => {
   const [caption, setCaption] = useState("");
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -28,7 +32,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
       if (selectedGenres.length < 5) {
         setSelectedGenres([...selectedGenres, genre]);
       } else {
-        alert("Você pode selecionar no máximo 5 tags musicais.");
+        toast.warn("Você pode selecionar no máximo 5 tags musicais.");
       }
     }
   };
@@ -73,15 +77,15 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
         setSelectedGenres([]);
         if (fileInputRef.current) fileInputRef.current.value = "";
         onClose();
-        if (isComment && onCommentAdded) {
-          onCommentAdded();
+        if (onPostCreated) {
+          onPostCreated();
         }
       } else {
-        alert(data.error || "Erro ao criar post");
+        toast.error(data.error || "Erro ao criar post");
       }
     } catch (error) {
       console.error("Erro:", error);
-      alert("Erro ao conectar com a API");
+      toast.error("Erro ao conectar com a API");
     } finally {
       setIsSubmitting(false);
     }

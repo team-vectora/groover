@@ -1,6 +1,6 @@
 const PianoKeys = ({ notes, onKeyClick }) => {
     return (
-        <div className="sticky left-0 z-20 flex flex-col bg-bg-darker border-r-2 border-primary">
+        <div className="sticky left-0 z-1 flex flex-col bg-bg-darker border-r-2 border-primary">
             {notes.map((note, index) => {
                 const isBlackKey = note.includes("#");
                 const isC_Note = note.startsWith("C") && !isBlackKey;

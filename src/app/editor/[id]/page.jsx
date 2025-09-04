@@ -13,7 +13,7 @@ export default function EditorPage() {
     const { id: projectId } = params;
 
     const { state: projectState, actions: projectActions, projectData } = useProjectStates();
-    const { token, userId, loading: authLoading } = useAuth();
+    const { token, userId, username, loading: authLoading } = useAuth();
     const { synthRef, playerState, playerActions } = useTonePlayer(projectState);
     const { apiState, apiActions } = useProjectAPI(projectId, projectActions);
     const { forkProject, loading: forkLoading } = useForkProject(token);
@@ -38,13 +38,13 @@ export default function EditorPage() {
         if (apiState.project) {
             projectActions.loadProjectData(apiState.project);
         }
-    }, [apiState.project, projectActions.loadProjectData]);
+    }, [apiState.project]);
 
     useEffect(() => {
         if (apiState.version) {
             projectActions.loadVersionData(apiState.version);
         }
-    }, [apiState.version, projectActions.loadVersionData]);
+    }, [apiState.version]);
 
 
     // ✅ LÓGICA DE PLAY SIMPLIFICADA
@@ -98,7 +98,7 @@ export default function EditorPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-background text-foreground">
+        <div className="flex flex-col h-screen bg-background text-foreground ">
             <ToastContainer position="top-center" theme="dark" />
             <HeaderEditor
                 onPlaySong={() => handlePlay('song')}
@@ -133,6 +133,7 @@ export default function EditorPage() {
                 lang={lang}
                 onDeletePage={handleDeletePage}
                 isCurrentUserProject={isCurrentUserProject}
+                username={username}
             />
             <ConfirmationPopUp
                 open={!!confirmationAction}

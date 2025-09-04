@@ -1,3 +1,4 @@
+// src/hooks/editor/useProjectStates.jsx
 "use client";
 import { useState, useEffect, useCallback } from 'react';
 import { ROWS, INITIAL_COLS } from '../../constants'; // Arquivo de constantes
@@ -82,12 +83,18 @@ export const useProjectState = () => {
     }, [pages.length]);
 
     const movePage = useCallback((change) => {
-        setActivePage(prev => {
-            const next = prev + change;
-            if (next < 0 || next >= pages.length) return prev;
-            return next;
-        });
-    }, [pages.length]);
+        const nextPage = activePage + change;
+
+        if (nextPage < 0) {
+            setPages(prevPages => [createNewMatrix(), ...prevPages]);
+            setActivePage(0);
+        } else if (nextPage >= pages.length) {
+            setPages(prevPages => [...prevPages, createNewMatrix()]);
+            setActivePage(pages.length);
+        } else {
+            setActivePage(nextPage);
+        }
+    }, [activePage, pages]);
 
     const deletePage = useCallback((pageIndex) => {
         setPages(prev => {

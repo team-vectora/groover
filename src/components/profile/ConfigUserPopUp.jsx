@@ -1,20 +1,13 @@
+// src/components/profile/ConfigUserPopUp.jsx
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { uploadToCloudinary } from '../../lib/util/upload';
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
+import { toast } from 'react-toastify';
+import { GENRES } from '../../constants';
 
-const GENRES = [
-  "rock", "pop", "jazz", "blues", "rap", "hip hop", "r&b", "reggae",
-  "samba", "mpb", "bossa nova", "funk", "sertanejo", "forró", "axé",
-  "pagode", "indie", "metal", "heavy metal", "trap", "lo-fi", "electronic",
-  "house", "techno", "trance", "drum and bass", "dubstep", "k-pop", "j-pop",
-  "classical", "opera", "gospel", "country", "folk", "punk", "hardcore",
-  "grunge", "soul", "disco", "reggaeton", "cumbia", "tango", "flamenco",
-  "chillout", "ambient", "experimental"
-];
-
-const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfilePic, favoriteTags = [] }) => {
+const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfilePic, favoriteTags = [], onSuccess }) => {
   const [musicTags, setMusicTags] = useState([]);
   const [previewUrl, setPreviewUrl] = useState("/img/default_avatar.png");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +44,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
       if (musicTags.length < 5) {
         setMusicTags([...musicTags, tag]);
       } else {
-        alert("Você pode selecionar no máximo 5 gêneros musicais.");
+        toast.warn("Você pode selecionar no máximo 5 gêneros musicais.");
       }
     }
   };
@@ -84,15 +77,17 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem("avatar", profilePicUrl);
-        alert("Perfil atualizado com sucesso!");
-        window.location.reload(); // Recarrega a página para atualizar os dados
+        toast.success("Perfil atualizado com sucesso!");
+        if (onSuccess) {
+          onSuccess();
+        }
         onClose();
       } else {
-        alert(data.error || "Erro ao atualizar");
+        toast.error(data.error || "Erro ao atualizar");
       }
     } catch (error) {
       console.error("Erro:", error);
-      alert("Erro ao conectar com a API");
+      toast.error("Erro ao conectar com a API");
     } finally {
       setIsSubmitting(false);
     }

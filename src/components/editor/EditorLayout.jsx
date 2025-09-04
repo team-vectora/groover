@@ -8,10 +8,11 @@ const EditorLayout = ({
                           synthRef, lang, onDeletePage, isCurrentUserProject
                       }) => {
     return (
-        <main className="flex flex-col md:flex-row flex-grow p-4 gap-4">
+        <main className="flex flex-col md:flex-row flex-grow p-4 pt-20 gap-4">
             {/* Painel de Controle (Lateral) */}
             <aside className="w-full md:w-1/4 lg:w-1/5 bg-bg-darker rounded-lg p-2 overflow-y-auto">
                 <ControlPanel
+                    projectState={projectState}
                     instrument={projectState.instrument}
                     setInstrument={projectActions.setInstrument}
                     instruments={playerState.instruments}
@@ -36,21 +37,24 @@ const EditorLayout = ({
 
             {/* Área de Edição Principal */}
             <section className="w-full md:w-3/4 lg:w-4/5 flex flex-col bg-bg-secondary rounded-lg border-2 border-primary">
-                <div id="piano-roll-container" className="flex w-full overflow-x-auto h-full">
+                <div id="piano-roll-container" className="flex w-full h-full">
                     <PianoKeys notes={NOTES} onKeyClick={playerActions.playNotePiano} />
-                    <PianoRoll
-                        synthRef={synthRef}
-                        pages={projectState.pages}
-                        setPages={projectActions.setPages}
-                        activePage={projectState.activePage}
-                        activeCol={playerState.activeCol}
-                        activeSubIndex={playerState.activeSubIndex}
-                        notes={NOTES}
-                        rows={ROWS}
-                        selectedColumn={projectState.selectedColumn}
-                        setSelectedColumn={projectActions.setSelectedColumn}
-                        isCurrentUserProject={isCurrentUserProject}
-                    />
+                    {/* Este novo div será o container de scroll */}
+                    <div className="flex-grow">
+                        <PianoRoll
+                            synthRef={synthRef}
+                            pages={projectState.pages}
+                            setPages={projectActions.setPages}
+                            activePage={projectState.activePage}
+                            activeCol={playerState.activeCol}
+                            activeSubIndex={playerState.activeSubIndex}
+                            notes={NOTES}
+                            rows={ROWS}
+                            selectedColumn={projectState.selectedColumn}
+                            setSelectedColumn={projectActions.setSelectedColumn}
+                            isCurrentUserProject={isCurrentUserProject}
+                        />
+                    </div>
                 </div>
             </section>
         </main>

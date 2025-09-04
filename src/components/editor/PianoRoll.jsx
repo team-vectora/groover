@@ -63,7 +63,7 @@ const PianoRoll = ({
         if (!currentMatrix) return null;
 
         return (
-            <table className="border-collapse w-full table-fixed">
+            <table className="border-collapse w-full table-fixed ">
                 <tbody>
                 {Array.from({ length: rows }).map((_, rowIndex) => (
                     <tr key={`row-${rowIndex}`} className={`${notes[rowIndex].startsWith("C") && !notes[rowIndex].startsWith("C#") ? 'bg-primary/10' : ''}`}>

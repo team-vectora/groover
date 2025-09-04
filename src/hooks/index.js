@@ -1,3 +1,5 @@
+// src/hooks/index.js
+
 // Exportações de autenticação
 export { default as useAuth } from './auth/useAuth';
 export { default as useLogin } from './auth/useLogin';
@@ -10,6 +12,7 @@ export { default as useLikePost } from './posts/useLikePost';
 export { default as useSimilarUsers } from './posts/useSimilarUsers';
 export { default as useFollow } from './posts/useFollow';
 export { default as useOutsideClick } from './posts/useOutsideClick';
+export { default as useDeletePost } from './posts/useDeletePost';
 
 // Exportações de projetos
 export { default as useForkProject } from './projects/useForkProject';
