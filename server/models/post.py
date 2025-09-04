@@ -302,7 +302,7 @@ class Post:
         """Busca todos os posts que são comentários do post_id fornecido."""
         pipeline = [
             {'$match': {'parent_post_id': ObjectId(post_id)}},
-            {'$sort': {'created_at': 1}},
+            {'$sort': {'created_at': -1}},
             {
                 '$lookup': {
                     'from': 'users',
