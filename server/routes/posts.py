@@ -82,13 +82,6 @@ def post_like():
 
     return jsonify(response), status
 
-
-@posts_bp.route('/alguemmeajuda', methods=['POST'])
-@jwt_required()
-def save_project_quadro():
-    print("Entrou")
-    return 201
-
 @posts_bp.route('/<post_id>/comment', methods=['POST'])
 @jwt_required()
 def add_comment_to_post(post_id):

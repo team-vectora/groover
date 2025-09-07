@@ -51,8 +51,8 @@ export default function SimilarUsers({ users = [], userId }) {
     };
 
     return (
-        <section className="bg-[#121113] rounded-lg p-4 border-2 border-[#4c4e30] sticky top-24">
-            <h2 className="text-2xl font-semibold text-[#c1915d] mb-4 text-center">
+        <section className="bg-bg-secondary rounded-lg p-4 border-2 border-primary sticky top-24">
+            <h2 className="text-2xl font-semibold text-accent-light mb-4 text-center">
                 Sugestões para você
             </h2>
 
@@ -60,7 +60,7 @@ export default function SimilarUsers({ users = [], userId }) {
                 {visibleUsers.map((user) => (
                     <li
                         key={user._id}
-                        className="flex items-center justify-between bg-[#070608] hover:bg-[#0a090d] transition-colors rounded-md p-3"
+                        className="flex items-center justify-between bg-bg-darker hover:bg-background transition-colors rounded-md p-3"
                     >
                         <div className="flex items-center">
                             <Image
@@ -68,16 +68,16 @@ export default function SimilarUsers({ users = [], userId }) {
                                 alt={user.username}
                                 width={48}
                                 height={48}
-                                className="rounded-full object-cover border-2 border-[#4c4e30]"
+                                className="rounded-full object-cover border-2 border-primary"
                             />
                             <div className="ml-3">
-                                <Link href={`/profile/${user?.username}`} className="text-[#e6e8e3] hover:underline">
+                                <Link href={`/profile/${user?.username}`} className="text-foreground hover:underline">
                                     <h3 className="text-lg font-medium">{user.username}</h3>
                                 </Link>
-                                <p className="text-[#e6e8e3] text-sm line-clamp-2 max-w-[100px]">
+                                <p className="text-foreground text-sm line-clamp-2 max-w-[100px]">
                                     {user.bio || "Sem biografia"}
                                 </p>
-                                <p className="text-[#a97f52] text-sm">
+                                <p className="text-accent text-sm">
                                     {(user.similarity * 100).toFixed(0)}% de match
                                 </p>
                             </div>
@@ -98,7 +98,7 @@ export default function SimilarUsers({ users = [], userId }) {
             {users.length > pageSize && (
                 <button
                     onClick={handleMoreClick}
-                    className="w-full mt-3 py-2 bg-[#4c4e30] rounded-md text-[#c1915d] hover:bg-[#61673e] transition-colors"
+                    className="w-full mt-3 py-2 bg-primary rounded-md text-accent-light hover:bg-primary-light transition-colors"
                 >
                     Ver mais
                 </button>

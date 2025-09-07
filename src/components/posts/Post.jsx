@@ -279,13 +279,13 @@ export default function Post({
 
                     {/* Imagem atual */}
                     <div
-                        className="relative w-full h-[500px] overflow-hidden flex"
+                        className="relative w-full overflow-hidden flex "
                         onDoubleClick={handleLikeImage}
                     >
                         <img
                             src={post.photos[currentImageIndex]}
                             alt={`Post image ${currentImageIndex + 1}`}
-                            className="w-full h-full object-contain rounded-lg border border-primary"
+                            className="w-full h-full object-contain rounded-lg rounded-md"
                         />
 
                         {/* Animação de coração com SVGs originais */}

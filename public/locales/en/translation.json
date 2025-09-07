@@ -1,11 +1,114 @@
 {
-  "notifications": "Notifications",
-  "new_post": "New Post",
-  "no_notifications": "No notifications",
-  "like": "{{user}} liked your post",
-  "comment": "{{user}} commented: {{content}}",
-  "invite_accepted": "{{user}} accepted your invitation to the project: {{content}}",
-  "invite_rejected": "{{user}} rejected your invitation to the project: {{content}}",
-  "invitation_received": "{{user}} sent you an invitation to the project: {{content}}",
-  "collaborator_update": "{{user}} modified your project: {{content}}"
+  "sidebar": {
+    "feed": "Feed",
+    "search": "Search",
+    "editor": "Editor",
+    "livecode": "DJ CODE",
+    "notifications": "Notifications",
+    "new_post": "New Post",
+    "settings": "Settings",
+    "logout": "Logout",
+    "close": "Close",
+    "loading": "Loading...",
+    "no_notifications": "No notifications"
+  },
+  "notifications": {
+    "notifications": "Notifications",
+    "new_post": "New Post",
+    "no_notifications": "No notifications",
+    "like": "{{user}} liked your post",
+    "comment": "{{user}} commented: {{content}}",
+    "invite_accepted": "{{user}} accepted your invitation to the project: {{content}}",
+    "invite_rejected": "{{user}} rejected your invitation to the project: {{content}}",
+    "invitation_received": "{{user}} sent you an invitation to the project: {{content}}",
+    "collaborator_update": "{{user}} modified your project: {{content}}"
+  },
+  "login": {
+    "title": "Entrar",
+    "username": "Username",
+    "username_placeholder": "Yanke Doodle",
+    "password": "Senha",
+    "password_placeholder": "Digite sua senha",
+    "show_password": "Mostrar senha",
+    "hide_password": "Ocultar senha",
+    "forgot_password": "Esqueci senha",
+    "login_button": "Logar",
+    "logging_in": "Entrando...",
+    "terms": "Ao prosseguir, você concorda com os",
+    "terms_link": "Termos de uso",
+    "privacy_link": "Política de privacidade",
+    "no_account": "Não tem uma conta?",
+    "create_account": "Crie",
+    "login_success": "Login realizado com sucesso!"
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search for posts, users, projects...",
+    "loading": "Searching...",
+    "noResults": "No results found.",
+    "users": "Users",
+    "posts": "Posts",
+    "projects": "Projects",
+    "all": "All",
+    "filterBy": "Filter by:",
+    "filterGenres": "Filter by Genres",
+    "filterButtons": {
+      "all": "All",
+      "posts": "Posts",
+      "projects": "Projects",
+      "users": "People"
+    }
+  },
+  "genres": {
+    "rock": "Rock",
+    "pop": "Pop",
+    "jazz": "Jazz",
+    "hiphop": "Hip Hop",
+    "electronic": "Electronic",
+    "classical": "Classical",
+    "metal": "Metal",
+    "country": "Country",
+    "reggae": "Reggae",
+    "blues": "Blues"
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "changeToTheme": "Change theme to {{theme}}",
+    "language": "Language",
+    "app": "App",
+    "installApp": "Install App"
+  },
+  "livecode": {
+    "title": "Livecode Song",
+    "description": {
+      "part1": "Here you can experiment with music **live** using code! The player below uses ",
+      "part2": ", a livecoding tool to create beats, melodies and loops in real time."
+    },
+    "loading": "Loading posts...",
+    "error": "Failed to load posts."
+  },
+  "profile": {
+    "avatarAlt": "User avatar",
+    "editProfile": "Edit Profile",
+    "user": "User",
+    "followers": "Followers",
+    "following": "Following",
+    "logout": "Logout"
+  },
+  "sharePopup": {
+    "inviteTo": "Invite to:",
+    "username": "Username",
+    "placeholder": "Type 5+ characters to search...",
+    "loading": "Searching...",
+    "noUsers": "No users found.",
+    "sendInvite": "Send Invite",
+    "errorEmpty": "Please enter a username."
+  },
+  "followButton": {
+    "follow": "Follow",
+    "following": "Following",
+    "loading": "Loading..."
+  }
+
 }

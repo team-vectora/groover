@@ -116,11 +116,11 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
   if (!open) return null;
 
   return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-auto">
         <div ref={popupRef} className="bg-bg-secondary: rounded-xl w-full max-w-6xl border border-primary flex flex-col md:flex-row overflow-hidden">
 
           {/* Form (agora à esquerda) */}
-          <div className="md:w-1/2 p-5 flex flex-col">
+          <div className="md:w-1/2 p-5 flex flex-col bg-bg-secondary">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-accent-light">
                 {isComment ? 'Adicionar Comentário' : 'Criar Nova Publicação'}
@@ -184,7 +184,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
           </div>
 
           {/* Preview + Projeto (agora à direita) */}
-          <div className="md:w-1/2 p-5 border-t md:border-t-0 md:border-l border-primary: flex flex-col items-center">
+          <div className="md:w-1/2 p-5 border-t md:border-t-0 md:border-l border-primary: flex flex-col items-center bg-bg-secondary">
             {/* Preview de imagens */}
             {previews.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-2 gap-3 mb-4 w-full">

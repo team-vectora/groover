@@ -18,8 +18,10 @@ import useNotifications from "../../hooks/posts/useNotifications";
 import NotificationItem from "../posts/NotificationItem";
 import Image from "next/image";
 import { useOutsideClick } from "../../hooks";
+import { useTranslation } from "react-i18next";
 
 const Sidebar = () => {
+  const { t, i18n } = useTranslation();
   const [username, setUsername] = useState("");
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("/img/default_avatar.png");
@@ -41,10 +43,10 @@ const Sidebar = () => {
     useNotifications(token || "");
 
   const navItems = [
-    { icon: faHome, label: "Feed", path: "/feed" },
-    { icon: faSearch, label: "Buscar", path: "/search" },
-    { icon: faMusic, label: "Editor", path: "/editor/new" },
-    { icon: faMusic, label: "DJ CODE", path: "/livecode" },
+    { icon: faHome, label: "feed", path: "/feed" },
+    { icon: faSearch, label: "search", path: "/search" },
+    { icon: faMusic, label: "editor", path: "/editor/new" },
+    { icon: faMusic, label: "livecode", path: "/livecode" },
   ];
 
   const notifRef = useOutsideClick(() => setIsNotifOpen(false));
@@ -52,7 +54,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Header mobile */}
-      <div className="md:hidden flex items-center justify-between p-2 bg-bg-secondary border-b border-primary/50">
+      <div className="md:hidden flex items-center justify-center p-2 bg-bg-secondary border-b border-primary/50">
         <img src="/img/groover_logo.png" alt="Groover Logo" className="w-28" />
         <div className="flex items-center gap-4">
           {/* Notificações */}
@@ -86,7 +88,7 @@ const Sidebar = () => {
             className="mb-6 text-foreground flex items-center gap-2"
           >
             <FontAwesomeIcon icon={faTimes} />
-            Fechar
+            {t("sidebar.close")}
           </button>
 
           {/* Navegação */}
@@ -98,10 +100,10 @@ const Sidebar = () => {
                   router.push(item.path);
                   setIsMenuOpen(false);
                 }}
-                className="flex items-center w-full p-3 hover:bg-[#ffffff] rounded-lg transition"
+                className="flex items-center w-full p-3 hover:bg-[var(--color-accent-sidebar)] text-text-lighter rounded-lg transition-colors cursor-pointer"
               >
                 <FontAwesomeIcon icon={item.icon} className="mr-3 w-6 h-6" />
-                <span>{item.label}</span>
+                <span>{t(`sidebar.${item.label}`)}</span>
               </button>
             ))}
 
@@ -111,17 +113,17 @@ const Sidebar = () => {
                 router.push(`/profile/${username}?newPost=true`);
                 setIsMenuOpen(false);
               }}
-              className="flex items-center w-full p-3 bg-[#a97f52] hover:bg-[#c1915d] text-white rounded-lg transition-colors mt-2"
+              className="flex items-center w-full p-3 bg-accent hover:bg-accent-light text-white rounded-lg transition-colors mt-2"
             >
               <FontAwesomeIcon icon={faPlus} className="mr-3 w-6 h-6" />
-              <span>Nova Postagem</span>
+              <span>{t("sidebar.new_post")}</span>
             </button>
           </nav>
 
           {/* Perfil e Logout */}
-          <div className="border-t border-[#4c4e30] pt-4 mt-4">
+          <div className="border-t border-primary pt-4 mt-4">
             <div
-              className="flex items-center cursor-pointer p-2 hover:bg-[#1b1b1b] rounded-lg"
+              className="flex items-center cursor-pointer p-2 hover:bg-accent-sidebar rounded-lg"
               onClick={() => {
                 router.push(`/profile/${username}`);
                 setIsMenuOpen(false);
@@ -132,7 +134,7 @@ const Sidebar = () => {
                 alt="Avatar"
                 width={40}
                 height={40}
-                className="rounded-full object-cover border border-[#4c4e30] mr-3"
+                className="rounded-full object-cover border border-primary mr-3"
               />
               <span className="font-medium">{username}</span>
             </div>
@@ -142,10 +144,10 @@ const Sidebar = () => {
                 router.push("/logout");
                 setIsMenuOpen(false);
               }}
-              className="flex items-center w-full p-2 mt-2 hover:bg-[#1b1b1b] rounded-lg text-red-400"
+              className="flex items-center w-full p-2 mt-2 hover:bg-accent-sidebar rounded-lg text-red-400"
             >
               <FontAwesomeIcon icon={faSignOutAlt} className="mr-3 w-6 h-6" />
-              <span>Sair</span>
+              <span>{t("sidebar.logout")}</span>
             </button>
           </div>
         </div>
@@ -166,7 +168,7 @@ const Sidebar = () => {
                   className="flex items-center w-full p-3 hover:bg-[var(--color-accent-sidebar)] text-text-lighter rounded-lg transition-colors cursor-pointer"
                 >
                   <FontAwesomeIcon icon={item.icon} className="mr-3 w-6 h-6" />
-                  <span>{item.label}</span>
+                  <span>{t(`sidebar.${item.label}`)}</span>
                 </button>
               </li>
             ))}
@@ -178,7 +180,7 @@ const Sidebar = () => {
                 className="flex items-center w-full p-3 hover:bg-[var(--color-accent-sidebar)] rounded-lg transition-colors text-text-lighter cursor-pointer"
               >
                 <FontAwesomeIcon icon={faBell} className="mr-3 w-6 h-6" />
-                <span className="cursor-pointer">Notificações</span>
+                <span>{t("sidebar.notifications")}</span>
                 {notifications.length > 0 && (
                   <span className="absolute top-1 right-1 text-text-lighter text-[10px] px-1.5 rounded-full bg-primary">
                     {notifications.length > 9 ? "9+" : notifications.length}
@@ -189,10 +191,10 @@ const Sidebar = () => {
               {/* Popup Notificações */}
               {isNotifOpen && (
                 <ul className="absolute top-full left-0 mt-2 w-80 max-h-96 overflow-y-auto bg-[var(--color-accent-sidebar)] border border-primary rounded-lg shadow-lg z-50">
-                  {loading && <li className="p-3 text-sm text-gray-400">Carregando...</li>}
+                  {loading && <li className="p-3 text-sm text-gray-400">{t("sidebar.loading")}</li>}
                   {error && <li className="p-3 text-sm text-red-400">{error}</li>}
                   {!loading && notifications.length === 0 && (
-                    <li className="p-3 text-sm text-gray-400">Nenhuma notificação</li>
+                    <li className="p-3 text-sm text-gray-400">{t("sidebar.no_notifications")}</li>
                   )}
                   {notifications.map((notif) => (
                     <NotificationItem
@@ -212,7 +214,7 @@ const Sidebar = () => {
                 className="flex items-center w-full p-3 bg-[var(--color-accent)] hover:bg-[#c1915d] text-white rounded-lg transition-colors mt-2 cursor-pointer"
               >
                 <FontAwesomeIcon icon={faPlus} className="mr-3 w-6 h-6" />
-                <span>Nova Postagem</span>
+                <span>{t("sidebar.new_post")}</span>
               </button>
             </li>
           </ul>
@@ -236,7 +238,7 @@ const Sidebar = () => {
             className="flex items-center w-full p-2 mt-2 hover:bg-[var(--color-accent-sidebar)] rounded-lg text-text-lighter cursor-pointer"
           >
             <FontAwesomeIcon icon={faGear} className="mr-3 w-6 h-6" />
-            <span>Configurações</span>
+            <span>{t("sidebar.settings")}</span>
           </button>
           <button
             onClick={() => {
@@ -246,7 +248,7 @@ const Sidebar = () => {
             className="flex items-center w-full p-2 mt-2 hover:bg-[var(--color-accent-sidebar)] cursor-pointer rounded-lg text-red-400"
           >
             <FontAwesomeIcon icon={faSignOutAlt} className="mr-3 w-6 h-6" />
-            <span>Sair</span>
+            <span>{t("sidebar.logout")}</span>
           </button>
         </div>
       </aside>

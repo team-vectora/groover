@@ -48,6 +48,7 @@
   --color-accent: #ff79c6; /* Rosa neon */
   --color-accent-light: #ff92d0; /* Rosa mais claro */
   --color-text-lighter: #f8f8f2; /* Texto em destaque */
+  --color-accent-sidebar: #373844;
 }
 
 body {

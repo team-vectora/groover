@@ -1,8 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_mail import Mail
 from utils.db import mongo
-
+import smtplib
 from routes.auth import auth_bp
 from routes.notification import notifications_bp
 from routes.users import users_bp
@@ -14,7 +15,7 @@ from utils.config import Config
 import os
 import cloudinary
 from flasgger import Swagger
-
+from utils.mail import mail
 
 def create_app():
     app = Flask(__name__)
@@ -36,8 +37,16 @@ def create_app():
         secure=True
     )
 
+    app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+    app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+    app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL')
+    app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS')
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 
-    # Registra blueprints
+
+    mail.init_app(app)
+
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(users_bp, url_prefix='/api/users')

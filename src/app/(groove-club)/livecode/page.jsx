@@ -5,20 +5,21 @@ import { Post } from "../../../components";
 import { useAuth, usePosts } from "../../../hooks/";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useTranslation } from "react-i18next";
 
-const FeedPage = () => {
-  const { token, userId } = useAuth();
-  const { posts, loading, error, refetch } = usePosts(token);
+const LivecodePage = () => {
+  const { t } = useTranslation();
+  const { token } = useAuth();
+  const { posts, loading, error } = usePosts(token);
   const { setCurrentProject } = useContext(MidiContext);
 
   return (
-    <div className="flex flex-col gap-10 w-full">
+    <div className="flex flex-col gap-10 w-full px-4 md:px-8 py-8 max-w-6xl mx-auto">
       {/* Seção de Livecode Song */}
-      <section className="bg-zinc-900 text-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-3">🎵 Livecode Song</h2>
-        <p className="text-zinc-300 mb-6">
-          Aqui você pode experimentar música **ao vivo** com código!
-          O player abaixo usa o{" "}
+      <section className="bg-zinc-900 text-white rounded-2xl shadow-lg p-6 md:p-8 animate-fade-in">
+        <h2 className="text-2xl md:text-3xl font-bold mb-4">🎵 {t('livecode.title')}</h2>
+        <p className="text-zinc-300 mb-6 md:text-lg">
+          {t('livecode.description.part1')}{" "}
           <a
             href="https://strudel.cc"
             target="_blank"
@@ -26,26 +27,25 @@ const FeedPage = () => {
             className="text-blue-400 hover:underline"
           >
             Strudel
-          </a>,
-          uma ferramenta de livecoding para criar batidas, melodias e loops em tempo real.
+          </a>
+          {t('livecode.description.part2')}
         </p>
 
         <div className="flex justify-center">
           <iframe
             src="https://strudel.cc/?xwWRfuCE8TAR"
-            width="600"
+            width="100%"
             height="300"
             className="rounded-xl border border-zinc-700 shadow-md"
           ></iframe>
         </div>
       </section>
 
-      {/* Conteúdo principal do feed */}
-      <div className="flex-1 w-full">
-        {/* Aqui entrariam os posts */}
-      </div>
+
+
+      <ToastContainer />
     </div>
   );
 };
 
-export default FeedPage;
+export default LivecodePage;

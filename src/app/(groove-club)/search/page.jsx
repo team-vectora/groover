@@ -5,13 +5,15 @@ import { GENRES } from '../../../constants';
 import { Post, ProjectCard, UserSearchResult } from '../../../components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { useTranslation } from 'react-i18next';
 
 export default function SearchPage() {
+    const { t, i18n } = useTranslation();
     const { token } = useAuth();
     const [query, setQuery] = useState('');
     const [selectedTags, setSelectedTags] = useState([]);
-    const [searchType, setSearchType] = useState('all'); // Estado para o tipo de busca
-    const [tagsExpanded, setTagsExpanded] = useState(false); // NOVO: Estado para expandir/recolher tags
+    const [searchType, setSearchType] = useState('all');
+    const [tagsExpanded, setTagsExpanded] = useState(false);
     const [results, setResults] = useState({ users: [], posts: [], projects: [] });
     const [loading, setLoading] = useState(false);
 
@@ -26,7 +28,6 @@ export default function SearchPage() {
 
             setLoading(true);
             const tagsQuery = selectedTags.join(',');
-            // A requisição agora envia o 'searchType' para o backend
             const response = await fetch(`http://localhost:5000/api/search?q=${debouncedQuery}&tags=${tagsQuery}&type=${searchType}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -47,16 +48,16 @@ export default function SearchPage() {
     };
 
     const renderResults = () => {
-        if (loading) return <p className="text-center mt-8">Buscando...</p>;
+        if (loading) return <p className="text-center mt-8">{t('search.loading')}</p>;
 
         const hasResults = results.users.length > 0 || results.posts.length > 0 || results.projects.length > 0;
-        if (!hasResults) return <p className="text-center mt-8 text-gray-400">Nenhum resultado encontrado.</p>;
+        if (!hasResults) return <p className="text-center mt-8 text-gray-400">{t('search.noResults')}</p>;
 
         return (
             <div className="space-y-12 mt-8">
                 {results.users.length > 0 && (
                     <section>
-                        <h2 className="text-2xl font-bold mb-4 text-accent-light">Usuários</h2>
+                        <h2 className="text-2xl font-bold mb-4 text-accent-light">{t('search.users')}</h2>
                         <div className="space-y-4">
                             {results.users.map(user => <UserSearchResult key={user.id} user={user} />)}
                         </div>
@@ -64,7 +65,7 @@ export default function SearchPage() {
                 )}
                 {results.posts.length > 0 && (
                     <section>
-                        <h2 className="text-2xl font-bold mb-4 text-accent-light">Posts</h2>
+                        <h2 className="text-2xl font-bold mb-4 text-accent-light">{t('search.posts')}</h2>
                         <div className="space-y-6">
                             {results.posts.map(post => <Post key={post._id} post={post} />)}
                         </div>
@@ -72,7 +73,7 @@ export default function SearchPage() {
                 )}
                 {results.projects.length > 0 && (
                     <section>
-                        <h2 className="text-2xl font-bold mb-4 text-accent-light">Projetos</h2>
+                        <h2 className="text-2xl font-bold mb-4 text-accent-light">{t('search.projects')}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {results.projects.map(project => <ProjectCard key={project._id} project={project} isYourProfile={false} />)}
                         </div>
@@ -82,31 +83,29 @@ export default function SearchPage() {
         );
     };
 
-    // NOVO: Array para os botões de filtro de tipo
     const filterButtons = [
-        { label: 'Todos', value: 'all' },
-        { label: 'Posts', value: 'posts' },
-        { label: 'Projetos', value: 'projects' },
-        { label: 'Pessoas', value: 'users' }
+        { label: t('search.all'), value: 'all' },
+        { label: t('search.posts'), value: 'posts' },
+        { label: t('search.projects'), value: 'projects' },
+        { label: t('search.users'), value: 'users' }
     ];
 
     return (
         <div className="py-8">
-            <h1 className="text-3xl font-bold mb-6">Busca</h1>
+            <h1 className="text-3xl font-bold mb-6">{t('search.title')}</h1>
             <div className="relative mb-4">
                 <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Busque por posts, usuários, projetos..."
+                    placeholder={t('search.placeholder')}
                     className="w-full p-4 pl-12 bg-bg-secondary rounded-lg border border-primary focus:outline-none focus:ring-2 focus:ring-accent"
                 />
                 <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             </div>
 
-            {/* NOVO: Botões de filtro por tipo */}
             <div className="flex items-center gap-2 mb-4">
-                <span className="font-semibold">Filtrar por:</span>
+                <span className="font-semibold">{t('search.filterBy')}</span>
                 {filterButtons.map(btn => (
                     <button
                         key={btn.value}
@@ -119,16 +118,14 @@ export default function SearchPage() {
             </div>
 
             <div className="mb-6">
-                {/* NOVO: Botão para expandir/recolher tags */}
                 <button
                     onClick={() => setTagsExpanded(!tagsExpanded)}
                     className="font-semibold mb-3 flex items-center gap-2 text-foreground hover:text-accent transition"
                 >
-                    Filtrar por Gêneros
+                    {t('search.filterGenres')}
                     <FontAwesomeIcon icon={tagsExpanded ? faChevronUp : faChevronDown} />
                 </button>
 
-                {/* As tags só aparecem se 'tagsExpanded' for true */}
                 {tagsExpanded && (
                     <div className="flex flex-wrap gap-2 animate-fade-in">
                         {GENRES.map(genre => (
@@ -137,14 +134,14 @@ export default function SearchPage() {
                                 onClick={() => toggleTag(genre)}
                                 className={`px-3 py-1 rounded-full text-sm transition ${selectedTags.includes(genre) ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'}`}
                             >
-                                {genre}
+                                {t(`genres.${genre}`)}
                             </button>
                         ))}
                     </div>
                 )}
             </div>
+
             {renderResults()}
         </div>
     );
 }
-

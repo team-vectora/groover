@@ -1,14 +1,117 @@
 {
-  "notifications": "Notificações",
-  "new_post": "Nova Postagem",
-  "no_notifications": "Nenhuma notificação",
-  "like": "{{user}} curtiu seu post",
-  "comment": "{{user}} comentou: {{content}}",
-  "fork": "{{user}} fez um fork no seu projeto",
-  "recomendacao": "{{user}} recomendou você",
-  "locale": "pt-BR",
-  "invite_accepted": "{{user}} aceitou seu convite para o projeto: {{content}}",
-  "invite_rejected": "{{user}} recusou seu convite para o projeto: {{content}}",
-  "invitation_received": "{{user}} te enviou um convite para o projeto: {{content}}",
-  "collaborator_update": "{{user}} modificou seu projeto: {{content}}"
+  "sidebar": {
+    "feed": "Feed",
+    "search": "Buscar",
+    "editor": "Editor",
+    "livecode": "DJ CODE",
+    "notifications": "Notificações",
+    "new_post": "Nova Postagem",
+    "settings": "Configurações",
+    "logout": "Sair",
+    "close": "Fechar",
+    "loading": "Carregando...",
+    "no_notifications": "Nenhuma notificação"
+  },
+  "notifications": {
+    "notifications": "Notificações",
+    "new_post": "Nova Postagem",
+    "no_notifications": "Nenhuma notificação",
+    "like": "{{user}} curtiu seu post",
+    "comment": "{{user}} comentou: {{content}}",
+    "fork": "{{user}} fez um fork no seu projeto",
+    "recomendacao": "{{user}} recomendou você",
+    "invite_accepted": "{{user}} aceitou seu convite para o projeto: {{content}}",
+    "invite_rejected": "{{user}} recusou seu convite para o projeto: {{content}}",
+    "invitation_received": "{{user}} te enviou um convite para o projeto: {{content}}",
+    "collaborator_update": "{{user}} modificou seu projeto: {{content}}"
+  },
+
+  "login": {
+    "title": "Entrar",
+    "username": "Username",
+    "username_placeholder": "Yanke Doodle",
+    "password": "Senha",
+    "password_placeholder": "Digite sua senha",
+    "show_password": "Mostrar senha",
+    "hide_password": "Ocultar senha",
+    "forgot_password": "Esqueci senha",
+    "login_button": "Logar",
+    "logging_in": "Entrando...",
+    "terms": "Ao prosseguir, você concorda com os",
+    "terms_link": "Termos de uso",
+    "privacy_link": "Política de privacidade",
+    "no_account": "Não tem uma conta?",
+    "create_account": "Crie",
+    "login_success": "Login realizado com sucesso!"
+  },
+  "search": {
+    "title": "Busca",
+    "placeholder": "Busque por posts, usuários, projetos...",
+    "loading": "Buscando...",
+    "noResults": "Nenhum resultado encontrado.",
+    "users": "Usuários",
+    "posts": "Posts",
+    "projects": "Projetos",
+    "all": "Todos",
+    "filterBy": "Filtrar por:",
+    "filterGenres": "Filtrar por Gêneros",
+    "filterButtons": {
+      "all": "Todos",
+      "posts": "Posts",
+      "projects": "Projetos",
+      "users": "Pessoas"
+    }
+  },
+  "genres": {
+    "rock": "Rock",
+    "pop": "Pop",
+    "jazz": "Jazz",
+    "hiphop": "Hip Hop",
+    "electronic": "Eletrônica",
+    "classical": "Clássica",
+    "metal": "Metal",
+    "country": "Country",
+    "reggae": "Reggae",
+    "blues": "Blues"
+  },
+  "settings": {
+    "title": "Configurações",
+    "theme": "Tema",
+    "changeToTheme": "Mudar tema para {{theme}}",
+    "language": "Idioma",
+    "app": "Aplicativo",
+    "installApp": "Instalar App"
+  },
+  "livecode": {
+    "title": "Livecode Song",
+    "description": {
+      "part1": "Aqui você pode experimentar música **ao vivo** com código! O player abaixo usa ",
+      "part2": ", uma ferramenta de livecoding para criar batidas, melodias e loops em tempo real."
+    },
+    "loading": "Carregando posts...",
+    "error": "Falha ao carregar os posts."
+  },
+  "profile": {
+    "avatarAlt": "Avatar do usuário",
+    "editProfile": "Editar Perfil",
+    "user": "Usuário",
+    "followers": "Seguidores",
+    "following": "Seguindo",
+    "logout": "Sair"
+  },
+  "sharePopup": {
+    "inviteTo": "Convidar para:",
+    "username": "Nome de usuário",
+    "placeholder": "Digite 5+ caracteres para buscar...",
+    "loading": "Buscando...",
+    "noUsers": "Nenhum usuário encontrado.",
+    "sendInvite": "Enviar Convite",
+    "errorEmpty": "Por favor, digite um nome de usuário."
+  },
+  "followButton": {
+    "follow": "Seguir",
+    "following": "Seguindo",
+    "loading": "Carregando..."
+  }
+
 }

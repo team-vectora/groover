@@ -13,7 +13,7 @@ const ConfirmationPopUp = ({
                            }) => {
     return (
         <Popup open={open} closeOnDocumentClick={false} contentStyle={{ background: "transparent", boxShadow: "none", border:"none"}}>
-            <div className="modal p-6 rounded-lg shadow-lg bg-[#121113] text-[#e6e8e3] max-w-sm mx-auto border border-yellow-500/50">
+            <div className="modal p-6 rounded-lg shadow-lg bg-bg-secondary text-foreground max-w-sm mx-auto border border-yellow-500/50">
                 <div className="text-center">
                     <FontAwesomeIcon icon={faExclamationTriangle} className="text-yellow-500 text-4xl mb-4" />
 

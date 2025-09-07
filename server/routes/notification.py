@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Notification
-
+from utils.mail import mail  # importa do arquivo separado
+from flask_mail import Message
+import os
 notifications_bp = Blueprint('notifications', __name__)
 
 @notifications_bp.route("", methods=["GET"])
@@ -32,3 +34,14 @@ def see_notification():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@notifications_bp.route("/send-test", methods=["GET"])
+def send_test_email():
+    msg = Message(
+        "Teste de Email",
+        sender=os.getenv("MAIL_USERNAME"),
+        recipients=["joaoaugusto.haupt@gmail.com"]
+    )
+    msg.body = "Funcionando com senha de app do Gmail!"
+    mail.send(msg)
+    return "Email enviado com sucesso!"

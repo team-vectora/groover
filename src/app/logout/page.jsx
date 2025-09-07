@@ -8,16 +8,14 @@ export default function LogoutPage() {
     const router = useRouter();
 
     useEffect(() => {
-        // Salva o tema atual
         const savedTheme = localStorage.getItem("theme");
+        const savedLang = localStorage.getItem("lang");
 
-        // Limpa todos os dados do localStorage
         localStorage.clear();
 
-        // Restaura o tema
         if (savedTheme) localStorage.setItem("theme", savedTheme);
+        if (savedLang) localStorage.setItem("lang", savedLang);
 
-        // Redireciona para login
         router.push("/login");
     }, [router]);
 

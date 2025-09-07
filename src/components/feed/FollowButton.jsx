@@ -1,7 +1,10 @@
+'use client';
 import { useState } from "react";
 import { useFollow } from "../../hooks";
+import { useTranslation } from 'react-i18next';
 
 const FollowButton = ({ followingId, userId, isFollowing, setIsFollowing }) => {
+    const { t } = useTranslation();
     const { toggleFollow, loading, error } = useFollow();
 
     const handleClick = async () => {
@@ -23,14 +26,18 @@ const FollowButton = ({ followingId, userId, isFollowing, setIsFollowing }) => {
             onClick={handleClick}
             disabled={loading}
             className={`
-                px-4 py-2 rounded-full text-sm font-medium transition-colors
+                px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer
                 ${isFollowing
-                ? 'bg-[#4c4e30] text-[#e6e8e3] border border-[#4c4e30] hover:bg-[#61673e]'
-                : 'bg-transparent text-[#e6e8e3] border border-[#a97f52] hover:bg-[#a97f52]'}
+                ? 'bg-primary text-foreground border border-primary hover:bg-primary-light'
+                : 'bg-transparent text-foreground border border-accent hover:bg-accent'}
                 ${loading ? 'opacity-70 cursor-not-allowed' : ''}
             `}
         >
-            {loading ? 'Carregando...' : isFollowing ? 'Seguindo' : 'Seguir'}
+            {loading 
+                ? t('followButton.loading') 
+                : isFollowing 
+                    ? t('followButton.following') 
+                    : t('followButton.follow')}
         </button>
     );
 };

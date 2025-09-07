@@ -19,10 +19,10 @@ class MongoDB:
     def init_db(self):
         try:
             # Configuração da URI de conexão
-            username = os.getenv('MONGO_USERNAME', 'team_vectora')
-            password = os.getenv('MONGO_PASSWORD', 'vectora!2025')
-            cluster = os.getenv('MONGO_CLUSTER', 'cluster-groover.9gfspos.mongodb.net')
-            dbname = os.getenv('MONGO_DBNAME', 'music_app')
+            username = os.getenv('MONGO_USERNAME')
+            password = os.getenv('MONGO_PASSWORD')
+            cluster = os.getenv('MONGO_CLUSTER')
+            dbname = os.getenv('MONGO_DBNAME')
             
             self.uri = f"mongodb+srv://{username}:{password}@{cluster}/{dbname}?retryWrites=true&w=majority&appName=cluster-groover"
             

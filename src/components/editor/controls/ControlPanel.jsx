@@ -31,9 +31,9 @@ const ControlPanel = ({
     return (
         <div className="px-4 space-y-6 flex flex-col h-full md:w-1/4 lg:w-1/5 fixed">
             <div>
-                <h2 className={`text-sm font-bold uppercase text-accent mb-2 mt-4`}>
+                <h1 className={`text-sm font-bold uppercase text-accent mb-2 mt-4`}>
                     {projectState.title || "Novo Projeto"}
-                </h2>
+                </h1>
                 <p className="text-sm text-gray-400 h-10 overflow-y-auto">{projectState.description || "Sem descrição"}</p>
             </div>
             <div className="flex-grow overflow-y-auto space-y-6">

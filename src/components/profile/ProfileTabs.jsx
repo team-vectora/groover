@@ -6,11 +6,11 @@ const ProfileTabs = ({
                          showInvites
                      }) => {
     return (
-        <div className="flex border-b border-[#4c4e30] mb-6">
+        <div className="flex border-b border-primary: mb-6">
             <button
                 className={`px-4 py-2 font-medium ${
                     activeTab === 'posts'
-                        ? 'text-[#c1915d] border-b-2 border-[#c1915d]'
+                        ? 'text-accent-light border-b-2 border-accent-light'
                         : 'text-gray-400 hover:text-gray-300'
                 }`}
                 onClick={() => setActiveTab('posts')}
@@ -21,7 +21,7 @@ const ProfileTabs = ({
             <button
                 className={`px-4 py-2 font-medium ${
                     activeTab === 'musics'
-                        ? 'text-[#c1915d] border-b-2 border-[#c1915d]'
+                        ? 'text-accent-light border-b-2 border-accent-light'
                         : 'text-gray-400 hover:text-gray-300'
                 }`}
                 onClick={() => setActiveTab('musics')}
@@ -33,7 +33,7 @@ const ProfileTabs = ({
                 <button
                     className={`px-4 py-2 font-medium ${
                         activeTab === 'invites'
-                            ? 'text-[#c1915d] border-b-2 border-[#c1915d]'
+                            ? 'text-accent-light border-b-2 border-accent-light'
                             : 'text-gray-400 hover:text-gray-300'
                     }`}
                     onClick={() => setActiveTab('invites')}
