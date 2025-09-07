@@ -105,9 +105,9 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
 
   return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div ref={popupRef} className="bg-[#121113] rounded-xl w-full max-w-md border border-[#4c4e30]">
-          <div className="flex justify-between items-center px-5 py-4 border-b border-[#4c4e30]">
-            <h3 className="text-lg font-semibold text-[#c1915d]">
+        <div ref={popupRef} className="bg-bg-secondary rounded-xl w-full max-w-md border border-primary">
+          <div className="flex justify-between items-center px-5 py-4 border-b border-primary">
+            <h3 className="text-lg font-semibold text-accent-light">
               Configurar Perfil
             </h3>
             <button
@@ -128,12 +128,12 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
                 <img
                     src={previewUrl}
                     alt="Preview"
-                    className="w-24 h-24 rounded-full object-cover border border-[#61673e]"
+                    className="w-24 h-24 rounded-full object-cover border border-primary-light"
                 />
               </div>
               <label
                   htmlFor="file-upload"
-                  className="inline-block px-4 py-2 rounded-md cursor-pointer select-none transition-colors bg-[#4c4e30] text-white hover:bg-[#61673e]"
+                  className="inline-block px-4 py-2 rounded-md cursor-pointer select-none transition-colors bg-primary text-white hover:bg-primary-light"
               >
                 Selecionar nova foto
               </label>
@@ -157,9 +157,9 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
                   placeholder="Fale um pouco sobre você..."
                   rows={2}
                   maxLength={50}
-                  className="w-full p-3 bg-[#070608] border border-[#4c4e30] rounded-md text-white focus:outline-none focus:border-[#c1915d]"
+                  className="w-full p-3 bg-bg-darker border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"
               />
-              <div className="text-right text-xs text-[#61673e] mt-1">
+              <div className="text-right text-xs text-primary-light mt-1">
                 {changedBio.length}/50
               </div>
             </div>
@@ -168,15 +168,15 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
               <label className="block mb-2 text-sm text-gray-300">
                 Escolha até 5 gêneros musicais
               </label>
-              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 bg-[#070608] border border-[#4c4e30] rounded-md">
+              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 bg-bg-darker border border-primary rounded-md">
                 {GENRES.map((tag) => (
                     <button
                         key={tag}
                         type="button"
                         className={`px-2 py-1 rounded-full text-center transition ${
                             musicTags.includes(tag)
-                                ? "bg-[#4c4e30] text-white font-semibold"
-                                : "bg-[#121113] text-[#e6e8e3] hover:bg-[#1b1b1b]"
+                                ? "bg-primary text-white font-semibold"
+                                : "bg-bg-secondary text-foreground hover:bg-accent-sidebar"
                         }`}
                         onClick={() => toggleTag(tag)}
                     >
@@ -191,8 +191,8 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
                 disabled={isSubmitting}
                 className={`w-full py-3 rounded-md font-semibold flex justify-center items-center ${
                     isSubmitting
-                        ? "bg-[#c1915d] cursor-not-allowed"
-                        : "bg-[#a97f52] hover:bg-[#c1915d]"
+                        ? "bg-accent-light cursor-not-allowed"
+                        : "bg-accent hover:bg-accent-light"
                 }`}
             >
               {isSubmitting ? (

@@ -20,7 +20,7 @@ const ProfileHeader = ({
     };
 
     return (
-        <div className="bg-[#121113] rounded-lg p-6 mb-6 border border-[#4c4e30]">
+        <div className="bg-bg-secondary rounded-lg p-6 mb-6 border border-primary">
             <div className="flex flex-col md:flex-row items-center gap-6">
                 <div className="relative">
                     <Image
@@ -28,12 +28,13 @@ const ProfileHeader = ({
                         alt="Avatar"
                         width={120}
                         height={120}
-                        className="rounded-full border-2 border-[#4c4e30]"
+                        className="rounded-full border-2 border-primary"
                     />
                     {isCurrentUser && (
                         <button
                             onClick={onEdit}
-                            className="absolute -bottom-2 -right-2 bg-[#a97f52] hover:bg-[#c1915d] text-white p-2 rounded-full shadow transition-transform hover:rotate-45"
+                            className="absolute -bottom-2 -right-2 bg-accent hover:bg-accent-light text-white w-10 h-10 flex items-center justify-center rounded-full shadow transition-transform hover:rotate-45 cursor-pointer"
+
                             title="Editar Perfil"
                         >
                             <FontAwesomeIcon icon={faCog} />
@@ -42,7 +43,7 @@ const ProfileHeader = ({
                 </div>
 
                 <div className="flex-1 text-center md:text-left">
-                    <h1 className="text-3xl font-bold text-[#c1915d] mb-2">
+                    <h1 className="text-3xl font-bold text-accent-light mb-2">
                         {user?.username || "Usuário"}
                     </h1>
 
@@ -63,7 +64,7 @@ const ProfileHeader = ({
                         {getFavoriteGenres().map((genre) => (
                             <span
                                 key={genre}
-                                className="px-3 py-1 bg-[#4c4e30] text-white rounded-full text-sm"
+                                className="px-3 py-1 bg-primary text-white rounded-full text-sm"
                             >
                 {genre.charAt(0).toUpperCase() + genre.slice(1)}
               </span>
@@ -74,7 +75,7 @@ const ProfileHeader = ({
                 {isCurrentUser && (
                     <button
                         onClick={onLogout}
-                        className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition cursor-pointer"
                     >
                         <FontAwesomeIcon icon={faSignOutAlt} />
                         Sair

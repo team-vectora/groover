@@ -8,10 +8,16 @@ export default function LogoutPage() {
     const router = useRouter();
 
     useEffect(() => {
-        // Limpa os dados do localStorage
+        // Salva o tema atual
+        const savedTheme = localStorage.getItem("theme");
+
+        // Limpa todos os dados do localStorage
         localStorage.clear();
 
-        // Redireciona para a página de login após limpar os dados
+        // Restaura o tema
+        if (savedTheme) localStorage.setItem("theme", savedTheme);
+
+        // Redireciona para login
         router.push("/login");
     }, [router]);
 

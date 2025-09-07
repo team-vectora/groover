@@ -32,7 +32,7 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="w-full max-w-md sm:max-w-lg bg-bg-secondary rounded-3xl p-6 sm:p-8 shadow-lg">
+        <div className="w-full max-w-md sm:max-w-lg bg-background rounded-3xl p-6 sm:p-8 shadow-lg">
             <h2 className="text-2xl font-semibold mb-6 text-center text-text-lighter">Entrar</h2>
 
             {errors.general && !toast.isActive('error') && (
@@ -97,21 +97,9 @@ const LoginPage = () => {
 
             <div className="flex items-center my-6 text-accent text-sm">
                 <div className="flex-grow border-t border-accent"></div>
-                <span className="mx-4 whitespace-nowrap">ou entre com</span>
-                <div className="flex-grow border-t border-accent"></div>
+
             </div>
 
-            <div className="flex justify-center space-x-6 mb-6">
-                {['google.png', 'facebook.png', 'apple.png'].map((src, idx) => (
-                    <button
-                        key={idx}
-                        className="p-3 rounded-full bg-bg-darker hover:bg-bg-secondary transition"
-                        aria-label={`Entrar com ${src.split('.')[0]}`}
-                    >
-                        <Image src={`/img/${src}`} alt={src.split('.')[0]} width={25} height={25} />
-                    </button>
-                ))}
-            </div>
 
             <p className="text-xs text-foreground text-center mb-6 px-2 sm:px-0">
                 Ao prosseguir, você concorda com os{' '}

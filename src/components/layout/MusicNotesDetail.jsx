@@ -11,8 +11,8 @@ function MusicNotesDetail() {
         id: Math.random(),
         symbol: symbols[Math.floor(Math.random() * symbols.length)],
         left: Math.random() * 100,
-        size: Math.random() * 20 + 15,
-        duration: Math.random() * 10 + 10
+        size: Math.random() * 40 + 15,
+        duration: Math.random() * 20 + 10
       }));
       setNotes((prev) => [...prev, ...newOnes]);
       setTimeout(() => {
@@ -44,7 +44,7 @@ function MusicNotesDetail() {
       <style jsx>{`
         .music-note {
           bottom: 0px;
-          color: #4c4e30;
+          color: var(--color-primary);
           opacity: 0;
           animation: floatUp linear forwards;
         }

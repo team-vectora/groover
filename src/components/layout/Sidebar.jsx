@@ -23,7 +23,7 @@ const Sidebar = () => {
   const [username, setUsername] = useState("");
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("/img/default_avatar.png");
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // controle menu mobile
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [token, setToken] = useState(null);
   const router = useRouter();
 
@@ -34,80 +34,84 @@ const Sidebar = () => {
 
     if (storedUsername) setUsername(storedUsername);
     if (storedToken) setToken(storedToken);
-
-    if (storedAvatar && storedAvatar !== "null") {
-      setAvatarUrl(storedAvatar);
-    }
-
+    if (storedAvatar && storedAvatar !== "null") setAvatarUrl(storedAvatar);
   }, []);
 
   const { notifications, loading, error, refetch, checkNotification } =
-      useNotifications(token || "");
+    useNotifications(token || "");
 
   const navItems = [
     { icon: faHome, label: "Feed", path: "/feed" },
-    { icon: faSearch, label: "Buscar", path: "/search" }, // Adicionado
+    { icon: faSearch, label: "Buscar", path: "/search" },
     { icon: faMusic, label: "Editor", path: "/editor/new" },
+    { icon: faMusic, label: "DJ CODE", path: "/livecode" },
   ];
 
-  const notifRef = useOutsideClick(() => setIsNotifOpen(false))
+  const notifRef = useOutsideClick(() => setIsNotifOpen(false));
 
   return (
-      <>
-        {/* header celular teste*/}
-        <div className="md:hidden flex items-center justify-between p-4 bg-bg-secondary border-b border-primary/50">
-          <img src="/img/groover_logo.png" alt="Groover Logo" className="w-28" />
-          <div className="flex items-center gap-4">
-            {/* Botão Notificações */}
-            <button onClick={() => setIsNotifOpen(!isNotifOpen)}>
-              <FontAwesomeIcon icon={faBell} className="w-6 h-6 text-[#a97f52]" />
-            </button>
-
-            {/* Botão Menu */}
-            <button onClick={() => setIsMenuOpen(true)}>
-              <FontAwesomeIcon icon={faBars} className="w-6 h-6 text-white" />
-            </button>
-          </div>
+    <>
+      {/* Header mobile */}
+      <div className="md:hidden flex items-center justify-between p-2 bg-bg-secondary border-b border-primary/50">
+        <img src="/img/groover_logo.png" alt="Groover Logo" className="w-28" />
+        <div className="flex items-center gap-4">
+          {/* Notificações */}
+          <button onClick={() => setIsNotifOpen(!isNotifOpen)}>
+            <FontAwesomeIcon icon={faBell} className="w-6 h-6 text-text-lighter" />
+          </button>
+          {/* Botão abrir menu */}
+          <button onClick={() => setIsMenuOpen(true)}>
+            <FontAwesomeIcon icon={faBars} className="w-6 h-6 text-white" />
+          </button>
         </div>
+      </div>
 
-        {/* Drawer Mobile */}
+      {/* Drawer Mobile */}
+      <div
+        className={`fixed inset-0 z-50 md:hidden flex ${
+          isMenuOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 ease-in-out`}
+      >
+        {/* Fundo semitransparente */}
         <div
-            className={`fixed inset-y-0 left-0 w-64 bg-[#111] p-4 transform ${
-                isMenuOpen ? "translate-x-0" : "-translate-x-full"
-            } transition-transform duration-300 ease-in-out md:hidden z-50`}
-        >
+          className={`fixed inset-0 bg-black/50 ${isMenuOpen ? "block" : "hidden"}`}
+          onClick={() => setIsMenuOpen(false)}
+        />
+
+        {/* Sidebar drawer */}
+        <div className="relative w-64 bg-[#111] p-4 h-full flex flex-col">
           {/* Botão Fechar */}
           <button
-              onClick={() => setIsMenuOpen(false)}
-              className="mb-6 text-foreground flex items-center gap-2"
+            onClick={() => setIsMenuOpen(false)}
+            className="mb-6 text-foreground flex items-center gap-2"
           >
             <FontAwesomeIcon icon={faTimes} />
             Fechar
           </button>
 
           {/* Navegação */}
-          <nav className="space-y-2">
+          <nav className="space-y-2 flex-1 overflow-y-auto">
             {navItems.map((item) => (
-                <button
-                    key={item.path}
-                    onClick={() => {
-                      router.push(item.path);
-                      setIsMenuOpen(false);
-                    }}
-                    className="flex items-center w-full p-3 hover:bg-[#1b1b1b] rounded-lg transition"
-                >
-                  <FontAwesomeIcon icon={item.icon} className="mr-3 w-6 h-6" />
-                  <span>{item.label}</span>
-                </button>
+              <button
+                key={item.path}
+                onClick={() => {
+                  router.push(item.path);
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center w-full p-3 hover:bg-[#ffffff] rounded-lg transition"
+              >
+                <FontAwesomeIcon icon={item.icon} className="mr-3 w-6 h-6" />
+                <span>{item.label}</span>
+              </button>
             ))}
 
             {/* Nova Postagem */}
             <button
-                onClick={() => {
-                  router.push(`/profile/${username}?newPost=true`);
-                  setIsMenuOpen(false);
-                }}
-                className="flex items-center w-full p-3 bg-[#a97f52] hover:bg-[#c1915d] text-white rounded-lg transition-colors mt-2"
+              onClick={() => {
+                router.push(`/profile/${username}?newPost=true`);
+                setIsMenuOpen(false);
+              }}
+              className="flex items-center w-full p-3 bg-[#a97f52] hover:bg-[#c1915d] text-white rounded-lg transition-colors mt-2"
             >
               <FontAwesomeIcon icon={faPlus} className="mr-3 w-6 h-6" />
               <span>Nova Postagem</span>
@@ -117,144 +121,136 @@ const Sidebar = () => {
           {/* Perfil e Logout */}
           <div className="border-t border-[#4c4e30] pt-4 mt-4">
             <div
-                className="flex items-center cursor-pointer p-2 hover:bg-[#1b1b1b] rounded-lg"
-                onClick={() => {
-                  router.push(`/profile/${username}`);
-                  setIsMenuOpen(false);
-                }}
+              className="flex items-center cursor-pointer p-2 hover:bg-[#1b1b1b] rounded-lg"
+              onClick={() => {
+                router.push(`/profile/${username}`);
+                setIsMenuOpen(false);
+              }}
             >
               <Image
-                  src={avatarUrl}
-                  alt="Avatar"
-                  width={10}
-                  height={10}
-                  quality={100}
-                  className="rounded-full object-cover border border-[#4c4e30] mr-3"
+                src={avatarUrl}
+                alt="Avatar"
+                width={40}
+                height={40}
+                className="rounded-full object-cover border border-[#4c4e30] mr-3"
               />
               <span className="font-medium">{username}</span>
             </div>
             <button
-                onClick={() => {
-                  localStorage.removeItem("token");
-                  router.push("/logout");
-                  setIsMenuOpen(false);
-                }}
-                className="flex items-center w-full p-2 mt-2 hover:bg-[#1b1b1b] rounded-lg text-red-400"
+              onClick={() => {
+                localStorage.removeItem("token");
+                router.push("/logout");
+                setIsMenuOpen(false);
+              }}
+              className="flex items-center w-full p-2 mt-2 hover:bg-[#1b1b1b] rounded-lg text-red-400"
             >
               <FontAwesomeIcon icon={faSignOutAlt} className="mr-3 w-6 h-6" />
               <span>Sair</span>
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Teste de responsividade maior */}
-        <aside className="hidden md:flex sticky top-0 left-0 h-fit w-64 p-4 flex-col">
-          <div className="flex justify-center mb-8">
-            <img src="/img/groover_logo.png" alt="Groover Logo" className="w-32" />
-          </div>
+      {/* Sidebar Desktop */}
+      <aside className="hidden md:flex sticky top-0 left-0 h-fit w-64 p-4 flex-col">
+        <div className="flex justify-center mb-8">
+          <img src="/img/groover_logo.png" alt="Groover Logo" className="w-32" />
+        </div>
 
-          <nav className="mb-4">
-            <ul className="space-y-2">
-              {navItems.map((item) => (
-                  <li key={item.path}>
-                    <button
-                        onClick={() => router.push(item.path)}
-                        className="flex items-center w-full p-3 hover:bg-[#1b1b1b] rounded-lg transition-colors cursor-pointer"
-                    >
-                      <FontAwesomeIcon icon={item.icon} className="mr-3 w-6 h-6" />
-                      <span>{item.label}</span>
-                    </button>
-                  </li>
-              ))}
-
-              {/* Notificações */}
-              <li className="relative " ref={notifRef}>
+        <nav className="mb-4">
+          <ul className="space-y-2">
+            {navItems.map((item) => (
+              <li key={item.path}>
                 <button
-                    onClick={() => setIsNotifOpen(!isNotifOpen)}
-                    className="flex items-center w-full p-3 hover:bg-[#1b1b1b] rounded-lg transition-colors"
+                  onClick={() => router.push(item.path)}
+                  className="flex items-center w-full p-3 hover:bg-[var(--color-accent-sidebar)] text-text-lighter rounded-lg transition-colors cursor-pointer"
                 >
-                  <FontAwesomeIcon icon={faBell} className="mr-3 w-6 h-6" />
-                  <span className="cursor-pointer">Notificações</span>
-                  {notifications.length > 0 && (
-                      <span className="absolute top-1 right-1 text-white text-[10px] px-1.5 rounded-full bg-[#4c4e30]">
+                  <FontAwesomeIcon icon={item.icon} className="mr-3 w-6 h-6" />
+                  <span>{item.label}</span>
+                </button>
+              </li>
+            ))}
+
+            {/* Notificações */}
+            <li className="relative" ref={notifRef}>
+              <button
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                className="flex items-center w-full p-3 hover:bg-[var(--color-accent-sidebar)] rounded-lg transition-colors text-text-lighter cursor-pointer"
+              >
+                <FontAwesomeIcon icon={faBell} className="mr-3 w-6 h-6" />
+                <span className="cursor-pointer">Notificações</span>
+                {notifications.length > 0 && (
+                  <span className="absolute top-1 right-1 text-text-lighter text-[10px] px-1.5 rounded-full bg-primary">
                     {notifications.length > 9 ? "9+" : notifications.length}
                   </span>
-                  )}
-                </button>
-
-                {/* Popup Notificações */}
-                {isNotifOpen && (
-                    <ul className="absolute top-full left-0 mt-2 w-80 max-h-96 overflow-y-auto bg-[#1b1b1b] border border-[#4c4e30] rounded-lg shadow-lg z-50">
-                      {loading && (
-                          <li className="p-3 text-sm text-gray-400">Carregando...</li>
-                      )}
-                      {error && (
-                          <li className="p-3 text-sm text-red-400">{error}</li>
-                      )}
-                      {!loading && notifications.length === 0 && (
-                          <li className="p-3 text-sm text-gray-400">
-                            Nenhuma notificação
-                          </li>
-                      )}
-                      {notifications.map((notif) => (
-                          <NotificationItem
-                              key={notif._id}
-                              notification={notif}
-                              onCheck={() => checkNotification(notif._id)}
-                          />
-                      ))}
-                    </ul>
                 )}
-              </li>
+              </button>
 
-              {/* Botão Nova Postagem */}
-              <li>
-                <button
-                    onClick={() =>
-                        router.push(`/profile/${username}?newPost=true`)
-                    }
-                    className="flex items-center w-full p-3 bg-[#a97f52] hover:bg-[#c1915d] text-white rounded-lg transition-colors mt-2"
-                >
-                  <FontAwesomeIcon icon={faPlus} className="mr-3 w-6 h-6" />
-                  <span>Nova Postagem</span>
-                </button>
-              </li>
-            </ul>
-          </nav>
+              {/* Popup Notificações */}
+              {isNotifOpen && (
+                <ul className="absolute top-full left-0 mt-2 w-80 max-h-96 overflow-y-auto bg-[var(--color-accent-sidebar)] border border-primary rounded-lg shadow-lg z-50">
+                  {loading && <li className="p-3 text-sm text-gray-400">Carregando...</li>}
+                  {error && <li className="p-3 text-sm text-red-400">{error}</li>}
+                  {!loading && notifications.length === 0 && (
+                    <li className="p-3 text-sm text-gray-400">Nenhuma notificação</li>
+                  )}
+                  {notifications.map((notif) => (
+                    <NotificationItem
+                      key={notif._id}
+                      notification={notif}
+                      onCheck={() => checkNotification(notif._id)}
+                    />
+                  ))}
+                </ul>
+              )}
+            </li>
 
-          {/* Perfil e logout */}
-          <div className="border-t border-[#4c4e30] pt-4">
-            <div
-                className="flex items-center cursor-pointer p-2 hover:bg-[#1b1b1b] rounded-lg"
-                onClick={() => router.push(`/profile/${username}`)}
-            >
-              <img
-                  src={avatarUrl}
-                  alt="Avatar"
-                  className="w-10 h-10 rounded-full object-cover border border-[#4c4e30] mr-3"
-              />
-              <span className="font-medium">{username}</span>
-            </div>
-            <button
-                onClick={() => {router.push("/settings")}}
-                className="flex items-center w-full p-2 mt-2 hover:bg-[#1b1b1b] rounded-lg "
-            >
-              <FontAwesomeIcon icon={faGear} className="mr-3 w-6 h-6" />
-              <span>Configurações</span>
-            </button>
-            <button
-                onClick={() => {
-                  localStorage.removeItem("token");
-                  router.push("/logout");
-                }}
-                className="flex items-center w-full p-2 mt-2 hover:bg-[#1b1b1b] rounded-lg text-red-400"
-            >
-              <FontAwesomeIcon icon={faSignOutAlt} className="mr-3 w-6 h-6" />
-              <span>Sair</span>
-            </button>
+            {/* Botão Nova Postagem */}
+            <li>
+              <button
+                onClick={() => router.push(`/profile/${username}?newPost=true`)}
+                className="flex items-center w-full p-3 bg-[var(--color-accent)] hover:bg-[#c1915d] text-white rounded-lg transition-colors mt-2 cursor-pointer"
+              >
+                <FontAwesomeIcon icon={faPlus} className="mr-3 w-6 h-6" />
+                <span>Nova Postagem</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+
+        {/* Perfil e Logout */}
+        <div className="border-t border-[#4c4e30] pt-4">
+          <div
+            className="flex items-center cursor-pointer p-2 hover:bg-[var(--color-accent-sidebar)] rounded-lg text-text-lighter"
+            onClick={() => router.push(`/profile/${username}`)}
+          >
+            <img
+              src={avatarUrl}
+              alt="Avatar"
+              className="w-10 h-10 rounded-full object-cover border border-[#4c4e30] mr-3"
+            />
+            <span className="font-medium">{username}</span>
           </div>
-        </aside>
-      </>
+          <button
+            onClick={() => router.push("/settings")}
+            className="flex items-center w-full p-2 mt-2 hover:bg-[var(--color-accent-sidebar)] rounded-lg text-text-lighter cursor-pointer"
+          >
+            <FontAwesomeIcon icon={faGear} className="mr-3 w-6 h-6" />
+            <span>Configurações</span>
+          </button>
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              router.push("/logout");
+            }}
+            className="flex items-center w-full p-2 mt-2 hover:bg-[var(--color-accent-sidebar)] cursor-pointer rounded-lg text-red-400"
+          >
+            <FontAwesomeIcon icon={faSignOutAlt} className="mr-3 w-6 h-6" />
+            <span>Sair</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 };
 

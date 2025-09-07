@@ -2,7 +2,7 @@
 'use client'
 
 import React from "react";
-import { useState, useContext, useEffect } from 'react';
+import { use,useState, useContext, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -12,7 +12,7 @@ import { ProfileHeader, ProfileTabs, Post, ProjectCard, Invite,
   PostFormPopUp, ConfigUserPopUp, SharePopUp, ConfirmationPopUp, FollowListPopup } from '../../../../components';
 
 export default function ProfilePage({ params }) {
-  const { user: username } = params;
+    const { user: username } = use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token, userId, username: currentUsername } = useAuth();
@@ -115,7 +115,7 @@ export default function ProfilePage({ params }) {
               {isCurrentUser && (
                   <div className="flex justify-end mb-4">
                     <button
-                        className="bg-[#a97f52] hover:bg-[#c1915d] text-white p-2 rounded-full w-12 h-12 flex items-center justify-center text-2xl"
+                        className="bg-accent hover:bg-accent-light text-white p-2 rounded-full w-12 h-12 flex items-center justify-center text-2xl"
                         onClick={() => setOpenPostForm(true)}
                         title="Novo Post"
                     >
@@ -146,7 +146,7 @@ export default function ProfilePage({ params }) {
             <div>
               {isCurrentUser && (
                   <button
-                      className="mb-4 px-4 py-2 bg-[#a97f52] hover:bg-[#c1915d] text-white rounded"
+                      className="mb-4 px-4 py-2 bg-accent hover:bg-accent-light text-white rounded"
                       onClick={() => router.push('/editor/new')}
                   >
                     Novo Projeto

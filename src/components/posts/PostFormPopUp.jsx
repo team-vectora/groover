@@ -117,12 +117,12 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
 
   return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-auto">
-        <div ref={popupRef} className="bg-[#121113] rounded-xl w-full max-w-6xl border border-[#4c4e30] flex flex-col md:flex-row overflow-hidden">
+        <div ref={popupRef} className="bg-bg-secondary: rounded-xl w-full max-w-6xl border border-primary flex flex-col md:flex-row overflow-hidden">
 
           {/* Form (agora à esquerda) */}
           <div className="md:w-1/2 p-5 flex flex-col">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-[#c1915d]">
+              <h3 className="text-lg font-semibold text-accent-light">
                 {isComment ? 'Adicionar Comentário' : 'Criar Nova Publicação'}
               </h3>
 
@@ -142,23 +142,23 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
                   placeholder={isComment ? "Escreva seu comentário..." : "Escreva uma legenda..."}
                   rows={4}
                   maxLength={500}
-                  className="w-full p-3 bg-[#070608] border border-[#4c4e30] rounded-md text-white focus:outline-none focus:border-[#c1915d]"
+                  className="w-full p-3 bg-bg-darker border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"
               />
-              <div className="text-right text-xs text-[#61673e] mt-1">
+              <div className="text-right text-xs text-primary-light mt-1">
                 {caption.length}/500
               </div>
             </div>
 
             <label className="block mb-2 text-sm text-gray-300">Escolha até 5 tags musicais</label>
-            <div className="grid grid-cols-3 md:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 mb-4 bg-[#070608] border border-[#4c4e30] rounded-md">
+            <div className="grid grid-cols-3 md:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 mb-4 bg-bg-darker border border-primary rounded-md">
               {GENRES.map((genre) => (
                   <button
                       key={genre}
                       type="button"
                       className={`px-2 py-1 rounded-full text-center transition ${
                           selectedGenres.includes(genre)
-                              ? "bg-[#4c4e30] text-white font-semibold"
-                              : "bg-[#121113] text-[#e6e8e3] hover:bg-[#1b1b1b]"
+                              ? "bg-primary text-white font-semibold"
+                              : "bg-bg-secondary text-foreground hover:bg-text-lighter"
                       }`}
                       onClick={() => toggleGenre(genre)}
                   >
@@ -172,8 +172,8 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
                 disabled={isSubmitting || (!caption && images.length === 0)}
                 className={`w-full py-3 rounded-md font-semibold flex justify-center items-center mt-auto ${
                     isSubmitting || (!caption && images.length === 0)
-                        ? "bg-[#c1915d] cursor-not-allowed opacity-70"
-                        : "bg-[#a97f52] hover:bg-[#c1915d]"
+                        ? "bg-accent-light cursor-not-allowed opacity-70"
+                        : "bg-accent hover:bg-accent-light"
                 }`}
                 onClick={handleSubmit}
             >
@@ -184,12 +184,12 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
           </div>
 
           {/* Preview + Projeto (agora à direita) */}
-          <div className="md:w-1/2 p-5 border-t md:border-t-0 md:border-l border-[#4c4e30] flex flex-col items-center">
+          <div className="md:w-1/2 p-5 border-t md:border-t-0 md:border-l border-primary: flex flex-col items-center">
             {/* Preview de imagens */}
             {previews.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-2 gap-3 mb-4 w-full">
                   {previews.map((preview, index) => (
-                      <div key={index} className="relative rounded-md overflow-hidden aspect-square border border-[#4c4e30]">
+                      <div key={index} className="relative rounded-md overflow-hidden aspect-square border border-primary">
                         <img
                             src={preview.url}
                             alt={preview.name}
@@ -206,13 +206,13 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
                   ))}
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-[#4c4e30] rounded-md mb-4 text-[#61673e] w-full">
+                <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-primary rounded-md mb-4 text-primary-light w-full">
                   <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
-                      className="w-12 h-12 mb-3 text-[#4c4e30]"
+                      className="w-12 h-12 mb-3 text-primary"
                   >
                     <path
                         strokeLinecap="round"
@@ -228,7 +228,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
             {/* Selecionar imagens */}
             <label
                 htmlFor="file-upload"
-                className="inline-block px-4 py-2 rounded-md cursor-pointer select-none bg-[#4c4e30] text-white hover:bg-[#61673e] mb-4"
+                className="inline-block px-4 py-2 rounded-md cursor-pointer select-none bg-primary text-white hover:bg-primary-light mb-4"
             >
               Selecionar Imagens
             </label>
@@ -247,7 +247,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
             <select
                 value={selectedProject}
                 onChange={(e) => setSelectedProject(e.target.value)}
-                className="w-full p-3 bg-[#070608] border border-[#4c4e30] rounded-md text-white focus:outline-none focus:border-[#c1915d]"
+                className="w-full p-3 bg-bg-darker: border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"
             >
               <option value="">Nenhum projeto</option>
               {projects.map((proj) => (

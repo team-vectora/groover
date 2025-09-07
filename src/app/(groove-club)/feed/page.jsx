@@ -20,7 +20,7 @@ const FeedPage = () => {
                 {loading && <p className="text-center py-4">Carregando posts...</p>}
                 {error && <p className="text-red-500 text-center py-4">{error}</p>}
 
-                <div className="space-y-6">
+                <div className="space-y-6 ">
                     {posts.map((post) => (
                         <Post
                             key={post._id}

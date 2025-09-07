@@ -30,12 +30,12 @@ export default function MidiPlayer() {
       <div
           className={`fixed bottom-0 left-0 w-full z-50 px-3 py-2 border-t transition-all duration-300 ${
               collapsed ? "h-12" : "h-28"
-          } bg-[#0a090d] text-[#e6e8e3] border-[#a97f52]`}
+          } bg-background text-foreground border-accent`}
       >
         {/* Botão de recolher */}
         <button
             onClick={() => setCollapsed(!collapsed)}
-            className="absolute top-2 right-3 text-gray-400 hover:text-white"
+            className="absolute top-2 right-3 text-gray-400 hover:text-text-lighter"
             aria-label={collapsed ? "Expandir player" : "Recolher player"}
         >
           <FontAwesomeIcon icon={collapsed ? faChevronUp : faChevronDown} />
@@ -51,8 +51,8 @@ export default function MidiPlayer() {
                     className={`flex items-center justify-center w-8 h-8 rounded-full transition-colors
                 ${
                         isPlaying
-                            ? "bg-[#61673e] hover:bg-[#4c4e30]"
-                            : "bg-[#a97f52] hover:bg-[#c1915d]"
+                            ? "bg-primary-light hover:bg-primary"
+                            : "bg--accent hover:bg-accent-light"
                     }
                 ${!midi ? "opacity-50 cursor-not-allowed" : ""}
               `}
@@ -64,7 +64,7 @@ export default function MidiPlayer() {
                 <button
                     onClick={stop}
                     disabled={!midi || (!isPlaying && progress === 0)}
-                    className="flex items-center justify-center w-8 h-8 rounded-full bg-[#4c4e30] hover:bg-[#61673e] disabled:opacity-50 transition-colors"
+                    className="flex items-center justify-center w-8 h-8 rounded-full bg-primary hover:bg-primary-light disabled:opacity-50 transition-colors"
                     aria-label="Parar"
                 >
                   {StopIcon}
@@ -80,13 +80,13 @@ export default function MidiPlayer() {
                   value={progress}
                   onChange={(e) => seek(parseFloat(e.target.value))}
                   disabled={!midi}
-                  className={`w-full cursor-pointer rounded-lg h-1 accent-[#a97f52] ${
+                  className={`w-full cursor-pointer rounded-lg h-1 accent-accent ${
                       !midi ? "cursor-not-allowed opacity-50" : ""
                   }`}
               />
 
               {/* Informações */}
-              <div className="flex justify-between mt-1 font-mono text-xs select-none">
+              <div className="flex justify-between mt-1 font-mono text-xs select-none text-text-lighter">
             <span className="truncate max-w-xs" title={currentProject?.title}>
               {currentProject?.title || "Nenhum projeto selecionado"}
             </span>

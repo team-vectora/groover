@@ -2,15 +2,18 @@
 "use client";
 import "../styles/global.css";
 import { MidiProvider } from "../contexts/MidiContext";
+import { ThemeProvider } from "../contexts/ThemeContext"; // import do ThemeContext
 import "../lib/i18n";
 
 export default function RootLayout({ children }) {
   return (
-      <html lang="pt-BR" className="dark">
+    <html lang="pt-BR">
       <body>
-        <MidiProvider>
+        <ThemeProvider>
+          <MidiProvider>
             {children}
-        </MidiProvider>
+          </MidiProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

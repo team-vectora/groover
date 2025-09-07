@@ -9,19 +9,19 @@
   .dark -> Sobrescreve as variáveis quando a classe "dark" está no <html>
 */
 :root {
-  --color-background: #f4f4f5; /* Cinza bem claro */
-  --color-foreground: #18181b; /* Cinza quase preto */
 
-  --color-bg-secondary: #ffffff; /* Branco */
-  --color-bg-darker: #e4e4e7; /* Cinza claro */
+  --color-background: #f4f3ee; /* Fundo claro, suave e neutro */
+  --color-foreground: #2a2a2a; /* Texto escuro para bom contraste */
+  --color-bg-secondary: #ffffff; /* Painéis e cards claros */
+  --color-bg-darker: #e2e2e5; /* Fundo de seções levemente mais escuro */
+  --color-primary: #556b2f; /* Verde oliva sofisticado */
+  --color-primary-light: #7e9157; /* Verde oliva mais suave */
+  --color-accent: #d68642; /* Laranja/marrom elegante para destaques */
+  --color-accent-light: #e0a45c; /* Laranja claro para hover ou destaques */
+  --color-accent-sidebar: #f0ead6; /* Sidebar levemente amarelada */
+  --color-text-lighter: #1b1b1b; /* Texto em destaque */
 
-  --color-primary: #5d5f41; /* Verde oliva escuro */
-  --color-primary-light: #7e8157; /* Verde oliva claro */
 
-  --color-accent: #c48a47; /* Laranja/marrom */
-  --color-accent-light: #d89b58; /* Laranja/marrom claro */
-
-  --color-text-lighter: #000000; /* Preto para textos em destaque */
 }
 
 .dark {
@@ -33,7 +33,21 @@
   --color-primary-light: #61673e;
   --color-accent: #a97f52;
   --color-accent-light: #c1915d;
+  --color-accent-sidebar: #1b1b1b;
   --color-text-lighter: #ffffff;
+}
+
+.dracula {
+  /* Tema escuro - Dracula */
+  --color-background: #282a36; /* Fundo escuro roxo/acinzentado */
+  --color-foreground: #f8f8f2; /* Texto claro */
+  --color-bg-secondary: #44475a; /* Painéis secundários */
+  --color-bg-darker: #21222c; /* Fundo mais escuro */
+  --color-primary: #6272a4; /* Azul acinzentado */
+  --color-primary-light: #8be9fd; /* Azul claro para destaques */
+  --color-accent: #ff79c6; /* Rosa neon */
+  --color-accent-light: #ff92d0; /* Rosa mais claro */
+  --color-text-lighter: #f8f8f2; /* Texto em destaque */
 }
 
 body {
