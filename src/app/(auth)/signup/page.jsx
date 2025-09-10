@@ -219,20 +219,6 @@ const SignupPage = () => {
 
         <div className="flex items-center my-6 text-accent text-sm">
           <div className="flex-grow border-t border-accent"></div>
-          <span className="mx-4 whitespace-nowrap">ou entre com</span>
-          <div className="flex-grow border-t border-accent"></div>
-        </div>
-
-        <div className="flex justify-center space-x-6 mb-6">
-          {['google.png', 'facebook.png', 'apple.png'].map((src, idx) => (
-              <button
-                  key={idx}
-                  className="p-3 rounded-full bg-bg-darker hover:bg-bg-secondary transition"
-                  aria-label={`Entrar com ${src.split('.')[0]}`}
-              >
-                <Image src={`/img/${src}`} alt={src.split('.')[0]} width={25} height={25} />
-              </button>
-          ))}
         </div>
 
         <p className="text-xs text-foreground text-center mb-6 px-2 sm:px-0">

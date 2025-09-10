@@ -43,6 +43,15 @@ class User:
         return user
 
     @staticmethod
+    def activate_user(email):
+        result = mongo.db.users.update_one(
+            {"email": email},
+            {"$set": {"active": True}}
+        )
+        return result.matched_count > 0
+
+
+    @staticmethod
     def get_user(user_id):
         if not user_id:
             return None

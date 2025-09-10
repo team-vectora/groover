@@ -34,7 +34,7 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="w-full max-w-md sm:max-w-lg bg-background rounded-3xl p-6 sm:p-8 shadow-lg">
+        <div className="w-full max-w-md sm:max-w-lg bg-bg-secondary rounded-3xl p-6 sm:p-8 shadow-lg">
             <h2 className="text-2xl font-semibold mb-6 text-center text-text-lighter">{t("login.title")}</h2>
 
             {errors.general && !toast.isActive('error') && (
