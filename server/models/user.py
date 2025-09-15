@@ -25,6 +25,11 @@ class User:
         return mongo.db.users.insert_one(user).inserted_id
 
     @staticmethod
+    def delete(email):
+        result = mongo.db.users.delete_one({'email': email})
+        return result.deleted_count > 0
+
+    @staticmethod
     def find_by_username(username):
         user = mongo.db.users.find_one({'username': username})
         if user:

@@ -1,13 +1,15 @@
 import os
 from datetime import timedelta
 
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, render_template, redirect
 from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity,
     create_access_token
 )
-from flask_mail import Mail ,Message
+from flask_mail import Message
+from utils.mail import mail
+
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import User
 from itsdangerous import URLSafeSerializer, SignatureExpired
@@ -32,11 +34,6 @@ def signup():
 
     hashed_pw = generate_password_hash(data['password'])
     email = data.get('email')
-    user_id = User.create(
-        username=data['username'],
-        password_hash=hashed_pw,
-        email=email
-    )
 
 
     token = s.dumps(email, salt=os.getenv('SALT_AUTH'))
@@ -84,12 +81,18 @@ def signup():
         html=html_body,
         sender=os.getenv('MAIL_USERNAME')
     )
-    Mail.send(msg)
-    print(token)
+    mail.send(msg)
+
+    user_id = User.create(
+        username=data['username'],
+        password_hash=hashed_pw,
+        email=email
+    )
+
     return jsonify({
-        'message': 'User created successfully. Check your email to confirm.',
-        'id': str(user_id)
-    }), 201
+            'message': 'User created successfully. Check your email to confirm.',
+            'id': str(user_id)
+        }), 201
 
 
 @auth_bp.route('/confirm_email/<token>')
@@ -97,9 +100,10 @@ def confirm_email(token):
     try:
         email = s.loads(token, salt=os.getenv("SALT_AUTH"), max_age=300)
         User.activate_user(email)
-        return jsonify({'message': f'Email {email} confirmed successfully!'}), 200
+        return render_template('confirm_email_template.html', status='success', email=email), 200
     except SignatureExpired:
-        return jsonify({'error': 'Signature Time exceeded'}), 401
+        return redirect(url_for('auth_bp.token_expired_page'))
+
 
 
 @auth_bp.route('/signin', methods=['POST'])

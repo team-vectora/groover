@@ -7,7 +7,7 @@ import useOutsideClick from '../../hooks/posts/useOutsideClick';
 const FollowListPopup = ({ title, users, onClose, isLoading }) => {
     const popupRef = useOutsideClick(onClose);
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div ref={popupRef} className="bg-bg-secondary rounded-xl w-full max-w-md border border-primary">
                 <div className="flex justify-between items-center px-5 py-4 border-b border-primary">
                     <h3 className="text-lg font-semibold text-accent-light">{title}</h3>

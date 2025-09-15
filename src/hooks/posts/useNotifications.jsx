@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../../config"; // ajuste o caminho conforme sua estrutura
 
 export default function useNotifications(token) {
   const [notifications, setNotifications] = useState([]);
@@ -11,7 +12,7 @@ export default function useNotifications(token) {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/notifications", {
+      const res = await fetch(`${API_BASE_URL}/notifications`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -30,28 +31,23 @@ export default function useNotifications(token) {
     }
   };
 
-
   const checkNotification = async (notification_id) => {
     if (!token) return;
 
     try {
-      const res = await fetch(
-        "http://localhost:5000/api/notifications/check",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ notification_id }),
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/notifications/check`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ notification_id }),
+      });
 
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Erro ao marcar notificação");
       } else {
-
         setNotifications((prev) =>
           prev.map((n) =>
             n._id === notification_id ? { ...n, read: true } : n

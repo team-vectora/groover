@@ -1,43 +1,43 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../config';
 
 export default function useSimilarUsers(token) {
-    const [similarUsers, setSimilarUsers] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+  const [similarUsers, setSimilarUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-    const fetchSimilarUsers = async () => {
-        if (!token) return;
+  const fetchSimilarUsers = async () => {
+    if (!token) return;
 
-        setLoading(true);
-        try {
-            const res = await fetch("http://localhost:5000/api/users/similar", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/similar`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-            if (!res.ok) {
-                throw new Error("Erro ao buscar usuários similares");
-            }
+      if (!res.ok) {
+        throw new Error("Erro ao buscar usuários similares");
+      }
 
-            const data = await res.json();
+      const data = await res.json();
+      console.log("Usuarios similares achados: " + data);
 
-            console.log("Usuarios similares achados: " + data)
+      setSimilarUsers(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            setSimilarUsers(data);
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+  useEffect(() => {
+    fetchSimilarUsers();
+  }, [token]);
 
-    useEffect(() => {
-        fetchSimilarUsers();
-    }, [token]);
-
-    return {
-        similarUsers,
-        loading,
-        error,
-        refetch: fetchSimilarUsers
-    };
+  return {
+    similarUsers,
+    loading,
+    error,
+    refetch: fetchSimilarUsers
+  };
 }

@@ -51,9 +51,13 @@ const SignupPage = () => {
 
         if (result.success) {
             toast.success("Conta criada com sucesso!", { theme: "colored", autoClose: 3000 });
+
+            toast.info("Um email de verificação foi enviado para o seu endereço.", { theme: "colored", autoClose: 5000 });
+
             router.push("/login");
         }
     };
+
 
     const getPasswordStrengthColor = () => {
         switch(passwordStrength) {

@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { API_BASE_URL } from "../../config"; // ajuste o caminho conforme a sua estrutura
 
 export default function useLikePost(token, onSuccess) {
   const [error, setError] = useState("");
 
   const likePost = async (post_id, owner_id) => {
     try {
-      const res = await fetch("http://localhost:5000/api/posts/like", {
+      const res = await fetch(`${API_BASE_URL}/posts/like`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

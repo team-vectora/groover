@@ -13,15 +13,19 @@ const ProfileHeader = ({
 }) => {
   const { t } = useTranslation();
 
-  const getFavoriteGenres = () => {
-    if (!user?.genres || Object.keys(user.genres).length === 0) return [];
+    const getFavoriteGenres = () => {
+      if (!user?.genres) return [];
 
-    return Object.entries(user.genres)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([genre]) => genre);
-  };
+      const nonZeroGenres = Object.entries(user.genres)
+        .filter(([_, score]) => score > 0)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([genre]) => genre);
 
+      return nonZeroGenres;
+    };
+
+console.log(user.genres)
   return (
     <div className="bg-bg-secondary rounded-lg p-6 mb-6 border border-primary">
       <div className="flex flex-col md:flex-row items-center gap-6">

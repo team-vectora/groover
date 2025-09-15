@@ -2,13 +2,16 @@
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun, faMoon, faRobot, faDownload } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
+import { useDeleteAccount } from '../../../hooks/settings/useDeleteAccount';
 
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [token, setToken] = useState(null);
+  const { deleteAccount, loading: deleting, error: deleteError } = useDeleteAccount(token);
 
   useEffect(() => {
     const savedLang = localStorage.getItem('lang');
@@ -17,7 +20,11 @@ export default function SettingsPage() {
     }
   }, [i18n]);
 
-  // PWA
+  useEffect(() => {
+    setToken(localStorage.getItem('token'));
+  }, []);
+
+
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
@@ -35,63 +42,68 @@ export default function SettingsPage() {
     setDeferredPrompt(null);
   };
 
-  // Trocar idioma e salvar no localStorage
   const changeLanguage = (lang) => {
     i18n.changeLanguage(lang);
     localStorage.setItem('lang', lang);
   };
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-accent-light">{t('settings.title')}</h1>
+    <div className="p-8 max-w-2xl mx-auto space-y-6">
+      <h1 className="text-3xl font-bold text-accent-light">{t('settings.title')}</h1>
 
-      <div className="space-y-6">
-        {/* Tema */}
+      {/* Tema */}
+      <div className="bg-bg-secondary p-4 rounded-lg">
+        <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.theme')}</h2>
+        <select
+          value={theme}
+          onChange={(e) => setTheme(e.target.value)}
+          className="px-4 py-2 rounded-md bg-primary text-text-lighter cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent"
+        >
+          <option value="light">🌞 Light</option>
+          <option value="dark">🌙 Dark</option>
+          <option value="dracula">🤖 Dracula</option>
+        </select>
+      </div>
+
+      {/* Idioma */}
+      <div className="bg-bg-secondary p-4 rounded-lg">
+        <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.language')}</h2>
+        <select
+          value={i18n.language}
+          onChange={(e) => changeLanguage(e.target.value)}
+          className="px-4 py-2 rounded-md bg-primary text-text-lighter cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent"
+        >
+          <option value="pt-BR">🇧🇷 Português</option>
+          <option value="en">🇺🇸 English</option>
+        </select>
+      </div>
+
+      {/* PWA */}
+      {deferredPrompt && (
         <div className="bg-bg-secondary p-4 rounded-lg">
-          <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.theme')}</h2>
+          <h2 className="font-semibold mb-3">{t('settings.app')}</h2>
           <button
-            onClick={toggleTheme}
-            className="flex items-center gap-3 px-4 py-2 rounded-md bg-primary hover:bg-primary-light transition-colors cursor-pointer"
+            onClick={handleInstallPWA}
+            className="flex items-center gap-3 px-4 py-2 rounded-md bg-primary hover:bg-primary-light transition-colors"
           >
-            {theme === 'dark' && <FontAwesomeIcon icon={faSun} />}
-            {theme === 'light' && <FontAwesomeIcon icon={faMoon} />}
-            {theme === 'dracula' && <FontAwesomeIcon icon={faRobot} />}
-            {t('settings.changeToTheme', { theme })}
+            <FontAwesomeIcon icon={faDownload} />
+            {t('settings.installApp')}
           </button>
         </div>
+      )}
 
-        {/* Idioma */}
-        <div className="bg-bg-secondary p-4 rounded-lg">
-          <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.language')}</h2>
-          <div className="flex gap-4">
-            <button
-              onClick={() => changeLanguage('pt-BR')}
-              className={`px-4 py-2 rounded-md ${i18n.language === 'pt-BR' ? 'bg-accent' : 'bg-primary'}`}
-            >
-              Português
-            </button>
-            <button
-              onClick={() => changeLanguage('en')}
-              className={`px-4 py-2 rounded-md ${i18n.language === 'en' ? 'bg-accent' : 'bg-primary'}`}
-            >
-              English
-            </button>
-          </div>
-        </div>
-
-        {/* PWA */}
-        {deferredPrompt && (
-          <div className="bg-bg-secondary p-4 rounded-lg">
-            <h2 className="font-semibold mb-3">{t('settings.app')}</h2>
-            <button
-              onClick={handleInstallPWA}
-              className="flex items-center gap-3 px-4 py-2 rounded-md bg-primary hover:bg-primary-light transition-colors"
-            >
-              <FontAwesomeIcon icon={faDownload} />
-              {t('settings.installApp')}
-            </button>
-          </div>
-        )}
+      {/* Deletar conta */}
+      <div className="bg-bg-secondary p-4 rounded-lg">
+        <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.deleteAccount')}</h2>
+        {deleteError && <p className="text-red-500 mb-2">{deleteError}</p>}
+        <button
+          onClick={deleteAccount}
+          disabled={deleting}
+          className="flex items-center gap-3 px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
+        >
+          <FontAwesomeIcon icon={faTrash} />
+          {deleting ? t('settings.deleting') : t('settings.deleteAccount')}
+        </button>
       </div>
     </div>
   );

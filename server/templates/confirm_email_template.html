@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Email Confirmation — Groover</title>
+    <style>
+        :root{
+          --color-background: #0a090d;
+          --color-foreground: #e6e8e3;
+          --color-bg-secondary: #121113;
+          --color-bg-darker: #070608;
+          --color-primary: #4c4e30;
+          --color-primary-light: #61673e;
+          --color-accent: #a97f52;
+          --color-accent-light: #c1915d;
+          --color-accent-sidebar: #1b1b1b;
+          --color-text-lighter: #ffffff;
+          --radius: 14px;
+          --glass: rgba(255,255,255,0.03);
+          --shadow: 0 10px 30px rgba(0,0,0,0.6);
+          font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        }
+
+        html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--color-background) 0%, var(--color-bg-darker) 100%);color:var(--color-foreground);}
+
+        .wrap{
+          min-height:100%;display:flex;align-items:center;justify-content:center;padding:32px;
+        }
+
+        .card{
+          width:min(820px,96%);
+          background:linear-gradient(180deg,var(--color-bg-secondary), rgba(18,17,19,0.88));
+          border-radius:var(--radius);
+          box-shadow:var(--shadow);
+          overflow:hidden;
+          display:grid;grid-template-columns:1fr 360px;
+        }
+
+        .main{
+          padding:36px 40px;display:flex;flex-direction:column;gap:18px;justify-content:center;
+        }
+
+        .brand{
+          display:flex;align-items:center;gap:14px;
+        }
+
+        .logo{
+          width:120px;height:120px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--color-text-lighter);font-weight:700;font-size:20px;box-shadow:inset 0 -6px 18px rgba(0,0,0,0.25);
+        }
+
+        h1{margin:0;font-size:28px;line-height:1.05;color:var(--color-foreground);}
+        p.lead{margin:0;color:var(--color-foreground);opacity:0.9}
+
+        .result{
+          margin-top:6px;padding:18px;border-radius:12px;background:var(--glass);backdrop-filter:blur(6px);display:flex;align-items:center;gap:16px;border:1px solid rgba(255,255,255,0.03);
+        }
+
+        .result.success{border-left:6px solid var(--color-accent-light);}
+        .result.error{border-left:6px solid #c85b4a;}
+
+        .big-icon{width:60px;height:60px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.06));display:flex;align-items:center;justify-content:center;font-size:28px}
+
+        .meta{font-size:14px;color:var(--color-foreground);opacity:0.95}
+        .meta small{display:block;color:var(--color-foreground);opacity:0.6}
+
+        /* sidebar */
+        .side{
+          background:linear-gradient(180deg,var(--color-accent-sidebar), #0f0f0f);padding:28px;display:flex;flex-direction:column;gap:16px;align-items:flex-start;justify-content:center;color:var(--color-text-lighter);
+        }
+        .side h3{margin:0;font-size:16px}
+        .side p{margin:0;font-size:13px;opacity:0.9}
+
+        .foot{margin-top:6px;font-size:12px;color:var(--color-foreground);opacity:0.6}
+
+        @media (max-width:900px){
+          .card{grid-template-columns:1fr;}
+          .side{order:2}
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <div class="main">
+            <div class="brand">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='groover_logo.png') }}"
+                         alt="Groover Logo"
+                         style="width:110px;height:90px;border-radius:10px;">
+
+                </div>
+                <div>
+                    <h1>Groover — Email Confirmation</h1>
+                    <p class="lead">Thank you for joining Groover. Here is the status of your confirmation.</p>
+                </div>
+            </div>
+
+            {% if status == 'success' %}
+            <div class="result success" role="status">
+                <div class="big-icon">✓</div>
+                <div class="meta">
+                    <strong>Email {{ email }} successfully confirmed!</strong>
+                    <small>You can now access your account and start using Groover.</small>
+                </div>
+            </div>
+            {% else %}
+            <div class="result error" role="alert">
+                <div class="big-icon">⚠</div>
+                <div class="meta">
+                    <strong>Link expired or invalid.</strong>
+                    <small>The confirmation link has expired (max. 5 minutes) or has already been used. Request a new email to continue.</small>
+                </div>
+            </div>
+            {% endif %}
+
+            <p class="foot">If you believe there was an error, please contact Groover support.</p>
+        </div>
+
+        <aside class="side">
+            <h3>What happens now?</h3>
+            <p>Once your email is confirmed, your account is activated:  you can create music, send and receive feedback, and connect your services.</p>
+
+            <h3>Security</h3>
+            <p>The link expires in 5 minutes for security. If you did not request it, ignore this email.</p>
+
+            <h3>Quick help</h3>
+            <p>Need more info? Visit the help section or contact support.</p>
+        </aside>
+    </div>
+</div>
+</body>
+</html>

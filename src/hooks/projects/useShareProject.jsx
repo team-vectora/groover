@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../../config";
 
 export default function useShareProject(token) {
   const [loading, setLoading] = useState(false);
@@ -7,13 +8,13 @@ export default function useShareProject(token) {
   const shareProject = async (projectId, username) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/projects/${projectId}/invite`, {
+      const response = await fetch(`${API_BASE_URL}/projects/${projectId}/invite`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username: username }),
+        body: JSON.stringify({ username }),
       });
 
       const data = await response.json();

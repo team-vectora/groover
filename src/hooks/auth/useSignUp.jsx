@@ -1,6 +1,6 @@
-// src/hooks/auth/useSignUp.jsx
 import { useState } from "react";
 import useLogin from "./useLogin"; // Importa o hook de login
+import { API_BASE_URL } from "../../config"; // ajuste o caminho conforme sua estrutura
 
 export default function useSignUp() {
   const [errors, setErrors] = useState({});
@@ -10,7 +10,7 @@ export default function useSignUp() {
   const validateInputs = ({ username, email, senha }) => {
     const newErrors = {};
 
-    // Validação do username
+    // Validações (igual ao seu código)
     if (!username || username.trim() === "") {
       newErrors.username = "Nome de usuário é obrigatório";
     } else if (username.length < 3) {
@@ -21,14 +21,12 @@ export default function useSignUp() {
       newErrors.username = "Use apenas letras, números e underline (_)";
     }
 
-    // Validação do email
     if (!email || email.trim() === "") {
       newErrors.email = "Email é obrigatório";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = "Digite um email válido";
     }
 
-    // Validação da senha
     if (!senha || senha.trim() === "") {
       newErrors.senha = "Senha é obrigatória";
     } else if (senha.length < 8) {
@@ -48,7 +46,6 @@ export default function useSignUp() {
     setErrors({});
     setLoading(true);
 
-    // Validação frontend primeiro
     const validationErrors = validateInputs({ username, email, senha });
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -57,27 +54,26 @@ export default function useSignUp() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password: senha }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Se o cadastro foi bem-sucedido, faz o login automaticamente
+        // Login automático após cadastro
         const loginResult = await login({ username, senha });
         setLoading(false);
-        return loginResult; // Retorna o resultado do login
+        return loginResult;
       } else {
-        // Tratamento de erros do backend
         setLoading(false);
         const backendErrors = {};
 
-        if (data.error.includes('Username already exists')) {
+        if (data.error.includes("Username already exists")) {
           backendErrors.username = "Nome de usuário já em uso";
-        } else if (data.error.includes('Email already used')) {
+        } else if (data.error.includes("Email already used")) {
           backendErrors.email = "Email já cadastrado";
         } else {
           backendErrors.general = data.error || "Erro no cadastro";

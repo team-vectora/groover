@@ -6,6 +6,7 @@ import { Midi } from "@tonejs/midi";
 import * as Tone from "tone";
 import { useProjectStates, useAuth } from "../../hooks";
 import {NOTES , ROWS} from "../../constants";
+import { API_BASE_URL } from "../../config"; // ajuste o caminho conforme sua estrutura
 
 // 🔹 Utilitário: converte Blob → Base64
 const blobToBase64 = (blob) => {
@@ -133,7 +134,7 @@ export const useProjectAPI = (projectId, projectActions) => {
             }
 
             try {
-                const response = await fetch("http://localhost:5000/api/projects", {
+                const response = await fetch(`${API_BASE_URL}/projects`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
