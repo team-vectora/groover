@@ -35,28 +35,30 @@ const SignupPage = () => {
     }, [senha, confirmSenha]);
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+      e.preventDefault();
 
-        if (!passwordMatch) {
-            toast.error("As senhas não coincidem", { theme: "colored", autoClose: 3000 });
-            return;
-        }
+      if (/\s/.test(username) || /\s/.test(senha)) {
+        toast.error("Username e senha não podem conter espaços", { theme: "colored", autoClose: 3000 });
+        return;
+      }
 
-        if (passwordStrength < 3) {
-            toast.error("Sua senha é muito fraca", { theme: "colored", autoClose: 3000 });
-            return;
-        }
+      if (!passwordMatch) {
+        toast.error("As senhas não coincidem", { theme: "colored", autoClose: 3000 });
+        return;
+      }
 
-        const result = await signUp({ username, email, senha });
+      if (passwordStrength < 3) {
+        toast.error("Sua senha é muito fraca", { theme: "colored", autoClose: 3000 });
+        return;
+      }
 
-        if (result.success) {
-            toast.success("Conta criada com sucesso!", { theme: "colored", autoClose: 3000 });
+      const result = await signUp({ username, email, senha });
 
-            toast.info("Um email de verificação foi enviado para o seu endereço.", { theme: "colored", autoClose: 5000 });
-
-            router.push("/login");
-        }
+      if (result.success) {
+        toast.success("Conta criada com sucesso! Um email de verificação foi enviado.", { theme: "colored", autoClose: 5000 });
+      }
     };
+
 
 
     const getPasswordStrengthColor = () => {

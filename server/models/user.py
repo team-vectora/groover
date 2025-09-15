@@ -1,11 +1,18 @@
+import os
+
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.db import mongo
 from utils.genres import GENRES
 from bson import Binary
 from utils.similarity import cosine_similarity
-
+from itsdangerous import URLSafeSerializer, SignatureExpired
+from flask_mail import Message
+from utils.mail import mail
 from .followers import Followers
+from markupsafe import escape
+
+s = URLSafeSerializer(os.getenv('AUTH_KEY'))
 
 class User:
     @staticmethod
@@ -23,6 +30,55 @@ class User:
             'genres': genres_dict
         }
         return mongo.db.users.insert_one(user).inserted_id
+
+    @staticmethod
+    def send_email_verification(email, username, host_url):
+        token = s.dumps(email, salt=os.getenv('SALT_AUTH'))
+        confirm_url = f"{host_url}api/auth/confirm_email/{token}"
+
+        html_body = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color:#0a090d; color:#e6e8e3; padding:20px;">
+            <div style="max-width:600px; margin:auto; background:#121113; border-radius:10px; padding:30px; box-shadow:0 2px 10px rgba(0,0,0,0.5);">
+              <h2 style="color:#4c4e30; text-align:center;">Welcome to Groover, {escape(username)}!</h2>
+              <p style="font-size:16px; line-height:1.5; color:#e6e8e3;">
+                Thank you for signing up. To activate your Groover account, please confirm your email by clicking the button below:
+              </p>
+              <p style="text-align:center; margin:30px 0;">
+                <a href="{confirm_url}" style="
+                  display:inline-block;
+                  padding:14px 28px;
+                  background:#a97f52;
+                  color:#ffffff;
+                  text-decoration:none;
+                  border-radius:6px;
+                  font-weight:bold;
+                  font-size:16px;
+                  transition:all 0.3s;
+                " onmouseover="this.style.background='#c1915d';">
+                  Confirm Email
+                </a>
+              </p>
+              <p style="font-size:12px; color:#e6e8e3; text-align:center; margin-top:20px;">
+                If you didn’t create this account, you can safely ignore this email.
+              </p>
+              <hr style="border:none; border-top:1px solid #070608; margin:20px 0;">
+              <p style="font-size:12px; color:#61673e; text-align:center;">
+                © 2025 Groover. All rights reserved.
+              </p>
+            </div>
+          </body>
+        </html>
+        """
+
+        msg = Message(
+            subject="Please confirm your email",
+            recipients=[email],
+            body=f"Hello {username},\n\nPlease confirm your email by clicking the link below:\n{confirm_url}\n\nIf you didn’t create this account, ignore this message.",
+            html=html_body,
+            sender=os.getenv('MAIL_USERNAME')
+        )
+        mail.send(msg)
 
     @staticmethod
     def delete(email):

@@ -6,6 +6,7 @@ import { Post, ProjectCard, UserSearchResult } from '../../../components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { useTranslation } from 'react-i18next';
+import { API_BASE_URL } from "../../../config";
 
 export default function SearchPage() {
     const { t, i18n } = useTranslation();
@@ -28,7 +29,7 @@ export default function SearchPage() {
 
             setLoading(true);
             const tagsQuery = selectedTags.join(',');
-            const response = await fetch(`http://localhost:5000/api/search?q=${debouncedQuery}&tags=${tagsQuery}&type=${searchType}`, {
+            const response = await fetch(`${API_BASE_URL}/search?q=${debouncedQuery}&tags=${tagsQuery}&type=${searchType}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await response.json();
@@ -50,12 +51,16 @@ export default function SearchPage() {
     const renderResults = () => {
         if (loading) return <p className="text-center mt-8">{t('search.loading')}</p>;
 
-        const hasResults = results.users.length > 0 || results.posts.length > 0 || results.projects.length > 0;
+        const hasResults =
+            (results.users?.length || 0) > 0 ||
+            (results.posts?.length || 0) > 0 ||
+            (results.projects?.length || 0) > 0;
+
         if (!hasResults) return <p className="text-center mt-8 text-gray-400">{t('search.noResults')}</p>;
 
         return (
             <div className="space-y-12 mt-8">
-                {results.users.length > 0 && (
+                {results.users?.length > 0 && (
                     <section>
                         <h2 className="text-2xl font-bold mb-4 text-accent-light">{t('search.users')}</h2>
                         <div className="space-y-4">
@@ -63,7 +68,7 @@ export default function SearchPage() {
                         </div>
                     </section>
                 )}
-                {results.posts.length > 0 && (
+                {results.posts?.length > 0 && (
                     <section>
                         <h2 className="text-2xl font-bold mb-4 text-accent-light">{t('search.posts')}</h2>
                         <div className="space-y-6">
@@ -71,17 +76,20 @@ export default function SearchPage() {
                         </div>
                     </section>
                 )}
-                {results.projects.length > 0 && (
+                {results.projects?.length > 0 && (
                     <section>
                         <h2 className="text-2xl font-bold mb-4 text-accent-light">{t('search.projects')}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {results.projects.map(project => <ProjectCard key={project._id} project={project} isYourProfile={false} />)}
+                            {results.projects?.map((project, idx) => (
+                              <ProjectCard key={project._id || idx} project={project} isYourProfile={false} />
+                            ))}
                         </div>
                     </section>
                 )}
             </div>
         );
     };
+
 
     const filterButtons = [
         { label: t('search.all'), value: 'all' },

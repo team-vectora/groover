@@ -11,6 +11,7 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [token, setToken] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false); // <-- confirmation state
   const { deleteAccount, loading: deleting, error: deleteError } = useDeleteAccount(token);
 
   useEffect(() => {
@@ -23,7 +24,6 @@ export default function SettingsPage() {
   useEffect(() => {
     setToken(localStorage.getItem('token'));
   }, []);
-
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -45,6 +45,19 @@ export default function SettingsPage() {
   const changeLanguage = (lang) => {
     i18n.changeLanguage(lang);
     localStorage.setItem('lang', lang);
+  };
+
+  const handleDeleteClick = () => {
+    setShowConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    deleteAccount(); // will trigger backend which can send the email
+    setShowConfirm(false);
+  };
+
+  const cancelDelete = () => {
+    setShowConfirm(false);
   };
 
   return (
@@ -92,12 +105,12 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* Deletar conta */}
+
       <div className="bg-bg-secondary p-4 rounded-lg">
         <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.deleteAccount')}</h2>
         {deleteError && <p className="text-red-500 mb-2">{deleteError}</p>}
         <button
-          onClick={deleteAccount}
+          onClick={handleDeleteClick}
           disabled={deleting}
           className="flex items-center gap-3 px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
         >
@@ -105,6 +118,32 @@ export default function SettingsPage() {
           {deleting ? t('settings.deleting') : t('settings.deleteAccount')}
         </button>
       </div>
+
+
+      {showConfirm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+          <div className="bg-bg-secondary p-6 rounded-lg max-w-sm w-full text-center space-y-4">
+            <h2 className="text-lg font-semibold text-text-lighter">
+              {t('settings.confirmDeleteTitle')}
+            </h2>
+            <p className="text-text-lighter">{t('settings.confirmDeleteMessage')}</p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
+              >
+                {t('settings.yesDelete')}
+              </button>
+              <button
+                onClick={cancelDelete}
+                className="px-4 py-2 rounded-md bg-gray-400 hover:bg-gray-500 text-white transition-colors"
+              >
+                {t('settings.cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

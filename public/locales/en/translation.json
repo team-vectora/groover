@@ -77,8 +77,14 @@
     "changeToTheme": "Change theme to {{theme}}",
     "language": "Language",
     "app": "App",
-    "installApp": "Install App"
-  },
+    "installApp": "Install App",
+    "deleteAccount": "Delete Account",
+    "deleting": "An verification email was send.",
+    "confirmDeleteTitle": "Confirm Account Deletion",
+    "confirmDeleteMessage": "Are you sure you want to delete your account? This action cannot be undone.",
+    "cancel": "Cancel",
+    "yesDelete": "Confirm"
+},
   "livecode": {
     "title": "Livecode Song",
     "description": {

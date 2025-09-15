@@ -80,8 +80,14 @@
     "changeToTheme": "Mudar tema para {{theme}}",
     "language": "Idioma",
     "app": "Aplicativo",
-    "installApp": "Instalar App"
-  },
+    "installApp": "Instalar App",
+    "deleteAccount": "Deletar Conta",
+    "deleting": "Um email de confirmacao foi enviado.",
+    "confirmDeleteTitle": "Confirmar exclusão da conta",
+    "confirmDeleteMessage": "Tem certeza de que deseja excluir sua conta? Esta ação não pode ser desfeita.",
+    "cancel": "Cancelar",
+    "yesDelete": "Confirmar"
+},
   "livecode": {
     "title": "Livecode Song",
     "description": {
