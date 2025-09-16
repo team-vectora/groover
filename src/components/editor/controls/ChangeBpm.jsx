@@ -3,10 +3,13 @@
 const ChangeBpm = ({ bpm, setBpm, t }) => {
     return (
         <div>
-            <h3 className="text-sm font-bold uppercase text-accent mb-2">{t("tempo")}</h3>
+            <h3 className="text-sm font-bold uppercase text-accent mb-2">
+                {t("editor.controls.bpm.tempo")}
+            </h3>
             <div className="control-item">
                 <label className="block mb-2 text-sm font-medium">
-                    {t("bpmLabel")}: <span className="font-bold text-accent">{bpm}</span>
+                    {t("editor.controls.bpm.bpmLabel")}:{" "}
+                    <span className="font-bold text-accent">{bpm}</span>
                 </label>
                 <input
                     type="range"

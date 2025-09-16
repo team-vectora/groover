@@ -75,7 +75,6 @@ def signin():
         return jsonify({'error': 'Invalid credentials'}), 401
 
     if not user['active']:
-        # Gera token de ativação sem expiração aqui, pois o email será reenviado
         token = s.dumps(user['email'], salt=os.getenv("SALT_AUTH"))
         confirm_url = f"{request.host_url}api/auth/confirm_email/{token}"
 
@@ -91,7 +90,6 @@ def signin():
             'token': token
         }), 401
 
-    # Usuário ativo → gera JWT normalmente
     expires = timedelta(hours=24)
     access_token = create_access_token(
         identity=str(user['_id']),

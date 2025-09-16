@@ -30,13 +30,16 @@ console.log(user.genres)
     <div className="bg-bg-secondary rounded-lg p-6 mb-6 border border-primary">
       <div className="flex flex-col md:flex-row items-center gap-6">
         <div className="relative">
-          <Image
-            src={user?.avatar || "/img/default_avatar.png"}
-            alt={t('profile.avatarAlt')}
-            width={120}
-            height={120}
-            className="rounded-full border-2 border-primary"
-          />
+            <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-primary">
+              <Image
+                src={user?.avatar || "/img/default_avatar.png"}
+                alt={t('profile.avatarAlt')}
+                fill
+                className="object-cover"
+                quality={100}
+              />
+            </div>
+
           {isCurrentUser && (
             <button
               onClick={onEdit}
@@ -81,7 +84,7 @@ console.log(user.genres)
         {isCurrentUser && (
           <button
             onClick={onLogout}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-700 text-white rounded-lg transition cursor-pointer"
           >
             <FontAwesomeIcon icon={faSignOutAlt} />
             {t('profile.logout')}

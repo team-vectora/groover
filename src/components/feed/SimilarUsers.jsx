@@ -2,27 +2,25 @@ import React, { useState, useEffect } from "react";
 import FollowButton from "./FollowButton";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 
 export default function SimilarUsers({ users = [], userId }) {
+    const { t } = useTranslation();
     const [page, setPage] = useState(0);
     const [followingStates, setFollowingStates] = useState({});
     const pageSize = 3;
 
-    // Inicializar estados de follow
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const following = JSON.parse(localStorage.getItem("following") || "[]");
             const initialFollowingStates = {};
-
             users.forEach(user => {
                 initialFollowingStates[user._id] = following.includes(user._id);
             });
-
             setFollowingStates(initialFollowingStates);
         }
     }, [users]);
 
-    // Escutar eventos de atualização de follow
     useEffect(() => {
         const handleFollowingUpdate = (event) => {
             setFollowingStates(prev => ({
@@ -30,16 +28,14 @@ export default function SimilarUsers({ users = [], userId }) {
                 [event.detail.userId]: event.detail.isFollowing
             }));
         };
-
         window.addEventListener('followingUpdated', handleFollowingUpdate);
-
         return () => {
             window.removeEventListener('followingUpdated', handleFollowingUpdate);
         };
     }, []);
 
     if (!users || users.length === 0) {
-        return <p className="text-center py-4">Carregando sugestões...</p>;
+        return <p className="text-center py-4">{t("similarUsers.loading")}</p>;
     }
 
     const startIndex = page * pageSize;
@@ -53,7 +49,7 @@ export default function SimilarUsers({ users = [], userId }) {
     return (
         <section className="bg-bg-secondary rounded-lg p-4 border-2 border-primary sticky top-24">
             <h2 className="text-2xl font-semibold text-accent-light mb-4 text-center">
-                Sugestões para você
+                {t("similarUsers.suggestionsTitle")}
             </h2>
 
             <ul className="space-y-3">
@@ -75,10 +71,10 @@ export default function SimilarUsers({ users = [], userId }) {
                                     <h3 className="text-lg font-medium">{user.username}</h3>
                                 </Link>
                                 <p className="text-foreground text-sm line-clamp-2 max-w-[100px]">
-                                    {user.bio || "Sem biografia"}
+                                    {user.bio || t("similarUsers.noBio")}
                                 </p>
                                 <p className="text-accent text-sm">
-                                    {(user.similarity * 100).toFixed(0)}% de match
+                                    {t("similarUsers.matchPercentage", { percentage: (user.similarity * 100).toFixed(0) })}
                                 </p>
                             </div>
                         </div>
@@ -100,7 +96,7 @@ export default function SimilarUsers({ users = [], userId }) {
                     onClick={handleMoreClick}
                     className="w-full mt-3 py-2 bg-primary rounded-md text-accent-light hover:bg-primary-light transition-colors"
                 >
-                    Ver mais
+                    {t("similarUsers.viewMore")}
                 </button>
             )}
         </section>

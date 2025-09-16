@@ -18,14 +18,11 @@
     "no_notifications": "Nenhuma notificação",
     "like": "{{user}} curtiu seu post",
     "comment": "{{user}} comentou: {{content}}",
-    "fork": "{{user}} fez um fork no seu projeto",
-    "recomendacao": "{{user}} recomendou você",
     "invite_accepted": "{{user}} aceitou seu convite para o projeto: {{content}}",
     "invite_rejected": "{{user}} recusou seu convite para o projeto: {{content}}",
     "invitation_received": "{{user}} te enviou um convite para o projeto: {{content}}",
     "collaborator_update": "{{user}} modificou seu projeto: {{content}}"
   },
-
   "login": {
     "title": "Entrar",
     "username": "Username",
@@ -66,13 +63,49 @@
     "rock": "Rock",
     "pop": "Pop",
     "jazz": "Jazz",
-    "hiphop": "Hip Hop",
-    "electronic": "Eletrônica",
-    "classical": "Clássica",
-    "metal": "Metal",
-    "country": "Country",
+    "blues": "Blues",
+    "rap": "Rap",
+    "hip hop": "Hip Hop",
+    "r&b": "R&B",
     "reggae": "Reggae",
-    "blues": "Blues"
+    "samba": "Samba",
+    "mpb": "MPB",
+    "bossa nova": "Bossa Nova",
+    "funk": "Funk",
+    "sertanejo": "Sertanejo",
+    "forró": "Forró",
+    "axé": "Axé",
+    "pagode": "Pagode",
+    "indie": "Indie",
+    "metal": "Metal",
+    "heavy metal": "Heavy Metal",
+    "trap": "Trap",
+    "lo-fi": "Lo-Fi",
+    "electronic": "Eletrônica",
+    "house": "House",
+    "techno": "Techno",
+    "trance": "Trance",
+    "drum and bass": "Drum and Bass",
+    "dubstep": "Dubstep",
+    "k-pop": "K-Pop",
+    "j-pop": "J-Pop",
+    "classical": "Clássica",
+    "opera": "Ópera",
+    "gospel": "Gospel",
+    "country": "Country",
+    "folk": "Folk",
+    "punk": "Punk",
+    "hardcore": "Hardcore",
+    "grunge": "Grunge",
+    "soul": "Soul",
+    "disco": "Disco",
+    "reggaeton": "Reggaeton",
+    "cumbia": "Cumbia",
+    "tango": "Tango",
+    "flamenco": "Flamenco",
+    "chillout": "Chillout",
+    "ambient": "Ambiental",
+    "experimental": "Experimental"
   },
   "settings": {
     "title": "Configurações",
@@ -82,12 +115,12 @@
     "app": "Aplicativo",
     "installApp": "Instalar App",
     "deleteAccount": "Deletar Conta",
-    "deleting": "Um email de confirmacao foi enviado.",
+    "deleting": "Um email de confirmação foi enviado.",
     "confirmDeleteTitle": "Confirmar exclusão da conta",
     "confirmDeleteMessage": "Tem certeza de que deseja excluir sua conta? Esta ação não pode ser desfeita.",
     "cancel": "Cancelar",
     "yesDelete": "Confirmar"
-},
+  },
   "livecode": {
     "title": "Livecode Song",
     "description": {
@@ -118,6 +151,77 @@
     "follow": "Seguir",
     "following": "Seguindo",
     "loading": "Carregando..."
-  }
-
+  },
+  "editor": {
+    "controls": {
+      "instrument": {
+        "title": "Instrumento",
+        "selectLabel": "Selecione um instrumento:"
+      },
+      "bpm": {
+        "tempo": "Tempo",
+        "bpmLabel": "Batidas por minuto"
+      },
+      "rhythm": {
+        "title": "Ritmo (Subdivisões)",
+        "options": {
+          "semibreve": "(Semibreve)",
+          "minima": "(Mínima)",
+          "tercina": "(Tercina)",
+          "seminima": "(Semínima)",
+          "sextina": "(Sextina)",
+          "colcheia": "(Colcheia)"
+        }
+      },
+      "volume": "Volume",
+      "panel": {
+        "newProject": "Novo Projeto",
+        "noDescription": "Sem descrição",
+        "page": "Página",
+        "pageOf": "Página {current} de {total}",
+        "deletePage": "Excluir Página Atual"
+      }
+    },
+    "confirmation": {
+      "clearTitle": "Limpar Página",
+      "clearMessage": "Todas as notas da página atual serão removidas. Esta ação não pode ser desfeita.",
+      "deleteTitle": "Excluir Página",
+      "deleteMessage": "Esta página será excluída permanentemente. Tem certeza?"
+    }
+  },
+  "header": {
+    "backToFeed": "Voltar ao Feed",
+    "playSong": "Tocar a música inteira",
+    "play": "TOCAR",
+    "pause": "PAUSAR",
+    "stop": "PARAR",
+    "clearPage": "Limpar Página",
+    "clear": "LIMPAR",
+    "exportMidi": "Exportar MIDI",
+    "export": "EXPORTAR",
+    "importMidi": "Importar MIDI",
+    "import": "IMPORTAR",
+    "saveProject": "Salvar Projeto",
+    "save": "SALVAR",
+    "forkProject": "Copiar projeto para seu perfil",
+    "fork": "FORK"
+  },
+  "confirmation": {
+    "title": "Confirmar Ação",
+    "message": "Você tem certeza que deseja continuar?",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar"
+  },
+  "similarUsers": {
+    "loading": "Carregando sugestões...",
+    "suggestionsTitle": "Sugestões para você",
+    "noBio": "Sem biografia",
+    "matchPercentage": "{{percentage}}% de match",
+    "viewMore": "Ver mais"
+  },
+  "versions": "Versões",
+  "unknown_user": "Usuário desconhecido",
+  "no_versions": "Nenhuma versão disponível",
+  "invalid_date": "Data inválida",
+  "current": "Atual"
 }

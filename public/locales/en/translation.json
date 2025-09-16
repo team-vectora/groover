@@ -24,22 +24,22 @@
     "collaborator_update": "{{user}} modified your project: {{content}}"
   },
   "login": {
-    "title": "Entrar",
+    "title": "Login",
     "username": "Username",
     "username_placeholder": "Yanke Doodle",
-    "password": "Senha",
-    "password_placeholder": "Digite sua senha",
-    "show_password": "Mostrar senha",
-    "hide_password": "Ocultar senha",
-    "forgot_password": "Esqueci senha",
-    "login_button": "Logar",
-    "logging_in": "Entrando...",
-    "terms": "Ao prosseguir, você concorda com os",
-    "terms_link": "Termos de uso",
-    "privacy_link": "Política de privacidade",
-    "no_account": "Não tem uma conta?",
-    "create_account": "Crie",
-    "login_success": "Login realizado com sucesso!"
+    "password": "Password",
+    "password_placeholder": "Enter your password",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
+    "forgot_password": "Forgot password",
+    "login_button": "Login",
+    "logging_in": "Logging in...",
+    "terms": "By continuing, you agree to the",
+    "terms_link": "Terms of use",
+    "privacy_link": "Privacy policy",
+    "no_account": "Don't have an account?",
+    "create_account": "Create",
+    "login_success": "Login successful!"
   },
   "search": {
     "title": "Search",
@@ -63,13 +63,49 @@
     "rock": "Rock",
     "pop": "Pop",
     "jazz": "Jazz",
-    "hiphop": "Hip Hop",
-    "electronic": "Electronic",
-    "classical": "Classical",
-    "metal": "Metal",
-    "country": "Country",
+    "blues": "Blues",
+    "rap": "Rap",
+    "hip hop": "Hip Hop",
+    "r&b": "R&B",
     "reggae": "Reggae",
-    "blues": "Blues"
+    "samba": "Samba",
+    "mpb": "MPB",
+    "bossa nova": "Bossa Nova",
+    "funk": "Funk",
+    "sertanejo": "Sertanejo",
+    "forró": "Forró",
+    "axé": "Axé",
+    "pagode": "Pagode",
+    "indie": "Indie",
+    "metal": "Metal",
+    "heavy metal": "Heavy Metal",
+    "trap": "Trap",
+    "lo-fi": "Lo-Fi",
+    "electronic": "Electronic",
+    "house": "House",
+    "techno": "Techno",
+    "trance": "Trance",
+    "drum and bass": "Drum and Bass",
+    "dubstep": "Dubstep",
+    "k-pop": "K-Pop",
+    "j-pop": "J-Pop",
+    "classical": "Classical",
+    "opera": "Opera",
+    "gospel": "Gospel",
+    "country": "Country",
+    "folk": "Folk",
+    "punk": "Punk",
+    "hardcore": "Hardcore",
+    "grunge": "Grunge",
+    "soul": "Soul",
+    "disco": "Disco",
+    "reggaeton": "Reggaeton",
+    "cumbia": "Cumbia",
+    "tango": "Tango",
+    "flamenco": "Flamenco",
+    "chillout": "Chillout",
+    "ambient": "Ambient",
+    "experimental": "Experimental"
   },
   "settings": {
     "title": "Settings",
@@ -79,12 +115,12 @@
     "app": "App",
     "installApp": "Install App",
     "deleteAccount": "Delete Account",
-    "deleting": "An verification email was send.",
+    "deleting": "A verification email was sent.",
     "confirmDeleteTitle": "Confirm Account Deletion",
     "confirmDeleteMessage": "Are you sure you want to delete your account? This action cannot be undone.",
     "cancel": "Cancel",
     "yesDelete": "Confirm"
-},
+  },
   "livecode": {
     "title": "Livecode Song",
     "description": {
@@ -115,6 +151,78 @@
     "follow": "Follow",
     "following": "Following",
     "loading": "Loading..."
-  }
+  },
+  "editor": {
+    "controls": {
+      "instrument": {
+        "title": "Instrument",
+        "selectLabel": "Select an instrument:"
+      },
+      "bpm": {
+        "tempo": "Tempo",
+        "bpmLabel": "Beats per minute"
+      },
+      "rhythm": {
+        "title": "Rhythm (Subdivisions)",
+        "options": {
+          "semibreve": "(Whole note)",
+          "minima": "(Half note)",
+          "tercina": "(Triplet)",
+          "seminima": "(Quarter note)",
+          "sextina": "(Sextuplet)",
+          "colcheia": "(Eighth note)"
+        }
+      },
+      "volume": "Volume",
+      "panel": {
+        "newProject": "New Project",
+        "noDescription": "No description",
+        "page": "Page",
+        "pageOf": "Page {current} of {total}",
+        "deletePage": "Delete Current Page"
+      }
+    },
+    "confirmation": {
+      "clearTitle": "Clear Page",
+      "clearMessage": "All notes on the current page will be removed. This action cannot be undone.",
+      "deleteTitle": "Delete Page",
+      "deleteMessage": "This page will be permanently deleted. Are you sure?"
+    }
+  },
+  "header": {
+    "backToFeed": "Back to Feed",
+    "playSong": "Play the entire song",
+    "play": "PLAY",
+    "pause": "PAUSE",
+    "stop": "STOP",
+    "clearPage": "Clear Page",
+    "clear": "CLEAR",
+    "exportMidi": "Export MIDI",
+    "export": "EXPORT",
+    "importMidi": "Import MIDI",
+    "import": "IMPORT",
+    "saveProject": "Save Project",
+    "save": "SAVE",
+    "forkProject": "Copy project to your profile",
+    "fork": "FORK"
+  },
+  "confirmation": {
+    "title": "Confirm Action",
+    "message": "Are you sure you want to continue?",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
 
+  "similarUsers": {
+    "loading": "Loading suggestions...",
+    "suggestionsTitle": "Suggestions for you",
+    "noBio": "No bio",
+    "matchPercentage": "{{percentage}}% match",
+    "viewMore": "View more"
+  },
+  "versions": "Versions",
+  "unknown_user": "Unknown user",
+  "no_versions": "No versions available",
+  "invalid_date": "Invalid date",
+  "current": "Current"
 }

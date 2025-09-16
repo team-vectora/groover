@@ -199,14 +199,17 @@ export default function Post({
         <div className="flex flex-col gap-4 bg-bg-secondary rounded-lg p-5 w-full mx-auto border border-primary mb-10 shadow-lg hover:shadow-xl transition-shadow">
             {/* Cabeçalho do post */}
             <div className="flex items-center gap-4">
-                <Image
-                    className="rounded-full object-cover border-2 border-primary hover:border-accent-light transition duration-300 cursor-pointer"
-                    src={avatarUrl}
-                    height={60}
-                    width={60}
+                <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-primary hover:border-accent-light transition duration-300 cursor-pointer">
+                  <Image
+                    src={avatarUrl || "/img/default_avatar.png"}
                     alt="Avatar"
+                    fill
+                    className="object-cover"
+                    quality={100}
                     unoptimized
-                />
+                  />
+                </div>
+
                 <div className="flex-1 justify-items-start">
                     <Link href={`/profile/${post.user?.username}`} className="hover:underline">
                         <p className="font-medium text-text-lighter">{post.user?.username || "Usuário desconhecido"}</p>

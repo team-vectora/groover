@@ -53,20 +53,21 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Header mobile */}
-      <div className="md:hidden flex items-center justify-center p-2 bg-bg-secondary border-b border-primary/50">
-        <img src="/img/groover_logo.png" alt="Groover Logo" className="w-28" />
-        <div className="flex items-center gap-4">
-          {/* Notificações */}
-          <button onClick={() => setIsNotifOpen(!isNotifOpen)}>
-            <FontAwesomeIcon icon={faBell} className="w-6 h-6 text-text-lighter" />
-          </button>
-          {/* Botão abrir menu */}
-          <button onClick={() => setIsMenuOpen(true)}>
-            <FontAwesomeIcon icon={faBars} className="w-6 h-6 text-white" />
-          </button>
-        </div>
+
+    <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-center p-2 bg-bg-secondary border-b border-primary/50">
+      <img src="/img/groover_logo.png" alt="Groover Logo" className="w-28" />
+      <div className="flex items-center gap-4 absolute right-4">
+        {/* Notificações */}
+        <button onClick={() => setIsNotifOpen(!isNotifOpen)}>
+          <FontAwesomeIcon icon={faBell} className="w-6 h-6 text-text-lighter" />
+        </button>
+        {/* Botão abrir menu */}
+        <button onClick={() => setIsMenuOpen(true)}>
+          <FontAwesomeIcon icon={faBars} className="w-6 h-6 text-white" />
+        </button>
       </div>
+    </div>
+
 
       {/* Drawer Mobile */}
       <div
@@ -177,12 +178,12 @@ const Sidebar = () => {
             <li className="relative" ref={notifRef}>
               <button
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
-                className="flex items-center w-full p-3 hover:bg-[var(--color-accent-sidebar)] rounded-lg transition-colors text-text-lighter cursor-pointer"
+                className="flex items-center w-full p-3 hover:bg-[var(--color-accent-sidebar)] rounded-lg transition-colors text-text-lighter cursor-pointer relative z-10"
               >
                 <FontAwesomeIcon icon={faBell} className="mr-3 w-6 h-6" />
                 <span>{t("sidebar.notifications")}</span>
                 {notifications.length > 0 && (
-                  <span className="absolute top-1 right-1 text-text-lighter text-[10px] px-1.5 rounded-full bg-primary">
+                  <span className="absolute top-1 right-1 text-text-lighter text-[10px] px-1.5 rounded-full bg-primary z-20">
                     {notifications.length > 9 ? "9+" : notifications.length}
                   </span>
                 )}
@@ -190,7 +191,7 @@ const Sidebar = () => {
 
               {/* Popup Notificações */}
               {isNotifOpen && (
-                <ul className="absolute top-full left-0 mt-2 w-80 max-h-96 overflow-y-auto bg-[var(--color-accent-sidebar)] border border-primary rounded-lg shadow-lg z-50">
+                <ul className="absolute top-full left-0 mt-2 w-70 max-h-96 overflow-y-auto bg-[var(--color-accent-sidebar)] border border-primary rounded-lg shadow-lg z-[9999]">
                   {loading && <li className="p-3 text-sm text-gray-400">{t("sidebar.loading")}</li>}
                   {error && <li className="p-3 text-sm text-red-400">{error}</li>}
                   {!loading && notifications.length === 0 && (
@@ -206,6 +207,7 @@ const Sidebar = () => {
                 </ul>
               )}
             </li>
+
 
             {/* Botão Nova Postagem */}
             <li>
