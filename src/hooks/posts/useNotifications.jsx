@@ -46,9 +46,9 @@ export default function useNotifications(token) {
         setError(data.error || t('toasts.error_marking_notification'));
       } else {
         setNotifications((prev) =>
-            prev.map((n) =>
-                n._id === notification_id ? { ...n, read: true } : n
-            )
+          prev.map((n) =>
+            n._id === notification_id ? { ...n, read: true } : n
+          )
         );
       }
     } catch (err) {
@@ -57,7 +57,11 @@ export default function useNotifications(token) {
   };
 
   useEffect(() => {
+    if (!token) return;
+
     fetchNotifications();
+    const interval = setInterval(fetchNotifications, 100000);
+    return () => clearInterval(interval);
   }, [token]);
 
   return { notifications, loading, error, refetch: fetchNotifications, checkNotification };

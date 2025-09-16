@@ -99,7 +99,7 @@ def delete_confirm(token):
         if not user or user["email"] != email:
             status = "error"
         else:
-            result = User.delete(email)
+            result = User.delete(user["_id"])
             if getattr(result, "deleted_count", 0) == 0:
                 status = "error"
 

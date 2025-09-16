@@ -55,16 +55,12 @@ def signup():
 @auth_bp.route('/confirm_email/<token>')
 def confirm_email(token):
     try:
-        # Validação do token com expiração de 5 minutos (300 segundos)
         email = s.loads(token, salt=os.getenv("SALT_AUTH"), max_age=300)
         User.activate_user(email)
-        # Redireciona para o frontend com status de sucesso
         return redirect(f"{FRONTEND_URL}/auth-result?status=success")
     except SignatureExpired:
-        # Redireciona para o frontend com status de expirado
         return redirect(f"{FRONTEND_URL}/auth-result?status=expired")
     except Exception:
-        # Redireciona para o frontend com status de erro genérico
         return redirect(f"{FRONTEND_URL}/auth-result?status=error")
 
 @auth_bp.route('/forgot_password', methods=['POST'])
@@ -124,12 +120,10 @@ def signin():
         return jsonify({'error': 'Username and password are required'}), 400
 
     user = User.find_by_username(data['username'])
-    print(user)
-    print(data)
-    if not user or not check_password_hash(user['password'], data['password']):
-        return jsonify({'error': 'Invalid credentials'}), 401
 
+    print(user['active'])
     if not user['active']:
+        print("ENTREI")
         lang = request.headers.get('Accept-Language', 'en').split(',')[0]
         User.send_email_verification(
             email=user['email'],
@@ -141,7 +135,8 @@ def signin():
         return jsonify({
             'error': 'User is not active. Verification email resent.',
         }), 401
-
+    if not user or not check_password_hash(user['password'], data['password']):
+        return jsonify({'error': 'Invalid credentials'}), 401
     expires = timedelta(hours=24)
     access_token = create_access_token(
         identity=str(user['_id']),

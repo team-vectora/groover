@@ -17,7 +17,7 @@ const SaveMusicPopUp = ({
   const { t } = useTranslation();
   return (
       <Popup open={open} closeOnDocumentClick={false}   contentStyle={{ background: "transparent", boxShadow: "none", border:"none"}}>
-        <div className="modal p-6 rounded-lg shadow-lg bg-[#121113] text-[#e6e8e3] max-w-md mx-auto cursor">
+        <div className="modal p-6 rounded-lg shadow-lg bg-bg-secondary text-foreground max-w-md mx-auto cursor">
           <button
               className="close text-4xl font-bold float-right hover:text-red-600 transition-colors duration-300"
               onClick={onCancel}
@@ -26,7 +26,7 @@ const SaveMusicPopUp = ({
           </button>
 
 
-          <div className="header text-2xl font-semibold mb-4 text-[#a97f52]">
+          <div className="header text-2xl font-semibold mb-4 text-accent">
             {t('editor.saveProject')}
           </div>
 
@@ -42,7 +42,7 @@ const SaveMusicPopUp = ({
                 placeholder={t('editor.title')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="bg-[#070608] text-[#e6e8e3] border border-[#61673e] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#c1915d]"
+                className="bg-bg-darker text-foreground border border-primary-light rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-light:"
                 required
             />
             <input
@@ -50,12 +50,12 @@ const SaveMusicPopUp = ({
                 placeholder={t('editor.description')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="bg-[#070608] text-[#e6e8e3] border border-[#61673e] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#c1915d]"
+                className="bg-bg-darker text-foreground border border-primary-light rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-light"
                 required
             />
             <button
                 type="submit"
-                className="bg-[#a97f52] hover:bg-[#c1915d] text-white px-4 py-2 rounded transition duration-300"
+                className="bg-accent hover:bg-accent-light text-white px-4 py-2 rounded transition duration-300"
             >
               {saveOrFork || t('editor.save')}
             </button>

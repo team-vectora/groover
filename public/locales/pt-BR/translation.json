@@ -32,6 +32,7 @@
     "viewThread": "Ver thread",
     "deletePost": "Apagar post",
     "deletePostTitle": "Apagar Post",
+    "deletedSuccess": "Post deletado com sucesso!",
     "deletePostConfirmation": "Você tem certeza que deseja apagar este post?",
     "noComments": "Nenhum comentário ainda.",
     "comments": "Comentários"

@@ -31,7 +31,7 @@ export default function ProfilePage({ params }) {
 
   const { forkProject } = useForkProject(token);
   const { shareProject: shareProjectApi } = useShareProject(token);
-  const { deletePost } = useDeleteProject(token);
+  const { deleteProject: deletePost } = useDeleteProject(token);
 
   const isCurrentUser = currentUsername === username;
 
@@ -127,21 +127,22 @@ export default function ProfilePage({ params }) {
                   </div>
               )}
 
-              {posts.length === 0 ? (
-                  <p className="text-center text-gray-400">{t('profile.noPosts')}</p>
-              ) : (
-                  posts.map(post => (
-                      <Post
-                          key={post._id}
-                          token={token}
-                          post={post}
-                          userId={userId}
-                          setCurrentProject={setCurrentProject}
-                          handleClickFork={handleForkProject}
-                          onPostCreated={refetch} // Adicionado para refetch
-                      />
-                  ))
-              )}
+                {(!posts || posts.length === 0) ? (
+                    <p className="text-center text-gray-400">{t('profile.noPosts')}</p>
+                ) : (
+                    posts.map(post => (
+                        <Post
+                            key={post._id}
+                            token={token}
+                            post={post}
+                            userId={userId}
+                            setCurrentProject={setCurrentProject}
+                            handleClickFork={handleForkProject}
+                            onPostCreated={refetch}
+                        />
+                    ))
+                )}
+
             </div>
         )}
 

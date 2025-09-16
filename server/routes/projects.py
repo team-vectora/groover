@@ -184,10 +184,13 @@ def fork_project():
         user_id
     )
 
+    Notification.create(user_id=project['user_id'], type="fork", actor=data.get('username_actor'))
+
+
     return jsonify({
-        'message': 'Fork created',
-        'new_project_id': new_project_id
-    }), 201
+            'message': 'Fork created',
+            'new_project_id': new_project_id
+        }), 201
 
 
 @projects_bp.route('/<project_id>', methods=['DELETE'])

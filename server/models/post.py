@@ -7,6 +7,7 @@ from utils.genres import GENRES
 from bson import Binary
 import base64
 from utils.similarity import cosine_similarity
+import pytz
 
 from models import User
 
@@ -14,20 +15,20 @@ from models import User
 class Post:
     @staticmethod
     def create(user_id, project_id=None, photos=None, caption=None, genres=None, is_comment=False, parent_post_id=None):
+        tz = pytz.timezone("America/Sao_Paulo")
         post = {
             'user_id': ObjectId(user_id),
             'project_id': ObjectId(project_id) if project_id else None,
             'parent_post_id': ObjectId(parent_post_id) if parent_post_id else None,  # Novo campo
             'photos': photos if photos else [],
             'caption': caption if caption else "",
-            'created_at': datetime.now(),
+            'created_at': datetime.now(tz),
             'likes': [],
             'comments': [],
             'comment_count': 0,
             'is_comment': is_comment,
             'genres': genres if genres else []
         }
-        # Se for um comentário, incrementa o contador no post pai
         if parent_post_id:
             mongo.db.posts.update_one(
                 {'_id': ObjectId(parent_post_id)},
@@ -36,7 +37,7 @@ class Post:
         return mongo.db.posts.insert_one(post).inserted_id
 
     @staticmethod
-    def get_posts_with_user_and_project(user_id, similarity_threshold=0.5, limit=50):  # Limite aumentado
+    def get_posts_with_user_and_project(user_id, similarity_threshold=0.7, limit=50):
 
         def encode_midi_field(post):
             if post.get('project') and post['project'] and 'midi' in post['project'] and post['project']['midi']:
@@ -161,7 +162,7 @@ class Post:
             if similarity >= similarity_threshold:
                 if 'likes' in post:
                     post['likes'] = [str(like) if isinstance(like, ObjectId) else like for like in post['likes']]
-
+                print(post_user_genres)
                 post = encode_midi_field(post)
 
                 filtered_posts.append(post)

@@ -10,6 +10,7 @@ from .followers import Followers
 from markupsafe import escape
 from werkzeug.security import generate_password_hash
 
+from utils.similarity import cosine_similarity
 # Corrigido: Use o TimedSerializer para tokens com expiração
 s = URLSafeTimedSerializer(os.getenv('AUTH_KEY'))
 
@@ -102,14 +103,13 @@ class User:
 
     @staticmethod
     def update_password(email, new_password):
-        hashed_pw = generate_password_hash(new_password)
-        print(hashed_pw)
+        hashed_pw = generate_password_hash(new_password, method="scrypt")
         result = mongo.db.users.update_one(
             {'email': email},
             {'$set': {'password': hashed_pw}}
         )
-        print(User.find_by_email(email))
         return result.modified_count > 0
+
 
     @staticmethod
     def send_reset_password_email(email, username, reset_url):
@@ -137,9 +137,12 @@ class User:
         mail.send(msg)
     # ... resto do arquivo user.py sem alterações ...
     @staticmethod
-    def delete(email):
-        result = mongo.db.users.delete_one({'email': email})
-        return result.deleted_count > 0
+    def delete(user_id):
+        user_oid = ObjectId(user_id)
+        result_user = mongo.db.users.delete_one({'_id': user_oid})
+        result_posts = mongo.db.posts.delete_many({'user_id': user_oid})
+
+        return result_user.deleted_count > 0
 
     @staticmethod
     def find_by_username(username):

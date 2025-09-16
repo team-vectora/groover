@@ -18,7 +18,10 @@ export default function useForkProject(token) {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ project_id: projectId })
+        body: JSON.stringify({
+          project_id: projectId,
+          username_actor: localStorage.getItem("username")
+        })
       });
 
       if (!response.ok) throw new Error(t('errors.fork_failed'));

@@ -32,7 +32,7 @@ export default function MidiPlayer() {
         <div
             className={`fixed bottom-0 left-0 w-full z-50 px-3 py-2 border-t transition-all duration-300 ${
                 collapsed ? "h-12" : "h-28"
-            } bg-background background text-foreground border-accent`}
+            } bg-background text-foreground border-accent`}
         >
             {/* Botão de recolher */}
             <button
