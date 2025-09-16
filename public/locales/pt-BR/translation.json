@@ -15,6 +15,16 @@
   "feed": {
     "loading": "Carregando posts..."
   },
+  "forgotPassword": {
+    "title": "Esqueceu a senha?",
+    "description": "Digite seu e-mail abaixo para receber um link de redefinição de senha.",
+    "email_label": "E-mail",
+    "email_placeholder": "Digite seu e-mail",
+    "send_email": "Enviar e-mail",
+    "sending": "Enviando...",
+    "email_sent": "E-mail enviado com sucesso!",
+    "email_error": "Erro ao enviar o e-mail. Tente novamente."
+  },
   "post": {
     "loading": "Carregando post...",
     "unavailable": "Esse post não está mais disponível.",

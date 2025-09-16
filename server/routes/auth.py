@@ -1,7 +1,7 @@
 import os
 from datetime import timedelta
 
-from flask import Blueprint, request, jsonify, redirect
+from flask import Blueprint, request, jsonify, redirect, render_template
 from flask_jwt_extended import create_access_token
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -67,6 +67,51 @@ def confirm_email(token):
         # Redireciona para o frontend com status de erro genérico
         return redirect(f"{FRONTEND_URL}/auth-result?status=error")
 
+@auth_bp.route('/forgot_password', methods=['POST'])
+def forgot_password():
+    data = request.get_json()
+    email = data.get('email')
+    if not email:
+        return {"error": "Email is required"}, 4001
+
+    user = User.find_by_email(email)
+    if not user:
+        return {"error": "User not found"}, 404
+
+    token = s.dumps(email, salt=os.getenv('SALT_AUTH'))
+    reset_url = f"{request.host_url}api/auth/reset_password/{token}"
+
+    User.send_reset_password_email(email, user['username'], reset_url)
+    return {"message": "Password reset email sent"}, 200
+
+
+@auth_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        email = s.loads(token, salt=os.getenv('SALT_AUTH'), max_age=600)
+    except SignatureExpired:
+        return render_template('reset_password.html', status='error', error_message="Link expired. Request a new reset email.")
+
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        if new_password != confirm_password:
+            return render_template('reset_password.html', status='error', error_message="Passwords do not match.")
+
+        strength = 0
+        if len(new_password) >= 8: strength += 1
+        if any(c.isupper() for c in new_password): strength += 1
+        if any(c.isdigit() for c in new_password): strength += 1
+        if any(not c.isalnum() for c in new_password): strength += 1
+        if strength < 3:
+            return render_template('reset_password.html', status='error', error_message="Password is too weak.")
+        print(new_password)
+        User.update_password(email, new_password)
+
+        return render_template('reset_password.html', status='success')
+
+    return render_template('reset_password.html', status=None)
 
 # Rota removida, pois o frontend cuidará disso
 # @auth_bp.route('/token_expired') ...
@@ -79,12 +124,12 @@ def signin():
         return jsonify({'error': 'Username and password are required'}), 400
 
     user = User.find_by_username(data['username'])
-
+    print(user)
+    print(data)
     if not user or not check_password_hash(user['password'], data['password']):
         return jsonify({'error': 'Invalid credentials'}), 401
 
     if not user['active']:
-        # O idioma pode ser pego do header da requisição se você o enviar do frontend
         lang = request.headers.get('Accept-Language', 'en').split(',')[0]
         User.send_email_verification(
             email=user['email'],

@@ -8,6 +8,7 @@ from flask_mail import Message
 from utils.mail import mail
 from .followers import Followers
 from markupsafe import escape
+from werkzeug.security import generate_password_hash
 
 # Corrigido: Use o TimedSerializer para tokens com expiração
 s = URLSafeTimedSerializer(os.getenv('AUTH_KEY'))
@@ -94,6 +95,42 @@ class User:
         msg = Message(
             subject=content['subject'],
             recipients=[email],
+            html=html_body,
+            sender=os.getenv('MAIL_USERNAME')
+        )
+        mail.send(msg)
+
+    @staticmethod
+    def update_password(email, new_password):
+        hashed_pw = generate_password_hash(new_password)
+        print(hashed_pw)
+        result = mongo.db.users.update_one(
+            {'email': email},
+            {'$set': {'password': hashed_pw}}
+        )
+        print(User.find_by_email(email))
+        return result.modified_count > 0
+
+    @staticmethod
+    def send_reset_password_email(email, username, reset_url):
+        html_body = f"""
+        <html>
+        <body style="font-family: Arial; background:#0a090d; color:#e6e8e3; padding:20px;">
+        <div style="max-width:600px;margin:auto;background:#121113;padding:30px;border-radius:10px;">
+        <h2 style="color:#4c4e30;text-align:center;">Password Reset for {escape(username)}</h2>
+        <p>Click below to reset your password:</p>
+        <p style="text-align:center;">
+            <a href="{reset_url}" style="padding:14px 28px;background:#a97f52;color:#fff;text-decoration:none;border-radius:6px;">Reset Password</a>
+        </p>
+        </div>
+        </body>
+        </html>
+        """
+
+        msg = Message(
+            subject="Groover Password Reset",
+            recipients=[email],
+            body=f"Hello {username}, reset your password: {reset_url}",
             html=html_body,
             sender=os.getenv('MAIL_USERNAME')
         )
@@ -233,7 +270,7 @@ class User:
             u_genres = u.get('genres', {})
             u_vector = [u_genres.get(g, 0) for g in GENRES]
             similarity = cosine_similarity(user_vector, u_vector)
-            if similarity >= 0.6:
+            if similarity >= 0.4:
                 similar_users.append({
                     '_id': str(u['_id']),
                     'username': u.get('username'),

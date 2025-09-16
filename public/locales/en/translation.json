@@ -15,6 +15,16 @@
   "feed": {
     "loading": "Loading posts..."
   },
+  "forgotPassword": {
+    "title": "Forgot your password?",
+    "description": "Enter your email below to receive a password reset link.",
+    "email_label": "Email",
+    "email_placeholder": "Enter your email",
+    "send_email": "Send Email",
+    "sending": "Sending...",
+    "email_sent": "Email sent successfully!",
+    "email_error": "Error sending email. Please try again."
+  },
   "post": {
     "loading": "Loading post...",
     "unavailable": "This post is no longer available.",

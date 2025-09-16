@@ -7,6 +7,9 @@ import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { useTranslation } from "react-i18next";
+import { ForgotPasswordPopup } from "../../../components";
+
+import { API_BASE_URL } from "../../../config";
 
 const LoginPage = () => {
     const { t } = useTranslation();
@@ -16,6 +19,7 @@ const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [senha, setSenha] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
 
     useEffect(() => {
         if (errors.general) {
@@ -85,7 +89,16 @@ const LoginPage = () => {
                             />
                         </button>
                     </div>
-                    <a href="#" className="text-accent hover:text-accent-light mt-1 block text-sm">{t("login.forgot_password")}</a>
+                    <a
+                        href="#"
+                        className="text-accent hover:text-accent-light mt-1 block text-sm"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setIsPopupOpen(true);
+                        }}
+                    >
+                        {t("login.forgot_password")}
+                    </a>
                 </div>
 
                 <button
@@ -110,6 +123,19 @@ const LoginPage = () => {
             <p className="text-center text-foreground">
                 {t("login.no_account")} <a href="/signup" className="text-accent font-semibold hover:underline">{t("login.create_account")}</a>
             </p>
+
+            <ForgotPasswordPopup
+                isOpen={isPopupOpen}
+                onClose={() => setIsPopupOpen(false)}
+                onSendEmail={async (email) => {
+                    const res = await fetch(`${API_BASE_URL}/auth/forgot_password`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email })
+                    });
+                    return res.ok;
+                }}
+            />
         </div>
     );
 };

@@ -109,6 +109,8 @@ def delete_confirm(token):
         email=email
     )
 
+
+
 @users_bp.route("/similar", methods=["GET"])
 @jwt_required()
 def get_users_similar():
