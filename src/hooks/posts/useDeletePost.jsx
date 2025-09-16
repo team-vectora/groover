@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { API_BASE_URL } from "../../config";
+import { useTranslation } from "react-i18next";
 
 export default function useDeletePost(token) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const deletePost = async (postId, onSuccess) => {
@@ -17,10 +19,10 @@ export default function useDeletePost(token) {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Erro ao excluir o post");
+        throw new Error(data.error ? t(`backend_errors.${data.error}`, { defaultValue: t('errors.delete_failed') }) : t('errors.delete_failed'));
       }
 
-      toast.success("Post apagado com sucesso!");
+      toast.success(t('post.deletedSuccess'));
       if (onSuccess) onSuccess();
     } catch (err) {
       toast.error(err.message);

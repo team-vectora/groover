@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { API_BASE_URL } from "../../config"; // ajuste o caminho conforme sua estrutura
+import { API_BASE_URL } from "../../config";
+import { useTranslation } from "react-i18next";
 
 export default function useFollow() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -12,7 +14,7 @@ export default function useFollow() {
 
       const token = localStorage.getItem('token');
       if (!token) {
-        throw new Error("Token de autenticação não encontrado");
+        throw new Error(t('errors.invalid_token'));
       }
 
       const response = await fetch(`${API_BASE_URL}/users/follow`, {
@@ -27,16 +29,13 @@ export default function useFollow() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao seguir/deixar de seguir');
+        throw new Error(data.error ? t(`backend_errors.${data.error}`, { defaultValue: t('toasts.error_following') }) : t('toasts.error_following'));
       }
 
-      // Atualiza o estado local
       const newIsFollowing = !currentFollowingState;
       setFollowingState(newIsFollowing);
 
-      // Atualiza o localStorage
       let updatedFollowing = JSON.parse(localStorage.getItem('following') || '[]');
-
       if (newIsFollowing) {
         if (!updatedFollowing.includes(followingId)) {
           updatedFollowing.push(followingId);
@@ -44,15 +43,10 @@ export default function useFollow() {
       } else {
         updatedFollowing = updatedFollowing.filter(id => id !== followingId);
       }
-
       localStorage.setItem('following', JSON.stringify(updatedFollowing));
 
-      // Dispara evento personalizado para notificar outros componentes
       const event = new CustomEvent('followingUpdated', {
-        detail: {
-          userId: followingId,
-          isFollowing: newIsFollowing
-        }
+        detail: { userId: followingId, isFollowing: newIsFollowing }
       });
       window.dispatchEvent(event);
 
@@ -60,7 +54,7 @@ export default function useFollow() {
 
     } catch (err) {
       setError(err.message);
-      console.error('Erro no hook useFollow:', err);
+      console.error('Error in useFollow hook:', err);
       return { success: false, error: err.message };
     } finally {
       setLoading(false);

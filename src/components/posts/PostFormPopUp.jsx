@@ -1,5 +1,3 @@
-// src/components/posts/PostFormPopUp.jsx
-
 'use client'
 
 import { useState, useRef, useEffect } from 'react';
@@ -84,11 +82,11 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
           onPostCreated();
         }
       } else {
-        toast.error(data.error || "Erro ao criar post");
+        toast.error(data.error || t('toasts.error_creating_post'));
       }
     } catch (error) {
       console.error("Erro:", error);
-      toast.error("Erro ao conectar com a API");
+      toast.error(t('errors.api_connection_error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -98,7 +96,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
     const files = Array.from(e.target.files);
 
     if (files.length + images.length > 5) {
-      alert("Máximo de 5 imagens permitidas");
+      alert(t('alerts.max_images'));
       return;
     }
 
@@ -188,7 +186,6 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
 
           {/* Preview + Projeto (agora à direita) */}
           <div className="md:w-1/2 p-5 border-t md:border-t-0 md:border-l border-primary: flex flex-col items-center bg-bg-secondary">
-            {/* Preview de imagens */}
             {previews.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-2 gap-3 mb-4 w-full">
                   {previews.map((preview, index) => (
@@ -228,7 +225,6 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
                 </div>
             )}
 
-            {/* Selecionar imagens */}
             <label
                 htmlFor="file-upload"
                 className="inline-block px-4 py-2 rounded-md cursor-pointer select-none bg-primary text-white hover:bg-primary-light mb-4"
@@ -245,7 +241,6 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
                 className="hidden"
             />
 
-            {/* Projeto */}
             <label className="block mb-2 text-sm text-gray-300 w-full">{t('postForm.projectLabel')}</label>
             <select
                 value={selectedProject}

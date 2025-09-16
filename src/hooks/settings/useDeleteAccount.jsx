@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { API_BASE_URL } from "../../config";
+import { useTranslation } from "react-i18next";
 
 export function useDeleteAccount(token) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const deleteAccount = async () => {
-
     setLoading(true);
     setError(null);
 
@@ -22,7 +23,7 @@ export function useDeleteAccount(token) {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Erro desconhecido");
+        throw new Error(data.error || t('errors.generic_error'));
       }
 
       return { success: true };

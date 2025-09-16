@@ -233,8 +233,8 @@
     "deleteLastPageError": "Não é possível excluir a última página."
   },
   "midiPlayer": {
-    "expand": "Expandir player",
-    "collapse": "Recolher player",
+    "expand": "Expandir",
+    "collapse": "Recolher",
     "pause": "Pausar",
     "play": "Tocar",
     "stop": "Parar",
@@ -404,5 +404,73 @@
     "privacy_policy": "Política de privacidade",
     "already_have_account": "Já tem uma conta?",
     "login_link": "Entrar"
+  },
+  "errors": {
+    "user_not_found": "Usuário não encontrado",
+    "post_not_found": "Post não encontrado",
+    "project_not_found": "Projeto não encontrado",
+    "unauthorized": "Não autorizado",
+    "forbidden": "Acesso negado",
+    "generic_error": "Ocorreu um erro",
+    "network_error": "Erro na comunicação com o servidor",
+    "invalid_token": "Token inválido ou expirado. Faça login novamente.",
+    "api_connection_error": "Erro ao conectar com a API",
+    "no_data_provided": "Nenhum dado fornecido",
+    "update_failed": "Falha na atualização",
+    "delete_failed": "Falha ao deletar",
+    "fork_failed": "Erro ao fazer fork do projeto"
+  },
+  "validation": {
+    "username_required": "Nome de usuário é obrigatório",
+    "username_min_length": "Nome de usuário deve ter pelo menos 3 caracteres",
+    "username_max_length": "Nome de usuário não pode exceder 20 caracteres",
+    "username_pattern": "Use apenas letras, números e underline (_)",
+    "username_no_spaces": "Nome de usuário não pode conter espaços",
+    "email_required": "Email é obrigatório",
+    "email_invalid": "Digite um email válido",
+    "password_required": "Senha é obrigatória",
+    "password_min_length": "Senha deve ter pelo menos 8 caracteres",
+    "password_uppercase": "Inclua pelo menos uma letra maiúscula",
+    "password_number": "Inclua pelo menos um número",
+    "password_special_char": "Inclua pelo menos um caractere especial",
+    "password_no_spaces": "Senha não pode conter espaços",
+    "passwords_no_match": "As senhas não coincidem",
+    "password_too_weak": "Sua senha é muito fraca",
+    "comment_required": "O texto do comentário é obrigatório",
+    "bio_too_long": "Bio muito longa",
+    "invalid_music_tags": "Tags musicais inválidas",
+    "search_term_required": "Pelo menos um termo de busca ou tag é necessário"
+  },
+  "toasts": {
+    "forking": "Copiando projeto...",
+    "error_loading_project": "Falha ao carregar o projeto",
+    "error_saving_project": "Falha ao salvar o projeto",
+    "error_importing_midi": "Não foi possível ler o arquivo MIDI",
+    "error_following": "Erro ao seguir/deixar de seguir",
+    "error_loading_notifications": "Erro ao carregar notificações",
+    "error_marking_notification": "Erro ao marcar notificação",
+    "error_loading_similar_users": "Erro ao buscar usuários similares",
+    "error_creating_post": "Erro ao criar post"
+  },
+  "alerts": {
+    "max_images": "Máximo de 5 imagens permitidas"
+  },
+  "backend_errors": {
+    "username_exists": "Nome de usuário já em uso",
+    "email_exists": "Email já cadastrado",
+    "invalid_credentials": "Nome de usuário ou senha incorreto",
+    "user_not_active": "Usuário não está ativo. E-mail de verificação reenviado.",
+    "response_required": "A resposta é obrigatória",
+    "invitation_not_found": "Convite não encontrado",
+    "invitation_already_responded": "Este convite já foi respondido",
+    "invalid_response": "Resposta inválida",
+    "username_is_required": "Nome de usuário é obrigatório",
+    "cannot_invite_yourself": "Você não pode convidar a si mesmo",
+    "already_collaborator": "O usuário já é um colaborador",
+    "invitation_already_sent": "Um convite já foi enviado para este usuário para este projeto",
+    "project_id_not_found": "project_id não encontrado",
+    "project_no_music": "O projeto não tem música para copiar",
+    "following_id_required": "following_id obrigatório",
+    "cant_follow_self": "Não é possível seguir a si mesmo."
   }
 }

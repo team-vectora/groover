@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { API_BASE_URL } from "../../config"; // ajuste o caminho conforme a sua estrutura
+import { API_BASE_URL } from "../../config";
+import { useTranslation } from "react-i18next";
 
 export default function useLikePost(token, onSuccess) {
+  const { t } = useTranslation();
   const [error, setError] = useState("");
 
   const likePost = async (post_id, owner_id) => {
@@ -17,21 +19,18 @@ export default function useLikePost(token, onSuccess) {
 
       if (!res.ok) {
         if (res.status === 401) {
-          setError("Token inválido ou expirado. Faça login novamente.");
+          setError(t('errors.invalid_token'));
           return;
         }
-        const text = await res.text();
-        setError(`Erro na API: ${res.status} - ${text}`);
+        const data = await res.json();
+        setError(t(`backend_errors.${data.error}`, { defaultValue: t('errors.generic_error') }));
         return;
       }
-
-      const data = await res.json();
-      console.log(data.message);
 
       if (onSuccess) onSuccess();
 
     } catch (err) {
-      setError("Erro na comunicação com a API.");
+      setError(t('errors.network_error'));
       console.error(err);
     }
   };

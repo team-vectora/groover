@@ -21,7 +21,7 @@ export default function useForkProject(token) {
         body: JSON.stringify({ project_id: projectId })
       });
 
-      if (!response.ok) throw new Error("Erro ao fazer fork");
+      if (!response.ok) throw new Error(t('errors.fork_failed'));
 
       const data = await response.json();
       toast.success(t('fork.copiedSuccess'));

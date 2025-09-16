@@ -1,16 +1,21 @@
-// src/components/posts/CommentForm.jsx
 import { useState } from 'react';
 import PostFormPopUp from './PostFormPopUp';
-import {API_BASE_URL} from "../../config"; // Importe o popup
+import { API_BASE_URL } from "../../config";
+import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 
 const CommentForm = ({ postId, token, onCommentAdded, projects }) => {
+    const { t } = useTranslation();
     const [caption, setCaption] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isPopupOpen, setIsPopupOpen] = useState(false); // Estado para controlar o popup
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!caption.trim()) return;
+        if (!caption.trim()) {
+            toast.error(t('validation.comment_required'));
+            return;
+        }
         setIsSubmitting(true);
         try {
             await fetch(`${API_BASE_URL}/posts/${postId}/comment`, {
@@ -22,9 +27,10 @@ const CommentForm = ({ postId, token, onCommentAdded, projects }) => {
                 body: JSON.stringify({ caption })
             });
             setCaption('');
-            onCommentAdded(); // Recarrega os comentários no pai
+            onCommentAdded();
         } catch (err) {
-            console.error("Erro ao comentar:", err);
+            console.error("Error submitting comment:", err);
+            toast.error(t('errors.network_error'));
         } finally {
             setIsSubmitting(false);
         }
@@ -36,16 +42,16 @@ const CommentForm = ({ postId, token, onCommentAdded, projects }) => {
                 <textarea
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
-                    placeholder="Escreva seu comentário..."
+                    placeholder={t('postForm.commentPlaceholder')}
                     className="w-full p-2 bg-bg-darker rounded-md"
                     rows="3"
                 />
                 <div className="flex justify-between items-center mt-2">
                     <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-accent rounded-md">
-                        {isSubmitting ? "Enviando..." : "Comentar"}
+                        {isSubmitting ? t('login.logging_in') : t('postForm.comment')}
                     </button>
                     <button type="button" onClick={() => setIsPopupOpen(true)} className="text-sm text-accent hover:underline">
-                        Expandir
+                        {t('midiPlayer.expand')}
                     </button>
                 </div>
             </form>

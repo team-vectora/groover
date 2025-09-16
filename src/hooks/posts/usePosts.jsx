@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
+import { useTranslation } from 'react-i18next';
 
 export default function usePosts(token) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useTranslation();
 
   const fetchPosts = async () => {
     if (!token) return;
@@ -19,10 +21,10 @@ export default function usePosts(token) {
       if (res.ok) {
         setPosts(data);
       } else {
-        setError(data.error || 'Erro ao carregar posts');
+        setError(data.error || t('livecode.error'));
       }
     } catch (err) {
-      setError('Erro na comunicação com o servidor');
+      setError(t('errors.network_error'));
     } finally {
       setLoading(false);
     }

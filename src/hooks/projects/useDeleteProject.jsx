@@ -17,7 +17,7 @@ export default function useDeleteProject(token) {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Erro ao excluir projeto");
+        throw new Error(data.error || t('errors.delete_failed'));
       }
 
       toast.success(t('project.deletedSuccess'));

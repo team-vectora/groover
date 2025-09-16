@@ -64,12 +64,12 @@ export default function EditorPage() {
 
     const handleFork = async () => {
         if (forkLoading) return;
-        toast.info(t("editor.toast.forking"));
+        toast.info(t("toasts.forking"));
         await forkProject(projectId);
     };
 
     if (authLoading || apiState.loading) {
-        return <div className="flex items-center justify-center h-screen">{t("loading")}</div>;
+        return <div className="flex items-center justify-center h-screen">{t("sidebar.loading")}</div>;
     }
 
     const handleClear = () => setConfirmationAction('clear');

@@ -1,31 +1,29 @@
 import { useState, useEffect } from "react";
-import { API_BASE_URL } from "../../config"; // ajuste o caminho conforme sua estrutura
+import { API_BASE_URL } from "../../config";
+import { useTranslation } from "react-i18next";
 
 export default function useNotifications(token) {
+  const { t } = useTranslation();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // GET notifications
   const fetchNotifications = async () => {
     if (!token) return;
 
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/notifications`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = await res.json();
       if (res.ok) {
         setNotifications(data);
       } else {
-        setError(data.error || "Erro ao carregar notificações");
+        setError(data.error || t('toasts.error_loading_notifications'));
       }
     } catch (err) {
-      setError("Erro na comunicação com o servidor");
+      setError(t('errors.network_error'));
     } finally {
       setLoading(false);
     }
@@ -43,19 +41,18 @@ export default function useNotifications(token) {
         },
         body: JSON.stringify({ notification_id }),
       });
-
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Erro ao marcar notificação");
+        setError(data.error || t('toasts.error_marking_notification'));
       } else {
         setNotifications((prev) =>
-          prev.map((n) =>
-            n._id === notification_id ? { ...n, read: true } : n
-          )
+            prev.map((n) =>
+                n._id === notification_id ? { ...n, read: true } : n
+            )
         );
       }
     } catch (err) {
-      setError("Erro na comunicação com o servidor");
+      setError(t('errors.network_error'));
     }
   };
 

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { API_BASE_URL } from "../../config";
+import { useTranslation } from "react-i18next";
 
 export default function useShareProject(token) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const shareProject = async (projectId, username) => {
@@ -18,14 +20,14 @@ export default function useShareProject(token) {
       });
 
       const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || "Erro ao compartilhar");
+        // Agora, usamos a chave de erro do backend para traduzir
+        throw new Error(t(`backend_errors.${data.error}`, { defaultValue: t('share.error') }));
       }
 
-      toast.success("Projeto compartilhado", { theme: "dark", autoClose: 3000 });
+      toast.success(t('share.sharedSuccess'));
     } catch (err) {
-      toast.error(err.message, { theme: "dark", autoClose: 3000 });
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

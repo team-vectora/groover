@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { API_BASE_URL } from "../../config";
+import { useTranslation } from "react-i18next";
 
 export default function useHandleInvite(token) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const handleInvite = async (inviteId, response, onComplete) => {
@@ -17,13 +19,16 @@ export default function useHandleInvite(token) {
         body: JSON.stringify({ response }),
       });
 
-      if (!res.ok) throw new Error("Erro ao responder ao convite");
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ? t(`backend_errors.${data.error}`, { defaultValue: t('errors.generic_error') }) : t('errors.generic_error'));
+      }
 
-      toast.success(`Convite ${response === 'accept' ? 'aceito' : 'recusado'}!`, { theme: "dark", autoClose: 3000 });
+      toast.success(t(response === 'accept' ? 'notifications.invite_accepted_toast' : 'notifications.invite_rejected_toast'));
 
       if (onComplete) onComplete();
     } catch (err) {
-      toast.error(err.message, { theme: "dark", autoClose: 3000 });
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

@@ -2,9 +2,11 @@ import React from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { useHandleInvite } from '../../hooks'; // Adjust path if necessary
+import { useHandleInvite } from '../../hooks';
+import { useTranslation } from "react-i18next";
 
 const Invite = ({ invite, onActionComplete }) => {
+    const { t } = useTranslation();
     const { handleInvite, loading } = useHandleInvite(localStorage.getItem('token'));
 
     return (
@@ -12,10 +14,12 @@ const Invite = ({ invite, onActionComplete }) => {
             <div>
                 <p className="text-foreground">
                     <Link href={`/profile/${invite.from_user.username}`} className="font-semibold text-accent hover:underline">
-                        {invite.from_user.username || "Usuário desconhecido"}
+                        {invite.from_user.username || t('unknown_user')}
                     </Link>
-                    {' '} te convidou para o projeto {' '}
-                    <span className="font-semibold text-accent">{invite.project.title || "Sem título"}</span>
+                    {' '}
+                    {t('notifications.invitation_received_text')}
+                    {' '}
+                    <span className="font-semibold text-accent">{invite.project.title || t('profile.untitled')}</span>
                 </p>
                 <p className="text-xs text-foreground/70 mt-1">{new Date(invite.created_at).toLocaleString()}</p>
             </div>
@@ -24,6 +28,7 @@ const Invite = ({ invite, onActionComplete }) => {
                     onClick={() => handleInvite(invite.id, 'accept', onActionComplete)}
                     disabled={loading}
                     className="bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-full h-10 w-10 flex items-center justify-center transition-colors disabled:opacity-50"
+                    aria-label={t('confirmation.confirm')}
                 >
                     <FontAwesomeIcon icon={faCheck} />
                 </button>
@@ -31,6 +36,7 @@ const Invite = ({ invite, onActionComplete }) => {
                     onClick={() => handleInvite(invite.id, 'reject', onActionComplete)}
                     disabled={loading}
                     className="bg-red-600 hover:bg-red-700 text-white font-bold p-2 rounded-full h-10 w-10 flex items-center justify-center transition-colors disabled:opacity-50"
+                    aria-label={t('confirmation.cancel')}
                 >
                     <FontAwesomeIcon icon={faTimes} />
                 </button>

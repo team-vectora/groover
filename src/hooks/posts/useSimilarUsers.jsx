@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
+import { useTranslation } from 'react-i18next';
 
 export default function useSimilarUsers(token) {
   const [similarUsers, setSimilarUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { t } = useTranslation();
 
   const fetchSimilarUsers = async () => {
     if (!token) return;
@@ -16,12 +18,10 @@ export default function useSimilarUsers(token) {
       });
 
       if (!res.ok) {
-        throw new Error("Erro ao buscar usuários similares");
+        throw new Error(t('toasts.error_loading_similar_users'));
       }
 
       const data = await res.json();
-      console.log("Usuarios similares achados: " + data);
-
       setSimilarUsers(data);
     } catch (err) {
       setError(err.message);

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { API_BASE_URL } from "../../config";
+import { useTranslation } from "react-i18next";
 
 export default function useLogin() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const login = async ({ username, senha }) => {
     setErrors({});
@@ -29,22 +31,14 @@ export default function useLogin() {
         return { success: true, data };
       } else {
         const backendErrors = {};
-
-        if (data.error.includes("Invalid credentials")) {
-          backendErrors.general = "Nome de usuário ou senha incorreto";
-        } else if (data.error.includes("Username and password are required")) {
-          backendErrors.general = "Insira um usuário e senha";
-        } else {
-          backendErrors.general = data.error || "Erro no login";
-        }
-
+        backendErrors.general = t('errors.generic_error');
         setErrors(backendErrors);
         return { success: false, errors: backendErrors };
       }
     } catch (err) {
       setLoading(false);
-      setErrors({ general: "Erro ao conectar com o servidor" });
-      return { success: false, errors: { general: "Erro ao conectar com o servidor" } };
+      setErrors({ general: t('errors.network_error') });
+      return { success: false, errors: { general: t('errors.network_error') } };
     }
   };
 

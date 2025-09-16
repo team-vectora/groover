@@ -233,8 +233,8 @@
     "deleteLastPageError": "Cannot delete the last page."
   },
   "midiPlayer": {
-    "expand": "Expand player",
-    "collapse": "Collapse player",
+    "expand": "Expand",
+    "collapse": "Collapse",
     "pause": "Pause",
     "play": "Play",
     "stop": "Stop",
@@ -405,5 +405,73 @@
     "privacy_policy": "Privacy policy",
     "already_have_account": "Already have an account?",
     "login_link": "Login"
+  },
+  "errors": {
+    "user_not_found": "User not found",
+    "post_not_found": "Post not found",
+    "project_not_found": "Project not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden",
+    "generic_error": "An error occurred",
+    "network_error": "Server communication error",
+    "invalid_token": "Invalid or expired token. Please log in again.",
+    "api_connection_error": "Error connecting to the API",
+    "no_data_provided": "No data provided",
+    "update_failed": "Update failed",
+    "delete_failed": "Failed to delete",
+    "fork_failed": "Error forking project"
+  },
+  "validation": {
+    "username_required": "Username is required",
+    "username_min_length": "Username must be at least 3 characters",
+    "username_max_length": "Username cannot exceed 20 characters",
+    "username_pattern": "Use only letters, numbers, and underscore (_)",
+    "username_no_spaces": "Username cannot contain spaces",
+    "email_required": "Email is required",
+    "email_invalid": "Please enter a valid email",
+    "password_required": "Password is required",
+    "password_min_length": "Password must be at least 8 characters",
+    "password_uppercase": "Include at least one uppercase letter",
+    "password_number": "Include at least one number",
+    "password_special_char": "Include at least one special character",
+    "password_no_spaces": "Password cannot contain spaces",
+    "passwords_no_match": "Passwords do not match",
+    "password_too_weak": "Your password is too weak",
+    "comment_required": "Comment text is required",
+    "bio_too_long": "Bio too long",
+    "invalid_music_tags": "Invalid music tags",
+    "search_term_required": "At least one search term or tag is required"
+  },
+  "toasts": {
+    "forking": "Forking project...",
+    "error_loading_project": "Failed to load project",
+    "error_saving_project": "Failed to save project",
+    "error_importing_midi": "Could not read the MIDI file",
+    "error_following": "Error following/unfollowing",
+    "error_loading_notifications": "Error loading notifications",
+    "error_marking_notification": "Error marking notification",
+    "error_loading_similar_users": "Error fetching similar users",
+    "error_creating_post": "Error creating post"
+  },
+  "alerts": {
+    "max_images": "Maximum of 5 images allowed"
+  },
+  "backend_errors": {
+    "username_exists": "Username already in use",
+    "email_exists": "Email already registered",
+    "invalid_credentials": "Incorrect username or password",
+    "user_not_active": "User is not active. Verification email resent.",
+    "response_required": "Response is required",
+    "invitation_not_found": "Invitation not found",
+    "invitation_already_responded": "Invitation already responded",
+    "invalid_response": "Invalid response",
+    "username_is_required": "Username is required",
+    "cannot_invite_yourself": "Cannot invite yourself",
+    "already_collaborator": "User is already a collaborator",
+    "invitation_already_sent": "An invitation has already been sent to this user for this project",
+    "project_id_not_found": "project_id not found",
+    "project_no_music": "Project doesn't have music to copy",
+    "following_id_required": "missing following_id",
+    "cant_follow_self": "Can't follow itself."
   }
 }

@@ -9,7 +9,7 @@ export default function Home() {
   const { t } = useTranslation();
   return (
       <div className="w-full min-h-screen bg-background text-foreground relative overflow-x-hidden lg:max-h-screen">
-        <div className="absolute top-4 right-4 z-30">
+        <div className="absolute top-4 right-4 z-30" style={{zIndex: 30}}>
           <LanguageSwitcher />
         </div>
         {/* Círculos de fundo mantidos, mas com tamanho reduzido para não interferir no layout */}
