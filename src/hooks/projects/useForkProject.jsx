@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { API_BASE_URL } from "../../config";
+import { useTranslation } from "react-i18next";
 
 export default function useForkProject(token) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -22,7 +24,7 @@ export default function useForkProject(token) {
       if (!response.ok) throw new Error("Erro ao fazer fork");
 
       const data = await response.json();
-      toast.success("Projeto copiado para seu perfil!");
+      toast.success(t('fork.copiedSuccess'));
 
       if (data.new_project_id) {
         router.push(`/editor/${data.new_project_id}`);

@@ -39,7 +39,7 @@ const ControlPanel = ({
   const { t, i18n } = useTranslation();
 
   return (
-    <div className="px-4 space-y-6 flex flex-col h-full w-3/5 md:w-[19%] fixed">
+    <div className="px-4 space-y-6 flex flex-col h-full">
       <div>
         <h1 className="text-sm font-bold uppercase text-accent mb-2 mt-4">
           {projectState.title || t("editor.controls.panel.newProject")}
@@ -50,20 +50,20 @@ const ControlPanel = ({
       </div>
       <div className="flex-grow overflow-y-auto space-y-6">
         <ChangeInstrument
-          instrument={instrument}
-          instruments={instruments}
-          setInstrument={setInstrument}
-          t={t}
+            instrument={instrument}
+            instruments={instruments}
+            setInstrument={setInstrument}
+            t={t}
         />
         <ChangeVolume volume={volume} setVolume={setVolume} t={t} />
         <ChangeBpm bpm={bpm} setBpm={setBpm} t={t} />
         <SelectRitmo rhythm={rhythm} setRhythm={setRhythm} t={t} />
         <VersionManager
-          versions={versions}
-          currentMusicId={currentMusicId}
-          handleVersionChange={handleVersionChange}
-          t={t}
-          lastVersionId={lastVersionId}
+            versions={versions}
+            currentMusicId={currentMusicId}
+            handleVersionChange={handleVersionChange}
+            t={t}
+            lastVersionId={lastVersionId}
         />
 
         {/* Page Controls */}
@@ -80,27 +80,27 @@ const ControlPanel = ({
 
           <div className="flex justify-center items-center gap-3">
             <button
-              onClick={() => movePage(-1)}
-              className="w-10 h-10 rounded-full border-2 border-primary hover:bg-primary/30 transition text-lg"
+                onClick={() => movePage(-1)}
+                className="w-10 h-10 rounded-full border-2 border-primary hover:bg-primary/30 transition text-lg"
             >
               <FontAwesomeIcon icon={faArrowLeft} />
             </button>
             <button
-              onClick={addPage}
-              className="w-10 h-10 rounded-full border-2 border-primary hover:bg-primary/30 transition text-lg font-bold"
+                onClick={addPage}
+                className="w-10 h-10 rounded-full border-2 border-primary hover:bg-primary/30 transition text-lg font-bold"
             >
               <FontAwesomeIcon icon={faPlus} />
             </button>
             <button
-              onClick={() => movePage(1)}
-              className="w-10 h-10 rounded-full border-2 border-primary hover:bg-primary/30 transition text-lg"
+                onClick={() => movePage(1)}
+                className="w-10 h-10 rounded-full border-2 border-primary hover:bg-primary/30 transition text-lg"
             >
               <FontAwesomeIcon icon={faArrowRight} />
             </button>
             <button
-              onClick={deletePage}
-              title={t("editor.controls.panel.deletePage")}
-              className="w-10 h-10 rounded-full border-2 border-red-500/50 text-red-500/80 hover:bg-red-500/30 hover:text-red-500 transition text-lg"
+                onClick={deletePage}
+                title={t("editor.controls.panel.deletePage", {current: activePage, total: pages})}
+                className="w-10 h-10 rounded-full border-2 border-red-500/50 text-red-500/80 hover:bg-red-500/30 hover:text-red-500 transition text-lg"
             >
               <FontAwesomeIcon icon={faTrash} />
             </button>

@@ -87,7 +87,7 @@ export const useProjectAPI = (projectId, projectActions) => {
             setLoading(true);
             try {
                 const response = await fetch(
-                    `http://localhost:5000/api/projects/${projectId}`,
+                    `${API_BASE_URL}/projects/${projectId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
 
@@ -96,7 +96,7 @@ export const useProjectAPI = (projectId, projectActions) => {
                     return;
                 }
 
-                if (!response.ok) throw new Error("Falha ao carregar o projeto.");
+                if (!response.ok) throw new Error(t('toasts.error_loading_project'));
 
                 const data = await response.json();
 

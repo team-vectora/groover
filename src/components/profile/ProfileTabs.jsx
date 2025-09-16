@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const ProfileTabs = ({
                          activeTab,
                          setActiveTab,
                          showInvites
                      }) => {
+    const { t } = useTranslation();
     return (
         <div className="flex border-b border-primary: mb-6">
             <button
@@ -15,7 +17,7 @@ const ProfileTabs = ({
                 }`}
                 onClick={() => setActiveTab('posts')}
             >
-                Posts
+                {t('profileTabs.posts')}
             </button>
 
             <button
@@ -26,7 +28,7 @@ const ProfileTabs = ({
                 }`}
                 onClick={() => setActiveTab('musics')}
             >
-                Músicas
+                {t('profileTabs.musics')}
             </button>
 
             {showInvites && (
@@ -38,7 +40,7 @@ const ProfileTabs = ({
                     }`}
                     onClick={() => setActiveTab('invites')}
                 >
-                    Convites
+                    {t('profileTabs.invites')}
                 </button>
             )}
         </div>

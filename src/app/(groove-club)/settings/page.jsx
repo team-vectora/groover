@@ -8,12 +8,13 @@ import { useDeleteAccount } from '../../../hooks/settings/useDeleteAccount';
 
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, size, setSize } = useTheme(); // <-- Obtenha 'size' e 'setSize'
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [token, setToken] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(false); // <-- confirmation state
+  const [showConfirm, setShowConfirm] = useState(false);
   const { deleteAccount, loading: deleting, error: deleteError } = useDeleteAccount(token);
 
+  // ... (resto do seu código useEffect e outras funções) ...
   useEffect(() => {
     const savedLang = localStorage.getItem('lang');
     if (savedLang && i18n.language !== savedLang) {
@@ -52,7 +53,7 @@ export default function SettingsPage() {
   };
 
   const confirmDelete = () => {
-    deleteAccount(); // will trigger backend which can send the email
+    deleteAccount();
     setShowConfirm(false);
   };
 
@@ -61,89 +62,114 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-8 max-w-2xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold text-accent-light">{t('settings.title')}</h1>
+      <div className="p-8 max-w-2xl mx-auto space-y-6">
+        <h1 className="text-3xl font-bold text-accent-light">{t('settings.title')}</h1>
 
-      {/* Tema */}
-      <div className="bg-bg-secondary p-4 rounded-lg">
-        <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.theme')}</h2>
-        <select
-          value={theme}
-          onChange={(e) => setTheme(e.target.value)}
-          className="px-4 py-2 rounded-md bg-primary text-text-lighter cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent"
-        >
-          <option value="light">🌞 Light</option>
-          <option value="dark">🌙 Dark</option>
-          <option value="dracula">🤖 Dracula</option>
-        </select>
-      </div>
-
-      {/* Idioma */}
-      <div className="bg-bg-secondary p-4 rounded-lg">
-        <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.language')}</h2>
-        <select
-          value={i18n.language}
-          onChange={(e) => changeLanguage(e.target.value)}
-          className="px-4 py-2 rounded-md bg-primary text-text-lighter cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent"
-        >
-          <option value="pt-BR">🇧🇷 Português</option>
-          <option value="en">🇺🇸 English</option>
-        </select>
-      </div>
-
-      {/* PWA */}
-      {deferredPrompt && (
+        {/* Tema */}
         <div className="bg-bg-secondary p-4 rounded-lg">
-          <h2 className="font-semibold mb-3">{t('settings.app')}</h2>
-          <button
-            onClick={handleInstallPWA}
-            className="flex items-center gap-3 px-4 py-2 rounded-md bg-primary hover:bg-primary-light transition-colors"
+          <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.theme')}</h2>
+          <select
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+              className="px-4 py-2 rounded-md bg-primary text-text-lighter cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent"
           >
-            <FontAwesomeIcon icon={faDownload} />
-            {t('settings.installApp')}
-          </button>
+            <option value="light">🌞 Light</option>
+            <option value="dark">🌙 Dark</option>
+            <option value="dracula">🤖 Dracula</option>
+          </select>
         </div>
-      )}
 
-
-      <div className="bg-bg-secondary p-4 rounded-lg">
-        <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.deleteAccount')}</h2>
-        {deleteError && <p className="text-red-500 mb-2">{deleteError}</p>}
-        <button
-          onClick={handleDeleteClick}
-          disabled={deleting}
-          className="flex items-center gap-3 px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
-        >
-          <FontAwesomeIcon icon={faTrash} />
-          {deleting ? t('settings.deleting') : t('settings.deleteAccount')}
-        </button>
-      </div>
-
-
-      {showConfirm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
-          <div className="bg-bg-secondary p-6 rounded-lg max-w-sm w-full text-center space-y-4">
-            <h2 className="text-lg font-semibold text-text-lighter">
-              {t('settings.confirmDeleteTitle')}
-            </h2>
-            <p className="text-text-lighter">{t('settings.confirmDeleteMessage')}</p>
-            <div className="flex justify-center gap-4 mt-4">
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
-              >
-                {t('settings.yesDelete')}
-              </button>
-              <button
-                onClick={cancelDelete}
-                className="px-4 py-2 rounded-md bg-gray-400 hover:bg-gray-500 text-white transition-colors"
-              >
-                {t('settings.cancel')}
-              </button>
-            </div>
+        {/* NOVO: Seção para Tamanho da Fonte */}
+        <div className="bg-bg-secondary p-4 rounded-lg">
+          <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.fontSize')}</h2>
+          <div className="flex gap-2">
+            <button
+                onClick={() => setSize('small')}
+                className={`px-4 py-2 rounded-md text-sm transition ${size === 'small' ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'}`}
+            >
+              {t('settings.small')}
+            </button>
+            <button
+                onClick={() => setSize('medium')}
+                className={`px-4 py-2 rounded-md text-sm transition ${size === 'medium' ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'}`}
+            >
+              {t('settings.medium')}
+            </button>
+            <button
+                onClick={() => setSize('giga')}
+                className={`px-4 py-2 rounded-md text-sm transition ${size === 'giga' ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'}`}
+            >
+              {t('settings.large')}
+            </button>
           </div>
         </div>
-      )}
-    </div>
+
+        {/* Idioma */}
+        <div className="bg-bg-secondary p-4 rounded-lg">
+          <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.language')}</h2>
+          <select
+              value={i18n.language}
+              onChange={(e) => changeLanguage(e.target.value)}
+              className="px-4 py-2 rounded-md bg-primary text-text-lighter cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent"
+          >
+            <option value="pt-BR">🇧🇷 Português</option>
+            <option value="en">🇺🇸 English</option>
+          </select>
+        </div>
+
+        {/* PWA */}
+        {deferredPrompt && (
+            <div className="bg-bg-secondary p-4 rounded-lg">
+              <h2 className="font-semibold mb-3">{t('settings.app')}</h2>
+              <button
+                  onClick={handleInstallPWA}
+                  className="flex items-center gap-3 px-4 py-2 rounded-md bg-primary hover:bg-primary-light transition-colors"
+              >
+                <FontAwesomeIcon icon={faDownload} />
+                {t('settings.installApp')}
+              </button>
+            </div>
+        )}
+
+        {/* Deletar Conta */}
+        <div className="bg-bg-secondary p-4 rounded-lg">
+          <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.deleteAccount')}</h2>
+          {deleteError && <p className="text-red-500 mb-2">{deleteError}</p>}
+          <button
+              onClick={handleDeleteClick}
+              disabled={deleting}
+              className="flex items-center gap-3 px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
+          >
+            <FontAwesomeIcon icon={faTrash} />
+            {deleting ? t('settings.deleting') : t('settings.deleteAccount')}
+          </button>
+        </div>
+
+        {/* Popup de Confirmação */}
+        {showConfirm && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+              <div className="bg-bg-secondary p-6 rounded-lg max-w-sm w-full text-center space-y-4">
+                <h2 className="text-lg font-semibold text-text-lighter">
+                  {t('settings.confirmDeleteTitle')}
+                </h2>
+                <p className="text-text-lighter">{t('settings.confirmDeleteMessage')}</p>
+                <div className="flex justify-center gap-4 mt-4">
+                  <button
+                      onClick={confirmDelete}
+                      className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
+                  >
+                    {t('settings.yesDelete')}
+                  </button>
+                  <button
+                      onClick={cancelDelete}
+                      className="px-4 py-2 rounded-md bg-gray-400 hover:bg-gray-500 text-white transition-colors"
+                  >
+                    {t('settings.cancel')}
+                  </button>
+                </div>
+              </div>
+            </div>
+        )}
+      </div>
   );
 }

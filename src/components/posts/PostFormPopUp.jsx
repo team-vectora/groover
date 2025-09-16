@@ -9,9 +9,12 @@ import { uploadToCloudinary } from '../../lib/util/upload';
 import { GENRES } from '../../constants'
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
 import { toast } from 'react-toastify';
+import {API_BASE_URL} from "../../config";
+import { useTranslation } from 'react-i18next';
 
 
 const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = null, initialCaption = '', onPostCreated }) => {
+  const { t } = useTranslation();
   const [caption, setCaption] = useState("");
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -32,7 +35,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
       if (selectedGenres.length < 5) {
         setSelectedGenres([...selectedGenres, genre]);
       } else {
-        toast.warn("Você pode selecionar no máximo 5 tags musicais.");
+        toast.warn(t('postForm.maxTagsWarning'));
       }
     }
   };
@@ -51,7 +54,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
         );
       }
 
-      const url = isComment ? `http://localhost:5000/api/posts/${postId}/comment` : "http://localhost:5000/api/posts";
+      const url = isComment ? `${API_BASE_URL}/posts/${postId}/comment` : `${API_BASE_URL}/posts`;
       const body = {
         caption,
         photos: photoUrls,
@@ -116,14 +119,14 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-auto">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-auto">
         <div ref={popupRef} className="bg-bg-secondary: rounded-xl w-full max-w-6xl border border-primary flex flex-col md:flex-row overflow-hidden">
 
           {/* Form (agora à esquerda) */}
           <div className="md:w-1/2 p-5 flex flex-col bg-bg-secondary">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-accent-light">
-                {isComment ? 'Adicionar Comentário' : 'Criar Nova Publicação'}
+                {isComment ? t('postForm.addComment') : t('postForm.createPublication')}
               </h3>
 
               <button
@@ -139,7 +142,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
               <textarea
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
-                  placeholder={isComment ? "Escreva seu comentário..." : "Escreva uma legenda..."}
+                  placeholder={isComment ? t('postForm.commentPlaceholder') : t('postForm.captionPlaceholder')}
                   rows={4}
                   maxLength={500}
                   className="w-full p-3 bg-bg-darker border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"
@@ -149,7 +152,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
               </div>
             </div>
 
-            <label className="block mb-2 text-sm text-gray-300">Escolha até 5 tags musicais</label>
+            <label className="block mb-2 text-sm text-gray-300">{t('postForm.selectTags')}</label>
             <div className="grid grid-cols-3 md:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 mb-4 bg-bg-darker border border-primary rounded-md">
               {GENRES.map((genre) => (
                   <button
@@ -179,7 +182,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
             >
               {isSubmitting ? (
                   <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
-              ) : (isComment ? "Comentar" : "Publicar")}
+              ) : (isComment ? t('postForm.comment') : t('postForm.publish'))}
             </button>
           </div>
 
@@ -221,7 +224,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
                   </svg>
-                  <p>Adicione fotos ao seu post</p>
+                  <p>{t('postForm.addPhotos')}</p>
                 </div>
             )}
 
@@ -230,7 +233,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
                 htmlFor="file-upload"
                 className="inline-block px-4 py-2 rounded-md cursor-pointer select-none bg-primary text-white hover:bg-primary-light mb-4"
             >
-              Selecionar Imagens
+              {t('postForm.selectImages')}
             </label>
             <input
                 id="file-upload"
@@ -243,13 +246,13 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
             />
 
             {/* Projeto */}
-            <label className="block mb-2 text-sm text-gray-300 w-full">Projeto (opcional)</label>
+            <label className="block mb-2 text-sm text-gray-300 w-full">{t('postForm.projectLabel')}</label>
             <select
                 value={selectedProject}
                 onChange={(e) => setSelectedProject(e.target.value)}
                 className="w-full p-3 bg-bg-darker: border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"
             >
-              <option value="">Nenhum projeto</option>
+              <option value="">{t('postForm.noProject')}</option>
               {projects.map((proj) => (
                   <option key={proj.id} value={proj.id}>{proj.title}</option>
               ))}

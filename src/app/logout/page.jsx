@@ -3,8 +3,10 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 
 export default function LogoutPage() {
+    const { t } = useTranslation();
     const router = useRouter();
 
     useEffect(() => {
@@ -21,7 +23,7 @@ export default function LogoutPage() {
 
     return (
         <div className="flex items-center justify-center h-screen">
-            <p>Fazendo logout...</p>
+            <p>{t('logout.loggingOut')}</p>
         </div>
     );
 }

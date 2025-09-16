@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { API_BASE_URL } from "../../config";
+import { useTranslation } from "react-i18next";
 
 export default function useDeleteProject(token) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const deleteProject = async (projectId, onSuccess) => {
@@ -18,7 +20,7 @@ export default function useDeleteProject(token) {
         throw new Error(data.error || "Erro ao excluir projeto");
       }
 
-      toast.success("Projeto excluído com sucesso!");
+      toast.success(t('project.deletedSuccess'));
       if (onSuccess) onSuccess();
     } catch (err) {
       toast.error(err.message);

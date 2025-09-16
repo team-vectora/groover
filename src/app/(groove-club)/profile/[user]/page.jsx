@@ -10,9 +10,12 @@ import { MidiContext } from '../../../../contexts/MidiContext';
 import { useAuth, useProfile, useForkProject, useShareProject, useDeleteProject } from '../../../../hooks';
 import { ProfileHeader, ProfileTabs, Post, ProjectCard, Invite,
   PostFormPopUp, ConfigUserPopUp, SharePopUp, ConfirmationPopUp, FollowListPopup } from '../../../../components';
+import { useTranslation } from 'react-i18next';
+import { API_BASE_URL } from '../../../../config';
 
 export default function ProfilePage({ params }) {
-    const { user: username } = use(params);
+  const { t } = useTranslation();
+  const { user: username } = use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token, userId, username: currentUsername } = useAuth();
@@ -71,7 +74,7 @@ export default function ProfilePage({ params }) {
   const fetchFollowList = async (type) => {
     setFollowList({ open: true, type, users: [], isLoading: true });
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${username}/${type}`, {
+      const res = await fetch(`${API_BASE_URL}/users/${username}/${type}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -87,7 +90,7 @@ export default function ProfilePage({ params }) {
     router.push('/login');
   };
 
-  if (loading) return <div className="text-center py-8">Carregando perfil...</div>;
+  if (loading) return <div className="text-center py-8">{t('profile.loading')}</div>;
   if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
 
   return (
@@ -125,7 +128,7 @@ export default function ProfilePage({ params }) {
               )}
 
               {posts.length === 0 ? (
-                  <p className="text-center text-gray-400">Nenhum post encontrado</p>
+                  <p className="text-center text-gray-400">{t('profile.noPosts')}</p>
               ) : (
                   posts.map(post => (
                       <Post
@@ -149,7 +152,7 @@ export default function ProfilePage({ params }) {
                       className="mb-4 px-4 py-2 bg-accent hover:bg-accent-light text-white rounded"
                       onClick={() => router.push('/editor/new')}
                   >
-                    Novo Projeto
+                    {t('profile.newProject')}
                   </button>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -170,7 +173,7 @@ export default function ProfilePage({ params }) {
         {activeTab === 'invites' && isCurrentUser && (
             <div>
               {invites.length === 0 ? (
-                  <p className="text-center text-gray-400">Nenhum convite encontrado</p>
+                  <p className="text-center text-gray-400">{t('profile.noInvites')}</p>
               ) : (
                   <div className="space-y-4">
                     {invites.map(invite => (
@@ -214,7 +217,7 @@ export default function ProfilePage({ params }) {
 
         {followList.open && (
             <FollowListPopup
-                title={followList.type === 'followers' ? 'Seguidores' : 'Seguindo'}
+                title={followList.type === 'followers' ? t('profile.followers') : t('profile.following')}
                 users={followList.users}
                 isLoading={followList.isLoading}
                 onClose={() => setFollowList({ open: false, type: '', users: [], isLoading: false })}
@@ -226,8 +229,8 @@ export default function ProfilePage({ params }) {
                 open={!!projectToDelete}
                 onClose={() => setProjectToDelete(null)}
                 onConfirm={confirmDelete}
-                title="Excluir Projeto"
-                message="Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita."
+                title={t('profile.deleteProjectTitle')}
+                message={t('profile.deleteProjectConfirmation')}
             />
         )}
       </div>

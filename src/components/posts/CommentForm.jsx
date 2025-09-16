@@ -1,6 +1,7 @@
 // src/components/posts/CommentForm.jsx
 import { useState } from 'react';
-import PostFormPopUp from './PostFormPopUp'; // Importe o popup
+import PostFormPopUp from './PostFormPopUp';
+import {API_BASE_URL} from "../../config"; // Importe o popup
 
 const CommentForm = ({ postId, token, onCommentAdded, projects }) => {
     const [caption, setCaption] = useState('');
@@ -12,7 +13,7 @@ const CommentForm = ({ postId, token, onCommentAdded, projects }) => {
         if (!caption.trim()) return;
         setIsSubmitting(true);
         try {
-            await fetch(`http://localhost:5000/api/posts/${postId}/comment`, {
+            await fetch(`${API_BASE_URL}/posts/${postId}/comment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

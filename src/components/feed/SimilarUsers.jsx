@@ -66,11 +66,11 @@ export default function SimilarUsers({ users = [], userId }) {
                                 height={48}
                                 className="rounded-full object-cover border-2 border-primary"
                             />
-                            <div className="ml-3">
+                            <div className="ml-3 mr-3">
                                 <Link href={`/profile/${user?.username}`} className="text-foreground hover:underline">
                                     <h3 className="text-lg font-medium">{user.username}</h3>
                                 </Link>
-                                <p className="text-foreground text-sm line-clamp-2 max-w-[100px]">
+                                <p className="text-foreground text-sm line-clamp-2 max-h-5 ">
                                     {user.bio || t("similarUsers.noBio")}
                                 </p>
                                 <p className="text-accent text-sm">

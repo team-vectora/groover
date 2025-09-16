@@ -139,8 +139,8 @@ export const useTonePlayer = (projectState) => {
             // Lógica de agendamento de ÁUDIO (permanece a mesma, mas sem o visual)
             if (sequence.length > 0) {
                 const processedSequence = sequence.map((currentEvent, index, arr) => {
-                    const prevEvent = arr[index - 1];
-                    const nextEvent = arr[index + 1];
+                    const prevEvent = arr.slice(0, index).reverse().find(e => e.rowIndex === currentEvent.rowIndex);
+                    const nextEvent = arr.slice(index + 1).find(e => e.rowIndex === currentEvent.rowIndex);
 
                     // --- CONDIÇÕES PARA INICIAR UMA NOTA (shouldStart) ---
                     const isSeparated = currentEvent.subNote.isSeparated;

@@ -1,18 +1,35 @@
 import os
-
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.db import mongo
 from utils.genres import GENRES
-from bson import Binary
-from utils.similarity import cosine_similarity
-from itsdangerous import URLSafeSerializer, SignatureExpired
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired # Corrigido
 from flask_mail import Message
 from utils.mail import mail
 from .followers import Followers
 from markupsafe import escape
 
-s = URLSafeSerializer(os.getenv('AUTH_KEY'))
+# Corrigido: Use o TimedSerializer para tokens com expiração
+s = URLSafeTimedSerializer(os.getenv('AUTH_KEY'))
+
+# Textos de e-mail para internacionalização
+EMAIL_CONTENT = {
+    'pt-BR': {
+        'subject': "Por favor, confirme seu e-mail",
+        'title': "Bem-vindo ao Groover, {username}!",
+        'body': "Obrigado por se registrar. Para ativar sua conta, por favor, confirme seu e-mail clicando no botão abaixo:",
+        'button': "Confirmar E-mail",
+        'footer': "Se você não criou esta conta, pode ignorar este e-mail com segurança."
+    },
+    'en': {
+        'subject': "Please confirm your email",
+        'title': "Welcome to Groover, {username}!",
+        'body': "Thank you for signing up. To activate your Groover account, please confirm your email by clicking the button below:",
+        'button': "Confirm Email",
+        'footer': "If you didn’t create this account, you can safely ignore this email."
+    }
+}
+
 
 class User:
     @staticmethod
@@ -32,17 +49,20 @@ class User:
         return mongo.db.users.insert_one(user).inserted_id
 
     @staticmethod
-    def send_email_verification(email, username, host_url):
+    def send_email_verification(email, username, host_url, lang='en'):
         token = s.dumps(email, salt=os.getenv('SALT_AUTH'))
         confirm_url = f"{host_url}api/auth/confirm_email/{token}"
+
+        # Seleciona o idioma ou usa inglês como padrão
+        content = EMAIL_CONTENT.get(lang, EMAIL_CONTENT['en'])
 
         html_body = f"""
         <html>
           <body style="font-family: Arial, sans-serif; background-color:#0a090d; color:#e6e8e3; padding:20px;">
             <div style="max-width:600px; margin:auto; background:#121113; border-radius:10px; padding:30px; box-shadow:0 2px 10px rgba(0,0,0,0.5);">
-              <h2 style="color:#4c4e30; text-align:center;">Welcome to Groover, {escape(username)}!</h2>
+              <h2 style="color:#4c4e30; text-align:center;">{content['title'].format(username=escape(username))}</h2>
               <p style="font-size:16px; line-height:1.5; color:#e6e8e3;">
-                Thank you for signing up. To activate your Groover account, please confirm your email by clicking the button below:
+                {content['body']}
               </p>
               <p style="text-align:center; margin:30px 0;">
                 <a href="{confirm_url}" style="
@@ -56,11 +76,11 @@ class User:
                   font-size:16px;
                   transition:all 0.3s;
                 " onmouseover="this.style.background='#c1915d';">
-                  Confirm Email
+                  {content['button']}
                 </a>
               </p>
               <p style="font-size:12px; color:#e6e8e3; text-align:center; margin-top:20px;">
-                If you didn’t create this account, you can safely ignore this email.
+                {content['footer']}
               </p>
               <hr style="border:none; border-top:1px solid #070608; margin:20px 0;">
               <p style="font-size:12px; color:#61673e; text-align:center;">
@@ -72,14 +92,13 @@ class User:
         """
 
         msg = Message(
-            subject="Please confirm your email",
+            subject=content['subject'],
             recipients=[email],
-            body=f"Hello {username},\n\nPlease confirm your email by clicking the link below:\n{confirm_url}\n\nIf you didn’t create this account, ignore this message.",
             html=html_body,
             sender=os.getenv('MAIL_USERNAME')
         )
         mail.send(msg)
-
+    # ... resto do arquivo user.py sem alterações ...
     @staticmethod
     def delete(email):
         result = mongo.db.users.delete_one({'email': email})

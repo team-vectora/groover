@@ -19,6 +19,7 @@ import FollowButton from "../feed/FollowButton";
 import ProjectCard from "../profile/ProjectCard";
 import ConfirmationPopUp from '../editor/ConfirmationPopUp';
 import { useAuth, useLikePost, useDeletePost, useOutsideClick } from "../../hooks";
+import { useTranslation } from 'react-i18next';
 
 // Componente de animação do coração com SVGs originais
 const HeartAnimation = ({ position, showHeart }) => {
@@ -85,6 +86,7 @@ export default function Post({
                                  handleClickFork,
                                  onPostCreated,
                              }) {
+    const { t } = useTranslation();
     const router = useRouter();
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -200,14 +202,14 @@ export default function Post({
             {/* Cabeçalho do post */}
             <div className="flex items-center gap-4">
                 <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-primary hover:border-accent-light transition duration-300 cursor-pointer">
-                  <Image
-                    src={avatarUrl || "/img/default_avatar.png"}
-                    alt="Avatar"
-                    fill
-                    className="object-cover"
-                    quality={100}
-                    unoptimized
-                  />
+                    <Image
+                        src={avatarUrl || "/img/default_avatar.png"}
+                        alt="Avatar"
+                        fill
+                        className="object-cover"
+                        quality={100}
+                        unoptimized
+                    />
                 </div>
 
                 <div className="flex-1 justify-items-start">
@@ -234,7 +236,7 @@ export default function Post({
                                     className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-primary/20 flex items-center gap-2"
                                 >
                                     <FontAwesomeIcon icon={faTrash} />
-                                    Apagar post
+                                    {t('post.deletePost')}
                                 </button>
                             </div>
                         )}
@@ -245,7 +247,7 @@ export default function Post({
             {post.parent_post_id && post.parent_post_id !== 'None' && (
                 <Link href={`/p/${post.parent_post_id}`} className="text-accent text-sm hover:underline">
                     <FontAwesomeIcon icon={faArrowUp} className="mr-2" />
-                    Ver thread
+                    {t('post.viewThread')}
                 </Link>
             )}
 
@@ -389,8 +391,8 @@ export default function Post({
                     open={isConfirmOpen}
                     onClose={() => setIsConfirmOpen(false)}
                     onConfirm={confirmDelete}
-                    title="Apagar Post"
-                    message="Você tem certeza que deseja apagar este post?"
+                    title={t('post.deletePostTitle')}
+                    message={t('post.deletePostConfirmation')}
                 />
             </div>
         </div>

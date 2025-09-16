@@ -2,6 +2,7 @@
 "use client";
 import { useState, useEffect, useCallback } from 'react';
 import { ROWS, INITIAL_COLS } from '../../constants'; // Arquivo de constantes
+import { useTranslation } from 'react-i18next';
 
 // ✅ FUNÇÕES ATUALIZADAS: Criam a nova estrutura de dados compacta
 const createNote = (duration = 1) => Array(duration).fill(null);
@@ -41,6 +42,7 @@ const createNewPage = () =>
     );
 
 export const useProjectState = () => {
+    const { t } = useTranslation();
     const [title, setTitle] = useState("Novo Projeto");
     const [description, setDescription] = useState("");
     const [bpm, setBpm] = useState(120);
@@ -99,7 +101,7 @@ export const useProjectState = () => {
     const deletePage = useCallback((pageIndex) => {
         setPages(prev => {
             if (prev.length <= 1) {
-                alert("Não é possível excluir a última página.");
+                alert(t('editor.deleteLastPageError'));
                 return prev;
             }
             const newPages = prev.filter((_, index) => index !== pageIndex);
@@ -110,7 +112,7 @@ export const useProjectState = () => {
             }
             return newPages;
         });
-    }, [activePage]);
+    }, [activePage, t]);
 
     const clearPage = useCallback((pageIndex) => {
         setPages(prevPages => {

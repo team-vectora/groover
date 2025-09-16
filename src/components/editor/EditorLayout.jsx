@@ -40,7 +40,7 @@ const EditorLayout = ({
 
 
             {/* Conteúdo do painel */}
-            <div className="relative bg-bg-darker w-3/5 max-w-md h-[90%] rounded-lg overflow-hidden z-10 flex flex-col">
+            <div className="relative bg-bg-darker w-3/5 max-w-md h-[90%] rounded-lg z-10 flex flex-col">
 
               {/* Botão fechar */}
               <button

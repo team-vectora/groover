@@ -1,14 +1,18 @@
 import os
 from datetime import timedelta
 
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for
+from flask import Blueprint, request, jsonify, redirect
 from flask_jwt_extended import create_access_token
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import User
 
 auth_bp = Blueprint('auth', __name__)
-# Usando URLSafeTimedSerializer para expiração de tokens
+
+# URL do seu frontend
+FRONTEND_URL = "http://localhost:3000"
+
+# Corrigido: Use o TimedSerializer para tokens com expiração
 s = URLSafeTimedSerializer(os.getenv('AUTH_KEY'))
 
 
@@ -26,6 +30,8 @@ def signup():
 
     hashed_pw = generate_password_hash(data['password'])
     email = data.get('email')
+    # Recebe o idioma do frontend
+    lang = data.get('lang', 'en')
 
     user_id = User.create(
         username=data['username'],
@@ -36,7 +42,8 @@ def signup():
     User.send_email_verification(
         email=email,
         username=data['username'],
-        host_url=request.host_url
+        host_url=request.host_url,
+        lang=lang  # Passa o idioma para o envio de e-mail
     )
 
     return jsonify({
@@ -51,16 +58,18 @@ def confirm_email(token):
         # Validação do token com expiração de 5 minutos (300 segundos)
         email = s.loads(token, salt=os.getenv("SALT_AUTH"), max_age=300)
         User.activate_user(email)
-        return render_template('confirm_email_template.html', status='success', email=email), 200
+        # Redireciona para o frontend com status de sucesso
+        return redirect(f"{FRONTEND_URL}/auth-result?status=success")
     except SignatureExpired:
-        return redirect(url_for('auth.token_expired_page'))
+        # Redireciona para o frontend com status de expirado
+        return redirect(f"{FRONTEND_URL}/auth-result?status=expired")
+    except Exception:
+        # Redireciona para o frontend com status de erro genérico
+        return redirect(f"{FRONTEND_URL}/auth-result?status=error")
 
 
-@auth_bp.route('/token_expired')
-def token_expired_page():
-    # Página bonita informando que o token expirou
-    return render_template('token_expired.html'), 200
-
+# Rota removida, pois o frontend cuidará disso
+# @auth_bp.route('/token_expired') ...
 
 @auth_bp.route('/signin', methods=['POST'])
 def signin():
@@ -75,19 +84,17 @@ def signin():
         return jsonify({'error': 'Invalid credentials'}), 401
 
     if not user['active']:
-        token = s.dumps(user['email'], salt=os.getenv("SALT_AUTH"))
-        confirm_url = f"{request.host_url}api/auth/confirm_email/{token}"
-
+        # O idioma pode ser pego do header da requisição se você o enviar do frontend
+        lang = request.headers.get('Accept-Language', 'en').split(',')[0]
         User.send_email_verification(
             email=user['email'],
             username=user['username'],
-            host_url=request.host_url
+            host_url=request.host_url,
+            lang=lang
         )
 
         return jsonify({
             'error': 'User is not active. Verification email resent.',
-            'activation_link': confirm_url,
-            'token': token
         }), 401
 
     expires = timedelta(hours=24)

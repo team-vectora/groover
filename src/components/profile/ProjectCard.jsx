@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShareNodes, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { useTranslation } from 'react-i18next';
 
 const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickShare, handleClickDelete }) => {
+    const { t } = useTranslation();
     return (
         <div
             key={project.id}
@@ -13,10 +15,10 @@ const ProjectCard = ({ isYourProfile, project, setCurrentProject, handleClickSha
         >
             <div className="pb-4">
                 <h2 className="text-xl font-semibold mb-2 truncate text-accent-light">
-                    {project.title || "Sem título"}
+                    {project.title || t('profile.untitled')}
                 </h2>
                 <p className="text-foreground opacity-80 mb-4 h-12 overflow-hidden">
-                    {project.description || "Sem descrição"}
+                    {project.description || t('profile.noDescription')}
                 </p>
 
                 <div className="flex justify-between text-sm text-foreground opacity-70">

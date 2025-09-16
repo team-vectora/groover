@@ -12,6 +12,20 @@
     "loading": "Carregando...",
     "no_notifications": "Nenhuma notificação"
   },
+  "feed": {
+    "loading": "Carregando posts..."
+  },
+  "post": {
+    "loading": "Carregando post...",
+    "unavailable": "Esse post não está mais disponível.",
+    "removed": "Ele pode ter sido removido pelo autor.",
+    "viewThread": "Ver thread",
+    "deletePost": "Apagar post",
+    "deletePostTitle": "Apagar Post",
+    "deletePostConfirmation": "Você tem certeza que deseja apagar este post?",
+    "noComments": "Nenhum comentário ainda.",
+    "comments": "Comentários"
+  },
   "notifications": {
     "notifications": "Notificações",
     "new_post": "Nova Postagem",
@@ -119,7 +133,11 @@
     "confirmDeleteTitle": "Confirmar exclusão da conta",
     "confirmDeleteMessage": "Tem certeza de que deseja excluir sua conta? Esta ação não pode ser desfeita.",
     "cancel": "Cancelar",
-    "yesDelete": "Confirmar"
+    "yesDelete": "Confirmar",
+    "fontSize": "Tamanho da Fonte",
+    "small": "Pequeno",
+    "medium": "Médio",
+    "large": "Grande"
   },
   "livecode": {
     "title": "Livecode Song",
@@ -136,7 +154,17 @@
     "user": "Usuário",
     "followers": "Seguidores",
     "following": "Seguindo",
-    "logout": "Sair"
+    "logout": "Sair",
+    "loading": "Carregando perfil...",
+    "noPosts": "Nenhum post encontrado",
+    "newProject": "Novo Projeto",
+    "noInvites": "Nenhum convite encontrado",
+    "deleteProjectTitle": "Excluir Projeto",
+    "deleteProjectConfirmation": "Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.",
+    "untitled": "Sem título",
+    "noDescription": "Sem descrição",
+    "loadingUsers": "Carregando...",
+    "noUsers": "Nenhum usuário encontrado."
   },
   "sharePopup": {
     "inviteTo": "Convidar para:",
@@ -178,7 +206,7 @@
         "newProject": "Novo Projeto",
         "noDescription": "Sem descrição",
         "page": "Página",
-        "pageOf": "Página {current} de {total}",
+        "pageOf": "Página {{current}} de {{total}}",
         "deletePage": "Excluir Página Atual"
       }
     },
@@ -187,7 +215,68 @@
       "clearMessage": "Todas as notas da página atual serão removidas. Esta ação não pode ser desfeita.",
       "deleteTitle": "Excluir Página",
       "deleteMessage": "Esta página será excluída permanentemente. Tem certeza?"
-    }
+    },
+    "saveProject": "Salvar Projeto",
+    "title": "Título",
+    "description": "Descrição",
+    "save": "Salvar",
+    "deleteLastPageError": "Não é possível excluir a última página."
+  },
+  "midiPlayer": {
+    "expand": "Expandir player",
+    "collapse": "Recolher player",
+    "pause": "Pausar",
+    "play": "Tocar",
+    "stop": "Parar",
+    "noProject": "Nenhum projeto selecionado"
+  },
+  "postForm": {
+    "maxTagsWarning": "Você pode selecionar no máximo 5 tags musicais.",
+    "addComment": "Adicionar Comentário",
+    "createPublication": "Criar Nova Publicação",
+    "commentPlaceholder": "Escreva seu comentário...",
+    "captionPlaceholder": "Escreva uma legenda...",
+    "selectTags": "Escolha até 5 tags musicais",
+    "comment": "Comentar",
+    "publish": "Publicar",
+    "addPhotos": "Adicione fotos ao seu post",
+    "selectImages": "Selecionar Imagens",
+    "projectLabel": "Projeto (opcional)",
+    "noProject": "Nenhum projeto"
+  },
+  "configUserPopup": {
+    "maxGenresWarning": "Você pode selecionar no máximo 5 gêneros musicais.",
+    "profileUpdatedSuccess": "Perfil atualizado com sucesso!",
+    "updateError": "Erro ao atualizar",
+    "apiError": "Erro ao conectar com a API",
+    "configureProfile": "Configurar Perfil",
+    "profilePicture": "Foto de perfil",
+    "selectNewPhoto": "Selecionar nova foto",
+    "bio": "Bio",
+    "bioPlaceholder": "Fale um pouco sobre você...",
+    "selectGenres": "Escolha até 5 gêneros musicais",
+    "saveChanges": "Salvar alterações"
+  },
+  "profileTabs": {
+    "posts": "Posts",
+    "musics": "Músicas",
+    "invites": "Convites"
+  },
+  "project": {
+    "deletedSuccess": "Projeto excluído com sucesso!"
+  },
+  "fork": {
+    "copiedSuccess": "Projeto copiado para seu perfil!"
+  },
+  "share": {
+    "sharedSuccess": "Projeto compartilhado"
+  },
+  "upload": {
+    "imageTooLarge": "Imagem muito grande (máximo 2MB)",
+    "error": "Erro no upload"
+  },
+  "logout": {
+    "loggingOut": "Fazendo logout..."
   },
   "header": {
     "backToFeed": "Voltar ao Feed",
@@ -223,5 +312,87 @@
   "unknown_user": "Usuário desconhecido",
   "no_versions": "Nenhuma versão disponível",
   "invalid_date": "Data inválida",
-  "current": "Atual"
+  "current": "Atual",
+  "verifyEmail": {
+    "title": "Verifique seu e-mail!",
+    "message": "Um e-mail de verificação foi enviado. Você já pode fechar esta guia."
+  },
+  "home": {
+    "description": "A plataforma que democratiza a produção de música, oferecendo ferramentas profissionais em uma interface acessível para todos.",
+    "features": {
+      "midi": {
+        "title": "Editor MIDI Visual",
+        "description": "Edite notas, velocidades e instrumentos em uma interface intuitiva."
+      },
+      "collaboration": {
+        "title": "Colaboração Global",
+        "description": "Conecte-se com artistas do mundo todo."
+      },
+      "sharing": {
+        "title": "Compartilhamento Fácil",
+        "description": "Gere links para enviar seus projetos a colegas rapidamente."
+      },
+      "multiplatform": {
+        "title": "Multiplataforma",
+        "description": "Use em dispositivos móveis e PCs."
+      }
+    },
+    "login": "Entrar",
+    "signup": "Cadastrar"
+  },
+  "authLayout": {
+    "login": "Entrar",
+    "signup": "Criar Conta"
+  },
+  "authResult": {
+    "success": {
+      "title": "E-mail Verificado!",
+      "message": "Sua conta foi ativada com sucesso. Você já pode fazer o login."
+    },
+    "expired": {
+      "title": "Link Expirado",
+      "message": "O link de verificação expirou. Por favor, tente fazer login novamente para receber um novo."
+    },
+    "error": {
+      "title": "Falha na Verificação",
+      "message": "Algo deu errado. Por favor, tente novamente ou contate o suporte."
+    },
+    "loginButton": "Ir para o Login"
+  },
+  "signup": {
+    "title": "Criar Conta",
+    "username": "Nome de Usuário",
+    "username_placeholder": "Yankee Doodle",
+    "email": "Email",
+    "email_placeholder": "exemplo@e-mail.com",
+    "password": "Senha",
+    "password_placeholder": "Digite sua senha",
+    "show_password": "Mostrar senha",
+    "hide_password": "Ocultar senha",
+    "confirm_password": "Confirmar Senha",
+    "confirm_password_placeholder": "Confirme sua senha",
+    "password_strength": "Força da senha",
+    "strength_levels": {
+      "very_weak": "Muito fraca",
+      "weak": "Fraca",
+      "moderate": "Moderada",
+      "good": "Boa",
+      "strong": "Forte",
+      "very_strong": "Muito forte"
+    },
+    "password_requirements": {
+      "min_length": "Mínimo 8 caracteres",
+      "uppercase": "Pelo menos 1 letra maiúscula",
+      "number": "Pelo menos 1 número",
+      "special_char": "Pelo menos 1 caractere especial"
+    },
+    "passwords_no_match": "As senhas não coincidem",
+    "create_button": "Criar",
+    "creating_button": "Criando...",
+    "terms_agreement": "Ao prosseguir, você concorda com os",
+    "terms_of_use": "Termos de uso",
+    "privacy_policy": "Política de privacidade",
+    "already_have_account": "Já tem uma conta?",
+    "login_link": "Entrar"
+  }
 }

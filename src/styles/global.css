@@ -9,18 +9,16 @@
   .dark -> Sobrescreve as variáveis quando a classe "dark" está no <html>
 */
 :root {
-
-  --color-background: #f4f3ee; /* Fundo claro, suave e neutro */
-  --color-foreground: #2a2a2a; /* Texto escuro para bom contraste */
-  --color-bg-secondary: #ffffff; /* Painéis e cards claros */
-  --color-bg-darker: #e2e2e5; /* Fundo de seções levemente mais escuro */
-  --color-primary: #556b2f; /* Verde oliva sofisticado */
-  --color-primary-light: #7e9157; /* Verde oliva mais suave */
-  --color-accent: #d68642; /* Laranja/marrom elegante para destaques */
-  --color-accent-light: #e0a45c; /* Laranja claro para hover ou destaques */
-  --color-accent-sidebar: #f0ead6; /* Sidebar levemente amarelada */
-  --color-text-lighter: #1b1b1b; /* Texto em destaque */
-
+  --color-background: #F8F7F2; /* Um branco-gelo suave, confortável para os olhos */
+  --color-foreground: #403D39; /* Um cinza escuro para o texto, com bom contraste */
+  --color-bg-secondary: #FFFFFF; /* Branco puro para cartões e painéis, criando profundidade */
+  --color-bg-darker: #EAE8E1; /* Um tom levemente mais escuro que o fundo para seções */
+  --color-primary: #778A35; /* Verde-oliva como cor principal, calmo e orgânico */
+  --color-primary-light: #99AD5A; /* Uma variação mais clara do verde para interações */
+  --color-accent: #D4A373; /* Um caramelo/dourado para destaques e botões de ação */
+  --color-accent-light: #E0B98A; /* Variação mais clara do "accent" para hovers */
+  --color-accent-sidebar: #F1F0EA; /* Cor sutil para a barra lateral */
+  --color-text-lighter: #2B2926; /* Cor de texto para ênfase, um pouco mais escura */
 
 }
 
@@ -120,4 +118,17 @@ body {
   background: var(--color-accent);
   border-radius: 50%;
   cursor: pointer;
+}
+
+/* Tamanhos de Fonte para acessibilidade */
+:root.text-small {
+  font-size: 14px; /* Pequeno */
+}
+
+:root.text-medium {
+  font-size: 16px; /* Padrão */
+}
+
+:root.text-giga {
+  font-size: 18px; /* Grande */
 }

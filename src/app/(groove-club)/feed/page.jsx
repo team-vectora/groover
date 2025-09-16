@@ -5,8 +5,10 @@ import { Post } from "../../../components";
 import {useAuth, usePosts} from "../../../hooks/";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useTranslation } from "react-i18next";
 
 const FeedPage = () => {
+    const { t } = useTranslation();
     const { token, userId } = useAuth();
     const { posts, loading, error, refetch } = usePosts(token);
     const { setCurrentProject } = useContext(MidiContext);
@@ -17,7 +19,7 @@ const FeedPage = () => {
             <div className="flex-1 w-full">
                 <ToastContainer position="top-center" />
 
-                {loading && <p className="text-center py-4">Carregando posts...</p>}
+                {loading && <p className="text-center py-4">{t('feed.loading')}</p>}
                 {error && <p className="text-red-500 text-center py-4">{error}</p>}
 
                 <div className="space-y-6 ">

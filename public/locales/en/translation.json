@@ -12,6 +12,20 @@
     "loading": "Loading...",
     "no_notifications": "No notifications"
   },
+  "feed": {
+    "loading": "Loading posts..."
+  },
+  "post": {
+    "loading": "Loading post...",
+    "unavailable": "This post is no longer available.",
+    "removed": "It may have been removed by the author.",
+    "viewThread": "View thread",
+    "deletePost": "Delete post",
+    "deletePostTitle": "Delete Post",
+    "deletePostConfirmation": "Are you sure you want to delete this post?",
+    "noComments": "No comments yet.",
+    "comments": "Comments"
+  },
   "notifications": {
     "notifications": "Notifications",
     "new_post": "New Post",
@@ -119,7 +133,11 @@
     "confirmDeleteTitle": "Confirm Account Deletion",
     "confirmDeleteMessage": "Are you sure you want to delete your account? This action cannot be undone.",
     "cancel": "Cancel",
-    "yesDelete": "Confirm"
+    "yesDelete": "Confirm",
+    "fontSize": "Font Size",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large"
   },
   "livecode": {
     "title": "Livecode Song",
@@ -136,7 +154,17 @@
     "user": "User",
     "followers": "Followers",
     "following": "Following",
-    "logout": "Logout"
+    "logout": "Logout",
+    "loading": "Loading profile...",
+    "noPosts": "No posts found",
+    "newProject": "New Project",
+    "noInvites": "No invites found",
+    "deleteProjectTitle": "Delete Project",
+    "deleteProjectConfirmation": "Are you sure you want to delete this project? This action cannot be undone.",
+    "untitled": "Untitled",
+    "noDescription": "No description",
+    "loadingUsers": "Loading...",
+    "noUsers": "No users found."
   },
   "sharePopup": {
     "inviteTo": "Invite to:",
@@ -178,7 +206,7 @@
         "newProject": "New Project",
         "noDescription": "No description",
         "page": "Page",
-        "pageOf": "Page {current} of {total}",
+        "pageOf": "Page {{current}} of {{total}}",
         "deletePage": "Delete Current Page"
       }
     },
@@ -187,7 +215,68 @@
       "clearMessage": "All notes on the current page will be removed. This action cannot be undone.",
       "deleteTitle": "Delete Page",
       "deleteMessage": "This page will be permanently deleted. Are you sure?"
-    }
+    },
+    "saveProject": "Save Project",
+    "title": "Title",
+    "description": "Description",
+    "save": "Save",
+    "deleteLastPageError": "Cannot delete the last page."
+  },
+  "midiPlayer": {
+    "expand": "Expand player",
+    "collapse": "Collapse player",
+    "pause": "Pause",
+    "play": "Play",
+    "stop": "Stop",
+    "noProject": "No project selected"
+  },
+  "postForm": {
+    "maxTagsWarning": "You can select a maximum of 5 musical tags.",
+    "addComment": "Add Comment",
+    "createPublication": "Create New Publication",
+    "commentPlaceholder": "Write your comment...",
+    "captionPlaceholder": "Write a caption...",
+    "selectTags": "Choose up to 5 musical tags",
+    "comment": "Comment",
+    "publish": "Publish",
+    "addPhotos": "Add photos to your post",
+    "selectImages": "Select Images",
+    "projectLabel": "Project (optional)",
+    "noProject": "No project"
+  },
+  "configUserPopup": {
+    "maxGenresWarning": "You can select a maximum of 5 musical genres.",
+    "profileUpdatedSuccess": "Profile updated successfully!",
+    "updateError": "Error updating",
+    "apiError": "Error connecting to the API",
+    "configureProfile": "Configure Profile",
+    "profilePicture": "Profile picture",
+    "selectNewPhoto": "Select new photo",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us a little about yourself...",
+    "selectGenres": "Choose up to 5 musical genres",
+    "saveChanges": "Save changes"
+  },
+  "profileTabs": {
+    "posts": "Posts",
+    "musics": "Musics",
+    "invites": "Invites"
+  },
+  "project": {
+    "deletedSuccess": "Project deleted successfully!"
+  },
+  "fork": {
+    "copiedSuccess": "Project copied to your profile!"
+  },
+  "share": {
+    "sharedSuccess": "Project shared"
+  },
+  "upload": {
+    "imageTooLarge": "Image too large (maximum 2MB)",
+    "error": "Upload error"
+  },
+  "logout": {
+    "loggingOut": "Logging out..."
   },
   "header": {
     "backToFeed": "Back to Feed",
@@ -224,5 +313,87 @@
   "unknown_user": "Unknown user",
   "no_versions": "No versions available",
   "invalid_date": "Invalid date",
-  "current": "Current"
+  "current": "Current",
+  "verifyEmail": {
+    "title": "Check your email!",
+    "message": "A verification email has been sent. You can now close this tab."
+  },
+  "home": {
+    "description": "The platform that democratizes music production, offering professional tools in an accessible interface for everyone.",
+    "features": {
+      "midi": {
+        "title": "Visual MIDI Editor",
+        "description": "Edit notes, velocities, and instruments in an intuitive interface."
+      },
+      "collaboration": {
+        "title": "Global Collaboration",
+        "description": "Connect with artists worldwide."
+      },
+      "sharing": {
+        "title": "Easy Sharing",
+        "description": "Generate links to quickly send your projects to colleagues."
+      },
+      "multiplatform": {
+        "title": "Multiplatform",
+        "description": "Use on mobile devices and PCs."
+      }
+    },
+    "login": "Login",
+    "signup": "Sign Up"
+  },
+  "authLayout": {
+    "login": "Login",
+    "signup": "Create Account"
+  },
+  "authResult": {
+    "success": {
+      "title": "Email Verified!",
+      "message": "Your account has been successfully activated. You can now log in."
+    },
+    "expired": {
+      "title": "Link Expired",
+      "message": "The verification link has expired. Please try to log in again to receive a new one."
+    },
+    "error": {
+      "title": "Verification Failed",
+      "message": "Something went wrong. Please try again or contact support."
+    },
+    "loginButton": "Go to Login"
+  },
+  "signup": {
+    "title": "Create Account",
+    "username": "Username",
+    "username_placeholder": "Yankee Doodle",
+    "email": "Email",
+    "email_placeholder": "example@email.com",
+    "password": "Password",
+    "password_placeholder": "Enter your password",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
+    "confirm_password": "Confirm Password",
+    "confirm_password_placeholder": "Confirm your password",
+    "password_strength": "Password strength",
+    "strength_levels": {
+      "very_weak": "Very weak",
+      "weak": "Weak",
+      "moderate": "Moderate",
+      "good": "Good",
+      "strong": "Strong",
+      "very_strong": "Very strong"
+    },
+    "password_requirements": {
+      "min_length": "Minimum 8 characters",
+      "uppercase": "At least 1 uppercase letter",
+      "number": "At least 1 number",
+      "special_char": "At least 1 special character"
+    },
+    "passwords_no_match": "Passwords do not match",
+    "create_button": "Create",
+    "creating_button": "Creating...",
+    "terms_agreement": "By proceeding, you agree to the",
+    "terms_of_use": "Terms of use",
+    "privacy_policy": "Privacy policy",
+    "already_have_account": "Already have an account?",
+    "login_link": "Login"
+  }
 }

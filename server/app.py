@@ -16,6 +16,7 @@ import cloudinary
 from flasgger import Swagger
 from utils.mail import mail
 
+
 def create_app():
     app = Flask(__name__)
     Swagger(app)

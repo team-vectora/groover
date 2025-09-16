@@ -3,8 +3,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
+import { useTranslation } from 'react-i18next';
 
 const FollowListPopup = ({ title, users, onClose, isLoading }) => {
+    const { t } = useTranslation();
     const popupRef = useOutsideClick(onClose);
     return (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -17,9 +19,9 @@ const FollowListPopup = ({ title, users, onClose, isLoading }) => {
                 </div>
                 <div className="p-5 max-h-80 overflow-y-auto">
                     {isLoading ? (
-                        <p>Carregando...</p>
+                        <p>{t('profile.loadingUsers')}</p>
                     ) : users.length === 0 ? (
-                        <p>Nenhum usuário encontrado.</p>
+                        <p>{t('profile.noUsers')}</p>
                     ) : (
                         <ul className="space-y-3">
                             {users.map(user => (
