@@ -25,6 +25,11 @@ def create_app():
     # Configurações
     CORS(app)
     JWTManager(app)
+
+    @app.route('/api')
+    def api_root():
+        """Endpoint para verificar se a API está no ar."""
+        return {"status": "ok", "message": "API esta funcionando perfeitamente!"}
     
     # Inicializa o banco de dados
     mongo.init_db()
