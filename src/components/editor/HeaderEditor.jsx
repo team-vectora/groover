@@ -1,33 +1,67 @@
 'use client';
 import Image from 'next/image';
+import { useEffect, useState} from "react";
 import Link from 'next/link';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faPlay, faPause, faStop, faDownload, faUpload, faFloppyDisk,
-    faUser, faMusic, faCodeFork, faHouse, faEraser
+    faUser, faMusic, faCodeFork, faHouse, faEraser, faSliders
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from '../../hooks';
 import { useTranslation } from 'react-i18next';
 
 const HeaderEditor = ({
     onPlaySong, onClear, onStop, isPlaying, onExport,
-    onImport, onSave, onFork, isCurrentUserProject, title
+    onImport, onSave, onFork, isCurrentUserProject, title, setIsControlPanelOpen, isControlPanelOpen
 }) => {
     const { username, avatar } = useAuth();
     const { t } = useTranslation();
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     return (
 <header className="bg-bg-darker flex flex-col md:flex-row items-center justify-between gap-3 md:gap-6 p-3 flex-shrink-0 w-full fixed z-20">
-  {/* Left: Logo + Home */}
+
   <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
     <Link href="/feed" className="text-gray-400 hover:text-accent transition-colors" title={t("header.backToFeed")}>
       <FontAwesomeIcon icon={faHouse} className="h-5 w-5 mb-1" />
     </Link>
     <Image src="/img/groover_logo.png" alt="Logo" width={40} height={40} />
   </div>
+  <div className="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
+    <Link href={`/profile/${username}`} className="flex items-center gap-2 group">
+      <h3 className="font-semibold text-sm group-hover:text-accent transition-colors">{username}</h3>
+        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary group-hover:border-accent transition-colors">
+          <Image
+            src={avatar}
+            alt="Avatar"
+            width={160}   // coloque maior que o tamanho final
+            height={160}  // idem
+            className="object-cover w-full h-full"
+          />
+        </div>
 
+
+    </Link>
+  </div>
   {/* Center: Player Controls */}
   <div className="flex flex-wrap justify-center md:justify-start gap-2 w-full md:w-auto">
+    {isMobile && (
+      <button
+        className="flex items-center px-3 py-2 text-xs md:text-sm font-semibold rounded-md border-2 border-primary hover:bg-primary/30 transition"
+        onClick={() => setIsControlPanelOpen(true)}
+        title="Abrir painel"
+      >
+        <FontAwesomeIcon icon={faSliders} className="mr-1" />
+        <span className="hidden sm:inline">Painel</span>
+      </button>
+    )}
     <button
       title={t("header.playSong")}
       className="flex items-center px-3 py-2 text-xs md:text-sm font-semibold rounded-md border-2 border-primary hover:bg-primary/30 transition"
@@ -98,23 +132,8 @@ const HeaderEditor = ({
     )}
   </div>
 
-  {/* Right: Profile */}
-  <div className="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
-    <Link href={`/profile/${username}`} className="flex items-center gap-2 group">
-      <h3 className="font-semibold text-sm group-hover:text-accent transition-colors">{username}</h3>
-        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary group-hover:border-accent transition-colors">
-          <Image
-            src={avatar}
-            alt="Avatar"
-            width={160}   // coloque maior que o tamanho final
-            height={160}  // idem
-            className="object-cover w-full h-full"
-          />
-        </div>
 
 
-    </Link>
-  </div>
 </header>
     );
 };

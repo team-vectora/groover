@@ -39,7 +39,7 @@ const ControlPanel = ({
   const { t, i18n } = useTranslation();
 
   return (
-    <div className="px-4 space-y-6 flex flex-col h-full">
+    <div className="px-4  space-y-6 flex flex-col h-full border-2 border-accent rounded-lg">
       <div>
         <h1 className="text-sm font-bold uppercase text-accent mb-2 mt-4">
           {projectState.title || t("editor.controls.panel.newProject")}

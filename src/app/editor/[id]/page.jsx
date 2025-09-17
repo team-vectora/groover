@@ -31,6 +31,7 @@ export default function EditorPage() {
     const isNewProject = projectId === "new";
     const isCurrentUserProject = isOwner || isCollaborator || isNewProject;
 
+
     useEffect(() => {
         if (!authLoading && !token) {
             router.push("/login");
@@ -97,14 +98,9 @@ export default function EditorPage() {
                 onClear={handleClear}
                 isCurrentUserProject={isCurrentUserProject}
                 title={projectState.title}
+                setIsControlPanelOpen={setIsControlPanelOpen}
+                isControlPanelOpen={isControlPanelOpen}
             >
-                {/* Botão para abrir/fechar painel no mobile */}
-                <button
-                    className="md:hidden p-2 ml-2 bg-gray-700 rounded text-white"
-                    onClick={() => setIsControlPanelOpen(!isControlPanelOpen)}
-                >
-                    ☰
-                </button>
             </HeaderEditor>
 
             {/* PopUp salvar música */}
@@ -131,7 +127,8 @@ export default function EditorPage() {
                 onDeletePage={handleDeletePage}
                 isCurrentUserProject={isCurrentUserProject}
                 username={username}
-                isControlPanelOpen={isControlPanelOpen} // passa para controlar visibilidade
+                                setIsControlPanelOpen={setIsControlPanelOpen}
+                                isControlPanelOpen={isControlPanelOpen}
             />
 
             {/* PopUp confirmação */}

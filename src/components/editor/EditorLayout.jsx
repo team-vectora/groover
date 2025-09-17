@@ -13,25 +13,15 @@ const EditorLayout = ({
   lang,
   onDeletePage,
   isCurrentUserProject,
+  isControlPanelOpen,
+  setIsControlPanelOpen
 }) => {
-  const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
 
   return (
     <main className="flex flex-col md:flex-row flex-grow p-4 pt-20 gap-4 relative">
 
-      {/* Botão abrir painel mobile */}
-        <button
-          className="md:hidden fixed top-12 left-2 z-50 bg-accent text-white rounded-lg shadow-lg overflow-hidden"
-          style={{ width: "44px", height: "36px", padding: "0.5rem" }}
-          onClick={() => setIsControlPanelOpen(true)}
-        >
-          ☰
-        </button>
-
-
-              {/* Modal do painel mobile */}
       {isControlPanelOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center md:hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center md:hidden ">
           {/* Fundo escuro */}
           <div
             className="absolute inset-0 bg-black/50"
@@ -40,7 +30,7 @@ const EditorLayout = ({
 
 
             {/* Conteúdo do painel */}
-            <div className="relative bg-bg-darker w-3/5 max-w-md h-[90%] rounded-lg z-10 flex flex-col">
+            <div className="relative bg-bg-darker max-w-md h-4/5 rounded-lg z-10 flex flex-col w-[90%] ">
 
               {/* Botão fechar */}
               <button
