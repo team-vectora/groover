@@ -91,6 +91,8 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem("avatar", profilePicUrl);
+        // Dispara o evento para notificar outros componentes da mudança
+        window.dispatchEvent(new Event('profileUpdated'));
         toast.success(t('configUserPopup.profileUpdatedSuccess'));
         if (onSuccess) onSuccess();
         onClose();
