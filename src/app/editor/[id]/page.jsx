@@ -2,7 +2,7 @@
 'use client';
 import { useRouter, useParams } from "next/navigation";
 import { useAuth, useProjectStates, useTonePlayer, useProjectAPI, useForkProject } from '../../../hooks';
-import { HeaderEditor, SaveMusicPopUp, EditorLayout, ConfirmationPopUp } from '../../../components';
+import { HeaderEditor, SaveMusicPopUp, EditorLayout, ConfirmationPopUp, LoadingDisc } from '../../../components';
 import { useEffect, useState, useCallback } from "react";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -70,8 +70,24 @@ export default function EditorPage() {
     };
 
     if (authLoading || apiState.loading) {
-        return <div className="flex items-center justify-center h-screen">{t("sidebar.loading")}</div>;
+      return (
+        <div className="flex flex-col items-center justify-center w-screen h-screen bg-[var(--color-background)] text-center p-4">
+          <LoadingDisc />
+          <span
+            className="mt-4 text-lg font-bold text-transparent bg-clip-text inline-block"
+            style={{
+              backgroundImage: `linear-gradient(90deg, var(--color-accent), var(--color-accent-light), var(--color-primary-light), var(--color-accent))`,
+              backgroundSize: "300% 100%",
+              animation: "gradient 2s linear infinite",
+            }}
+          >
+            {t("editor.loadingMessage")}
+          </span>
+        </div>
+      );
     }
+
+
 
     const handleClear = () => setConfirmationAction('clear');
     const handleDeletePage = () => setConfirmationAction('delete');

@@ -13,7 +13,7 @@
     "no_notifications": "No notifications"
   },
   "feed": {
-    "loading": "Loading posts..."
+    "loading": "Loading ..."
   },
   "forgotPassword": {
     "title": "Forgot your password?",
@@ -232,7 +232,8 @@
     "title": "Title",
     "description": "Description",
     "save": "Save",
-    "deleteLastPageError": "Cannot delete the last page."
+    "deleteLastPageError": "Cannot delete the last page.",
+    "loadingMessage": "The editor is loading so you can create amazing music!"
   },
   "midiPlayer": {
     "expand": "Expand",

@@ -1,7 +1,7 @@
 // src/app/(groove-club)/p/[id]/page.jsx
 'use client';
 import { useState, useEffect, useContext } from "react";
-import { Post, CommentForm, CommentThread } from "../../../../components"; // Novos componentes
+import { Post, CommentForm, CommentThread, LoadingDisc } from "../../../../components"; // Novos componentes
 import { useParams } from "next/navigation";
 import { useAuth, useProfile } from "../../../../hooks";
 import { MidiContext } from "../../../../contexts/MidiContext";
@@ -48,7 +48,7 @@ function PostPage() {
         fetchPost();
     }, [postId, token]);
 
-    if (loading) return <p className="text-center py-10">{t('post.loading')}</p>;
+    if (loading) return <LoadingDisc />;
     if (error) return (
         <div className="flex flex-col items-center justify-center text-center py-10">
             <h2 className="text-2xl font-bold mb-4">🚫 {t('post.unavailable')}</h2>

@@ -13,7 +13,7 @@
     "no_notifications": "Nenhuma notificação"
   },
   "feed": {
-    "loading": "Carregando posts..."
+    "loading": "Carregando ..."
   },
   "forgotPassword": {
     "title": "Esqueceu a senha?",
@@ -231,7 +231,8 @@
     "title": "Título",
     "description": "Descrição",
     "save": "Salvar",
-    "deleteLastPageError": "Não é possível excluir a última página."
+    "deleteLastPageError": "Não é possível excluir a última página.",
+    "loadingMessage": "O editor está carregando para você criar músicas incríveis!"
   },
   "midiPlayer": {
     "expand": "Expandir",
