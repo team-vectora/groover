@@ -85,7 +85,7 @@ export default function SettingsPage() {
   <div className="space-y-2">
     <h2 className="font-semibold text-foreground">{t('settings.fontSize')}</h2>
     <div className="flex gap-2">
-      {['small', 'medium', 'giga'].map((s) => (
+      {['small', 'medium', 'large'].map((s) => (
         <button
           key={s}
           onClick={() => setSize(s)}
