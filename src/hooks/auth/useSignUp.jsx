@@ -8,33 +8,33 @@ export default function useSignUp() {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-  const { i18n } = useTranslation(); // Obtenha a instância do i18n
+  const { t, i18n } = useTranslation();
 
   const validateInputs = ({ username, email, senha }) => {
     const newErrors = {};
 
     if (!username || username.trim() === "") {
-      newErrors.username = "Nome de usuário é obrigatório";
+      newErrors.username = t("validation.username_required");
     } else if (username.length < 3) {
-      newErrors.username = "Nome de usuário muito curto";
+      newErrors.username = t("validation.username_min_length");
     }
 
     if (!email || email.trim() === "") {
-      newErrors.email = "Email é obrigatório";
+      newErrors.email = t("validation.email_required");
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Email inválido";
+      newErrors.email = t("validation.email_invalid");
     }
 
     if (!senha || senha.trim() === "") {
-      newErrors.senha = "Senha é obrigatória";
+      newErrors.senha = t("validation.password_required");
     } else if (senha.length < 8) {
-      newErrors.senha = "Senha deve ter pelo menos 8 caracteres";
+      newErrors.senha = t("validation.password_min_length");
     } else if (!/[A-Z]/.test(senha)) {
-      newErrors.senha = "Inclua pelo menos uma letra maiúscula";
+      newErrors.senha = t("validation.password_uppercase");
     } else if (!/[0-9]/.test(senha)) {
-      newErrors.senha = "Inclua pelo menos um número";
+      newErrors.senha = t("validation.password_number");
     } else if (!/[^A-Za-z0-9]/.test(senha)) {
-      newErrors.senha = "Inclua pelo menos um caractere especial";
+      newErrors.senha = t("validation.password_special_char");
     }
 
     return newErrors;
@@ -69,11 +69,11 @@ export default function useSignUp() {
         const backendErrors = {};
 
         if (data.error.includes("Username already exists")) {
-          backendErrors.username = "Nome de usuário já em uso";
+          backendErrors.username = t("backend_errors.username_exists");
         } else if (data.error.includes("Email already used")) {
-          backendErrors.email = "Email já cadastrado";
+          backendErrors.email = t("backend_errors.email_exists");
         } else {
-          backendErrors.general = data.error || "Erro no cadastro";
+          backendErrors.general = data.error || t("errors.generic_error");
         }
 
         setErrors(backendErrors);
@@ -81,7 +81,7 @@ export default function useSignUp() {
       }
     } catch (err) {
       setLoading(false);
-      const networkError = { general: "Erro de rede" };
+      const networkError = { general: t("errors.network_error") };
       setErrors(networkError);
       return { success: false, errors: networkError };
     }

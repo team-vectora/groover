@@ -5,7 +5,6 @@ import { FollowButton } from '../../components';
 import { useAuth } from '../../hooks';
 import { useState, useEffect } from 'react';
 
-
 export default function UserSearchResult({ user }) {
     const { userId } = useAuth();
     const [isFollowing, setIsFollowing] = useState(false);
@@ -22,8 +21,8 @@ export default function UserSearchResult({ user }) {
             <Link href={`/profile/${user.username}`} className="flex items-center gap-4">
                 <Image src={user.avatar || '/img/default_avatar.png'} alt={user.username} width={50} height={50} className="rounded-full" />
                 <div>
-                    <p className="font-bold">{user.username}</p>
-                    <p className="text-sm text-gray-400">{user.bio}</p>
+                    <p className="font-bold text-foreground">{user.username}</p>
+                    <p className="text-sm text-text-lighter dark:text-gray-400">{user.bio}</p>
                 </div>
             </Link>
             {userId !== user.id && (

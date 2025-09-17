@@ -47,45 +47,25 @@ def transform_old_layers_to_new(old_layers):
     return new_layers
 
 
+def update_all_users_active_field():
+    """
+    Atualiza o campo 'active' para True em todos os documentos da coleção 'users'
+    """
+    # Acessa a coleção 'users'
+    users_collection = mongo.db.users
+
+    # Atualiza todos os documentos definindo 'active' como True
+    result = users_collection.update_many(
+        {},  # Filtro vazio = todos os documentos
+        {"$set": {"active": True}}
+    )
+
+    print(f"Documentos modificados: {result.modified_count}")
+    print(f"Documentos correspondentes: {result.matched_count}")
+
+
 # --- EXECUÇÃO DO SCRIPT ---
 if __name__ == "__main__":
     print("Iniciando script de migração...")
 
-    # ✅ 2. A conexão agora é muito mais simples!
-    #    Lembre-se que sua classe Music usa 'musics' (plural).
-    music_collection = mongo.db.musics
-
-    # O resto do script permanece o mesmo
-    query_for_old_structure = {"layers.0.0.0": {"$type": "object"}}
-
-    documents_to_migrate = list(music_collection.find(query_for_old_structure))
-    total_docs = len(documents_to_migrate)
-
-    if total_docs == 0:
-        print("Nenhum documento com a estrutura antiga encontrado. Nenhuma migração necessária.")
-        exit()
-
-    print(f"Encontrados {total_docs} documentos com a estrutura antiga para migrar.")
-
-    migrated_count = 0
-    for doc in documents_to_migrate:
-        doc_id = doc['_id']
-        print(f"Processando documento ID: {doc_id}...")
-
-        old_layers = doc.get('layers', [])
-        new_layers = transform_old_layers_to_new(old_layers)
-
-        result = music_collection.update_one(
-            {"_id": doc_id},
-            {"$set": {"layers": new_layers}}
-        )
-
-        if result.modified_count > 0:
-            print(f"  -> Documento {doc_id} migrado com sucesso.")
-            migrated_count += 1
-        else:
-            print(f"  -> AVISO: Documento {doc_id} não foi modificado.")
-
-    print("\n--- Migração Concluída ---")
-    print(f"Total de documentos encontrados: {total_docs}")
-    print(f"Total de documentos migrados: {migrated_count}")
+    update_all_users_active_field()

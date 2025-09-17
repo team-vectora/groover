@@ -1,3 +1,4 @@
+// src/app/(groove-club)/settings/page.jsx
 'use client';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -8,13 +9,12 @@ import { useDeleteAccount } from '../../../hooks/settings/useDeleteAccount';
 
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();
-  const { theme, setTheme, size, setSize } = useTheme(); // <-- Obtenha 'size' e 'setSize'
+  const { theme, setTheme, size, setSize } = useTheme();
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [token, setToken] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const { deleteAccount, loading: deleting, error: deleteError } = useDeleteAccount(token);
 
-  // ... (resto do seu código useEffect e outras funções) ...
   useEffect(() => {
     const savedLang = localStorage.getItem('lang');
     if (savedLang && i18n.language !== savedLang) {
@@ -67,7 +67,7 @@ export default function SettingsPage() {
 
         {/* Tema */}
         <div className="bg-bg-secondary p-4 rounded-lg">
-          <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.theme')}</h2>
+          <h2 className="font-semibold mb-3 text-foreground">{t('settings.theme')}</h2>
           <select
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
@@ -79,9 +79,9 @@ export default function SettingsPage() {
           </select>
         </div>
 
-        {/* NOVO: Seção para Tamanho da Fonte */}
+        {/* Tamanho da Fonte */}
         <div className="bg-bg-secondary p-4 rounded-lg">
-          <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.fontSize')}</h2>
+          <h2 className="font-semibold mb-3 text-foreground">{t('settings.fontSize')}</h2>
           <div className="flex gap-2">
             <button
                 onClick={() => setSize('small')}
@@ -106,7 +106,7 @@ export default function SettingsPage() {
 
         {/* Idioma */}
         <div className="bg-bg-secondary p-4 rounded-lg">
-          <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.language')}</h2>
+          <h2 className="font-semibold mb-3 text-foreground">{t('settings.language')}</h2>
           <select
               value={i18n.language}
               onChange={(e) => changeLanguage(e.target.value)}
@@ -120,7 +120,7 @@ export default function SettingsPage() {
         {/* PWA */}
         {deferredPrompt && (
             <div className="bg-bg-secondary p-4 rounded-lg">
-              <h2 className="font-semibold mb-3">{t('settings.app')}</h2>
+              <h2 className="font-semibold mb-3 text-foreground">{t('settings.app')}</h2>
               <button
                   onClick={handleInstallPWA}
                   className="flex items-center gap-3 px-4 py-2 rounded-md bg-primary hover:bg-primary-light transition-colors"
@@ -133,7 +133,7 @@ export default function SettingsPage() {
 
         {/* Deletar Conta */}
         <div className="bg-bg-secondary p-4 rounded-lg">
-          <h2 className="font-semibold mb-3 text-text-lighter">{t('settings.deleteAccount')}</h2>
+          <h2 className="font-semibold mb-3 text-foreground">{t('settings.deleteAccount')}</h2>
           {deleteError && <p className="text-red-500 mb-2">{deleteError}</p>}
           <button
               onClick={handleDeleteClick}
@@ -149,10 +149,10 @@ export default function SettingsPage() {
         {showConfirm && (
             <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
               <div className="bg-bg-secondary p-6 rounded-lg max-w-sm w-full text-center space-y-4">
-                <h2 className="text-lg font-semibold text-text-lighter">
+                <h2 className="text-lg font-semibold text-foreground">
                   {t('settings.confirmDeleteTitle')}
                 </h2>
-                <p className="text-text-lighter">{t('settings.confirmDeleteMessage')}</p>
+                <p className="text-foreground">{t('settings.confirmDeleteMessage')}</p>
                 <div className="flex justify-center gap-4 mt-4">
                   <button
                       onClick={confirmDelete}
