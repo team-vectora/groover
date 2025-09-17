@@ -15,7 +15,7 @@ export function ThemeProvider({ children }) {
 
   // <-- NOVA FUNÇÃO para aplicar o tamanho da fonte -->
   const applySize = (newSize) => {
-    document.documentElement.classList.remove('text-small', 'text-medium', 'text-giga');
+    document.documentElement.classList.remove('text-small', 'text-medium', 'text-large');
     document.documentElement.classList.add(`text-${newSize}`);
   };
 
