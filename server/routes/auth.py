@@ -10,7 +10,7 @@ from models import User
 auth_bp = Blueprint('auth', __name__)
 
 # URL do seu frontend
-FRONTEND_URL = "http://localhost:3000"
+FRONTEND_URL = "https://groover.app.br"
 
 # Corrigido: Use o TimedSerializer para tokens com expiração
 s = URLSafeTimedSerializer(os.getenv('AUTH_KEY'))
