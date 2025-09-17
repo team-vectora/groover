@@ -30,8 +30,18 @@ export default function useLogin() {
 
         return { success: true, data };
       } else {
+
         const backendErrors = {};
-        backendErrors.general = t('errors.generic_error');
+
+        if (data.error.includes("Invalid credentials")) {
+          backendErrors.general = t("backend_errors.invalid_credentials");
+        } else if (data.error.includes("User is not active.")) {
+          backendErrors.general = t("backend_errors.user_not_active");
+        } else if (data.error.includes("Username and password are required")){
+          backendErrors.general = t("backend_errors.username_is_required")
+        } else {
+          backendErrors.general = data.error || t("errors.generic_error");
+        }
         setErrors(backendErrors);
         return { success: false, errors: backendErrors };
       }

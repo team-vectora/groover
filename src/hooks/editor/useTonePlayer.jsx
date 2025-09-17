@@ -50,11 +50,10 @@ export const useTonePlayer = (projectState) => {
         synthRef.current.triggerAttackRelease(note, "8n");
     }, [isInstrumentLoading]);
 
-    // ✅ CORRIGIDO: Agora cria uma linha do tempo contínua a partir de todas as páginas.
     const createPlaybackSequence = (targetPages) => {
         const allSubNotes = [];
         let currentTime = 0;
-        let globalColIndex = 0; // Índice de coluna global para rastreamento contínuo.
+        let globalColIndex = 0;
 
         targetPages.forEach((matrix, matrixIndex) => {
             matrix.forEach((col, colIndexInPage) => {
@@ -64,7 +63,7 @@ export const useTonePlayer = (projectState) => {
 
                 col.forEach((note, rowIndex) => {
                     (note || []).forEach((subNote, subIndex) => {
-                        if (subNote?.name) { // Só adiciona eventos que têm notas
+                        if (subNote?.name) {
                             const startTime = currentTime + (subIndex * subDuration);
                             allSubNotes.push({
                                 matrixIndex,
@@ -75,7 +74,7 @@ export const useTonePlayer = (projectState) => {
                                 startTime,
                                 duration: subDuration,
                                 noteName: NOTES[rowIndex],
-                                globalColIndex, // Armazena o índice global
+                                globalColIndex,
                                 totalSubNotesInCol: subNotesCount
                             });
                         }
@@ -100,7 +99,7 @@ export const useTonePlayer = (projectState) => {
     }, []);
 
     const playPause = useCallback(async (sequence, onVisuals, onEnd) => {
-        if (isInstrumentLoading || !synthRef.current) return; // Removido sequence.length === 0 para permitir play em projetos vazios
+        if (isInstrumentLoading || !synthRef.current) return;
 
         await Tone.start();
         const state = Tone.Transport.state;
@@ -111,8 +110,7 @@ export const useTonePlayer = (projectState) => {
 
             let lastEventTime = 0;
 
-            // ✅ CORREÇÃO: Lógica de agendamento VISUAL separada.
-            // Este loop garante que TODAS as colunas (incluindo as vazias) recebam o callback visual.
+            // Lógica de agendamento VISUAL
             let currentTime = 0;
             const colDuration = Tone.Time("4n").toSeconds();
             pages.forEach((matrix, matrixIndex) => {
@@ -132,74 +130,96 @@ export const useTonePlayer = (projectState) => {
                     currentTime += colDuration;
                 });
             });
-            lastEventTime = currentTime; // O tempo final da música é o tempo total das colunas
-            // --- FIM DA LÓGICA VISUAL ---
+            lastEventTime = currentTime;
 
-
-            // Lógica de agendamento de ÁUDIO (permanece a mesma, mas sem o visual)
+            // Lógica de agendamento de ÁUDIO
             if (sequence.length > 0) {
-                const processedSequence = sequence.map((currentEvent, index, arr) => {
-                    const prevEvent = arr.slice(0, index).reverse().find(e => e.rowIndex === currentEvent.rowIndex);
-                    const nextEvent = arr.slice(index + 1).find(e => e.rowIndex === currentEvent.rowIndex);
-
-                    // --- CONDIÇÕES PARA INICIAR UMA NOTA (shouldStart) ---
-                    const isSeparated = currentEvent.subNote.isSeparated;
-                    const isFirstNote = !prevEvent;
-                    const isDifferentRow = prevEvent && prevEvent.rowIndex !== currentEvent.rowIndex;
-                    const hasSilenceBefore = prevEvent && (prevEvent.globalColIndex === currentEvent.globalColIndex && prevEvent.subIndex !== currentEvent.subIndex - 1);
-
-                    const shouldStart = isSeparated || isFirstNote || isDifferentRow || hasSilenceBefore;
-
-                    // --- CONDIÇÕES PARA PARAR UMA NOTA (shouldEnd) ---
-                    const isLastNote = !nextEvent;
-                    const nextIsSeparated = nextEvent && nextEvent.subNote.isSeparated;
-                    const nextIsDifferentRow = nextEvent && nextEvent.rowIndex !== currentEvent.rowIndex;
-                    const hasSilenceAfter = nextEvent && (nextEvent.globalColIndex === currentEvent.globalColIndex && nextEvent.subIndex !== currentEvent.subIndex + 1);
-
-                    const shouldEnd = isLastNote || nextIsSeparated || nextIsDifferentRow || hasSilenceAfter;
-
-                    // --- LOG DETALHADO ---
-                    console.group(`Nota: ${currentEvent.noteName} (Col: ${currentEvent.globalColIndex}, Sub: ${currentEvent.subIndex})`);
-
-                    console.log(`%c--- Verificando shouldStart: ${shouldStart} ---`, 'color: skyblue');
-                    console.log(`É uma nota separada? (isSeparated):`, isSeparated);
-                    console.log(`É a primeira nota da sequência? (isFirstNote):`, isFirstNote);
-                    console.log(`A nota anterior é de outra linha? (isDifferentRow):`, isDifferentRow);
-                    console.log(`Existe um silêncio antes? (hasSilenceBefore):`, hasSilenceBefore);
-
-                    console.log(`%c--- Verificando shouldEnd: ${shouldEnd} ---`, 'color: lightgreen');
-                    console.log(`É a última nota da sequência? (isLastNote):`, isLastNote);
-                    console.log(`A próxima nota é separada? (nextIsSeparated):`, nextIsSeparated);
-                    console.log(`A próxima nota é de outra linha? (nextIsDifferentRow):`, nextIsDifferentRow);
-                    console.log(`Existe um silêncio depois? (hasSilenceAfter):`, hasSilenceAfter);
-
-                    console.groupEnd();
-
-
-                    return { ...currentEvent, shouldStart, shouldEnd };
+                // 1. Criar um mapa de informações estruturais sobre cada coluna
+                const colInfoMap = new Map();
+                let currentGlobalColIndex = 0;
+                pages.forEach((matrix) => {
+                    matrix.forEach((col) => {
+                        const subNotesCount = Math.max(1, ...col.map(note => note?.length || 1));
+                        colInfoMap.set(currentGlobalColIndex, { totalSubNotes: subNotesCount });
+                        currentGlobalColIndex++;
+                    });
                 });
 
-                processedSequence.forEach((event) => {
-                    const { subNote, startTime, duration, noteName, shouldStart, shouldEnd } = event;
+                // 2. Criar o mapa de notas para acesso rápido
+                const noteMap = new Map();
+                sequence.forEach(event => {
+                    const key = `${event.rowIndex}-${event.globalColIndex}-${event.subIndex}`;
+                    noteMap.set(key, event.subNote);
+                });
 
-                    // O agendamento visual foi removido daqui
+                // 3. Função getAdjacentNote refatorada e robusta
+                const getAdjacentNote = (currentEvent, direction) => {
+                    const { rowIndex, globalColIndex, subIndex } = currentEvent;
+
+                    let adjSubIndex = subIndex + direction;
+                    let adjGlobalColIndex = globalColIndex;
+
+                    const currentColInfo = colInfoMap.get(globalColIndex);
+
+                    if (adjSubIndex < 0) { // Navega para a coluna anterior
+                        adjGlobalColIndex--;
+                        if (adjGlobalColIndex < 0) {
+                            return null; // Início da música
+                        }
+                        const prevColInfo = colInfoMap.get(adjGlobalColIndex);
+                        adjSubIndex = prevColInfo.totalSubNotes - 1; // Última sub-nota da coluna anterior
+
+                    } else if (adjSubIndex >= currentColInfo.totalSubNotes) { // Navega para a próxima coluna
+                        adjGlobalColIndex++;
+                        const nextColInfo = colInfoMap.get(adjGlobalColIndex);
+                        if (!nextColInfo) {
+                            return null; // Fim da música
+                        }
+                        adjSubIndex = 0; // Primeira sub-nota da próxima coluna
+                    }
+
+                    const key = `${rowIndex}-${adjGlobalColIndex}-${adjSubIndex}`;
+                    return noteMap.get(key);
+                };
+
+                sequence.forEach((event) => {
+                    const prevNote = getAdjacentNote(event, -1);
+                    const nextNote = getAdjacentNote(event, +1);
+
+                    const shouldStart = event.subNote.isSeparated || !prevNote || prevNote.isSeparated;
+                    const shouldEnd = event.subNote.isSeparated || !nextNote || nextNote.isSeparated;
+
+                    // Logs mantidos para depuração
+                    console.group(`Nota: ${event.noteName} (Col: ${event.globalColIndex}, Sub: ${event.subIndex})`);
+                    console.log(`%c--- Verificando shouldStart: ${shouldStart} ---`, 'color: skyblue');
+                    console.log(`É uma nota separada? (isSeparated):`, event.subNote.isSeparated);
+                    console.log(`Célula adjacente anterior é vazia? (!prevNote):`, !prevNote);
+                    if (prevNote) {
+                        console.log(`Nota anterior é separada? (prevNote.isSeparated):`, prevNote.isSeparated);
+                    }
+                    console.log(`%c--- Verificando shouldEnd: ${shouldEnd} ---`, 'color: lightgreen');
+                    console.log(`É uma nota separada? (isSeparated):`, event.subNote.isSeparated);
+                    console.log(`Célula adjacente posterior é vazia? (!nextNote):`, !nextNote);
+                    if (nextNote) {
+                        console.log(`Próxima nota é separada? (nextNote.isSeparated):`, nextNote.isSeparated);
+                    }
+                    console.groupEnd();
 
                     if (shouldStart) {
                         const attackId = Tone.Transport.schedule(time => {
-                            synthRef.current?.triggerAttack(noteName, time);
-                        }, startTime);
+                            synthRef.current?.triggerAttack(event.noteName, time);
+                        }, event.startTime);
                         scheduledEventsRef.current.push(attackId);
                     }
 
                     if (shouldEnd) {
                         const releaseId = Tone.Transport.schedule(time => {
-                            synthRef.current?.triggerRelease(noteName, time);
-                        }, startTime + duration);
+                            synthRef.current?.triggerRelease(event.noteName, time);
+                        }, event.startTime + event.duration);
                         scheduledEventsRef.current.push(releaseId);
                     }
                 });
             }
-            // --- FIM DA LÓGICA DE ÁUDIO ---
 
             const endEventId = Tone.Transport.schedule(time => {
                 Tone.Draw.schedule(() => {

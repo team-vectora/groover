@@ -135,14 +135,32 @@ class User:
             sender=os.getenv('MAIL_USERNAME')
         )
         mail.send(msg)
-    # ... resto do arquivo user.py sem alterações ...
+
+
     @staticmethod
     def delete(user_id):
         user_oid = ObjectId(user_id)
+
+        # Encontra todos os posts do usuário a ser deletado
+        posts_to_delete = list(mongo.db.posts.find({'user_id': user_oid}))
+
+        # Itera sobre os posts e decrementa o contador de comentários dos posts pais
+        for post in posts_to_delete:
+            if post.get('parent_post_id'):
+                mongo.db.posts.update_one(
+                    {'_id': post['parent_post_id']},
+                    {'$inc': {'comment_count': -1}}
+                )
+
+        # Deleta todos os posts do usuário
+        if posts_to_delete:
+            mongo.db.posts.delete_many({'user_id': user_oid})
+
+        # Deleta o usuário
         result_user = mongo.db.users.delete_one({'_id': user_oid})
-        result_posts = mongo.db.posts.delete_many({'user_id': user_oid})
 
         return result_user.deleted_count > 0
+
 
     @staticmethod
     def find_by_username(username):
