@@ -35,8 +35,31 @@ export default function SimilarUsers({ users = [], userId }) {
     }, []);
 
     if (!users || users.length === 0) {
-        return <p className="text-center py-4">{t("similarUsers.loading")}</p>;
+      return (
+        <section className="bg-bg-secondary rounded-lg p-4 border-2 border-primary sticky top-24">
+          <h2 className="text-2xl font-semibold text-accent-light mb-4 text-center">
+            {t("similarUsers.suggestionsTitle")}
+          </h2>
+
+          <div className="flex flex-col items-center justify-center py-6 px-4 bg-yellow-50 border border-yellow-300 rounded-lg shadow-md text-center">
+            <div className="text-4xl mb-3 text-yellow-500">
+              🌟
+            </div>
+            <p className="font-bold text-lg mb-2 text-yellow-800">
+              {t("similarUsers.noUsersTitle", "Nenhum usuário encontrado")}
+            </p>
+            <p className="text-sm text-yellow-700">
+              {t(
+                "similarUsers.noUsersDescription",
+                "Use mais tags e personalize suas preferências para receber recomendações de usuários."
+              )}
+            </p>
+          </div>
+        </section>
+      );
     }
+
+
 
     const startIndex = page * pageSize;
     const visibleUsers = users.slice(startIndex, startIndex + pageSize);
@@ -59,13 +82,16 @@ export default function SimilarUsers({ users = [], userId }) {
                         className="flex items-center justify-between bg-bg-darker hover:bg-background transition-colors rounded-md p-3"
                     >
                         <div className="flex items-center">
-                            <Image
+                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary flex-shrink-0">
+                              <Image
                                 src={user.avatar || "/img/default_avatar.png"}
                                 alt={user.username}
                                 width={48}
                                 height={48}
-                                className="rounded-full object-cover border-2 border-primary"
-                            />
+                                className="object-cover w-full h-full"
+                              />
+                            </div>
+
                             <div className="ml-3 mr-3">
                                 <Link href={`/profile/${user?.username}`} className="text-foreground hover:underline">
                                     <h3 className="text-lg font-medium">{user.username}</h3>

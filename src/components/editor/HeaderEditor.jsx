@@ -34,22 +34,7 @@ const HeaderEditor = ({
     </Link>
     <Image src="/img/groover_logo.png" alt="Logo" width={40} height={40} />
   </div>
-  <div className="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
-    <Link href={`/profile/${username}`} className="flex items-center gap-2 group">
-      <h3 className="font-semibold text-sm group-hover:text-accent transition-colors">{username}</h3>
-        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary group-hover:border-accent transition-colors">
-          <Image
-            src={avatar}
-            alt="Avatar"
-            width={160}   // coloque maior que o tamanho final
-            height={160}  // idem
-            className="object-cover w-full h-full"
-          />
-        </div>
 
-
-    </Link>
-  </div>
   {/* Center: Player Controls */}
   <div className="flex flex-wrap justify-center md:justify-start gap-2 w-full md:w-auto">
     {isMobile && (
@@ -131,7 +116,22 @@ const HeaderEditor = ({
       </button>
     )}
   </div>
+  <div className="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end">
+    <Link href={`/profile/${username}`} className="flex items-center gap-2 group">
+      <h3 className="font-semibold text-sm group-hover:text-accent transition-colors">{username}</h3>
+        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary group-hover:border-accent transition-colors">
+          <Image
+            src={avatar}
+            alt="Avatar"
+            width={160}   // coloque maior que o tamanho final
+            height={160}  // idem
+            className="object-cover w-full h-full"
+          />
+        </div>
 
+
+    </Link>
+  </div>
 
 
 </header>

@@ -313,10 +313,11 @@
     "confirm": "Confirmar"
   },
   "similarUsers": {
-    "loading": "Carregando sugestões...",
-    "suggestionsTitle": "Sugestões para você",
+    "suggestionsTitle": "Sugestões de usuários",
+    "noUsersTitle": "Nenhum usuário encontrado",
+    "noUsersDescription": "Use mais tags e personalize suas preferências para receber recomendações de usuários.",
     "noBio": "Sem biografia",
-    "matchPercentage": "{{percentage}}% de match",
+    "matchPercentage": "{{percentage}}% de compatibilidade",
     "viewMore": "Ver mais"
   },
   "versions": "Versões",

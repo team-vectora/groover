@@ -315,8 +315,9 @@
   },
 
   "similarUsers": {
-    "loading": "Loading suggestions...",
-    "suggestionsTitle": "Suggestions for you",
+    "suggestionsTitle": "User Suggestions",
+    "noUsersTitle": "No users found",
+    "noUsersDescription": "Use more tags and personalize your preferences to get user recommendations.",
     "noBio": "No bio",
     "matchPercentage": "{{percentage}}% match",
     "viewMore": "View more"
