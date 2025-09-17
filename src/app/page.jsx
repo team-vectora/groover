@@ -13,7 +13,7 @@ export default function Home() {
           <LanguageSwitcher />
         </div>
         {/* Círculos de fundo mantidos, mas com tamanho reduzido para não interferir no layout */}
-        <div className="absolute lg:w-0 bottom-[-300px] left-[-200px] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,var(--primary-light)_0%,transparent_70%)] opacity-10 z-10 animate-float-reverse"></div>
+        <div className="absolute lg:w-0 bottom-[-300px] left-[-200px] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,var(--primary-light)_0%,transparent_70%)] opacity-10 -z-1 animate-float-reverse"></div>
 
         <main className="relative px-4 py-16 sm:px-8 lg:max-h-screen">
           <div className="flex flex-col lg:grid lg:grid-cols-2 gap-16 items-center w-full max-w-7xl mx-auto">
