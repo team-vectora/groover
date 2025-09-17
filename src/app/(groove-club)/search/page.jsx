@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth, useDebounce } from '../../../hooks';
 import { GENRES } from '../../../constants';
-import { Post, ProjectCard, UserSearchResult } from '../../../components';
+import { Post, ProjectCard, UserSearchResult, LoadingDisc } from '../../../components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { useTranslation } from 'react-i18next';
@@ -49,7 +49,7 @@ export default function SearchPage() {
     };
 
     const renderResults = () => {
-        if (loading) return <p className="text-center mt-8">{t('search.loading')}</p>;
+        if (loading) return <LoadingDisc />;
 
         const hasResults =
             (results.users?.length || 0) > 0 ||

@@ -24,8 +24,6 @@ const ProfileHeader = ({
 
       return nonZeroGenres;
     };
-
-console.log(user.genres)
   return (
     <div className="bg-bg-secondary rounded-lg p-6 mb-6 border border-primary">
       <div className="flex flex-col md:flex-row items-center gap-6">

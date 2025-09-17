@@ -109,9 +109,6 @@ def reset_password(token):
 
     return render_template('reset_password.html', status=None)
 
-# Rota removida, pois o frontend cuidará disso
-# @auth_bp.route('/token_expired') ...
-
 @auth_bp.route('/signin', methods=['POST'])
 def signin():
     data = request.get_json()

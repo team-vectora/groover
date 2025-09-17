@@ -42,3 +42,5 @@ export { default as FollowListPopup } from './profile/FollowListPopup';
 export { default as UserSearchResult } from './search/UserSearchResult';
 
 export { default as ForgotPasswordPopup } from './auth/ForgotPasswordPopup';
+
+export { default as LoadingDisc } from './util/LoadingDisc';

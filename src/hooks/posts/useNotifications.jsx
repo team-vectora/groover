@@ -56,13 +56,13 @@ export default function useNotifications(token) {
     }
   };
 
-  useEffect(() => {
-    if (!token) return;
+      useEffect(() => {
+        if (!token) return;
 
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 100000);
-    return () => clearInterval(interval);
-  }, [token]);
+        fetchNotifications();
+        const interval = setInterval(fetchNotifications, 10000);
+        return () => clearInterval(interval);
+      }, [token]);
 
   return { notifications, loading, error, refetch: fetchNotifications, checkNotification };
 }

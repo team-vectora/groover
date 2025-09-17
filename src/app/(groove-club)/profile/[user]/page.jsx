@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { MidiContext } from '../../../../contexts/MidiContext';
 import { useAuth, useProfile, useForkProject, useShareProject, useDeleteProject } from '../../../../hooks';
 import { ProfileHeader, ProfileTabs, Post, ProjectCard, Invite,
-  PostFormPopUp, ConfigUserPopUp, SharePopUp, ConfirmationPopUp, FollowListPopup } from '../../../../components';
+  PostFormPopUp, ConfigUserPopUp, SharePopUp, ConfirmationPopUp, FollowListPopup, LoadingDisc } from '../../../../components';
 import { useTranslation } from 'react-i18next';
 import { API_BASE_URL } from '../../../../config';
 
@@ -90,7 +90,7 @@ export default function ProfilePage({ params }) {
     router.push('/login');
   };
 
-  if (loading) return <div className="text-center py-8">{t('profile.loading')}</div>;
+  if (loading) return <LoadingDisc />;
   if (error) return <div className="text-red-500 text-center py-8">{error}</div>;
 
   return (
@@ -112,7 +112,6 @@ export default function ProfilePage({ params }) {
             showInvites={isCurrentUser}
         />
 
-        {/* Conteúdo das Abas */}
         {activeTab === 'posts' && (
             <div className="space-y-6">
               {isCurrentUser && (
