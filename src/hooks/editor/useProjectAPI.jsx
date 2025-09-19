@@ -24,13 +24,12 @@ export const useProjectAPI = (projectId, projectActions) => {
     const [project, setProject] = useState(null);
     const [versions, setVersions] = useState([]);
     const [currentMusicId, setCurrentMusicId] = useState("");
-    const [lastVersionId, setLastVersionId] = useState("");
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
-    // Carregar dados iniciais do projeto
     useEffect(() => {
         const loadInitialData = async () => {
             if (!projectId || !token || projectId === "new") {
+                projectActions.loadProjectData(); // Carrega um projeto vazio
                 setLoading(false);
                 return;
             }
@@ -42,52 +41,48 @@ export const useProjectAPI = (projectId, projectActions) => {
                 if (!res.ok) throw new Error('Failed to load project');
                 const data = await res.json();
 
-                console.log(data)
-
                 setProject(data);
-                // A estrutura da música vem aninhada em current_music_id
                 if (data.current_music_id) {
                     projectActions.loadProjectData({ ...data, ...data.current_music_id });
                     setCurrentMusicId(data.current_music_id._id);
-                    setLastVersionId(data.current_music_id._id);
+                } else {
+                    // Se não houver música, carrega os metadados do projeto e um estado de música padrão
+                    projectActions.loadProjectData(data);
                 }
                 setVersions(data.music_versions || []);
 
             } catch (error) {
                 console.error("Error loading project:", error);
                 toast.error("Error loading project.");
+                router.push('/editor/new'); // Redireciona para um novo editor em caso de erro
             } finally {
                 setLoading(false);
             }
         };
 
         loadInitialData();
-    }, [projectId, token, router]);
+    }, [projectId, token, router]); // Removido projectActions das dependências para evitar loop
 
-    // Salvar Projeto (NOVO FORMATO)
     const handleSave = useCallback(async (projectData) => {
         if (!token) return;
-
-        const midiBlob = await exportToMIDI(projectData, true);
-        const midiBase64 = await blobToBase64(midiBlob);
-
-        const payload = {
-            ...projectData,
-            midi: midiBase64
-        };
-
-        if (projectId !== "new") {
-            payload.id = projectId;
-        }
+        setLoading(true);
 
         try {
+            const payload = { ...projectData };
+            if (projectId !== "new") {
+                payload.id = projectId;
+            }
+
             const response = await fetch(`${API_BASE_URL}/projects`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify(payload),
             });
 
-            if (!response.ok) throw new Error("Failed to save project.");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to save project.");
+            }
 
             const data = await response.json();
             toast.success("Project saved!");
@@ -98,17 +93,18 @@ export const useProjectAPI = (projectId, projectActions) => {
                 setProject(data);
                 if (data.current_music_id) {
                     setCurrentMusicId(data.current_music_id._id);
-                    setLastVersionId(data.current_music_id._id);
                 }
                 setVersions(data.music_versions || []);
             }
         } catch (error) {
             console.error("Error saving project:", error);
-            toast.error("Failed to save project.");
+            toast.error(`Failed to save project: ${error.message}`);
+        } finally {
+            setLoading(false);
         }
     }, [token, projectId, router]);
 
-    // Exportar para MIDI (NOVA LÓGICA MULTI-CANAL)
+
     const exportToMIDI = async (projectData, returnBlob = false) => {
         const { bpm, channels, patterns, songStructure } = projectData;
         const midi = new Midi();
@@ -136,6 +132,7 @@ export const useProjectAPI = (projectId, projectActions) => {
                         name: NOTES[note.pitch],
                         time: note.start * tickDuration + barOffset,
                         duration: (note.end - note.start) * tickDuration,
+                        velocity: 1
                     });
                 });
             });
@@ -152,7 +149,6 @@ export const useProjectAPI = (projectId, projectActions) => {
         URL.revokeObjectURL(url);
     };
 
-    // Importar de MIDI (NOVA LÓGICA MULTI-CANAL)
     const importFromMIDI = useCallback(async (file) => {
         if (!file) return;
 
@@ -171,7 +167,6 @@ export const useProjectAPI = (projectId, projectActions) => {
                 newChannels.push({ id: `imported-channel-${trackIndex}`, instrument: track.instrument.name || 'piano' });
                 const channelPatternRow = [];
 
-                // Agrupar notas por compasso
                 const notesByBar = {};
                 track.notes.forEach(note => {
                     const barIndex = Math.floor(note.time / barDuration);
@@ -179,7 +174,8 @@ export const useProjectAPI = (projectId, projectActions) => {
                     notesByBar[barIndex].push(note);
                 });
 
-                const maxBar = Math.max(...Object.keys(notesByBar).map(Number));
+                const maxBar = Object.keys(notesByBar).length > 0 ? Math.max(...Object.keys(notesByBar).map(Number)) : -1;
+
 
                 for (let barIndex = 0; barIndex <= maxBar; barIndex++) {
                     const barNotes = notesByBar[barIndex];
@@ -207,6 +203,7 @@ export const useProjectAPI = (projectId, projectActions) => {
             });
 
             projectActions.loadProjectData({
+                title: file.name.replace('.mid', ''),
                 bpm: midiData.header.tempos[0].bpm,
                 channels: newChannels,
                 patterns: newPatterns,
@@ -220,9 +217,8 @@ export const useProjectAPI = (projectId, projectActions) => {
         }
     }, [projectActions]);
 
-    // Carregar Versão Antiga (NOVA LÓGICA)
     const handleVersionChange = useCallback(async (musicId) => {
-        if (!musicId) return;
+        if (!musicId || musicId === currentMusicId) return;
         setLoading(true);
         try {
             const res = await fetch(`${API_BASE_URL}/projects/${projectId}/versions/${musicId}`, {
@@ -231,9 +227,8 @@ export const useProjectAPI = (projectId, projectActions) => {
             if (!res.ok) throw new Error('Failed to load version');
 
             const versionData = await res.json();
-            // O `project` (com metadados) permanece o mesmo, só a música muda.
             projectActions.loadProjectData({ ...project, ...versionData });
-            setCurrentMusicId(musicId);
+            setCurrentMusicId(musicId); // Atualiza o ID da música selecionada
             toast.info("Version loaded.");
 
         } catch (error) {
@@ -242,10 +237,11 @@ export const useProjectAPI = (projectId, projectActions) => {
         } finally {
             setLoading(false);
         }
-    }, [projectId, token, project, projectActions]);
+    }, [projectId, token, project, currentMusicId]); // Adicionado currentMusicId para evitar recargas desnecessárias
+
 
     return {
-        apiState: { loading, project, versions, currentMusicId, lastVersionId },
+        apiState: { loading, project, versions, currentMusicId },
         apiActions: { handleSave, exportToMIDI, importFromMIDI, handleVersionChange },
     };
 };

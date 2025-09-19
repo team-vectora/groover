@@ -13,12 +13,14 @@ ACOUSTIC_INSTRUMENTS.forEach(name => {
 });
 
 export const useTonePlayer = (projectState) => {
-    const { bpm, channels, patterns, songStructure } = projectState;
+    const { bpm, channels, patterns, songStructure, activePatternId, activeChannelIndex } = projectState;
     const synthsRef = useRef({});
     const [isPlaying, setIsPlaying] = useState(false);
+    const [isPatternPlaying, setIsPatternPlaying] = useState(false);
     const [isPlayerLoading, setIsPlayerLoading] = useState(true);
-    const [playheadPositionInTicks, setPlayheadPositionInTicks] = useState(0); // NOVO
+    const [playheadPositionInTicks, setPlayheadPositionInTicks] = useState(0);
     const scheduledEventsRef = useRef([]);
+    const patternPartRef = useRef(null);
 
     useEffect(() => {
         const loadInstruments = async () => {
@@ -58,14 +60,25 @@ export const useTonePlayer = (projectState) => {
         scheduledEventsRef.current.forEach(id => Tone.Transport.clear(id));
         scheduledEventsRef.current = [];
         Tone.Transport.position = 0;
-        setPlayheadPositionInTicks(0); // NOVO
+        setPlayheadPositionInTicks(0);
         Object.values(synthsRef.current).forEach(synth => synth.releaseAll());
         setIsPlaying(false);
+        setIsPatternPlaying(false);
+        if (patternPartRef.current) {
+            patternPartRef.current.stop();
+            patternPartRef.current.dispose();
+            patternPartRef.current = null;
+        }
     }, []);
 
     const playPause = useCallback(async () => {
         if (isPlayerLoading) return;
         await Tone.start();
+
+        if (isPatternPlaying) {
+            stop();
+            return;
+        }
 
         const state = Tone.Transport.state;
         if (state === 'started') {
@@ -73,17 +86,12 @@ export const useTonePlayer = (projectState) => {
             setIsPlaying(false);
             return;
         }
-        if (state === 'paused') {
-            Tone.Transport.start();
-            setIsPlaying(true);
-            return;
-        }
 
         stop();
 
-        const TICKS_PER_BAR = 32; // ATUALIZADO
+        const TICKS_PER_BAR = 32;
         const barDuration = Tone.Time("1m").toSeconds();
-        const tickDuration = barDuration / TICKS_PER_BAR; // ATUALIZADO
+        const tickDuration = barDuration / TICKS_PER_BAR;
         let totalDuration = 0;
 
         songStructure.forEach((channelPatterns, channelIndex) => {
@@ -108,14 +116,13 @@ export const useTonePlayer = (projectState) => {
                     }, startTime);
                     scheduledEventsRef.current.push(eventId);
 
-                    if(startTime + duration > totalDuration) {
+                    if (startTime + duration > totalDuration) {
                         totalDuration = startTime + duration;
                     }
                 });
             });
         });
 
-        // NOVO: Atualiza a posição do playhead
         const updatePlayheadEventId = Tone.Transport.scheduleRepeat(time => {
             Tone.Draw.schedule(() => {
                 const currentBar = Math.floor(Tone.Transport.seconds / barDuration);
@@ -124,7 +131,7 @@ export const useTonePlayer = (projectState) => {
                 const totalTicks = (currentBar * TICKS_PER_BAR) + ticksInBar;
                 setPlayheadPositionInTicks(totalTicks);
             }, time);
-        }, "32n"); // Atualiza na frequência de uma fusa
+        }, "32n");
         scheduledEventsRef.current.push(updatePlayheadEventId);
 
         if (totalDuration > 0) {
@@ -135,11 +142,70 @@ export const useTonePlayer = (projectState) => {
         Tone.Transport.start();
         setIsPlaying(true);
 
-    }, [isPlayerLoading, stop, songStructure, channels, patterns, bpm]);
+    }, [isPlayerLoading, stop, songStructure, channels, patterns, isPatternPlaying]);
+
+    const playPausePattern = useCallback(async () => {
+        if (isPlayerLoading || !activePatternId) return;
+        await Tone.start();
+
+        if (isPlaying) {
+            stop();
+        }
+
+        const state = Tone.Transport.state;
+        if (isPatternPlaying) {
+            if (state === 'started') {
+                Tone.Transport.pause();
+                setIsPatternPlaying(false);
+            } else {
+                Tone.Transport.start();
+                setIsPatternPlaying(true);
+            }
+            return;
+        }
+
+        stop();
+
+        const pattern = patterns[activePatternId];
+        const activeChannel = channels[activeChannelIndex];
+        if (!pattern || !activeChannel || !synthsRef.current[activeChannel.id]) return;
+        const synth = synthsRef.current[activeChannel.id];
+
+        const TICKS_PER_BAR = 32;
+        const barDuration = Tone.Time("1m").toSeconds();
+        const tickDuration = barDuration / TICKS_PER_BAR;
+
+        const events = pattern.notes.map(note => ({
+            time: note.start * tickDuration,
+            note: NOTES[note.pitch],
+            duration: (note.end - note.start) * tickDuration
+        }));
+
+        patternPartRef.current = new Tone.Part((time, value) => {
+            synth.triggerAttackRelease(value.note, value.duration, time);
+        }, events).start(0);
+
+        const updatePlayheadEventId = Tone.Transport.scheduleRepeat(time => {
+            Tone.Draw.schedule(() => {
+                const progressInBar = (Tone.Transport.seconds % barDuration) / barDuration;
+                setPlayheadPositionInTicks(progressInBar * TICKS_PER_BAR);
+            }, time);
+        }, "32n");
+        scheduledEventsRef.current.push(updatePlayheadEventId);
+
+        // Adiciona um evento para parar no final do pattern
+        const endOfPatternEvent = Tone.Transport.schedule(() => {
+            stop();
+        }, barDuration);
+        scheduledEventsRef.current.push(endOfPatternEvent);
+
+        Tone.Transport.start();
+        setIsPatternPlaying(true);
+    }, [isPlayerLoading, stop, patterns, activePatternId, channels, activeChannelIndex, isPlaying, isPatternPlaying]);
 
     return {
-        playerState: { isPlaying, isPlayerLoading, instruments, playheadPositionInTicks }, // EXPOSTO
-        playerActions: { playNotePiano, playPause, stop }
+        playerState: { isPlaying, isPatternPlaying, isPlayerLoading, instruments, playheadPositionInTicks },
+        playerActions: { playNotePiano, playPause, stop, playPausePattern }
     };
 };
 

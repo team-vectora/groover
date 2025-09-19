@@ -13,7 +13,7 @@ const TOTAL_HEIGHT_PX = ROWS * ROW_HEIGHT_PX;
 const PianoRoll = ({
                        patternNotes, onNotesChange, isCurrentUserProject,
                        activeInstrument, playNote, playheadPositionInTicks,
-                       songStructure, activePatternId
+                       isPlaying, isPatternPlaying
                    }) => {
     const { t } = useTranslation();
     const [dragging, setDragging] = useState(null);
@@ -23,7 +23,6 @@ const PianoRoll = ({
         return noteA.pitch === noteB.pitch && noteA.start < noteB.end && noteA.end > noteB.start;
     };
 
-    // Função para obter coordenadas PRECISAS (para arrastar e redimensionar)
     const getCoordsFromEvent = (e, snapToColumn = false) => {
         if (!svgRef.current) return { tick: 0, pitch: 0 };
         const rect = svgRef.current.getBoundingClientRect();
@@ -34,7 +33,6 @@ const PianoRoll = ({
 
         let tick = Math.max(0, Math.floor(x / tickWidth));
 
-        // ✅ LÓGICA DE SNAPPING CONDICIONAL
         if (snapToColumn) {
             tick = Math.floor(tick / 4) * 4;
         }
@@ -51,7 +49,6 @@ const PianoRoll = ({
         if (!isCurrentUserProject) return;
         e.preventDefault();
 
-        // Para arrastar e encontrar notas, usamos a posição precisa
         const preciseCoords = getCoordsFromEvent(e, false);
         const noteAtCursor = findNoteAt(preciseCoords.tick, preciseCoords.pitch);
 
@@ -61,7 +58,6 @@ const PianoRoll = ({
         }
 
         if (noteAtCursor) {
-            // Se já existe uma nota, preparamos para arrastar ou redimensionar
             const rect = svgRef.current.getBoundingClientRect();
             const tickWidth = rect.width / TICKS_PER_PATTERN;
             const noteEndX = (noteAtCursor.end * tickWidth) + rect.left;
@@ -71,14 +67,13 @@ const PianoRoll = ({
                 setDragging({ type: 'move', noteId: noteAtCursor.id, tickOffset: preciseCoords.tick - noteAtCursor.start, pitchOffset: preciseCoords.pitch - noteAtCursor.pitch });
             }
         } else {
-            // ✅ CRIAÇÃO DE NOTA: Usamos a coordenada com o snap ativado
             const snappedCoords = getCoordsFromEvent(e, true);
 
             const newNote = {
                 id: Date.now() + Math.random(),
                 pitch: snappedCoords.pitch,
                 start: snappedCoords.tick,
-                end: snappedCoords.tick + 4, // Duração padrão
+                end: snappedCoords.tick + 4,
                 pins: [{ time: 0, interval: 0, size: 3 }, { time: 4, interval: 0, size: 3 }]
             };
 
@@ -90,7 +85,6 @@ const PianoRoll = ({
 
             onNotesChange([...(patternNotes || []), newNote]);
             playNote(NOTES[snappedCoords.pitch], activeInstrument);
-            // Prepara para redimensionar a nova nota
             setDragging({ type: 'resize_end', noteId: newNote.id });
         }
     };
@@ -99,7 +93,6 @@ const PianoRoll = ({
         if (!dragging || !patternNotes) return;
         e.preventDefault();
 
-        // No movimento, usamos sempre as coordenadas precisas
         const { tick, pitch } = getCoordsFromEvent(e, false);
 
         const newNotes = [...patternNotes];
@@ -112,12 +105,10 @@ const PianoRoll = ({
 
         if (dragging.type === 'move') {
             const duration = updatedNote.end - updatedNote.start;
-            // O cálculo agora permite o arrasto para qualquer subdivisão
             updatedNote.start = Math.max(0, tick - dragging.tickOffset);
             updatedNote.end = updatedNote.start + duration;
             updatedNote.pitch = Math.max(0, Math.min(ROWS - 1, pitch - dragging.pitchOffset));
         } else if (dragging.type === 'resize_end') {
-            // O redimensionamento já era preciso
             const newEnd = Math.max(updatedNote.start + 1, tick + 1);
             updatedNote.end = Math.min(newEnd, updatedNote.start + TICKS_PER_PATTERN);
         }
@@ -131,15 +122,9 @@ const PianoRoll = ({
 
     const handleMouseUp = () => setDragging(null);
 
-    const currentBarIndex = Math.floor(playheadPositionInTicks / TICKS_PER_PATTERN);
-    const patternIdInCurrentBar = songStructure.map(ch => ch[currentBarIndex]).find(pId => pId === activePatternId);
-    const showPlayhead = !!patternIdInCurrentBar;
-    const playheadPositionInPattern = playheadPositionInTicks % TICKS_PER_PATTERN;
-
-
     return (
         <div
-            className="relative min-w-[1200px]"
+            className="relative w-full"
             style={{ height: `${TOTAL_HEIGHT_PX}px` }}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
@@ -152,7 +137,7 @@ const PianoRoll = ({
                 height="100%"
                 className="absolute top-0 left-0 bg-transparent"
             >
-                {/* Background das linhas 'C' */}
+                {/* Background lines */}
                 {NOTES.map((note, index) => {
                     if (note.startsWith('C') && !note.includes("#")) {
                         return (
@@ -193,9 +178,12 @@ const PianoRoll = ({
 
                 <rect width="100%" height="100%" fill="transparent" onMouseDown={handleMouseDown} style={{ cursor: isCurrentUserProject ? 'cell' : 'not-allowed' }} />
             </svg>
-            {showPlayhead && (
-                <Playhead position={playheadPositionInPattern} totalTicks={TICKS_PER_PATTERN} />
-            )}
+            <Playhead
+                isPlaying={isPlaying}
+                isPatternPlaying={isPatternPlaying}
+                playheadPositionInTicks={playheadPositionInTicks}
+                container="pianoroll"
+            />
         </div>
     );
 };

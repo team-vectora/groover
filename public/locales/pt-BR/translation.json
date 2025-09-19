@@ -230,7 +230,9 @@
       "deleteChannelTitle": "Excluir Canal?",
       "deleteChannelMessage": "Tem certeza que deseja excluir este canal? Todas as sequências de padrões nele serão perdidas.",
       "deletePatternTitle": "Excluir Padrão?",
-      "deletePatternMessage": "Tem certeza que deseja excluir este padrão? Ele será removido de todos os canais na sequência. Esta ação não pode ser desfeita."
+      "deletePatternMessage": "Tem certeza que deseja excluir este padrão? Ele será removido de todos os canais na sequência. Esta ação não pode ser desfeita.",
+      "deletePageTitle": "Excluir Página?",
+      "deletePageMessage": "Tem certeza que deseja excluir a página {{page}}? Esta ação não pode ser desfeita."
     },
     "sequencer": {
       "deleteChannel": "Excluir Canal",
@@ -238,7 +240,8 @@
       "title": "Sequenciador",
       "channel": "Canal",
       "addChannel": "Adicionar Canal",
-      "newPattern": "Novo Padrão"
+      "newPattern": "Novo Padrão",
+      "page": "Página {{current}} de {{total}}"
     },
     "pianoRoll": {
       "noteOverlapError": "As notas não podem se sobrepor."
@@ -252,7 +255,11 @@
     "channels": "Canais",
     "channel": "Canal",
     "patterns": "Padrões",
-    "pattern": "Padrão"
+    "pattern": "Padrão",
+    "patternControls": {
+      "play": "Tocar Padrão",
+      "pause": "Pausar Padrão"
+    }
   },
   "midiPlayer": {
     "expand": "Expandir",

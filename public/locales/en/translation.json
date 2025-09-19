@@ -231,8 +231,9 @@
       "deleteChannelTitle": "Delete Channel?",
       "deleteChannelMessage": "Are you sure you want to delete this channel? All pattern sequences within it will be lost.",
       "deletePatternTitle": "Delete Pattern?",
-      "deletePatternMessage": "Are you sure you want to delete this pattern? It will be removed from all channels in the sequence. This action cannot be undone."
-
+      "deletePatternMessage": "Are you sure you want to delete this pattern? It will be removed from all channels in the sequence. This action cannot be undone.",
+      "deletePageTitle": "Delete Page?",
+      "deletePageMessage": "Are you sure you want to delete page {{page}}? This action cannot be undone."
     },
     "sequencer": {
       "deleteChannel": "Delete Channel",
@@ -240,7 +241,8 @@
       "title": "Sequencer",
       "channel": "Channel",
       "addChannel": "Add Channel",
-      "newPattern": "New Pattern"
+      "newPattern": "New Pattern",
+      "page": "Page {{current}} of {{total}}"
     },
     "pianoRoll": {
       "noteOverlapError": "Notes cannot overlap."
@@ -254,7 +256,11 @@
     "channels": "Channels",
     "channel": "Channel",
     "patterns": "Patterns",
-    "pattern": "Pattern"
+    "pattern": "Pattern",
+    "patternControls": {
+      "play": "Play Pattern",
+      "pause": "Pause Pattern"
+    }
   },
   "midiPlayer": {
     "expand": "Expand",

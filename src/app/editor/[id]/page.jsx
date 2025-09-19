@@ -23,8 +23,6 @@ export default function EditorPage() {
 
     const [openPop, setOpenPop] = useState(false);
     const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
-
-    // ✅ ESTADO PARA CONTROLAR O POP-UP DE CONFIRMAÇÃO
     const [confirmationAction, setConfirmationAction] = useState(null);
 
     const isOwner = projectData.owner === userId;
@@ -38,11 +36,6 @@ export default function EditorPage() {
         }
     }, [token, authLoading, router]);
 
-    // useEffect(() => {
-    //     if (apiState.project) projectActions.loadProjectData(apiState.project);
-    // }, [apiState.project]);
-
-
     const handlePlay = useCallback(() => {
         playerActions.playPause();
     }, [playerActions]);
@@ -53,12 +46,10 @@ export default function EditorPage() {
         await forkProject(projectId);
     };
 
-    // ✅ FUNÇÃO ATUALIZADA: AGORA ABRE O POP-UP
     const handleClear = () => {
         setConfirmationAction('clear');
     };
 
-    // ✅ NOVA FUNÇÃO: EXECUTA A AÇÃO APÓS A CONFIRMAÇÃO
     const handleConfirmAction = () => {
         if (confirmationAction === 'clear') {
             if (projectState.activePatternId) {
@@ -66,11 +57,10 @@ export default function EditorPage() {
                 toast.info(t('toasts.patternCleared'));
             }
         }
-        setConfirmationAction(null); // Fecha o pop-up
+        setConfirmationAction(null);
     };
 
-
-    if (authLoading || apiState.loading || !projectState || playerState.isPlayerLoading) {
+    if (authLoading || apiState.loading || !projectState) {
         return (
             <div className="flex flex-col items-center justify-center w-screen h-screen bg-[var(--color-background)] text-center p-4">
                 <LoadingDisc />
@@ -99,7 +89,7 @@ export default function EditorPage() {
                 onExport={() => apiActions.exportToMIDI(projectData)}
                 onImport={apiActions.importFromMIDI}
                 onSave={() => setOpenPop(true)}
-                onClear={handleClear} // A função do header agora é a que abre o popup
+                onClear={handleClear}
                 onFork={handleFork}
                 isCurrentUserProject={isCurrentUserProject}
                 title={projectState.title}
@@ -129,7 +119,6 @@ export default function EditorPage() {
                 isControlPanelOpen={isControlPanelOpen}
             />
 
-            {/* ✅ POP-UP DE CONFIRMAÇÃO AGORA É CONTROLADO AQUI */}
             <ConfirmationPopUp
                 open={!!confirmationAction}
                 onClose={() => setConfirmationAction(null)}

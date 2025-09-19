@@ -3,20 +3,22 @@
 import { ChangeVolume, ChangeBpm, VersionManager, ConfirmationPopUp } from "../../";
 import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faTrash, faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
 import { useState } from "react";
 
 const ControlPanel = ({
-                          projectState, projectActions, playerState, apiState, apiActions,
+                          projectState, projectActions, playerState, playerActions, apiState, apiActions,
                       }) => {
     const { t } = useTranslation();
     const { patterns, activePatternId } = projectState;
     const { setActivePatternId, createNewPatternAndSelect, addChannel, deletePattern } = projectActions;
+    const { playPausePattern } = playerActions;
+    const { isPatternPlaying } = playerState;
 
     const [patternToDelete, setPatternToDelete] = useState(null);
 
-    // ✅ CORREÇÃO AQUI: Ordena a lista de padrões de forma consistente
-    const patternList = Object.values(patterns).sort((a, b) => a.id.localeCompare(b.id));
+    // Ordena por data de criação para manter a ordem estável
+    const patternList = Object.values(patterns).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
     const patternDisplayMap = patternList.reduce((acc, pattern, index) => {
         acc[pattern.id] = index + 1;
@@ -61,6 +63,23 @@ const ControlPanel = ({
                 </div>
                 <div>
                     <h3 className="text-sm font-bold uppercase text-accent mb-2">{t("editor.patterns")}</h3>
+                    <div className="flex items-center gap-2 mb-2">
+                        <button
+                            onClick={playPausePattern}
+                            disabled={!activePatternId}
+                            className="flex-1 px-3 py-2 text-xs font-semibold rounded-md border-2 border-accent hover:bg-accent/30 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <FontAwesomeIcon icon={isPatternPlaying ? faPause : faPlay} />
+                            {isPatternPlaying ? t('editor.patternControls.pause') : t('editor.patternControls.play')}
+                        </button>
+                        <button
+                            onClick={createNewPatternAndSelect}
+                            className="flex-1 px-3 py-2 text-xs font-semibold rounded-md border-2 border-primary hover:bg-primary/30 transition flex items-center justify-center gap-2"
+                        >
+                            <FontAwesomeIcon icon={faPlus} />
+                            {t('editor.sequencer.newPattern')}
+                        </button>
+                    </div>
                     <div className="max-h-32 overflow-y-auto border border-primary rounded-md p-1 space-y-1">
                         {patternList.map(p => (
                             <div key={p.id} className={`flex items-center justify-between p-2 rounded-md transition group ${activePatternId === p.id ? 'bg-accent text-white' : 'hover:bg-primary/30'}`}>
@@ -78,16 +97,13 @@ const ControlPanel = ({
                             </div>
                         ))}
                     </div>
-                    <button
-                        onClick={createNewPatternAndSelect}
-                        className="w-full mt-2 px-3 py-2 text-xs font-semibold rounded-md border-2 border-primary hover:bg-primary/30 transition flex items-center justify-center gap-2"
-                    >
-                        <FontAwesomeIcon icon={faPlus} />
-                        {t('editor.sequencer.newPattern')}
-                    </button>
                 </div>
 
-                <VersionManager versions={apiState.versions} currentMusicId={apiState.currentMusicId} handleVersionChange={apiActions.handleVersionChange} lastVersionId={apiState.lastVersionId} />
+                <VersionManager
+                    versions={apiState.versions}
+                    currentMusicId={apiState.currentMusicId}
+                    handleVersionChange={apiActions.handleVersionChange}
+                />
             </div>
             <ConfirmationPopUp
                 open={!!patternToDelete}

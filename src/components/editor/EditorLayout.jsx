@@ -13,7 +13,7 @@ const EditorLayout = ({
 
     return (
         <main className="flex flex-col md:flex-row flex-grow p-4 pt-20 gap-4 relative h-screen overflow-hidden">
-            {/* PAINEL MOBILE (sem alterações) */}
+            {/* PAINEL MOBILE */}
             {isControlPanelOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center md:hidden ">
                     <div className="absolute inset-0 bg-black/50" onClick={() => setIsControlPanelOpen(false)} />
@@ -29,6 +29,7 @@ const EditorLayout = ({
                                 projectState={projectState}
                                 projectActions={projectActions}
                                 playerState={playerState}
+                                playerActions={playerActions}
                                 apiState={apiState}
                                 apiActions={apiActions}
                             />
@@ -37,12 +38,13 @@ const EditorLayout = ({
                 </div>
             )}
 
-            {/* PAINEL DE CONTROLE DESKTOP (Esquerda - sem alterações) */}
+            {/* PAINEL DE CONTROLE DESKTOP */}
             <aside className="hidden md:block w-full md:w-1/4 lg:w-1/5 bg-bg-darker rounded-lg p-2 overflow-y-auto">
                 <ControlPanel
                     projectState={projectState}
                     projectActions={projectActions}
                     playerState={playerState}
+                    playerActions={playerActions}
                     apiState={apiState}
                     apiActions={apiActions}
                 />
@@ -51,10 +53,10 @@ const EditorLayout = ({
             {/* ÁREA DE EDIÇÃO PRINCIPAL (Direita) */}
             <div className="w-full md:flex-1 flex flex-col gap-4">
 
-                {/* SEÇÃO DO PIANO ROLL (Topo) - ESTRUTURA ATUALIZADA PARA SCROLL */}
+                {/* SEÇÃO DO PIANO ROLL (Topo) */}
                 <section className="h-2/3 bg-bg-secondary rounded-lg border-2 border-primary relative overflow-hidden">
                     <div id="piano-roll-scroll-container" className="h-full w-full overflow-auto">
-                        <div className="relative flex w-fit"> {/* w-fit para se ajustar ao conteúdo */}
+                        <div className="relative flex w-full"> {/* Alterado de w-fit para w-full */}
                             <PianoKeys
                                 notes={NOTES}
                                 onKeyClick={(note) => playerActions.playNotePiano(note, activeChannel.id)}
@@ -67,8 +69,8 @@ const EditorLayout = ({
                                     playNote={playerActions.playNotePiano}
                                     activeInstrument={activeChannel.id}
                                     playheadPositionInTicks={playerState.playheadPositionInTicks}
-                                    songStructure={projectState.songStructure}
-                                    activePatternId={projectState.activePatternId}
+                                    isPlaying={playerState.isPlaying}
+                                    isPatternPlaying={playerState.isPatternPlaying}
                                 />
                             </div>
                         </div>

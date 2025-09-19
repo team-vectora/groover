@@ -4,17 +4,18 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-const createNewPattern = () => ({ id: uuidv4(), notes: [] });
+// Adicionado 'createdAt' para ordenação estável
+const createNewPattern = () => ({ id: uuidv4(), notes: [], createdAt: new Date().toISOString() });
 const createNewChannel = () => ({ id: uuidv4(), instrument: 'piano', volume: -10 });
 const INITIAL_BAR_COUNT = 8;
 
 export const useProjectStates = () => {
     const { t } = useTranslation();
-    const [title, setTitle] = useState("Novo Projeto");
+    const [title, setTitle] = useState("New Project");
     const [description, setDescription] = useState("");
     const [bpm, setBpm] = useState(120);
     const [volume, setVolume] = useState(-10);
-    const [owner, setOwner] = useState();
+    const [owner, setOwner] = useState(null);
 
     const [channels, setChannels] = useState([createNewChannel()]);
     const [patterns, setPatterns] = useState(() => {
@@ -58,25 +59,23 @@ export const useProjectStates = () => {
     const deletePattern = useCallback((patternIdToDelete) => {
         if (Object.keys(patterns).length <= 1) return; // Não permite excluir o último padrão
 
-        // Remove o padrão do objeto de padrões
-        setPatterns(prev => {
-            const newPatterns = { ...prev };
-            delete newPatterns[patternIdToDelete];
-            return newPatterns;
-        });
+        const newPatterns = { ...patterns };
+        delete newPatterns[patternIdToDelete];
+        setPatterns(newPatterns);
 
-        // Remove o padrão da estrutura da música
         setSongStructure(prev => prev.map(channel =>
             channel.map(pId => (pId === patternIdToDelete ? null : pId))
         ));
 
-        // Se o padrão ativo foi deletado, seleciona o primeiro da lista
         if (activePatternId === patternIdToDelete) {
-            setActivePatternId(Object.keys(patterns)[0] || null);
+            const remainingPatterns = Object.keys(newPatterns);
+            setActivePatternId(remainingPatterns.length > 0 ? remainingPatterns[0] : null);
         }
     }, [patterns, activePatternId]);
 
+
     const updatePatternNotes = useCallback((patternId, newNotes) => {
+        if (!patternId) return;
         setPatterns(prev => ({
             ...prev,
             [patternId]: { ...prev[patternId], notes: newNotes }
@@ -91,18 +90,56 @@ export const useProjectStates = () => {
         });
     }, []);
 
+    const addPage = useCallback(() => {
+        setSongStructure(prev => prev.map(channel => [...channel, ...Array(8).fill(null)]));
+    }, []);
+
+    const removePage = useCallback((pageIndex) => {
+        const barCount = songStructure[0]?.length || 0;
+        if (barCount <= 8) return; // Não remove a última página
+
+        const start = pageIndex * 8;
+        const end = start + 8;
+
+        setSongStructure(prev => prev.map(channel => {
+            const newChannel = [...channel];
+            newChannel.splice(start, 8);
+            return newChannel;
+        }));
+    }, [songStructure]);
+
+
     const loadProjectData = useCallback((data) => {
-        setTitle(data.title ?? "Novo Projeto");
+        if (!data) return;
+
+        setTitle(data.title ?? "New Project");
         setDescription(data.description ?? "");
         setBpm(data.bpm ?? 120);
         setVolume(data.volume ?? -10);
-        setChannels(data.channels && data.channels.length > 0 ? data.channels : [createNewChannel()]);
-        setPatterns(data.patterns && Object.keys(data.patterns).length > 0 ? data.patterns : { 'initial': { id: 'initial', notes: [] } });
-        setSongStructure(data.songStructure && data.songStructure.length > 0 ? data.songStructure : [Array(INITIAL_BAR_COUNT).fill(null)]);
+        setOwner(data.user_id ?? null);
+
+        const loadedChannels = data.channels && data.channels.length > 0 ? data.channels : [createNewChannel()];
+        setChannels(loadedChannels);
+
+        const loadedPatterns = data.patterns && Object.keys(data.patterns).length > 0 ? data.patterns : { 'default': { id: 'default', notes: [] } };
+        setPatterns(loadedPatterns);
+
+        const loadedStructure = data.songStructure && data.songStructure.length > 0 ? data.songStructure : [Array(INITIAL_BAR_COUNT).fill(null)];
+        setSongStructure(loadedStructure);
+
         setActiveChannelIndex(0);
-        setOwner(data.user_id)
-        const firstPatternId = Object.keys(data.patterns || { 'initial': {} })[0];
-        setActivePatternId(firstPatternId);
+
+        // BUG FIX: Garante que um activePatternId válido seja selecionado após o carregamento
+        const patternIds = Object.keys(loadedPatterns);
+        if (patternIds.length > 0) {
+            setActivePatternId(patternIds[0]);
+        } else {
+            // Se não houver padrões, cria um novo
+            const newPattern = createNewPattern();
+            setPatterns({ [newPattern.id]: newPattern });
+            setActivePatternId(newPattern.id);
+        }
+
     }, []);
 
     const projectData = { title, description, bpm, volume, owner, channels, patterns, songStructure };
@@ -114,6 +151,7 @@ export const useProjectStates = () => {
             addChannel, deleteChannel, setChannelInstrument,
             createNewPatternAndSelect, deletePattern, setActivePatternId,
             updatePatternNotes, setPatternInStructure, loadProjectData,
+            addPage, removePage
         },
         projectData,
     };
