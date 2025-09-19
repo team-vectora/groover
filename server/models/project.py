@@ -14,20 +14,17 @@ class Project:
     def create_project(user_id, project_data):
         project = {
             'user_id': user_id,
-            'midi': Binary(project_data.get('midi')) if project_data.get('midi') else None,
-            'collaborators': [],  # Nova lista de colaboradores
+            'collaborators': [],
             'title': project_data.get('title', 'New Project'),
             'description': project_data.get('description', ''),
             'bpm': project_data.get('bpm'),
-            'instrument': project_data.get('instrument', 'piano'),
             'volume': project_data.get('volume', -10),
-            'tempo': project_data.get('tempo'),
-            'music_versions': project_data.get('music_versions', []),  # Inicializa vazio, Music cuidará disso depois
+            'midi': Binary(project_data.get('midi')) if project_data.get('midi') else None,
+            'music_versions': [],
             'created_at': datetime.now(),
             'created_by': user_id,
             'updated_at': datetime.now(),
             'last_updated_by': user_id
-            # sem current_music_id mas o Music também vai cuidar papai
         }
         return str(mongo.db.projects.insert_one(project).inserted_id)
 
@@ -45,6 +42,11 @@ class Project:
 
     @staticmethod
     def update_project(project_id, user_id, update_data):
+        # Remove campos de música do update_data, pois eles serão tratados pelo Music model
+        update_data.pop('channels', None)
+        update_data.pop('patterns', None)
+        update_data.pop('songStructure', None)
+
         update_data['updated_at'] = datetime.now()
         update_data['last_updated_by'] = user_id
 
@@ -83,31 +85,28 @@ class Project:
         return project
 
     @staticmethod
-    def get_project_full_data(project_id, user_id):
-        project = mongo.db.projects.find_one({
-            '_id': ObjectId(project_id),
-            'user_id': user_id
-        })
+    def get_project_full_data(project_id):
+        project = mongo.db.projects.find_one({'_id': ObjectId(project_id)})
         if project:
             project['_id'] = str(project['_id'])
-
             if 'current_music_id' in project:
+                # Carrega a versão atual da música com a nova estrutura
                 project['current_music_id'] = Music.get_music(project['current_music_id'])
 
             if 'music_versions' in project:
                 for version in project['music_versions']:
-                    version['music_id'] = Music.get_music(version['music_id'])
+                    version['music_id'] = str(version['music_id'])  # Mantenha apenas o ID aqui para performance
                     version['update_by'] = User.get_user(version['update_by'])
 
-            if 'midi' in project:
+            if 'midi' in project and project.get('midi'):
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
 
-            if 'collaborators' in project:
-                project['collaborators'] = [str(id_collab) for id_collab in project['collaborators']]
-
+            project['collaborators'] = [str(c) for c in project.get('collaborators', [])]
+            project['user_id'] = str(project['user_id'])
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
+
         return project
 
     @staticmethod
@@ -225,13 +224,6 @@ class Project:
                     'current_music_id': ObjectId(target_music_id),
                     'updated_at': datetime.now(),
                     'last_updated_by': user_id
-                },
-                '$push': {
-                    'music_versions': {
-                        'music_id': ObjectId(target_music_id),
-                        'updated_at': datetime.now(),
-                        'update_by': user_id
-                    }
                 }
             }
         )

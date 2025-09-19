@@ -1,4 +1,4 @@
-// EditorPage.jsx
+// src/app/editor/[id]/page.jsx
 'use client';
 import { useRouter, useParams } from "next/navigation";
 import { useAuth, useProjectStates, useTonePlayer, useProjectAPI, useForkProject } from '../../../hooks';
@@ -14,23 +14,23 @@ export default function EditorPage() {
     const { id: projectId } = params;
 
     const { state: projectState, actions: projectActions, projectData } = useProjectStates();
-    const { token, userId, username, loading: authLoading } = useAuth();
-    const { synthRef, playerState, playerActions } = useTonePlayer(projectState);
+    const { token, userId, loading: authLoading } = useAuth();
+    const { playerState, playerActions } = useTonePlayer(projectState);
     const { apiState, apiActions } = useProjectAPI(projectId, projectActions);
     const { forkProject, loading: forkLoading } = useForkProject(token);
 
     const { t } = useTranslation();
 
-    const [lang, setLang] = useState("pt");
     const [openPop, setOpenPop] = useState(false);
-    const [confirmationAction, setConfirmationAction] = useState(null); // 'clear' ou 'delete'
-    const [isControlPanelOpen, setIsControlPanelOpen] = useState(false); // NOVO: controla painel no mobile
+    const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
 
-    const isOwner = projectData.ownerId === userId;
-    const isCollaborator = projectData.collaborators.includes(userId);
+    // ✅ ESTADO PARA CONTROLAR O POP-UP DE CONFIRMAÇÃO
+    const [confirmationAction, setConfirmationAction] = useState(null);
+
+    const isOwner = projectData.owner === userId;
+    const isCollaborator = projectData.collaborators?.includes(userId);
     const isNewProject = projectId === "new";
     const isCurrentUserProject = isOwner || isCollaborator || isNewProject;
-
 
     useEffect(() => {
         if (!authLoading && !token) {
@@ -38,30 +38,14 @@ export default function EditorPage() {
         }
     }, [token, authLoading, router]);
 
-    useEffect(() => {
-        if (apiState.project) projectActions.loadProjectData(apiState.project);
-    }, [apiState.project]);
+    // useEffect(() => {
+    //     if (apiState.project) projectActions.loadProjectData(apiState.project);
+    // }, [apiState.project]);
 
-    useEffect(() => {
-        if (apiState.version) projectActions.loadVersionData(apiState.version);
-    }, [apiState.version]);
 
-    const handlePlay = useCallback((scope) => {
-        const targetPages = scope === 'song' ? projectState.pages : [projectState.pages[projectState.activePage]];
-        const sequence = playerActions.createPlaybackSequence(targetPages);
-
-        const onVisuals = (matrixIndex, colIndex, subIndex) => {
-            if (scope === 'song') projectActions.setActivePage(matrixIndex);
-            playerActions.setActiveCol(colIndex);
-            playerActions.setActiveSubIndex(subIndex);
-        };
-        const onEnd = () => {
-            playerActions.setActiveCol(null);
-            playerActions.setActiveSubIndex(null);
-        };
-
-        playerActions.playPause(sequence, onVisuals, onEnd);
-    }, [projectState.pages, projectState.activePage, playerActions, projectActions]);
+    const handlePlay = useCallback(() => {
+        playerActions.playPause();
+    }, [playerActions]);
 
     const handleFork = async () => {
         if (forkLoading) return;
@@ -69,57 +53,60 @@ export default function EditorPage() {
         await forkProject(projectId);
     };
 
-    if (authLoading || apiState.loading) {
-      return (
-        <div className="flex flex-col items-center justify-center w-screen h-screen bg-[var(--color-background)] text-center p-4">
-          <LoadingDisc />
-          <span
-            className="mt-4 text-lg font-bold text-transparent bg-clip-text inline-block"
-            style={{
-              backgroundImage: `linear-gradient(90deg, var(--color-accent), var(--color-accent-light), var(--color-primary-light), var(--color-accent))`,
-              backgroundSize: "300% 100%",
-              animation: "gradient 2s linear infinite",
-            }}
-          >
-            {t("editor.loadingMessage")}
-          </span>
-        </div>
-      );
-    }
-
-
-
-    const handleClear = () => setConfirmationAction('clear');
-    const handleDeletePage = () => setConfirmationAction('delete');
-
-    const handleConfirmAction = () => {
-        if (confirmationAction === 'clear') projectActions.clearPage(projectState.activePage);
-        else if (confirmationAction === 'delete') projectActions.deletePage(projectState.activePage);
-        setConfirmationAction(null);
+    // ✅ FUNÇÃO ATUALIZADA: AGORA ABRE O POP-UP
+    const handleClear = () => {
+        setConfirmationAction('clear');
     };
+
+    // ✅ NOVA FUNÇÃO: EXECUTA A AÇÃO APÓS A CONFIRMAÇÃO
+    const handleConfirmAction = () => {
+        if (confirmationAction === 'clear') {
+            if (projectState.activePatternId) {
+                projectActions.updatePatternNotes(projectState.activePatternId, []);
+                toast.info(t('toasts.patternCleared'));
+            }
+        }
+        setConfirmationAction(null); // Fecha o pop-up
+    };
+
+
+    if (authLoading || apiState.loading || !projectState || playerState.isPlayerLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center w-screen h-screen bg-[var(--color-background)] text-center p-4">
+                <LoadingDisc />
+                <span
+                    className="mt-4 text-lg font-bold text-transparent bg-clip-text inline-block"
+                    style={{
+                        backgroundImage: `linear-gradient(90deg, var(--color-accent), var(--color-accent-light), var(--color-primary-light), var(--color-accent))`,
+                        backgroundSize: "300% 100%",
+                        animation: "gradient 2s linear infinite",
+                    }}
+                >
+                    {t("editor.loadingMessage")}
+                </span>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col h-screen bg-background text-foreground">
             <ToastContainer position="top-center" theme="dark" />
 
-            {/* Header */}
             <HeaderEditor
-                onPlaySong={() => handlePlay('song')}
+                onPlaySong={handlePlay}
                 onStop={playerActions.stop}
                 isPlaying={playerState.isPlaying}
                 onExport={() => apiActions.exportToMIDI(projectData)}
                 onImport={apiActions.importFromMIDI}
                 onSave={() => setOpenPop(true)}
+                onClear={handleClear} // A função do header agora é a que abre o popup
                 onFork={handleFork}
-                onClear={handleClear}
                 isCurrentUserProject={isCurrentUserProject}
                 title={projectState.title}
                 setIsControlPanelOpen={setIsControlPanelOpen}
                 isControlPanelOpen={isControlPanelOpen}
-            >
-            </HeaderEditor>
+            />
 
-            {/* PopUp salvar música */}
             <SaveMusicPopUp
                 open={openPop}
                 onSave={() => { apiActions.handleSave(projectData); setOpenPop(false); }}
@@ -130,7 +117,6 @@ export default function EditorPage() {
                 setDescription={projectActions.setDescription}
             />
 
-            {/* Editor layout com painel lateral */}
             <EditorLayout
                 projectState={projectState}
                 projectActions={projectActions}
@@ -138,30 +124,18 @@ export default function EditorPage() {
                 playerActions={playerActions}
                 apiState={apiState}
                 apiActions={apiActions}
-                synthRef={synthRef}
-                lang={lang}
-                onDeletePage={handleDeletePage}
                 isCurrentUserProject={isCurrentUserProject}
-                username={username}
-                                setIsControlPanelOpen={setIsControlPanelOpen}
-                                isControlPanelOpen={isControlPanelOpen}
+                setIsControlPanelOpen={setIsControlPanelOpen}
+                isControlPanelOpen={isControlPanelOpen}
             />
 
-            {/* PopUp confirmação */}
+            {/* ✅ POP-UP DE CONFIRMAÇÃO AGORA É CONTROLADO AQUI */}
             <ConfirmationPopUp
                 open={!!confirmationAction}
                 onClose={() => setConfirmationAction(null)}
                 onConfirm={handleConfirmAction}
-                title={
-                    confirmationAction === 'clear'
-                        ? t("editor.confirmation.clearTitle")
-                        : t("editor.confirmation.deleteTitle")
-                }
-                message={
-                    confirmationAction === 'clear'
-                        ? t("editor.confirmation.clearMessage")
-                        : t("editor.confirmation.deleteMessage")
-                }
+                title={t("editor.confirmation.clearTitle")}
+                message={t("editor.confirmation.clearMessage")}
             />
         </div>
     );

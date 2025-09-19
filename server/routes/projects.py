@@ -13,7 +13,6 @@ projects_bp = Blueprint('projects', __name__)
 def save_project():
     user_id = get_jwt_identity()
     data = request.get_json()
-    print(data)
 
     if not data:
         return jsonify({'error': 'No data provided'}), 400
@@ -21,53 +20,68 @@ def save_project():
     midi_base64 = data.get('midi')
     midi_binary = base64.b64decode(midi_base64) if midi_base64 else None
 
+    # Dados do projeto (metadados)
     project_data = {
         'title': data.get('title', 'New Project'),
-        'midi': midi_binary,
         'description': data.get('description', ''),
         'bpm': data.get('bpm', 120),
-        'instrument': data.get('instrument', 'piano'),
-        'volume': data.get('volume', -10)
+        'volume': data.get('volume', -10),
+        'midi': midi_binary
     }
 
-    if 'id' in data.keys():
-        project_id = data.get('id')
-        project = Project.get_project(project_id)  # Pega o projeto para verificar o dono
+    # Dados da música (estrutura)
+    music_data = {
+        'channels': data.get('channels', []),
+        'patterns': data.get('patterns', {}),
+        'songStructure': data.get('songStructure', [])
+    }
 
-        # Lógica de notificação para o dono do projeto
+    project_id = data.get('id')
+
+    if project_id:  # Atualiza um projeto existente
+        project = Project.get_project_full_data(project_id)
+
+        if str(project.get('user_id')) != user_id and user_id not in project.get('collaborators', []):
+            return jsonify({'error': 'Permission denied'}), 403
+
         if str(project.get('user_id')) != user_id:
             actor_user = User.get_user(user_id)
             Notification.create(
                 user_id=str(project.get('user_id')),
-                actor=actor_user['username'],
-                type="collaborator_update",
-                project_id=project_id,
-                content=project.get('title')
+                actor=actor_user['username'], type="collaborator_update",
+                project_id=project_id, content=project.get('title')
             )
 
-        if data.get('layers'):
-            Music.create_music(project_id=project_id, layers=data.get('layers'), user_id=user_id)
-        success = Project.update_project(project_id, user_id, project_data)
-        project = Project.get_project_full_data_without_user_id(project_id)
-        if success:
-            return jsonify(project), 200
-        return jsonify({'error': 'Project not found or update failed'}), 404
-    else:
-        project_id = Project.create_project(user_id, project_data)
-        print(project_id)
-        Music.create_music(project_id, data.get('layers'), user_id)
-        project = Project.get_project_full_data(project_id, user_id)
-        return jsonify(project), 201
+        Music.create_music(project_id=project_id, music_data=music_data, user_id=user_id)
+        Project.update_project(project_id, user_id, project_data)
+
+        updated_project = Project.get_project_full_data(project_id)
+        return jsonify(updated_project), 200
+
+    else:  # Cria um novo projeto
+        new_project_id = Project.create_project(user_id, project_data)
+        Music.create_music(new_project_id, music_data, user_id)
+
+        created_project = Project.get_project_full_data(new_project_id)
+        return jsonify(created_project), 201
 
 
 @projects_bp.route('/<project_id>', methods=['GET'])
 @jwt_required()
 def get_project(project_id):
-    print("entrou aqui")
-    project = Project.get_project_full_data_without_user_id(project_id)
+    project = Project.get_project_full_data(project_id)
     if project:
         return jsonify(project), 200
     return jsonify({'error': 'Project not found'}), 404
+
+
+@projects_bp.route('/<project_id>/versions/<music_id>', methods=['GET'])
+@jwt_required()
+def get_music_version(project_id, music_id):
+    music_version = Music.get_music(music_id)
+    if music_version and str(music_version.get('project_id')) == project_id:
+        return jsonify(music_version), 200
+    return jsonify({'error': 'Music version not found'}), 404
 
 
 @projects_bp.route('/user/<username>', methods=['GET'])
@@ -136,61 +150,47 @@ def invite_user(project_id):
 
     return jsonify({'message': 'Invitation sent', 'invitation_id': str(invitation_id)}), 201
 
+
 @projects_bp.route('/fork', methods=['POST'])
 @jwt_required()
 def fork_project():
     data = request.get_json()
     user_id = get_jwt_identity()
-
     project_id = data.get('project_id')
+
     if not project_id:
         return jsonify({"error": "project_id not found"}), 400
 
-    project = Project.get_project(project_id)
-    if not project:
+    original_project = Project.get_project_full_data(project_id)
+    if not original_project:
         return jsonify({"error": "Project not found"}), 404
 
-    music = Music.get_music(project.get('current_music_id'))
-    if not music:
+    current_music = original_project.get('current_music_id')
+    if not current_music:
         return jsonify({"error": "Project doesn't have music to copy"}), 400
 
-    layers = music.get('layers', [])
-    midi_base64 = project.get('midi', '')
+    # Cria o novo projeto com os metadados
+    new_project_data = {
+        'title': original_project.get('title', '') + ' (Fork)',
+        'description': original_project.get('description', ''),
+        'bpm': original_project.get('bpm', 120),
+        'volume': original_project.get('volume', -10),
+        'midi': Binary(base64.b64decode(original_project.get('midi', '').split(',')[-1])) if original_project.get(
+            'midi') else None
+    }
+    new_project_id = Project.create_project(user_id, new_project_data)
 
-    if midi_base64 and midi_base64.startswith('data:audio/midi;base64,'):
-        midi_base64 = midi_base64.split(',')[1]
+    # Cria a música para o novo projeto, copiando a estrutura
+    music_data_to_copy = {
+        'channels': current_music.get('channels'),
+        'patterns': current_music.get('patterns'),
+        'songStructure': current_music.get('songStructure')
+    }
+    Music.create_music(new_project_id, music_data_to_copy, user_id)
 
-    midi_bytes = base64.b64decode(midi_base64) if midi_base64 else None
+    Notification.create(user_id=original_project['user_id'], type="fork", actor=data.get('username_actor'))
 
-    print(project)
-
-    new_project_id = Project.create_project(
-        user_id,
-        {
-            'title': project.get('title', '') + ' (Fork)',
-            'midi': Binary(midi_bytes) if midi_bytes else None,
-            'description': project.get('description', ''),
-            'bpm': project.get('bpm', 120),
-            'instrument': project.get('instrument', 'piano'),
-            'volume': project.get('volume', -10),
-            'tempo': project.get('tempo', None),
-            'music_versions': project.get('music_versions', [])
-        }
-    )
-
-    Music.create_music(
-        new_project_id,
-        layers,
-        user_id
-    )
-
-    Notification.create(user_id=project['user_id'], type="fork", actor=data.get('username_actor'))
-
-
-    return jsonify({
-            'message': 'Fork created',
-            'new_project_id': new_project_id
-        }), 201
+    return jsonify({'message': 'Fork created', 'new_project_id': new_project_id}), 201
 
 
 @projects_bp.route('/<project_id>', methods=['DELETE'])

@@ -223,17 +223,36 @@
       }
     },
     "confirmation": {
-      "clearTitle": "Limpar Página",
-      "clearMessage": "Todas as notas da página atual serão removidas. Esta ação não pode ser desfeita.",
+      "clearTitle": "Limpar Padrão?",
+      "clearMessage": "Todas as notas do padrão atual serão removidas. Esta ação não pode ser desfeita.",
       "deleteTitle": "Excluir Página",
-      "deleteMessage": "Esta página será excluída permanentemente. Tem certeza?"
+      "deleteMessage": "Esta página será excluída permanentemente. Tem certeza?",
+      "deleteChannelTitle": "Excluir Canal?",
+      "deleteChannelMessage": "Tem certeza que deseja excluir este canal? Todas as sequências de padrões nele serão perdidas.",
+      "deletePatternTitle": "Excluir Padrão?",
+      "deletePatternMessage": "Tem certeza que deseja excluir este padrão? Ele será removido de todos os canais na sequência. Esta ação não pode ser desfeita."
+    },
+    "sequencer": {
+      "deleteChannel": "Excluir Canal",
+      "deletePattern": "Excluir Padrão",
+      "title": "Sequenciador",
+      "channel": "Canal",
+      "addChannel": "Adicionar Canal",
+      "newPattern": "Novo Padrão"
+    },
+    "pianoRoll": {
+      "noteOverlapError": "As notas não podem se sobrepor."
     },
     "saveProject": "Salvar Projeto",
     "title": "Título",
     "description": "Descrição",
     "save": "Salvar",
     "deleteLastPageError": "Não é possível excluir a última página.",
-    "loadingMessage": "O editor está carregando para você criar músicas incríveis!"
+    "loadingMessage": "O editor está carregando para você criar músicas incríveis!",
+    "channels": "Canais",
+    "channel": "Canal",
+    "patterns": "Padrões",
+    "pattern": "Padrão"
   },
   "midiPlayer": {
     "expand": "Expandir",
@@ -454,7 +473,8 @@
     "error_loading_notifications": "Erro ao carregar notificações",
     "error_marking_notification": "Erro ao marcar notificação",
     "error_loading_similar_users": "Erro ao buscar usuários similares",
-    "error_creating_post": "Erro ao criar post"
+    "error_creating_post": "Erro ao criar post",
+    "patternCleared": "Padrão limpo!"
   },
   "alerts": {
     "max_images": "Máximo de 5 imagens permitidas"

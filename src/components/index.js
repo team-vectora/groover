@@ -5,6 +5,9 @@ export { default as ChangeVolume } from './editor/controls/ChangeVolume';
 export { default as ControlPanel } from './editor/controls/ControlPanel';
 export { default as SelectRitmo } from './editor/controls/SelectRitmo';
 export { default as VersionManager } from './editor/controls/VersionManager';
+export { default as Sequencer } from './editor/controls/Sequencer';
+export { default as ChannelControls } from './editor/controls/ChannelControls';
+export { default as Playhead } from './editor/Playhead'; // ADICIONE ESTA LINHA
 
 export { default as HeaderEditor } from './editor/HeaderEditor';
 export { default as PianoRoll } from './editor/PianoRoll';
