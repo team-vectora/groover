@@ -7,12 +7,17 @@ import * as Tone from "tone";
 import { NOTES } from "../../constants";
 import { API_BASE_URL } from "../../config";
 import { toast } from 'react-toastify';
-import useProjectStates from "./useProjectStates";
 
 const blobToBase64 = (blob) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(",")[1]);
+        reader.onloadend = () => {
+            if (reader.result) {
+                resolve(reader.result.split(",")[1]);
+            } else {
+                reject(new Error("Failed to read blob."));
+            }
+        };
         reader.onerror = reject;
         reader.readAsDataURL(blob);
     });
@@ -26,10 +31,70 @@ export const useProjectAPI = (projectId, projectActions) => {
     const [currentMusicId, setCurrentMusicId] = useState("");
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
+    const exportToMIDI = useCallback(async (projectData, returnBlob = false) => {
+        const { bpm, channels, patterns, songStructure } = projectData;
+        const midi = new Midi();
+        midi.header.setTempo(bpm);
+
+        // *** INÍCIO DA CORREÇÃO ***
+        // Calcula a duração do compasso (barra) usando o BPM do projeto,
+        // garantindo que os tempos das notas sejam corretos.
+        const barDuration = (60 / bpm) * 4; // Assumindo compasso 4/4
+        // *** FIM DA CORREÇÃO ***
+
+        channels.forEach((channel, channelIndex) => {
+            const track = midi.addTrack();
+            track.instrument.name = channel.instrument;
+
+            let currentTime = 0;
+            const channelStructure = songStructure[channelIndex] || [];
+
+            channelStructure.forEach(patternId => {
+                if (patternId && patterns[patternId]) {
+                    const pattern = patterns[patternId];
+                    const notesInPattern = pattern.notes || [];
+
+                    notesInPattern.forEach(note => {
+                        const noteName = NOTES[note.pitch];
+                        if (noteName) {
+                            try {
+                                track.addNote({
+                                    name: noteName,
+                                    time: currentTime + (note.start / 32) * barDuration,
+                                    duration: ((note.end - note.start) / 32) * barDuration,
+                                    velocity: 1
+                                });
+                            } catch (e) {
+                                console.error(`Nota inválida não exportada: ${noteName}`, e);
+                            }
+                        }
+                    });
+                }
+                currentTime += barDuration;
+            });
+        });
+
+        const blob = new Blob([await midi.toArray()], { type: "audio/midi" });
+
+        if (returnBlob) {
+            return blob;
+        }
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${projectData.title || "music"}.mid`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, []);
+
+
     useEffect(() => {
         const loadInitialData = async () => {
             if (!projectId || !token || projectId === "new") {
-                projectActions.loadProjectData(); // Carrega um projeto vazio
+                projectActions.loadProjectData();
                 setLoading(false);
                 return;
             }
@@ -41,14 +106,11 @@ export const useProjectAPI = (projectId, projectActions) => {
                 if (!res.ok) throw new Error('Failed to load project');
                 const data = await res.json();
 
-                console.log(data)
-
                 setProject(data);
                 if (data.current_music_id) {
                     projectActions.loadProjectData({ ...data, ...data.current_music_id });
                     setCurrentMusicId(data.current_music_id._id);
                 } else {
-                    // Se não houver música, carrega os metadados do projeto e um estado de música padrão
                     projectActions.loadProjectData(data);
                 }
                 setVersions(data.music_versions || []);
@@ -56,21 +118,27 @@ export const useProjectAPI = (projectId, projectActions) => {
             } catch (error) {
                 console.error("Error loading project:", error);
                 toast.error("Error loading project.");
-                router.push('/editor/new'); // Redireciona para um novo editor em caso de erro
+                router.push('/editor/new');
             } finally {
                 setLoading(false);
             }
         };
 
         loadInitialData();
-    }, [projectId, token, router]); // Removido projectActions das dependências para evitar loop
+    }, [projectId, token, router]);
+
 
     const handleSave = useCallback(async (projectData) => {
         if (!token) return;
         setLoading(true);
 
         try {
+            const midiBlob = await exportToMIDI(projectData, true);
+            const base64Midi = await blobToBase64(midiBlob);
+
             const payload = { ...projectData };
+            payload.midi = base64Midi;
+
             if (projectId !== "new") {
                 payload.id = projectId;
             }
@@ -104,120 +172,101 @@ export const useProjectAPI = (projectId, projectActions) => {
         } finally {
             setLoading(false);
         }
-    }, [token, projectId, router]);
-
-
-    const exportToMIDI = async (projectData, returnBlob = false) => {
-        const { bpm, channels, patterns, songStructure } = projectData;
-        const midi = new Midi();
-        midi.header.setTempo(bpm);
-
-        const TICKS_PER_BAR = 32;
-        const barDuration = Tone.Time("1m").toSeconds();
-        const tickDuration = barDuration / TICKS_PER_BAR;
-
-        channels.forEach((channel, channelIndex) => {
-            const track = midi.addTrack();
-            track.instrument.name = channel.instrument;
-
-            const channelStructure = songStructure[channelIndex] || [];
-            channelStructure.forEach((patternId, barIndex) => {
-                if (!patternId) return;
-
-                const pattern = patterns[patternId];
-                if (!pattern || !pattern.notes) return;
-
-                const barOffset = barIndex * barDuration;
-
-                pattern.notes.forEach(note => {
-                    track.addNote({
-                        name: NOTES[note.pitch],
-                        time: note.start * tickDuration + barOffset,
-                        duration: (note.end - note.start) * tickDuration,
-                        velocity: 1
-                    });
-                });
-            });
-        });
-
-        const blob = new Blob([await midi.toArray()], { type: "audio/midi" });
-        if (returnBlob) return blob;
-
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${projectData.title || "music"}.mid`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
+    }, [token, projectId, router, exportToMIDI]);
 
     const importFromMIDI = useCallback(async (file) => {
         if (!file) return;
 
         try {
             const midiData = new Midi(await file.arrayBuffer());
+            const bpm = midiData.header.tempos[0]?.bpm || 120;
+            const barDurationInSeconds = (60 / bpm) * 4;
+            const TICKS_PER_BAR = 32;
+
             const newChannels = [];
             const newPatterns = {};
             const newSongStructure = [];
-
-            const TICKS_PER_BAR = 32;
-            const barDuration = (60 / midiData.header.tempos[0].bpm) * 4;
+            let totalBars = 0;
 
             midiData.tracks.forEach((track, trackIndex) => {
                 if (track.notes.length === 0) return;
 
-                newChannels.push({ id: `imported-channel-${trackIndex}`, instrument: track.instrument.name || 'piano' });
-                const channelPatternRow = [];
-
+                const channelId = `imported-channel-${trackIndex}`;
+                newChannels.push({ id: channelId, instrument: track.instrument.name || 'piano', volume: -10 });
+                const channelStructureRow = [];
                 const notesByBar = {};
+
                 track.notes.forEach(note => {
-                    const barIndex = Math.floor(note.time / barDuration);
-                    if (!notesByBar[barIndex]) notesByBar[barIndex] = [];
+                    const barIndex = Math.floor(note.time / barDurationInSeconds);
+                    if (!notesByBar[barIndex]) {
+                        notesByBar[barIndex] = [];
+                    }
                     notesByBar[barIndex].push(note);
+                    totalBars = Math.max(totalBars, barIndex + 1);
                 });
 
-                const maxBar = Object.keys(notesByBar).length > 0 ? Math.max(...Object.keys(notesByBar).map(Number)) : -1;
+                for (let i = 0; i < totalBars; i++) {
+                    const barNotes = notesByBar[i];
+                    if (barNotes && barNotes.length > 0) {
+                        const patternId = `pattern-${channelId}-${i}`;
+                        const patternNotes = barNotes.map(note => {
+                            const noteStartInBar = note.time % barDurationInSeconds;
+                            const startTick = Math.floor((noteStartInBar / barDurationInSeconds) * TICKS_PER_BAR);
+                            const endTick = Math.ceil(((noteStartInBar + note.duration) / barDurationInSeconds) * TICKS_PER_BAR);
+                            const pitch = NOTES.indexOf(note.name);
 
+                            if (pitch === -1) return null;
 
-                for (let barIndex = 0; barIndex <= maxBar; barIndex++) {
-                    const barNotes = notesByBar[barIndex];
-                    if (!barNotes || barNotes.length === 0) {
-                        channelPatternRow.push(null);
-                        continue;
+                            return {
+                                id: `note-${Math.random()}`,
+                                pitch,
+                                start: startTick,
+                                end: Math.max(startTick + 1, endTick),
+                            };
+                        }).filter(Boolean);
+
+                        if (patternNotes.length > 0) {
+                            newPatterns[patternId] = { id: patternId, notes: patternNotes, createdAt: new Date().toISOString() };
+                            channelStructureRow.push(patternId);
+                        } else {
+                            channelStructureRow.push(null);
+                        }
+                    } else {
+                        channelStructureRow.push(null);
                     }
-
-                    const newPatternId = `imported-pattern-${trackIndex}-${barIndex}`;
-                    const patternNotes = barNotes.map(note => {
-                        const startTick = Math.round((note.time % barDuration) / barDuration * TICKS_PER_BAR);
-                        const endTick = Math.round(((note.time % barDuration) + note.duration) / barDuration * TICKS_PER_BAR);
-                        return {
-                            id: `note-${Math.random()}`,
-                            pitch: NOTES.indexOf(note.name),
-                            start: startTick,
-                            end: Math.max(startTick + 1, endTick),
-                        };
-                    }).filter(n => n.pitch !== -1);
-
-                    newPatterns[newPatternId] = { id: newPatternId, notes: patternNotes };
-                    channelPatternRow.push(newPatternId);
                 }
-                newSongStructure.push(channelPatternRow);
+                newSongStructure.push(channelStructureRow);
+            });
+
+            if (newChannels.length === 0) {
+                toast.warn("No valid notes found in the MIDI file.");
+                return;
+            }
+
+            newSongStructure.forEach(row => {
+                while (row.length < totalBars) {
+                    row.push(null);
+                }
             });
 
             projectActions.loadProjectData({
-                title: file.name.replace('.mid', ''),
-                bpm: midiData.header.tempos[0].bpm,
+                title: file.name.replace(/\.mid$/i, ''),
+                description: "Imported from MIDI file.",
+                bpm,
+                volume: -10,
                 channels: newChannels,
                 patterns: newPatterns,
-                songStructure: newSongStructure
+                songStructure: newSongStructure,
             });
+
             toast.success("MIDI imported successfully!");
 
         } catch (e) {
             console.error("Error importing MIDI:", e);
-            toast.error("Failed to read MIDI file.");
+            toast.error("Failed to read or parse the MIDI file. It might be corrupted or in an unsupported format.");
         }
     }, [projectActions]);
+
 
     const handleVersionChange = useCallback(async (musicId) => {
         if (!musicId || musicId === currentMusicId) return;
@@ -230,7 +279,7 @@ export const useProjectAPI = (projectId, projectActions) => {
 
             const versionData = await res.json();
             projectActions.loadProjectData({ ...project, ...versionData });
-            setCurrentMusicId(musicId); // Atualiza o ID da música selecionada
+            setCurrentMusicId(musicId);
             toast.info("Version loaded.");
 
         } catch (error) {
@@ -239,7 +288,7 @@ export const useProjectAPI = (projectId, projectActions) => {
         } finally {
             setLoading(false);
         }
-    }, [projectId, token, project, currentMusicId]); // Adicionado currentMusicId para evitar recargas desnecessárias
+    }, [projectId, token, project, currentMusicId, projectActions]);
 
 
     return {

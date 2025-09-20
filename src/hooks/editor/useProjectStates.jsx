@@ -121,7 +121,7 @@ export const useProjectStates = () => {
         const loadedChannels = data.channels && data.channels.length > 0 ? data.channels : [createNewChannel()];
         setChannels(loadedChannels);
 
-        const loadedPatterns = data.patterns && Object.keys(data.patterns).length > 0 ? data.patterns : { 'default': { id: 'default', notes: [] } };
+        const loadedPatterns = data.patterns && Object.keys(data.patterns).length > 0 ? data.patterns : { 'default': { id: 'default', notes: [], createdAt: new Date().toISOString() } };
         setPatterns(loadedPatterns);
 
         const loadedStructure = data.songStructure && data.songStructure.length > 0 ?
@@ -137,20 +137,21 @@ export const useProjectStates = () => {
         console.log("SONG STRUTUCTURE DEPOIS")
         console.log(loadedStructure)
 
+
         setActiveChannelIndex(0);
 
-        // BUG FIX: Garante que um activePatternId válido seja selecionado após o carregamento
         const patternIds = Object.keys(loadedPatterns);
         if (patternIds.length > 0) {
-            setActivePatternId(patternIds[0]);
+            // Tenta manter o ID ativo se ele ainda existir, senão pega o primeiro
+            setActivePatternId(prevId => patternIds.includes(prevId) ? prevId : patternIds[0]);
         } else {
-            // Se não houver padrões, cria um novo
             const newPattern = createNewPattern();
             setPatterns({ [newPattern.id]: newPattern });
             setActivePatternId(newPattern.id);
         }
 
     }, []);
+
 
     const projectData = { title, description, bpm, volume, owner, channels, patterns, songStructure };
 

@@ -13,7 +13,8 @@ ACOUSTIC_INSTRUMENTS.forEach(name => {
 });
 
 export const useTonePlayer = (projectState) => {
-    const { bpm, channels, patterns, songStructure, activePatternId, activeChannelIndex } = projectState;
+    // Adicionado 'volume' à desestruturação
+    const { bpm, volume, channels, patterns, songStructure, activePatternId, activeChannelIndex } = projectState;
     const synthsRef = useRef({});
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPatternPlaying, setIsPatternPlaying] = useState(false);
@@ -33,9 +34,21 @@ export const useTonePlayer = (projectState) => {
                 }
             });
             await Promise.all(channels.map(async (channel) => {
+                if (!channel || !channel.instrument) {
+                    console.error("Canal ou instrumento inválido:", channel);
+                    return;
+                }
+
                 if (!synthsRef.current[channel.id] || synthsRef.current[channel.id].name !== channel.instrument) {
                     synthsRef.current[channel.id]?.dispose();
-                    const newSynth = instruments[channel.instrument]();
+                    const instrumentLoader = instruments[channel.instrument] || instruments['piano'];
+
+                    if (!instrumentLoader) {
+                        console.error(`Instrumento padrão 'piano' não encontrado.`);
+                        return;
+                    }
+
+                    const newSynth = instrumentLoader();
                     await Tone.loaded();
                     synthsRef.current[channel.id] = newSynth;
                 }
@@ -48,6 +61,16 @@ export const useTonePlayer = (projectState) => {
     useEffect(() => {
         Tone.Transport.bpm.value = bpm;
     }, [bpm]);
+
+    // *** INÍCIO DA CORREÇÃO ***
+    // Este useEffect monitora a propriedade 'volume' do estado do projeto.
+    // Quando ela muda, o valor é aplicado ao volume de saída principal do Tone.js.
+    useEffect(() => {
+        // Tone.Destination.volume é o controle de volume mestre.
+        // O valor é em decibéis.
+        Tone.Destination.volume.value = volume;
+    }, [volume]);
+    // *** FIM DA CORREÇÃO ***
 
     const playNotePiano = useCallback(async (note, channelId) => {
         if (isPlayerLoading || !synthsRef.current[channelId]) return;
@@ -193,7 +216,6 @@ export const useTonePlayer = (projectState) => {
         }, "32n");
         scheduledEventsRef.current.push(updatePlayheadEventId);
 
-        // Adiciona um evento para parar no final do pattern
         const endOfPatternEvent = Tone.Transport.schedule(() => {
             stop();
         }, barDuration);
