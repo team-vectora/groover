@@ -124,8 +124,18 @@ export const useProjectStates = () => {
         const loadedPatterns = data.patterns && Object.keys(data.patterns).length > 0 ? data.patterns : { 'default': { id: 'default', notes: [] } };
         setPatterns(loadedPatterns);
 
-        const loadedStructure = data.songStructure && data.songStructure.length > 0 ? data.songStructure : [Array(INITIAL_BAR_COUNT).fill(null)];
+        const loadedStructure = data.songStructure && data.songStructure.length > 0 ?
+            data.songStructure.map((channel) => {
+                if (channel.length % INITIAL_BAR_COUNT !== 0)
+                    return channel.concat(Array(INITIAL_BAR_COUNT - channel.length % INITIAL_BAR_COUNT).fill(null))
+                return channel
+            }) : [Array(INITIAL_BAR_COUNT).fill(null)];
         setSongStructure(loadedStructure);
+
+        console.log("SONG STRUTUCTURE ANTES")
+        console.log(data.songStructure)
+        console.log("SONG STRUTUCTURE DEPOIS")
+        console.log(loadedStructure)
 
         setActiveChannelIndex(0);
 

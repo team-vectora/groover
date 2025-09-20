@@ -41,6 +41,8 @@ export const useProjectAPI = (projectId, projectActions) => {
                 if (!res.ok) throw new Error('Failed to load project');
                 const data = await res.json();
 
+                console.log(data)
+
                 setProject(data);
                 if (data.current_music_id) {
                     projectActions.loadProjectData({ ...data, ...data.current_music_id });
