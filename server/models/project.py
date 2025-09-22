@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.db import mongo
@@ -108,6 +109,36 @@ class Project:
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
 
         return project
+    @staticmethod
+    def get_recent_projects(limit=5):
+        # Busca os últimos projetos pelo campo 'created_at'
+        cursor = mongo.db.projects.find().sort('created_at', -1).limit(limit)
+
+        projects = []
+        for project in cursor:
+            project['_id'] = str(project['_id'])
+
+            if 'current_music_id' in project:
+                project['current_music_id'] = Music.get_music(project['current_music_id'])
+
+            if 'music_versions' in project:
+                for version in project['music_versions']:
+                    version['music_id'] = str(version['music_id'])
+                    version['update_by'] = User.get_user(version['update_by'])
+
+            if 'midi' in project and project.get('midi'):
+                midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
+                project['midi'] = f"data:audio/midi;base64,{midi_b64}"
+
+            project['collaborators'] = [str(c) for c in project.get('collaborators', [])]
+            project['user_id'] = str(project['user_id'])
+            project['created_by'] = User.get_user(project.get('created_by', ''))
+            project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
+
+            projects.append(project)
+
+        return projects
+
 
     @staticmethod
     def get_project_full_data_without_user_id(project_id):

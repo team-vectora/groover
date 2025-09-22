@@ -66,6 +66,11 @@ def save_project():
         return jsonify(created_project), 201
 
 
+@projects_bp.route('/teste', methods=["GET"])
+@jwt_required()
+def teste():
+    return Project.get_recent_projects()
+
 @projects_bp.route('/<project_id>', methods=['GET'])
 @jwt_required()
 def get_project(project_id):

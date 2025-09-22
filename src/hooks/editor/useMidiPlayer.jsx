@@ -55,13 +55,14 @@ export default function useMidiPlayer() {
         };
     }, [currentProject]);
 
-    // Programar notas no Tone.js
     useEffect(() => {
-        if (!midi) return;
+        if (!midi || !midi.tracks) return;
 
         Tone.Transport.cancel();
 
         midi.tracks.forEach((track) => {
+            if (!track.notes) return;
+
             track.notes.forEach((note) => {
                 Tone.Transport.schedule((time) => {
                     synthRef.current?.triggerAttackRelease(note.name, note.duration, time);
@@ -79,6 +80,20 @@ export default function useMidiPlayer() {
             }
         }, 0.1);
     }, [midi, duration]);
+
+
+    const playMidi = async (newMidi) => {
+      if (!newMidi) return;
+
+      Tone.Transport.stop();
+      setIsPlaying(false);
+
+      setMidi(newMidi);
+      await Tone.start();
+      Tone.Transport.start();
+      setIsPlaying(true);
+    };
+
 
     const playPause = async () => {
         if (!midi) return;
@@ -118,6 +133,7 @@ export default function useMidiPlayer() {
         progress,
         duration,
         currentProject,
+        playMidi,
         playPause,
         stop,
         seek,

@@ -198,10 +198,10 @@ export default function Post({
     };
 
     return (
-        <div className="flex flex-col gap-4 bg-bg-secondary rounded-lg p-5 w-full mx-auto border border-primary mb-10 shadow-lg hover:shadow-xl transition-shadow">
-            {/* Cabeçalho do post */}
+    <div className="flex flex-col gap-4 bg-bg-secondary p-5 w-full mx-auto border-t border-b border-primary/40">
+
             <div className="flex items-center gap-4">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-primary hover:border-accent-light transition duration-300 cursor-pointer">
+                <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-primary hover:border-accent-light transition duration-300 cursor-pointer">
                     <Image
                         src={avatarUrl || "/img/default_avatar.png"}
                         alt="Avatar"
@@ -269,58 +269,61 @@ export default function Post({
                 </div>
             )}
 
-            {/* Galeria de imagens */}
-            {post.photos?.length > 0 && (
-                <div className="relative w-full group">
-                    {/* Botão anterior */}
-                    {post.photos.length > 1 && (
-                        <button
-                            onClick={prevImage}
-                            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-primary bg-opacity-80 text-white w-10 h-10 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                            <FontAwesomeIcon icon={faChevronLeft} />
-                        </button>
-                    )}
-
-                    {/* Imagem atual */}
-                    <div
-                        className="relative w-full overflow-hidden flex "
-                        onDoubleClick={handleLikeImage}
+        {/* Galeria de imagens */}
+        {post.photos?.length > 0 && (
+            <div className="relative w-full group">
+                {/* Botão anterior */}
+                {post.photos.length > 1 && (
+                    <button
+                        onClick={prevImage}
+                        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-primary bg-opacity-80 text-white w-10 h-10 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                        <img
-                            src={post.photos[currentImageIndex]}
-                            alt={`Post image ${currentImageIndex + 1}`}
-                            className="w-full h-full object-contain rounded-lg rounded-md"
-                        />
+                        <FontAwesomeIcon icon={faChevronLeft} />
+                    </button>
+                )}
 
-                        {/* Animação de coração com SVGs originais */}
-                        <HeartAnimation position={heartPos} showHeart={showHeart} />
-                    </div>
+                {/* Imagem atual */}
+                <div
+                    className="relative w-full overflow-hidden flex"
+                    onDoubleClick={handleLikeImage}
+                >
+                    <img
+                        src={post.photos[currentImageIndex]}
+                        alt={`Post image ${currentImageIndex + 1}`}
+                        className="w-full max-h-[500px] object-contain rounded-md mx-auto"
+                    />
 
-                    {/* Botão próximo */}
-                    {post.photos.length > 1 && (
-                        <button
-                            onClick={nextImage}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary bg-opacity-80 text-text-lighter w-10 h-10 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                            <FontAwesomeIcon icon={faChevronRight} />
-                        </button>
-                    )}
-
-                    {/* Indicadores de imagem */}
-                    {post.photos.length > 1 && (
-                        <div className="flex justify-center items-center gap-2 mt-4">
-                            {post.photos.map((_, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => goToImage(index)}
-                                    className={`w-3 h-3 rounded-full transition-colors ${index === currentImageIndex ? 'bg-accent' : 'bg-accent-light'}`}
-                                />
-                            ))}
-                        </div>
-                    )}
+                    {/* Animação de coração */}
+                    <HeartAnimation position={heartPos} showHeart={showHeart} />
                 </div>
-            )}
+
+                {/* Botão próximo */}
+                {post.photos.length > 1 && (
+                    <button
+                        onClick={nextImage}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary bg-opacity-80 text-text-lighter w-10 h-10 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                        <FontAwesomeIcon icon={faChevronRight} />
+                    </button>
+                )}
+
+                {/* Indicadores de imagem */}
+                {post.photos.length > 1 && (
+                    <div className="flex justify-center items-center gap-2 mt-4">
+                        {post.photos.map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => goToImage(index)}
+                                className={`w-3 h-3 rounded-full transition-colors ${
+                                    index === currentImageIndex ? 'bg-accent' : 'bg-accent-light'
+                                }`}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        )}
+
 
             {/* Projeto associado */}
             {post.project && (

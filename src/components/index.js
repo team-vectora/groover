@@ -31,6 +31,7 @@ export { default as Post } from './posts/Post';
 export { default as PostFormPopUp } from './posts/PostFormPopUp';
 export { default as CommentForm } from './posts/CommentForm';
 export { default as CommentThread } from './posts/CommentThread';
+export { default as PsychedelicVisualizer } from './posts/PsychedelicVisualizer';
 
 // Profile
 export { default as ConfigUserPopUp } from './profile/ConfigUserPopUp';
@@ -43,6 +44,7 @@ export { default as FollowListPopup } from './profile/FollowListPopup';
 
 // Search
 export { default as UserSearchResult } from './search/UserSearchResult';
+export { default as GrooveFeed } from './feed/GrooveFeed';
 
 export { default as ForgotPasswordPopup } from './auth/ForgotPasswordPopup';
 

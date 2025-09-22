@@ -132,3 +132,13 @@ body {
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+.feed-container {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100%;
+}
+
+.feed-item {
+  scroll-snap-align: start;
+  height: 100vh;
+}
