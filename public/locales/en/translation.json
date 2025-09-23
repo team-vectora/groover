@@ -10,10 +10,12 @@
     "logout": "Logout",
     "close": "Close",
     "loading": "Loading...",
-    "no_notifications": "No notifications"
+    "no_notifications": "No notifications",
+    "explore": "Explore"
   },
   "feed": {
-    "loading": "Loading ..."
+    "loading": "Loading ...",
+    "open_feed": "Open Feed"
   },
   "forgotPassword": {
     "title": "Forgot your password?",

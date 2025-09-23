@@ -18,6 +18,7 @@ const PianoRoll = ({
     const { t } = useTranslation();
     const [dragging, setDragging] = useState(null);
     const svgRef = useRef(null);
+    const [cursor, setCursor] = useState(isCurrentUserProject ? 'cell' : 'not-allowed');
 
     const isOverlapping = (noteA, noteB) => {
         return noteA.pitch === noteB.pitch && noteA.start < noteB.end && noteA.end > noteB.start;
@@ -90,10 +91,25 @@ const PianoRoll = ({
     };
 
     const handleMouseMove = useCallback((e) => {
+        if (!isCurrentUserProject) return;
+        const { tick, pitch } = getCoordsFromEvent(e);
+        const noteAtCursor = findNoteAt(tick, pitch);
+        if (noteAtCursor) {
+            const rect = svgRef.current.getBoundingClientRect();
+            const tickWidth = rect.width / TICKS_PER_PATTERN;
+            const noteEndX = (noteAtCursor.end * tickWidth) + rect.left;
+
+            if (Math.abs(e.clientX - noteEndX) < 10) {
+                setCursor('ew-resize');
+            } else {
+                setCursor('move');
+            }
+        } else {
+            setCursor('cell');
+        }
+
         if (!dragging || !patternNotes) return;
         e.preventDefault();
-
-        const { tick, pitch } = getCoordsFromEvent(e, false);
 
         const newNotes = [...patternNotes];
         const noteIndex = newNotes.findIndex(n => n.id === dragging.noteId);
@@ -118,7 +134,7 @@ const PianoRoll = ({
             newNotes[noteIndex] = updatedNote;
             onNotesChange(newNotes);
         }
-    }, [dragging, patternNotes, onNotesChange]);
+    }, [dragging, patternNotes, onNotesChange, isCurrentUserProject]);
 
     const handleMouseUp = () => setDragging(null);
 
@@ -136,6 +152,7 @@ const PianoRoll = ({
                 width="100%"
                 height="100%"
                 className="absolute top-0 left-0 bg-transparent"
+                style={{ cursor: cursor }}
             >
                 {/* Background lines */}
                 {NOTES.map((note, index) => {
@@ -176,7 +193,7 @@ const PianoRoll = ({
                     );
                 })}
 
-                <rect width="100%" height="100%" fill="transparent" onMouseDown={handleMouseDown} style={{ cursor: isCurrentUserProject ? 'cell' : 'not-allowed' }} />
+                <rect width="100%" height="100%" fill="transparent" onMouseDown={handleMouseDown} />
             </svg>
             <Playhead
                 isPlaying={isPlaying}

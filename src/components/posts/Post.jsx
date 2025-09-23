@@ -20,6 +20,7 @@ import ProjectCard from "../profile/ProjectCard";
 import ConfirmationPopUp from '../editor/ConfirmationPopUp';
 import { useAuth, useLikePost, useDeletePost, useOutsideClick } from "../../hooks";
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from "framer-motion";
 
 // Componente de animação do coração com SVGs originais
 const HeartAnimation = ({ position, showHeart }) => {
@@ -198,7 +199,7 @@ export default function Post({
     };
 
     return (
-    <div className="flex flex-col gap-4 bg-bg-secondary p-5 w-full mx-auto border-t border-b border-primary/40">
+        <div className="flex flex-col gap-4 bg-bg-secondary p-5 w-full mx-auto rounded-lg border border-primary/40">
 
             <div className="flex items-center gap-4">
                 <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-primary hover:border-accent-light transition duration-300 cursor-pointer">
@@ -269,60 +270,79 @@ export default function Post({
                 </div>
             )}
 
-        {/* Galeria de imagens */}
-        {post.photos?.length > 0 && (
-            <div className="relative w-full group">
-                {/* Botão anterior */}
-                {post.photos.length > 1 && (
-                    <button
-                        onClick={prevImage}
-                        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-primary bg-opacity-80 text-white w-10 h-10 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+            {/* Galeria de imagens */}
+            {post.photos?.length > 0 && (
+                <div className="relative w-full group">
+                    {/* Botão anterior */}
+                    {post.photos.length > 1 && (
+                        <button
+                            onClick={prevImage}
+                            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-primary bg-opacity-80 text-white w-10 h-10 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            <FontAwesomeIcon icon={faChevronLeft} />
+                        </button>
+                    )}
+
+                    {/* Imagem atual */}
+                    <div
+                        className="relative w-full overflow-hidden flex"
+                        onDoubleClick={handleLikeImage}
                     >
-                        <FontAwesomeIcon icon={faChevronLeft} />
-                    </button>
-                )}
-
-                {/* Imagem atual */}
-                <div
-                    className="relative w-full overflow-hidden flex"
-                    onDoubleClick={handleLikeImage}
-                >
-                    <img
-                        src={post.photos[currentImageIndex]}
-                        alt={`Post image ${currentImageIndex + 1}`}
-                        className="w-full max-h-[500px] object-contain rounded-md mx-auto"
-                    />
-
-                    {/* Animação de coração */}
-                    <HeartAnimation position={heartPos} showHeart={showHeart} />
-                </div>
-
-                {/* Botão próximo */}
-                {post.photos.length > 1 && (
-                    <button
-                        onClick={nextImage}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary bg-opacity-80 text-text-lighter w-10 h-10 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                        <FontAwesomeIcon icon={faChevronRight} />
-                    </button>
-                )}
-
-                {/* Indicadores de imagem */}
-                {post.photos.length > 1 && (
-                    <div className="flex justify-center items-center gap-2 mt-4">
-                        {post.photos.map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => goToImage(index)}
-                                className={`w-3 h-3 rounded-full transition-colors ${
-                                    index === currentImageIndex ? 'bg-accent' : 'bg-accent-light'
-                                }`}
+                        <AnimatePresence initial={false} custom={currentImageIndex}>
+                            <motion.img
+                                key={currentImageIndex}
+                                src={post.photos[currentImageIndex]}
+                                alt={`Post image ${currentImageIndex + 1}`}
+                                className="w-full max-h-[500px] object-contain rounded-md mx-auto"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ opacity: { duration: 0.2 } }}
+                                drag="x"
+                                dragConstraints={{ left: 0, right: 0 }}
+                                onDragEnd={(event, { offset, velocity }) => {
+                                    const swipe = Math.abs(offset.x);
+                                    if (swipe > 50) {
+                                        if (offset.x > 0) {
+                                            prevImage();
+                                        } else {
+                                            nextImage();
+                                        }
+                                    }
+                                }}
                             />
-                        ))}
+                        </AnimatePresence>
+
+                        {/* Animação de coração */}
+                        <HeartAnimation position={heartPos} showHeart={showHeart} />
                     </div>
-                )}
-            </div>
-        )}
+
+                    {/* Botão próximo */}
+                    {post.photos.length > 1 && (
+                        <button
+                            onClick={nextImage}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary bg-opacity-80 text-text-lighter w-10 h-10 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            <FontAwesomeIcon icon={faChevronRight} />
+                        </button>
+                    )}
+
+                    {/* Indicadores de imagem */}
+                    {post.photos.length > 1 && (
+                        <div className="flex justify-center items-center gap-2 mt-4">
+                            {post.photos.map((_, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => goToImage(index)}
+                                    className={`w-3 h-3 rounded-full transition-colors ${
+                                        index === currentImageIndex ? 'bg-accent' : 'bg-accent-light'
+                                    }`}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
 
             {/* Projeto associado */}

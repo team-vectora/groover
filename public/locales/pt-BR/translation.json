@@ -10,10 +10,12 @@
     "logout": "Sair",
     "close": "Fechar",
     "loading": "Carregando...",
-    "no_notifications": "Nenhuma notificação"
+    "no_notifications": "Nenhuma notificação",
+    "explore": "Explorar"
   },
   "feed": {
-    "loading": "Carregando ..."
+    "loading": "Carregando ...",
+    "open_feed": "Abrir Feed"
   },
   "forgotPassword": {
     "title": "Esqueceu a senha?",

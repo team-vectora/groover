@@ -14,6 +14,7 @@ import {
   faTimes,
   faSearch,
   faCompactDisc,
+  faCompass, // Novo ícone
 } from "@fortawesome/free-solid-svg-icons";
 import useNotifications from "../../hooks/posts/useNotifications";
 import NotificationItem from "../posts/NotificationItem";
@@ -65,6 +66,7 @@ const Sidebar = () => {
 
   const navItems = [
     { icon: faHome, label: "feed", path: "/feed" },
+    { icon: faCompass, label: "explore", path: "/explore" },
     { icon: faSearch, label: "search", path: "/search" },
     { icon: faMusic, label: "editor", path: "/editor/new" },
     { icon: faCompactDisc, label: "livecode", path: "/livecode" },

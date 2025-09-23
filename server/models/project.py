@@ -1,3 +1,4 @@
+# models/project.py
 import random
 from datetime import datetime
 from bson.objectid import ObjectId
@@ -301,3 +302,4 @@ class Project:
                 'collaborators': [str(c) for c in p.get('collaborators', [])]
             })
         return results
+

@@ -126,21 +126,21 @@ export default function ProfilePage({ params }) {
                   </div>
               )}
 
-                {(!posts || posts.length === 0) ? (
-                    <p className="text-center text-gray-400">{t('profile.noPosts')}</p>
-                ) : (
-                    posts.map(post => (
-                        <Post
-                            key={post._id}
-                            token={token}
-                            post={post}
-                            userId={userId}
-                            setCurrentProject={setCurrentProject}
-                            handleClickFork={handleForkProject}
-                            onPostCreated={refetch}
-                        />
-                    ))
-                )}
+              {(!posts || posts.length === 0) ? (
+                  <p className="text-center text-gray-400">{t('profile.noPosts')}</p>
+              ) : (
+                  posts.map(post => (
+                      <Post
+                          key={post._id}
+                          token={token}
+                          post={post}
+                          userId={userId}
+                          setCurrentProject={setCurrentProject}
+                          handleClickFork={handleForkProject}
+                          onPostCreated={refetch}
+                      />
+                  ))
+              )}
 
             </div>
         )}
@@ -155,7 +155,7 @@ export default function ProfilePage({ params }) {
                     {t('profile.newProject')}
                   </button>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {projects.map(project => (
                     <ProjectCard
                         key={project.id}
