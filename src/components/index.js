@@ -31,7 +31,7 @@ export { default as Post } from './posts/Post';
 export { default as PostFormPopUp } from './posts/PostFormPopUp';
 export { default as CommentForm } from './posts/CommentForm';
 export { default as CommentThread } from './posts/CommentThread';
-export { default as PsychedelicVisualizer } from './posts/PsychedelicVisualizer';
+export { default as AudioVisualizer } from './posts/AudioVisualizer';
 
 // Profile
 export { default as ConfigUserPopUp } from './profile/ConfigUserPopUp';
