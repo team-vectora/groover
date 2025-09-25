@@ -52,11 +52,18 @@ export default function useSignUp() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password: senha, lang: i18n.language }),
-      });
+        const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username,
+            email,
+            password: senha,
+            lang: i18n.language,
+          }),
+          credentials: "include",
+        });
+
 
       const data = await response.json();
 

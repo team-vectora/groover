@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { API_BASE_URL } from "../../config";
 import { useTranslation } from "react-i18next";
 
-export default function useShareProject(token) {
+export default function useShareProject() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
@@ -12,8 +12,8 @@ export default function useShareProject(token) {
     try {
       const response = await fetch(`${API_BASE_URL}/projects/${projectId}/invite`, {
         method: "POST",
+        credentials: "include",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ username }),
@@ -21,8 +21,11 @@ export default function useShareProject(token) {
 
       const data = await response.json();
       if (!response.ok) {
-        // Agora, usamos a chave de erro do backend para traduzir
-        throw new Error(t(`backend_errors.${data.error}`, { defaultValue: t('share.error') }));
+        throw new Error(
+          data.error
+            ? t(`backend_errors.${data.error}`, { defaultValue: t('share.error') })
+            : t('share.error')
+        );
       }
 
       toast.success(t('share.sharedSuccess'));

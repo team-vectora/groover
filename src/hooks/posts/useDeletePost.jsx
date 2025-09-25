@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { API_BASE_URL } from "../../config";
 import { useTranslation } from "react-i18next";
 
-export default function useDeletePost(token) {
+export default function useDeletePost() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
@@ -12,14 +12,16 @@ export default function useDeletePost(token) {
     try {
       const response = await fetch(`${API_BASE_URL}/posts/${postId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error ? t(`backend_errors.${data.error}`, { defaultValue: t('errors.delete_failed') }) : t('errors.delete_failed'));
+        throw new Error(
+          data.error
+            ? t(`backend_errors.${data.error}`, { defaultValue: t('errors.delete_failed') })
+            : t('errors.delete_failed')
+        );
       }
 
       toast.success(t('post.deletedSuccess'));

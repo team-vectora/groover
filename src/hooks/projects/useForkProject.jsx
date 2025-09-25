@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { API_BASE_URL } from "../../config";
 import { useTranslation } from "react-i18next";
 
-export default function useForkProject(token) {
+export default function useForkProject() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -14,8 +14,8 @@ export default function useForkProject(token) {
     try {
       const response = await fetch(`${API_BASE_URL}/projects/fork`, {
         method: "POST",
+        credentials: "include", // envia o cookie HTTP-only
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

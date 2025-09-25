@@ -12,38 +12,27 @@ export default function useFollow() {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error(t('errors.invalid_token'));
-      }
-
       const response = await fetch(`${API_BASE_URL}/users/follow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({ following_id: followingId }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error ? t(`backend_errors.${data.error}`, { defaultValue: t('toasts.error_following') }) : t('toasts.error_following'));
+        throw new Error(
+          data.error
+            ? t(`backend_errors.${data.error}`, { defaultValue: t('toasts.error_following') })
+            : t('toasts.error_following')
+        );
       }
 
       const newIsFollowing = !currentFollowingState;
       setFollowingState(newIsFollowing);
-
-      let updatedFollowing = JSON.parse(localStorage.getItem('following') || '[]');
-      if (newIsFollowing) {
-        if (!updatedFollowing.includes(followingId)) {
-          updatedFollowing.push(followingId);
-        }
-      } else {
-        updatedFollowing = updatedFollowing.filter(id => id !== followingId);
-      }
-      localStorage.setItem('following', JSON.stringify(updatedFollowing));
 
       const event = new CustomEvent('followingUpdated', {
         detail: { userId: followingId, isFollowing: newIsFollowing }

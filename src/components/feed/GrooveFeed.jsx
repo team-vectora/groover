@@ -12,24 +12,30 @@ export default function GrooveFeed() {
   const [started, setStarted] = useState(false);
   const projectRefs = useRef([]);
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await fetch("http://localhost:5000/api/projects/teste", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Erro ao carregar projetos");
-        const data = await res.json();
-        setProjects(data);
-      } catch (err) {
-        console.error("Erro ao carregar projetos:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProjects();
-  }, []);
+    useEffect(() => {
+      const fetchProjects = async () => {
+        setLoading(true);
+        try {
+          const res = await fetch("http://localhost:5000/api/projects/teste", {
+            method: "GET",
+            credentials: "include", 
+            headers: {
+              "Content-Type": "application/json"
+            },
+          });
+
+          if (!res.ok) throw new Error("Erro ao carregar projetos");
+          const data = await res.json();
+          setProjects(data);
+        } catch (err) {
+          console.error("Erro ao carregar projetos:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProjects();
+    }, []);
+
 
   useEffect(() => {
     const observer = new IntersectionObserver(

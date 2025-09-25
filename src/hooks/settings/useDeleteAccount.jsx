@@ -2,7 +2,7 @@ import { useState } from "react";
 import { API_BASE_URL } from "../../config";
 import { useTranslation } from "react-i18next";
 
-export function useDeleteAccount(token) {
+export function useDeleteAccount() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -14,9 +14,9 @@ export function useDeleteAccount(token) {
     try {
       const response = await fetch(`${API_BASE_URL}/users/delete`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({}),
       });

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { API_BASE_URL } from '../../config';
 import { useTranslation } from 'react-i18next';
 
-export default function useProfile(username, token) {
+export default function useProfile(username) {
   const { t } = useTranslation();
   const [profileData, setProfileData] = useState({
     user: null,
@@ -14,7 +14,7 @@ export default function useProfile(username, token) {
   });
 
   const fetchData = useCallback(async (isBackgroundUpdate = false) => {
-    if (!username || !token) return;
+    if (!username) return;
 
     const cacheKey = `profile_${username}`;
 
@@ -23,14 +23,12 @@ export default function useProfile(username, token) {
       const cachedData = sessionStorage.getItem(cacheKey);
       if (cachedData) {
         setProfileData({ ...JSON.parse(cachedData), loading: false });
-        // Após carregar o cache, inicia uma atualização silenciosa em segundo plano.
+        // Atualização silenciosa em segundo plano
         fetchData(true);
         return;
       }
     }
 
-    // Mostra o "loading" principal apenas se não houver cache (primeira carga).
-    // A atualização em segundo plano não deve disparar este estado.
     if (!isBackgroundUpdate) {
       setProfileData(prev => ({ ...prev, loading: true, error: null }));
     }
@@ -39,18 +37,17 @@ export default function useProfile(username, token) {
       // Busca todos os dados em paralelo
       const [userRes, postsRes, projectsRes, invitesRes] = await Promise.all([
         fetch(`${API_BASE_URL}/users/${username}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          credentials: "include",
         }),
         fetch(`${API_BASE_URL}/posts/username/${username}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          credentials: "include",
         }),
         fetch(`${API_BASE_URL}/projects/user/${username}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          credentials: "include",
         }),
-        // Só busca convites se for o perfil do próprio usuário
         localStorage.getItem('username') === username
             ? fetch(`${API_BASE_URL}/invitations`, {
-              headers: { Authorization: `Bearer ${token}` }
+              credentials: "include",
             })
             : Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
       ]);
@@ -71,12 +68,10 @@ export default function useProfile(username, token) {
         error: null
       };
 
-      // Armazena os dados frescos no cache e atualiza o estado.
       sessionStorage.setItem(cacheKey, JSON.stringify(newData));
       setProfileData(newData);
 
     } catch (error) {
-      // Erros em atualizações de segundo plano podem falhar silenciosamente.
       if (!isBackgroundUpdate) {
         setProfileData(prev => ({
           ...prev,
@@ -87,18 +82,15 @@ export default function useProfile(username, token) {
         console.error("Falha na atualização de perfil em segundo plano:", error);
       }
     }
-  }, [username, token, t]);
+  }, [username, t]);
 
-  // Refetch manual deve limpar o cache e mostrar o "loading".
   const refetch = useCallback(() => {
     const cacheKey = `profile_${username}`;
     sessionStorage.removeItem(cacheKey);
     fetchData(false);
   }, [username, fetchData]);
 
-
   useEffect(() => {
-    // Busca inicial ao montar o componente.
     fetchData(false);
   }, [fetchData]);
 

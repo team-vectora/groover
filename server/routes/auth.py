@@ -1,7 +1,6 @@
 import os
 from datetime import timedelta
-
-from flask import Blueprint, request, jsonify, redirect, render_template
+from flask import Blueprint, request, jsonify, redirect, render_template, make_response
 from flask_jwt_extended import create_access_token
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -109,6 +108,7 @@ def reset_password(token):
 
     return render_template('reset_password.html', status=None)
 
+
 @auth_bp.route('/signin', methods=['POST'])
 def signin():
     data = request.get_json()
@@ -118,9 +118,13 @@ def signin():
 
     user = User.find_by_username(data['username'])
 
-    print(user['active'])
+    if not user:
+        return jsonify({'error': 'Invalid credentials'}), 401
+
+    if not check_password_hash(user['password'], data['password']):
+        return jsonify({'error': 'Invalid credentials'}), 401
+
     if not user['active']:
-        print("ENTREI")
         lang = request.headers.get('Accept-Language', 'en').split(',')[0]
         User.send_email_verification(
             email=user['email'],
@@ -128,26 +132,28 @@ def signin():
             host_url=request.host_url,
             lang=lang
         )
+        return jsonify({'error': 'User is not active. Verification email resent.'}), 401
 
-        return jsonify({
-            'error': 'User is not active. Verification email resent.',
-        }), 401
-    if not user or not check_password_hash(user['password'], data['password']):
-        return jsonify({'error': 'Invalid credentials'}), 401
     expires = timedelta(hours=24)
     access_token = create_access_token(
         identity=str(user['_id']),
         expires_delta=expires
     )
 
-    if 'avatar' not in user.keys():
-        user['avatar'] = None
-
-    return jsonify({
-        'access_token': access_token,
-        'user_id': str(user['_id']),
-        'username': user['username'],
-        'avatar': user['avatar'],
+    resp = make_response(jsonify({
+        "user_id": str(user['_id']),
+        "username": user['username'],
+        "avatar": user.get('avatar'),
         "following": user['following'],
         "followers": user['followers']
-    }), 200
+    }))
+    resp.set_cookie(
+        "access_token",
+        access_token,
+        httponly=True,
+        secure=False,
+        samesite="Lax",
+        max_age=60*60*24
+    )
+
+    return resp

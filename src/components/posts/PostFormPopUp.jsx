@@ -60,14 +60,14 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
         genres: selectedGenres,
       };
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(body),
-      });
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(body),
+    });
 
       const data = await response.json();
 

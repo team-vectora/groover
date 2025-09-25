@@ -8,8 +8,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const FeedPage = () => {
-    const { token, userId } = useAuth();
-    const { posts, loading, error } = usePosts(token);
+    const { username, userId } = useAuth();
+    const { posts, loading, error } = usePosts();
     const { setCurrentProject } = useContext(MidiContext);
 
     return (
@@ -24,7 +24,6 @@ const FeedPage = () => {
                     {posts.map((post) => (
                         <Post
                             key={post._id}
-                            token={token}
                             userId={userId}
                             post={post}
                             profileId={userId}
