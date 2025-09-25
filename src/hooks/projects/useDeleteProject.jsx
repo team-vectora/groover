@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { API_BASE_URL } from "../../config";
 import { useTranslation } from "react-i18next";
 
-export default function useDeleteProject(token) {
+export default function useDeleteProject() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
@@ -12,7 +12,7 @@ export default function useDeleteProject(token) {
     try {
       const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
 
       if (!response.ok) {

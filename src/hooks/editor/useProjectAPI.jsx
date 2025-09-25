@@ -145,9 +145,11 @@ export const useProjectAPI = (projectId, projectActions) => {
 
             const response = await fetch(`${API_BASE_URL}/projects`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
+                credentials: "include",
             });
+
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -273,8 +275,9 @@ export const useProjectAPI = (projectId, projectActions) => {
         setLoading(true);
         try {
             const res = await fetch(`${API_BASE_URL}/projects/${projectId}/versions/${musicId}`, {
-                headers: { Authorization: `Bearer ${token}` }
+                credentials: "include"
             });
+
             if (!res.ok) throw new Error('Failed to load version');
 
             const versionData = await res.json();

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
 import { useTranslation } from 'react-i18next';
 
-export default function usePosts(token) {
+export default function usePosts() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -10,12 +10,11 @@ export default function usePosts(token) {
   const cacheKey = 'feed_posts';
 
   const fetchPosts = async () => {
-    if (!token) return;
-
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/posts`, {
-        headers: { Authorization: `Bearer ${token}` },
+        method: "GET",
+        credentials: "include",
       });
 
       const data = await res.json();

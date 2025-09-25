@@ -203,14 +203,38 @@ export default function Post({
                             <FontAwesomeIcon icon={faChevronLeft} />
                         </button>
                     )}
-                    <div className="relative w-full overflow-hidden flex" onDoubleClick={handleLikeImage}>
-                        <AnimatePresence initial={false} custom={currentImageIndex}>
-                            <motion.img key={currentImageIndex} src={post.photos[currentImageIndex]} alt={`Post image ${currentImageIndex + 1}`} className="w-full max-h-[500px] object-contain rounded-md mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 0.2 } }} drag="x" dragConstraints={{ left: 0, right: 0 }} onDragEnd={(event, { offset }) => {
-                                if (Math.abs(offset.x) > 50) {
-                                    offset.x > 0 ? prevImage() : nextImage();
-                                }
-                            }} />
-                        </AnimatePresence>
+
+                    {/* Imagem atual */}
+                    <div
+                        className="relative w-full overflow-hidden flex"
+                        onDoubleClick={handleLikeImage}
+                    >
+                    <AnimatePresence initial={false} custom={currentImageIndex}>
+                      <motion.img
+                        key={currentImageIndex}
+                        src={post.photos[currentImageIndex]}
+                        alt={`Post image ${currentImageIndex + 1}`}
+                        className="w-full max-h-[500px] object-contain rounded-md mx-auto"
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -50 }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        onDragEnd={(event, { offset, velocity }) => {
+                          const swipe = Math.abs(offset.x);
+                          if (swipe > 50) {
+                            if (offset.x > 0) {
+                              prevImage();
+                            } else {
+                              nextImage();
+                            }
+                          }
+                        }}
+                      />
+                    </AnimatePresence>
+
+                        {/* Animação de coração */}
                         <HeartAnimation position={heartPos} showHeart={showHeart} />
                     </div>
                     {post.photos.length > 1 && (

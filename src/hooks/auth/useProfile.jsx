@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { API_BASE_URL } from '../../config';
 import { useTranslation } from 'react-i18next';
 
-export default function useProfile(username, token) {
+export default function useProfile(username) {
   const { t } = useTranslation();
   const [profileData, setProfileData] = useState({
     user: null,
@@ -14,16 +14,32 @@ export default function useProfile(username, token) {
   });
 
   const fetchData = useCallback(async (isBackgroundUpdate = false) => {
-    if (!username || !token) return;
+    if (!username) return;
 
     if (!isBackgroundUpdate) {
       setProfileData(prev => ({ ...prev, loading: true, error: null }));
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/users/profile/${username}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // Busca todos os dados em paralelo
+      const [userRes, postsRes, projectsRes, invitesRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/users/${username}`, {
+          credentials: "include",
+        }),
+        fetch(`${API_BASE_URL}/posts/username/${username}`, {
+          credentials: "include",
+        }),
+        fetch(`${API_BASE_URL}/projects/user/${username}`, {
+          credentials: "include",
+        }),
+        localStorage.getItem('username') === username
+            ? fetch(`${API_BASE_URL}/invitations`, {
+              credentials: "include",
+            })
+            : Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
+      ]);
+
+      if (!userRes.ok) throw new Error(t('errors.user_not_found'));
 
       if (!res.ok) {
         const errorData = await res.json();
@@ -32,6 +48,17 @@ export default function useProfile(username, token) {
 
       const data = await res.json();
       setProfileData({ ...data, loading: false, error: null });
+      const newData = {
+        user: userData,
+        posts: postsData,
+        projects: projectsData,
+        invites: invitesData,
+        loading: false,
+        error: null
+      };
+
+      sessionStorage.setItem(cacheKey, JSON.stringify(newData));
+      setProfileData(newData);
 
     } catch (error) {
       if (!isBackgroundUpdate) {
@@ -44,12 +71,11 @@ export default function useProfile(username, token) {
         console.error("Falha na atualização de perfil em segundo plano:", error);
       }
     }
-  }, [username, token, t]);
+  }, [username, t]);
 
   const refetch = useCallback(() => {
     fetchData(false);
   }, [fetchData]);
-
 
   useEffect(() => {
     fetchData(false);

@@ -22,8 +22,18 @@ def create_app():
     Swagger(app)
     app.config.from_object(Config)
 
-    # Configurações
-    CORS(app)
+    CORS(app,
+         supports_credentials=True,
+         resources={r"/api/*": {"origins": "http://localhost:3000"}})
+
+
+    app.config["JWT_SECRET_KEY"] = Config.JWT_SECRET_KEY
+    app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
+    app.config["JWT_ACCESS_COOKIE_NAME"] = "access_token"
+    app.config["JWT_COOKIE_SECURE"] = False
+    app.config["JWT_COOKIE_SAMESITE"] = "Lax"
+    app.config["JWT_COOKIE_CSRF_PROTECT"] = False
+
     JWTManager(app)
 
     @app.route('/api')

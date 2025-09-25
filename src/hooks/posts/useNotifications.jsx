@@ -2,19 +2,17 @@ import { useState, useEffect } from "react";
 import { API_BASE_URL } from "../../config";
 import { useTranslation } from "react-i18next";
 
-export default function useNotifications(token) {
+export default function useNotifications() {
   const { t } = useTranslation();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const fetchNotifications = async () => {
-    if (!token) return;
-
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/notifications`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
       const data = await res.json();
       if (res.ok) {
@@ -30,15 +28,13 @@ export default function useNotifications(token) {
   };
 
   const checkNotification = async (notification_id) => {
-    if (!token) return;
-
     try {
       const res = await fetch(`${API_BASE_URL}/notifications/check`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ notification_id }),
       });
       const data = await res.json();
@@ -56,13 +52,11 @@ export default function useNotifications(token) {
     }
   };
 
-      useEffect(() => {
-        if (!token) return;
-
-        fetchNotifications();
-        const interval = setInterval(fetchNotifications, 10000);
-        return () => clearInterval(interval);
-      }, [token]);
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   return { notifications, loading, error, refetch: fetchNotifications, checkNotification };
 }

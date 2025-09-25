@@ -10,7 +10,6 @@ export default function useAuth() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
     const userId = localStorage.getItem('id');
     const username = localStorage.getItem('username');
 
@@ -20,7 +19,6 @@ export default function useAuth() {
         : "/img/default_avatar.png";
 
     setAuthData({
-      token,
       userId,
       username,
       avatar: avatarUrl,

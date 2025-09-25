@@ -75,23 +75,19 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, setProfileP
         profilePicUrl = await uploadToCloudinary(changedProfilePic);
       }
 
-      const res = await fetch(`${API_BASE_URL}/users/config`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          avatar: profilePicUrl,
-          music_tags: musicTags,
-          bio: changedBio,
-        }),
-      });
+    const res = await fetch(`${API_BASE_URL}/users/config`, {
+      method: "PUT",
+      body: JSON.stringify({          avatar: profilePicUrl,
+                                       music_tags: musicTags,
+                                       bio: changedBio,}),
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+
 
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem("avatar", profilePicUrl);
-        // Dispara o evento para notificar outros componentes da mudança
         window.dispatchEvent(new Event('profileUpdated'));
         toast.success(t('configUserPopup.profileUpdatedSuccess'));
         if (onSuccess) onSuccess();

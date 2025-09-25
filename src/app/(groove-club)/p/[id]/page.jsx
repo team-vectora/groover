@@ -24,15 +24,21 @@ function PostPage() {
 
 
     const fetchPost = async () => {
-        if (!postId || !token) return;
+        if (!postId) return;
         setLoading(true);
         try {
             const res = await fetch(`${API_BASE_URL}/posts/${postId}`, {
-                headers: { Authorization: `Bearer ${token}` }
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json"
+                }
             });
+
             if (!res.ok) {
                 throw new Error("Post não encontrado");
             }
+
             const data = await res.json();
             if (!data) {
                 setError(true);
@@ -45,6 +51,7 @@ function PostPage() {
             setLoading(false);
         }
     };
+
 
     useEffect(() => {
         fetchPost();

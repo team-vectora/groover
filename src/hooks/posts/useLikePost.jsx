@@ -2,7 +2,7 @@ import { useState } from "react";
 import { API_BASE_URL } from "../../config";
 import { useTranslation } from "react-i18next";
 
-export default function useLikePost(token, onSuccess) {
+export default function useLikePost(onSuccess) {
   const { t } = useTranslation();
   const [error, setError] = useState("");
 
@@ -11,9 +11,9 @@ export default function useLikePost(token, onSuccess) {
       const res = await fetch(`${API_BASE_URL}/posts/like`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        credentials: "include",
         body: JSON.stringify({ post_id, owner_id }),
       });
 

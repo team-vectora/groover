@@ -14,7 +14,7 @@ const ForgotPasswordPopup = ({ isOpen, onClose, onSendEmail }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const success = await onSendEmail(email); // Função passada via props
+            const success = await onSendEmail(email);
             if (success) {
                 toast.success(t("forgotPassword.email_sent"), { theme: "colored", autoClose: 3000 });
                 onClose();

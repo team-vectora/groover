@@ -12,13 +12,10 @@ export async function uploadToCloudinary(file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  // AQUI ESTÁ A CORREÇÃO: Adicionado '/posts' na URL
   const res = await fetch(`${API_BASE_URL}/posts/upload-image`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
     body: formData,
+    credentials: "include",
   });
 
   if (!res.ok) {

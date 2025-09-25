@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { API_BASE_URL } from "../../config";
 import { useTranslation } from "react-i18next";
 
-export default function useHandleInvite(token) {
+export default function useHandleInvite() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
@@ -12,8 +12,8 @@ export default function useHandleInvite(token) {
     try {
       const res = await fetch(`${API_BASE_URL}/invitations/${inviteId}/respond`, {
         method: "POST",
+        credentials: "include",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ response }),
@@ -21,10 +21,16 @@ export default function useHandleInvite(token) {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error ? t(`backend_errors.${data.error}`, { defaultValue: t('errors.generic_error') }) : t('errors.generic_error'));
+        throw new Error(
+          data.error
+            ? t(`backend_errors.${data.error}`, { defaultValue: t('errors.generic_error') })
+            : t('errors.generic_error')
+        );
       }
 
-      toast.success(t(response === 'accept' ? 'notifications.invite_accepted_toast' : 'notifications.invite_rejected_toast'));
+      toast.success(
+        t(response === 'accept' ? 'notifications.invite_accepted_toast' : 'notifications.invite_rejected_toast')
+      );
 
       if (onComplete) onComplete();
     } catch (err) {
