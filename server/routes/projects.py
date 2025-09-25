@@ -4,8 +4,21 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Project, Music, User, Invitation, Notification
 import base64
 from bson.binary import Binary
+import cloudinary.uploader
 
 projects_bp = Blueprint('projects', __name__)
+
+@projects_bp.route('/upload-image', methods=['POST'])
+@jwt_required()
+def upload_project_image():
+    if 'file' not in request.files:
+        return jsonify({'error': 'File not found'}), 400
+    try:
+        # Adicionada a predefinição para segurança
+        result = cloudinary.uploader.upload(request.files['file'], upload_preset='project_covers_preset')
+        return jsonify({'secure_url': result['secure_url']}), 200
+    except Exception as e:
+        return jsonify({'error': str(e), 'msg': 'Cloudinary upload failed'}), 500
 
 
 @projects_bp.route('', methods=['POST'])
@@ -20,16 +33,15 @@ def save_project():
     midi_base64 = data.get('midi')
     midi_binary = base64.b64decode(midi_base64) if midi_base64 else None
 
-    # Dados do projeto (metadados)
     project_data = {
         'title': data.get('title', 'New Project'),
         'description': data.get('description', ''),
+        'cover_image': data.get('cover_image'),
         'bpm': data.get('bpm', 120),
         'volume': data.get('volume', -10),
         'midi': midi_binary
     }
 
-    # Dados da música (estrutura)
     music_data = {
         'channels': data.get('channels', []),
         'patterns': data.get('patterns', {}),
@@ -38,10 +50,9 @@ def save_project():
 
     project_id = data.get('id')
 
-    if project_id:  # Atualiza um projeto existente
+    if project_id:
         project = Project.get_project_full_data(project_id)
-
-        if str(project.get('user_id')) != user_id and user_id not in project.get('collaborators', []):
+        if str(project.get('user_id')) != user_id and user_id not in [c['id'] for c in project.get('collaborators', [])]:
             return jsonify({'error': 'Permission denied'}), 403
 
         if str(project.get('user_id')) != user_id:
@@ -54,17 +65,27 @@ def save_project():
 
         Music.create_music(project_id=project_id, music_data=music_data, user_id=user_id)
         Project.update_project(project_id, user_id, project_data)
-
         updated_project = Project.get_project_full_data(project_id)
         return jsonify(updated_project), 200
 
-    else:  # Cria um novo projeto
+    else:
         new_project_id = Project.create_project(user_id, project_data)
         Music.create_music(new_project_id, music_data, user_id)
-
         created_project = Project.get_project_full_data(new_project_id)
         return jsonify(created_project), 201
 
+
+@projects_bp.route('/<project_id>/collaborators/<collaborator_id>', methods=['DELETE'])
+@jwt_required()
+def remove_collaborator(project_id, collaborator_id):
+    user_id = get_jwt_identity()
+    project = Project.get_project(project_id)
+
+    if not project or str(project['user_id']) != user_id:
+        return jsonify({'error': 'Permission denied'}), 403
+
+    Project.remove_collaborator(project_id, collaborator_id)
+    return jsonify({'message': 'Collaborator removed'}), 200
 
 @projects_bp.route('/teste', methods=["GET"])
 @jwt_required()
@@ -104,7 +125,7 @@ def revert_project_version(project_id):
     if not target_music_id:
         return jsonify({'error': 'music_id is required'}), 400
 
-    success = Project.revert_to_version(project_id, target_music_id)
+    success = Project.revert_to_version(project_id, target_music_id, get_jwt_identity())
     if success:
         return jsonify({'message': 'Project reverted successfully'}), 200
     return jsonify({'error': 'Invalid project or music ID'}), 400
@@ -120,7 +141,7 @@ def invite_user(project_id):
         return jsonify({'error': 'Username is required'}), 400
 
     project = Project.get_project(project_id)
-    if not project or str(project['user_id']) != user_id:  # Apenas o dono pode convidar
+    if not project or str(project['user_id']) != user_id:
         return jsonify({'error': 'Project not found or permission denied'}), 404
 
     invited_user = User.find_by_username(data['username'])
@@ -131,10 +152,9 @@ def invite_user(project_id):
     if invited_user_id == user_id:
         return jsonify({'error': 'cannot_invite_yourself'}), 400
 
-    if ObjectId(invited_user_id) in project.get('collaborators', []):
+    if ObjectId(invited_user_id) in [ObjectId(c['id']) for c in project.get('collaborators', [])]:
         return jsonify({'error': 'already_collaborator'}), 400
 
-    # ✨ Nova Validação: Impede convites duplicados
     if Invitation.find_pending_invitation(project_id, invited_user_id):
         return jsonify({'error': 'invitation_already_sent'}), 409
 
@@ -174,18 +194,15 @@ def fork_project():
     if not current_music:
         return jsonify({"error": "Project doesn't have music to copy"}), 400
 
-    # Cria o novo projeto com os metadados
     new_project_data = {
         'title': original_project.get('title', '') + ' (Fork)',
         'description': original_project.get('description', ''),
         'bpm': original_project.get('bpm', 120),
         'volume': original_project.get('volume', -10),
-        'midi': Binary(base64.b64decode(original_project.get('midi', '').split(',')[-1])) if original_project.get(
-            'midi') else None
+        'midi': Binary(base64.b64decode(original_project.get('midi', '').split(',')[-1])) if original_project.get('midi') else None
     }
     new_project_id = Project.create_project(user_id, new_project_data)
 
-    # Cria a música para o novo projeto, copiando a estrutura
     music_data_to_copy = {
         'channels': current_music.get('channels'),
         'patterns': current_music.get('patterns'),
@@ -202,9 +219,7 @@ def fork_project():
 @jwt_required()
 def delete_project(project_id):
     user_id = get_jwt_identity()
-
     deleted_count = Project.delete_project(project_id, user_id)
-
     if deleted_count > 0:
         return jsonify({'message': 'Project deleted successfully'}), 200
     else:

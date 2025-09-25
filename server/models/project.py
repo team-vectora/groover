@@ -15,18 +15,19 @@ class Project:
     @staticmethod
     def create_project(user_id, project_data):
         project = {
-            'user_id': user_id,
+            'user_id': ObjectId(user_id),
             'collaborators': [],
             'title': project_data.get('title', 'New Project'),
             'description': project_data.get('description', ''),
+            'cover_image': project_data.get('cover_image'), # Novo campo
             'bpm': project_data.get('bpm'),
             'volume': project_data.get('volume', -10),
             'midi': Binary(project_data.get('midi')) if project_data.get('midi') else None,
             'music_versions': [],
             'created_at': datetime.now(),
-            'created_by': user_id,
+            'created_by': ObjectId(user_id),
             'updated_at': datetime.now(),
-            'last_updated_by': user_id
+            'last_updated_by': ObjectId(user_id)
         }
         return str(mongo.db.projects.insert_one(project).inserted_id)
 
@@ -43,6 +44,15 @@ class Project:
         return result.modified_count > 0
 
     @staticmethod
+    def remove_collaborator(project_id, user_id_to_remove):
+        """Remove um colaborador de um projeto."""
+        result = mongo.db.projects.update_one(
+            {'_id': ObjectId(project_id)},
+            {'$pull': {'collaborators': ObjectId(user_id_to_remove)}}
+        )
+        return result.modified_count > 0
+
+    @staticmethod
     def update_project(project_id, user_id, update_data):
         # Remove campos de música do update_data, pois eles serão tratados pelo Music model
         update_data.pop('channels', None)
@@ -50,7 +60,7 @@ class Project:
         update_data.pop('songStructure', None)
 
         update_data['updated_at'] = datetime.now()
-        update_data['last_updated_by'] = user_id
+        update_data['last_updated_by'] = ObjectId(user_id)
 
         result = mongo.db.projects.update_one(
             {'_id': ObjectId(project_id)},
@@ -60,9 +70,6 @@ class Project:
 
     @staticmethod
     def get_project(project_id):
-        # Baita de uma cabanagem pra depois o jsonify nn ficar chorando
-        # ain ObjectID nao é serializável ain ain, vou dar erro ai, ain ain
-
         project = mongo.db.projects.find_one({
             '_id': ObjectId(project_id)
         })
@@ -75,13 +82,14 @@ class Project:
                     version['music_id'] = str(version['music_id'])
                     version['update_by'] = str(version.get('update_by', ''))
 
-            if 'midi' in project:
+            if 'midi' in project and project['midi']:
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
 
             if 'collaborators' in project:
                 project['collaborators'] = [str(id_collab) for id_collab in project['collaborators']]
 
+            project['user_id'] = str(project['user_id'])
             project['created_by'] = str(project.get('created_by', ''))
             project['last_updated_by'] = str(project.get('last_updated_by', ''))
         return project
@@ -92,19 +100,20 @@ class Project:
         if project:
             project['_id'] = str(project['_id'])
             if 'current_music_id' in project:
-                # Carrega a versão atual da música com a nova estrutura
                 project['current_music_id'] = Music.get_music(project['current_music_id'])
 
             if 'music_versions' in project:
                 for version in project['music_versions']:
-                    version['music_id'] = str(version['music_id'])  # Mantenha apenas o ID aqui para performance
+                    version['music_id'] = str(version['music_id'])
                     version['update_by'] = User.get_user(version['update_by'])
 
             if 'midi' in project and project.get('midi'):
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
 
-            project['collaborators'] = [str(c) for c in project.get('collaborators', [])]
+            collaborator_ids = project.get('collaborators', [])
+            project['collaborators'] = User.get_user_details_by_ids(collaborator_ids)
+
             project['user_id'] = str(project['user_id'])
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
@@ -112,7 +121,6 @@ class Project:
         return project
     @staticmethod
     def get_recent_projects(limit=5):
-        # Busca os últimos projetos pelo campo 'created_at'
         cursor = mongo.db.projects.find().sort('created_at', -1).limit(limit)
 
         projects = []
@@ -172,22 +180,22 @@ class Project:
         if not user:
             return []
 
-        user_id_str = str(user['_id'])
+        user_id_obj = ObjectId(user['_id'])
 
-        projects = mongo.db.projects.find({
+        projects_cursor = mongo.db.projects.find({
             '$or': [
-                {'collaborators': {'$in': [ObjectId(user_id_str)]}},
-                {'user_id': user_id_str}
+                {'user_id': user_id_obj},
+                {'collaborators': user_id_obj}
             ]
         })
 
-        if not projects :
-            print(f"No projects found for user {username} with ID {user_id_str}")
+        projects = list(projects_cursor)
+
+        if not projects:
             return []
 
         result = []
         for p in projects:
-            # Handle MIDI data conversion
             midi_data = p.get('midi')
             if midi_data is not None:
                 try:
@@ -196,51 +204,50 @@ class Project:
                     print(f"Error encoding MIDI for project {p['_id']}: {str(e)}")
                     midi_data = None
 
-            list_collaborators = []
-            if 'collaborators' in p.keys():
-                list_collaborators = p['collaborators']
+            created_by_user = User.get_user(p.get('created_by'))
+            last_updated_by_user = User.get_user(p.get('last_updated_by'))
 
             result.append({
                 'id': str(p['_id']),
                 'midi': midi_data,
-                'collaborators': [str(id_collab) for id_collab in list_collaborators],
+                'cover_image': p.get('cover_image'),
+                'collaborators': [str(c) for c in p.get('collaborators', [])],
                 'title': p.get('title', 'Untitled'),
                 'bpm': p.get('bpm', 0),
-                'tempo': p.get('tempo', ''),
                 'description': p.get('description', ''),
-                'created_at': p.get('created_at', ''),
-                'updated_at': p.get('updated_at', ''),
-                'created_by': User.get_user(p.get('created_by', '')),
-                'last_updated_by': User.get_user(p.get('last_updated_by', '')),
-                'is_owner': True
+                'created_at': p.get('created_at'),
+                'updated_at': p.get('updated_at'),
+                'created_by': created_by_user,
+                'last_updated_by': last_updated_by_user,
+                'is_owner': str(p.get('user_id')) == str(user_id_obj)
             })
 
         return result
 
+
     @staticmethod
     def get_user_projects(user_id):
-        # Busca projetos onde o usuário é dono OU colaborador
+        user_id_obj = ObjectId(user_id)
         projects = mongo.db.projects.find({
             '$or': [
-                {'user_id': user_id},
-                {'collaborators': ObjectId(user_id)}
+                {'user_id': user_id_obj},
+                {'collaborators': user_id_obj}
             ]
         })
         return [{
             'id': str(p['_id']),
             'midi': (lambda project:
                      f"data:audio/midi;base64," + base64.b64encode(project['midi']).decode('utf-8')
-                     if 'midi' in project
+                     if 'midi' in project and project['midi']
                      else None
                      )(p),
             'title': p.get('title'),
             'bpm': p.get('bpm'),
-            'tempo': p.get('tempo'),
             'created_at': p.get('created_at'),
             'updated_at': p.get('updated_at'),
-            'created_by': str(p.get('created_by', '')),
-            'last_updated_by': str(p.get('last_updated_by', '')),
-            'is_owner': p['user_id'] == user_id
+            'created_by': User.get_user(p.get('created_by')),
+            'last_updated_by': User.get_user(p.get('last_updated_by')),
+            'is_owner': p.get('user_id') == user_id_obj
         } for p in projects]
 
     @staticmethod
@@ -255,7 +262,7 @@ class Project:
                 '$set': {
                     'current_music_id': ObjectId(target_music_id),
                     'updated_at': datetime.now(),
-                    'last_updated_by': user_id
+                    'last_updated_by': ObjectId(user_id)
                 }
             }
         )
@@ -266,18 +273,16 @@ class Project:
         """Exclui um projeto se o usuário for o proprietário."""
         project = mongo.db.projects.find_one({
             '_id': ObjectId(project_id),
-            'user_id': user_id  # Garante que apenas o dono possa excluir
+            'user_id': ObjectId(user_id)
         })
 
         if not project:
-            return 0  # Retorna 0 se o projeto não for encontrado ou o usuário não tiver permissão
+            return 0
 
-        # Opcional: excluir músicas associadas para limpar o DB
         if 'music_versions' in project and project['music_versions']:
             music_ids = [v['music_id'] for v in project['music_versions']]
             mongo.db.musics.delete_many({'_id': {'$in': music_ids}})
 
-        # Opcional: excluir convites pendentes
         mongo.db.invitations.delete_many({'project_id': ObjectId(project_id)})
 
         result = mongo.db.projects.delete_one({'_id': ObjectId(project_id)})
@@ -297,9 +302,8 @@ class Project:
                 'description': p.get('description', ''),
                 'bpm': p.get('bpm'),
                 'created_at': p.get('created_at').isoformat() if p.get('created_at') else None,
-                'created_by': created_by_user,  # O get_user já retorna um dict serializável
+                'created_by': created_by_user,
                 'user_id': str(p.get('user_id')),
                 'collaborators': [str(c) for c in p.get('collaborators', [])]
             })
         return results
-
