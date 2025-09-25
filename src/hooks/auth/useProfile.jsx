@@ -16,67 +16,24 @@ export default function useProfile(username, token) {
   const fetchData = useCallback(async (isBackgroundUpdate = false) => {
     if (!username || !token) return;
 
-    const cacheKey = `profile_${username}`;
-
-    // Na carga inicial, tenta usar o cache.
-    if (!isBackgroundUpdate) {
-      const cachedData = sessionStorage.getItem(cacheKey);
-      if (cachedData) {
-        setProfileData({ ...JSON.parse(cachedData), loading: false });
-        // Após carregar o cache, inicia uma atualização silenciosa em segundo plano.
-        fetchData(true);
-        return;
-      }
-    }
-
-    // Mostra o "loading" principal apenas se não houver cache (primeira carga).
-    // A atualização em segundo plano não deve disparar este estado.
     if (!isBackgroundUpdate) {
       setProfileData(prev => ({ ...prev, loading: true, error: null }));
     }
 
     try {
-      // Busca todos os dados em paralelo
-      const [userRes, postsRes, projectsRes, invitesRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/users/${username}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${API_BASE_URL}/posts/username/${username}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${API_BASE_URL}/projects/user/${username}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        // Só busca convites se for o perfil do próprio usuário
-        localStorage.getItem('username') === username
-            ? fetch(`${API_BASE_URL}/invitations`, {
-              headers: { Authorization: `Bearer ${token}` }
-            })
-            : Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
-      ]);
+      const res = await fetch(`${API_BASE_URL}/users/profile/${username}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-      if (!userRes.ok) throw new Error(t('errors.user_not_found'));
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || t('errors.user_not_found'));
+      }
 
-      const userData = await userRes.json();
-      const postsData = await postsRes.json();
-      const projectsData = await projectsRes.json();
-      const invitesData = await invitesRes.json();
-
-      const newData = {
-        user: userData,
-        posts: postsData,
-        projects: projectsData,
-        invites: invitesData,
-        loading: false,
-        error: null
-      };
-
-      // Armazena os dados frescos no cache e atualiza o estado.
-      sessionStorage.setItem(cacheKey, JSON.stringify(newData));
-      setProfileData(newData);
+      const data = await res.json();
+      setProfileData({ ...data, loading: false, error: null });
 
     } catch (error) {
-      // Erros em atualizações de segundo plano podem falhar silenciosamente.
       if (!isBackgroundUpdate) {
         setProfileData(prev => ({
           ...prev,
@@ -89,17 +46,62 @@ export default function useProfile(username, token) {
     }
   }, [username, token, t]);
 
-  // Refetch manual deve limpar o cache e mostrar o "loading".
   const refetch = useCallback(() => {
-    const cacheKey = `profile_${username}`;
-    sessionStorage.removeItem(cacheKey);
     fetchData(false);
-  }, [username, fetchData]);
+  }, [fetchData]);
 
 
   useEffect(() => {
-    // Busca inicial ao montar o componente.
     fetchData(false);
+
+    const handleFollowingUpdate = ({ detail }) => {
+      setProfileData(prev => {
+        if (!prev.user) return prev;
+
+        const newFollowing = [...prev.user.following];
+        const newFollowers = [...prev.user.followers];
+        let newIsFollowing = prev.user.is_following;
+        const currentUserId = localStorage.getItem('id');
+
+        // Se o usuário do perfil visualizado é o que sofreu a ação
+        if (prev.user._id === detail.userId) {
+          newIsFollowing = detail.isFollowing; // Atualiza o estado de "seguir"
+          if (detail.isFollowing) {
+            if (!newFollowers.includes(currentUserId)) newFollowers.push(currentUserId);
+          } else {
+            const index = newFollowers.indexOf(currentUserId);
+            if (index > -1) newFollowers.splice(index, 1);
+          }
+        }
+
+        // Se o usuário logado está em seu próprio perfil e seguiu/deixou de seguir alguém
+        if (prev.user._id === currentUserId) {
+          if (detail.isFollowing) {
+            if (!newFollowing.includes(detail.userId)) newFollowing.push(detail.userId);
+          } else {
+            const index = newFollowing.indexOf(detail.userId);
+            if (index > -1) newFollowing.splice(index, 1);
+          }
+        }
+
+        return {
+          ...prev,
+          user: {
+            ...prev.user,
+            followers: newFollowers,
+            following: newFollowing,
+            is_following: newIsFollowing // Garante que o estado seja repassado
+          }
+        };
+      });
+    };
+
+
+    window.addEventListener('followingUpdated', handleFollowingUpdate);
+
+    return () => {
+      window.removeEventListener('followingUpdated', handleFollowingUpdate);
+    };
   }, [fetchData]);
 
   return { ...profileData, refetch };

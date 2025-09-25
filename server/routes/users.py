@@ -2,7 +2,7 @@ import os
 
 from flask import Blueprint, jsonify, request, render_template
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User, Followers
+from models import User, Followers, Post, Project, Invitation
 from itsdangerous import URLSafeSerializer, SignatureExpired
 from flask_mail import Message
 from utils.mail import mail
@@ -11,12 +11,38 @@ users_bp = Blueprint('users', __name__)
 s = URLSafeSerializer(os.getenv('AUTH_KEY'))
 
 @users_bp.route("/<username>", methods=["GET"])
+@jwt_required()
 def get_user_by_username(username):
-    user = User.find_by_username(username)
+    current_user_id = get_jwt_identity()
+    user = User.find_by_username(username, current_user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
-    user["_id"] = str(user["_id"])
     return jsonify(user), 200
+
+@users_bp.route("/profile/<username>", methods=["GET"])
+@jwt_required()
+def get_user_profile(username):
+    """Endpoint otimizado para carregar todos os dados de um perfil de uma vez."""
+    current_user_id = get_jwt_identity()
+    user = User.find_by_username(username, current_user_id)
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    posts = Post.get_posts_by_username(username)
+    projects = Project.get_user_projects_by_username(username)
+    invites = []
+    if user['_id'] == current_user_id:
+        invites = Invitation.find_pending_by_user(current_user_id)
+
+    profile_data = {
+        "user": user,
+        "posts": posts,
+        "projects": projects,
+        "invites": invites
+    }
+    return jsonify(profile_data), 200
+
 
 @users_bp.route("/delete", methods=["POST"])
 @jwt_required()
@@ -135,7 +161,6 @@ def config_user():
     if not isinstance(music_tags, list) or not all(isinstance(tag, str) for tag in music_tags):
         return jsonify({'error': 'Invalid music tags'}), 400
 
-    # Limita a 5 gêneros
     if len(music_tags) > 5:
         music_tags = music_tags[:5]
     print(music_tags)
@@ -161,7 +186,6 @@ def post_follower():
 
     try:
         result = Followers.create_follow(user_id, following_id)
-        # result já é um dict: {"status": "...", "follow_id": "..."}
         status_code = 201 if result.get('status') == 'followed' else 200
         return jsonify(result), status_code
     except ValueError as ve:
@@ -186,13 +210,10 @@ def check_follow_status(following_id):
 @jwt_required()
 def search_users():
     query = request.args.get('q', '')
-    if len(query) < 5:
-        return jsonify([]), 200  # Retorna vazio se a busca for muito curta
+    if len(query) < 3:
+        return jsonify([]), 200
 
     current_user_id = get_jwt_identity()
-
-    # Busca por usuários que começam com a query, excluindo o próprio usuário
-    # O 'i' no regex torna a busca case-insensitive
     users = User.find_by_query(query, current_user_id)
 
     return jsonify(users), 200
@@ -218,4 +239,3 @@ def get_following_list(username):
 
     following_details = User.get_user_details_by_ids(user['following'])
     return jsonify(following_details), 200
-        

@@ -7,6 +7,7 @@ export default function usePosts(token) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { t } = useTranslation();
+  const cacheKey = 'feed_posts';
 
   const fetchPosts = async () => {
     if (!token) return;
@@ -20,6 +21,7 @@ export default function usePosts(token) {
       const data = await res.json();
       if (res.ok) {
         setPosts(data);
+        sessionStorage.setItem(cacheKey, JSON.stringify(data));
       } else {
         setError(data.error || t('livecode.error'));
       }
@@ -31,7 +33,12 @@ export default function usePosts(token) {
   };
 
   useEffect(() => {
-    fetchPosts();
+    const cachedPosts = sessionStorage.getItem(cacheKey);
+    if (cachedPosts) {
+      setPosts(JSON.parse(cachedPosts));
+    } else {
+      fetchPosts();
+    }
   }, [token]);
 
   return { posts, loading, error, refetch: fetchPosts };

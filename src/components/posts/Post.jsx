@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import Link from "next/link";
 import Image from 'next/image';
-import { useRouter } from "next/navigation";
+import {usePathname , useRouter} from "next/navigation";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faComment,
@@ -64,6 +64,17 @@ export default function Post({
     const { deletePost } = useDeletePost(token);
     const menuRef = useOutsideClick(() => setIsMenuOpen(false));
     const commentsCount = post.comment_count;
+    const pathname = usePathname();
+
+    const handleNavigation = (path) => {
+        if (pathname === '/feed') {
+            const scrollY = window.scrollY.toString();
+            console.log(`%c[Sidebar] SALVANDO SCROLL: Clicou para sair do feed. Posição salva: ${scrollY}`, 'color: #e67e22;');
+            sessionStorage.setItem('feedScrollPosition', scrollY);
+        }
+        router.push(path);
+        setIsMenuOpen(false);
+    };
 
     const [isFollowing, setIsFollowing] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -238,7 +249,7 @@ export default function Post({
                     )}
                     <span className="text-foreground">{likesCount}</span>
                 </button>
-                <button onClick={() => router.push(`/p/${post._id}`)} className="hover:text-accent-light transition-colors flex items-center gap-2">
+                <button onClick={() => handleNavigation(`/p/${post._id}`)} className="hover:text-accent-light transition-colors flex items-center gap-2">
                     <FontAwesomeIcon icon={faComment} className="text-foreground hover:cursor-pointer" />
                     <span className="text-foreground">{commentsCount}</span>
                 </button>

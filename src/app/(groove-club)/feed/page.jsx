@@ -1,6 +1,6 @@
 // src/app/(groove-club)/feed/page.jsx
 'use client';
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { MidiContext } from "../../../contexts/MidiContext";
 import { Post, LoadingDisc } from "../../../components";
 import { useAuth, usePosts } from "../../../hooks/";
@@ -11,6 +11,23 @@ const FeedPage = () => {
     const { token, userId } = useAuth();
     const { posts, loading, error } = usePosts(token);
     const { setCurrentProject } = useContext(MidiContext);
+
+    // Efeito para RESTAURAR a posição do scroll ao entrar na página
+    useEffect(() => {
+        // Só tenta restaurar se não estiver carregando e se houver posts
+        if (!loading && posts.length > 0) {
+            const scrollPosition = sessionStorage.getItem('feedScrollPosition');
+            if (scrollPosition) {
+                console.log(`%c[Feed] RESTAURANDO SCROLL: Posição encontrada: ${scrollPosition}.`, 'color: #2ecc71;');
+                // Adiciona um pequeno delay para garantir que o DOM esteja pronto
+                setTimeout(() => {
+                    window.scrollTo(0, parseInt(scrollPosition, 10));
+                    // Limpa a posição somente após o uso para não interferir em outras navegações
+                    sessionStorage.removeItem('feedScrollPosition');
+                }, 100);
+            }
+        }
+    }, [loading, posts]);
 
     return (
         <div className="flex gap-10">

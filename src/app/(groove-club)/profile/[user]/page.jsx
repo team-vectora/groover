@@ -11,11 +11,11 @@ import { useAuth, useProfile, useForkProject, useShareProject, useDeleteProject 
 import { ProfileHeader, ProfileTabs, Post, ProjectCard, Invite,
   PostFormPopUp, ConfigUserPopUp, SharePopUp, ConfirmationPopUp, FollowListPopup, LoadingDisc } from '../../../../components';
 import { useTranslation } from 'react-i18next';
-import { API_BASE_URL } from '../../../../config';
+import {API_BASE_URL} from "../../../../config";
 
 export default function ProfilePage({ params }) {
   const { t } = useTranslation();
-  const { user: username } = use(params);
+  const { user: username } = params;
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token, userId, username: currentUsername } = useAuth();
@@ -50,22 +50,13 @@ export default function ProfilePage({ params }) {
     }
   }, [searchParams, router, username]);
 
-  const handleForkProject = async (project) => {
-    await forkProject(project.id);
-  };
-
-  const handleShareProject = (project) => {
-    setShareProject(project);
-  };
-
-  const handleDeleteClick = (projectId) => {
-    setProjectToDelete(projectId);
-  };
+  const handleShareProject = (project) => setShareProject(project);
+  const handleDeleteClick = (projectId) => setProjectToDelete(projectId);
 
   const confirmDelete = async () => {
     if (projectToDelete) {
       await deletePost(projectToDelete, () => {
-        refetch(); // Recarrega os dados do perfil após a exclusão
+        refetch();
         setProjectToDelete(null);
       });
     }
@@ -74,16 +65,20 @@ export default function ProfilePage({ params }) {
   const fetchFollowList = async (type) => {
     setFollowList({ open: true, type, users: [], isLoading: true });
     try {
-      const res = await fetch(`${API_BASE_URL}/users/${username}/${type}`, {
+      const endpoint = type === 'followers' ? 'followers' : 'following';
+      const res = await fetch(`${API_BASE_URL}/users/${username}/${endpoint}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
+      console.log("Follow list")
+      console.log(data)
       setFollowList({ open: true, type, users: data, isLoading: false });
     } catch (err) {
       setFollowList({ open: true, type, users: [], isLoading: false });
       console.error("Erro ao buscar lista:", err);
     }
   };
+
 
   const handleLogout = () => {
     localStorage.clear();
@@ -106,67 +101,39 @@ export default function ProfilePage({ params }) {
             onFollowingClick={() => fetchFollowList('following')}
         />
 
-        <ProfileTabs
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            showInvites={isCurrentUser}
-        />
+        <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} showInvites={isCurrentUser} />
 
         {activeTab === 'posts' && (
             <div className="space-y-6">
               {isCurrentUser && (
                   <div className="flex justify-end mb-4">
-                    <button
-                        className="bg-accent hover:bg-accent-light text-white p-2 rounded-full w-12 h-12 flex items-center justify-center text-2xl"
-                        onClick={() => setOpenPostForm(true)}
-                        title="Novo Post"
-                    >
-                      +
-                    </button>
+                    <button className="bg-accent hover:bg-accent-light text-white p-2 rounded-full w-12 h-12 flex items-center justify-center text-2xl" onClick={() => setOpenPostForm(true)} title="Novo Post">+</button>
                   </div>
               )}
-
               {(!posts || posts.length === 0) ? (
                   <p className="text-center text-gray-400">{t('profile.noPosts')}</p>
               ) : (
-                  posts.map(post => (
-                      <Post
-                          key={post._id}
-                          token={token}
-                          post={post}
-                          userId={userId}
-                          setCurrentProject={setCurrentProject}
-                          handleClickFork={handleForkProject}
-                          onPostCreated={refetch}
-                      />
-                  ))
+                  posts.map(post => <Post key={post._id} token={token} post={post} userId={userId} setCurrentProject={setCurrentProject} onPostCreated={refetch} />)
               )}
-
             </div>
         )}
 
         {activeTab === 'musics' && (
             <div>
               {isCurrentUser && (
-                  <button
-                      className="mb-4 px-4 py-2 bg-accent hover:bg-accent-light text-white rounded"
-                      onClick={() => router.push('/editor/new')}
-                  >
+                  <button className="mb-4 px-4 py-2 bg-accent hover:bg-accent-light text-white rounded" onClick={() => router.push('/editor/new')}>
                     {t('profile.newProject')}
                   </button>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {projects.map(project => (
-                    <ProjectCard
-                        key={project.id}
-                        project={project}
-                        isYourProfile={isCurrentUser}
-                        setCurrentProject={setCurrentProject}
-                        handleClickShare={handleShareProject}
-                        handleClickDelete={handleDeleteClick} // Passa a função de exclusão
-                    />
-                ))}
-              </div>
+              {(!projects || projects.length === 0) ? (
+                  <p className="text-center text-gray-400">{t('profile.noMusics')}</p>
+              ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {projects.map(project => (
+                        <ProjectCard key={project.id} project={project} isYourProfile={isCurrentUser} setCurrentProject={setCurrentProject} handleClickShare={handleShareProject} handleClickDelete={handleDeleteClick} />
+                    ))}
+                  </div>
+              )}
             </div>
         )}
 
@@ -176,63 +143,17 @@ export default function ProfilePage({ params }) {
                   <p className="text-center text-gray-400">{t('profile.noInvites')}</p>
               ) : (
                   <div className="space-y-4">
-                    {invites.map(invite => (
-                        <Invite key={invite.id} invite={invite} onActionComplete={refetch} />
-                    ))}
+                    {invites.map(invite => <Invite key={invite.id} invite={invite} onActionComplete={refetch} />)}
                   </div>
               )}
             </div>
         )}
 
-        {/* Popups */}
-        {openPostForm && (
-            <PostFormPopUp
-                open={openPostForm}
-                onClose={() => setOpenPostForm(false)}
-                projects={projects}
-                onPostCreated={refetch} // Adicionado para refetch
-            />
-        )}
-
-        {openConfig && (
-            <ConfigUserPopUp
-                open={openConfig}
-                onClose={() => setOpenConfig(false)}
-                username={currentUsername}
-                bio={user.bio}
-                profilePic={user.avatar}
-                favoriteTags={Object.keys(user.genres || {})}
-                onSuccess={refetch}
-            />
-        )}
-
-        {shareProject && (
-            <SharePopUp
-                open={!!shareProject}
-                onClose={() => setShareProject(null)}
-                project={shareProject}
-                onShare={shareProjectApi}
-            />
-        )}
-
-        {followList.open && (
-            <FollowListPopup
-                title={followList.type === 'followers' ? t('profile.followers') : t('profile.following')}
-                users={followList.users}
-                isLoading={followList.isLoading}
-                onClose={() => setFollowList({ open: false, type: '', users: [], isLoading: false })}
-            />
-        )}
-
-        {projectToDelete && (
-            <ConfirmationPopUp
-                open={!!projectToDelete}
-                onClose={() => setProjectToDelete(null)}
-                onConfirm={confirmDelete}
-                title={t('profile.deleteProjectTitle')}
-                message={t('profile.deleteProjectConfirmation')}
-            />
-        )}
+        {openPostForm && <PostFormPopUp open={openPostForm} onClose={() => setOpenPostForm(false)} projects={projects} onPostCreated={refetch} />}
+        {openConfig && <ConfigUserPopUp open={openConfig} onClose={() => setOpenConfig(false)} username={currentUsername} bio={user.bio} profilePic={user.avatar} favoriteTags={user.genres || {}} onSuccess={refetch} />}
+        {shareProject && <SharePopUp open={!!shareProject} onClose={() => setShareProject(null)} project={shareProject} onShare={shareProjectApi} />}
+        {followList.open && <FollowListPopup title={followList.type === 'followers' ? t('profile.followers') : t('profile.following')} users={followList.users} isLoading={followList.isLoading} onClose={() => setFollowList({ open: false, type: '', users: [], isLoading: false })} isCurrentUserFollowingList={isCurrentUser && followList.type === 'following'} refetchProfile={refetch} />}
+        {projectToDelete && <ConfirmationPopUp open={!!projectToDelete} onClose={() => setProjectToDelete(null)} onConfirm={confirmDelete} title={t('profile.deleteProjectTitle')} message={t('profile.deleteProjectConfirmation')} />}
       </div>
   );
 }

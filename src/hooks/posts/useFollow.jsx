@@ -7,7 +7,7 @@ export default function useFollow() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const toggleFollow = async (followingId, currentFollowingState, setFollowingState) => {
+  const toggleFollow = async (followingId, currentFollowingState, onSuccess) => {
     try {
       setLoading(true);
       setError(null);
@@ -33,7 +33,6 @@ export default function useFollow() {
       }
 
       const newIsFollowing = !currentFollowingState;
-      setFollowingState(newIsFollowing);
 
       let updatedFollowing = JSON.parse(localStorage.getItem('following') || '[]');
       if (newIsFollowing) {
@@ -49,6 +48,11 @@ export default function useFollow() {
         detail: { userId: followingId, isFollowing: newIsFollowing }
       });
       window.dispatchEvent(event);
+
+      // Chama a callback de sucesso, se ela existir
+      if (onSuccess) {
+        onSuccess(newIsFollowing);
+      }
 
       return { success: true, isFollowing: newIsFollowing };
 

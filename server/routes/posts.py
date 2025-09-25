@@ -53,6 +53,8 @@ def get_posts():
 @jwt_required()
 def get_post_by_id(id):
     post = Post.get_post(id)
+    if not post:
+        return jsonify({"error": "Post not found"}), 404
     return jsonify(post), 200
 
 
@@ -91,7 +93,6 @@ def add_comment_to_post(post_id):
     if not data or not data.get('caption'):
         return jsonify({'error': 'O texto do comentário é obrigatório'}), 400
 
-    # Cria um novo post que é um comentário
     comment_id = Post.create(
         user_id=user_id,
         parent_post_id=post_id,
@@ -102,7 +103,6 @@ def add_comment_to_post(post_id):
         genres=data.get('genres', [])
     )
 
-    # Notificar o dono do post original
     original_post = Post.get_post(post_id)
     if original_post and str(original_post['user']['_id']) != user_id:
         actor_user = User.get_user(user_id)
