@@ -33,13 +33,13 @@ export default function GrooveFeed() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          const idx = entry.target.dataset.index;
-          if (entry.isIntersecting) setCurrentProject(projects[idx]);
-        });
-      },
-      { root: null, rootMargin: '0px', threshold: 0.6 }
+        (entries) => {
+          entries.forEach(entry => {
+            const idx = entry.target.dataset.index;
+            if (entry.isIntersecting) setCurrentProject(projects[idx]);
+          });
+        },
+        { root: null, rootMargin: '0px', threshold: 0.6 }
     );
     projectRefs.current.forEach(ref => ref && observer.observe(ref));
     return () => observer.disconnect();
@@ -49,65 +49,65 @@ export default function GrooveFeed() {
   if (!projects.length) return <p className="text-center text-white py-8">Nenhum projeto encontrado</p>;
 
   return (
-    <motion.div
-      initial={{ scale: 0.85, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="max-w-md mx-auto bg-bg-primary rounded-xl shadow-xl overflow-auto h-[900px]"
-    >
-      {!started && (
-        <div className="text-center p-4">
-          <button
-            onClick={async () => { await Tone.start(); setStarted(true); }}
-            className="w-[10] px-4 py-2 bg-green-500 text-white rounded-lg"
-          >
-            Iniciar Música e Visualizador
-          </button>
+      <motion.div
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="w-full h-full"
+      >
+        {!started && (
+            <div className="text-center p-4">
+              <button
+                  onClick={async () => { await Tone.start(); setStarted(true); }}
+                  className="px-6 py-3 bg-accent text-white rounded-lg shadow-lg hover:bg-accent-light transition"
+              >
+                Iniciar Música e Visualizador
+              </button>
+            </div>
+        )}
+
+        <div className="feed-container overflow-y-scroll h-screen scroll-snap-y mandatory space-y-6 p-0 max-w-lg mx-auto">
+          {projects.map((project, i) => (
+              <motion.div
+                  key={i}
+                  ref={el => projectRefs.current[i] = el}
+                  data-index={i}
+                  className="feed-item flex flex-col bg-black rounded-lg shadow-md overflow-hidden h-screen scroll-snap-align-start"
+                  initial={{ opacity: 0.5, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false }}
+                  transition={{ duration: 0.4 }}
+              >
+                <div className="flex-grow flex items-center justify-center bg-bg-darker">
+                  {started && (
+                      <AudioVisualizer
+                          midiData={project.midi}
+                          start={started && currentProject === project}
+                      />
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2 p-4 bg-gradient-to-t from-black/90 to-transparent text-white">
+                  <h3 className="font-bold text-lg truncate">{project.title || "Untitled Project"}</h3>
+                  <div className="flex items-center gap-2">
+                    {project.created_by?.avatar && (
+                        <img
+                            src={project.created_by.avatar}
+                            alt={project.created_by?.username || "Autor"}
+                            className="w-8 h-8 rounded-full object-cover"
+                        />
+                    )}
+                    <p className="text-sm text-gray-300 truncate">
+                      Autor: {project.created_by?.username || "Desconhecido"}
+                    </p>
+                  </div>
+                  {project.description && (
+                      <p className="text-sm text-gray-200 line-clamp-2">{project.description}</p>
+                  )}
+                </div>
+              </motion.div>
+          ))}
         </div>
-      )}
-
-      <div className="feed-container overflow-y-scroll h-screen scroll-snap-y mandatory space-y-6 p-0">
-        {projects.map((project, i) => (
-          <motion.div
-            key={i}
-            ref={el => projectRefs.current[i] = el}
-            data-index={i}
-            className="feed-item flex flex-col bg-black rounded-lg shadow-md overflow-hidden h-screen scroll-snap-align-start"
-            initial={{ opacity: 0.5, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false }}
-            transition={{ duration: 0.4 }}
-          >
-            <div className="h-[600px] border-2 border-white rounded-lg overflow-hidden">
-              {started && (
-                <AudioVisualizer
-                  midiData={project.midi}
-                  start={started && currentProject === project}
-                />
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2 p-4 bg-gradient-to-t from-black/90 to-transparent text-white">
-              <h3 className="font-bold text-lg truncate">{project.title || "Untitled Project"}</h3>
-              <div className="flex items-center gap-2">
-                {project.created_by?.avatar && (
-                  <img
-                    src={project.created_by.avatar}
-                    alt={project.created_by?.username || "Autor"}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                )}
-                <p className="text-sm text-gray-300 truncate">
-                  Autor: {project.created_by?.username || "Desconhecido"}
-                </p>
-              </div>
-              {project.description && (
-                <p className="text-sm text-gray-200 line-clamp-2">{project.description}</p>
-              )}
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </motion.div>
+      </motion.div>
   );
-} // <-- FECHAMENTO DA FUNÇÃO
+}

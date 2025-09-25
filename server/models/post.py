@@ -45,7 +45,6 @@ class Post:
                 if isinstance(midi, bytes):
                     midi_b64 = base64.b64encode(midi).decode('utf-8')
                 elif isinstance(midi, str):
-                    # Se já começa com o prefixo data:audio/midi;base64, remove para não duplicar
                     if midi.startswith('data:audio/midi;base64,'):
                         midi_b64 = midi.split(',', 1)[1]
                     else:
@@ -170,7 +169,7 @@ class Post:
                 if len(filtered_posts) == limit:
                     break
 
-        if len(filtered_posts) < 15:  # Condição de fallback aumentada
+        if len(filtered_posts) < 15:
             fallback_posts = []
             for post in raw_posts:
                 if 'likes' in post:
@@ -354,6 +353,11 @@ class Post:
         comments = list(mongo.db.posts.aggregate(pipeline))
         for comment in comments:
             comment['likes'] = [str(like) for like in comment.get('likes', [])]
+            # INÍCIO DA CORREÇÃO
+            if comment.get('project') and comment['project'].get('midi'):
+                midi_b64 = base64.b64encode(comment['project']['midi']).decode('utf-8')
+                comment['project']['midi'] = f"data:audio/midi;base64,{midi_b64}"
+            # FIM DA CORREÇÃO
         return comments
 
     @staticmethod
@@ -365,7 +369,7 @@ class Post:
                 }
             },
             {
-                '$sort': {'created_at': -1}  # Adicionado para ordenar
+                '$sort': {'created_at': -1}
             },
             {
                 '$lookup': {
@@ -461,7 +465,7 @@ class Post:
                 }
             },
             {
-                '$sort': {'created_at': -1}  # Adicionado para ordenar
+                '$sort': {'created_at': -1}
             },
             {
                 '$lookup': {
@@ -582,7 +586,6 @@ class Post:
         if str(post['user_id']) != user_id:
             return {"error": "Forbidden"}, 403
 
-        # Se o post for um comentário, decrementar o contador do pai
         if post.get('parent_post_id'):
             mongo.db.posts.update_one(
                 {'_id': post['parent_post_id']},

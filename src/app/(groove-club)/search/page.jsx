@@ -33,6 +33,8 @@ export default function SearchPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await response.json();
+            console.log("Projects")
+            console.log(data)
             setResults(data);
             setLoading(false);
         };

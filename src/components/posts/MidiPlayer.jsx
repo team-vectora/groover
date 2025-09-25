@@ -50,7 +50,7 @@ export default function MidiPlayer() {
                         <span className="text-sm md:text-base font-semibold text-accent-light truncate max-w-xs" title={currentProject?.title}>
                             {currentProject?.title || t('midiPlayer.noProject')}
                         </span>
-                        <span className="text-xs md:text-sm text-text-lighter font-mono">
+                        <span className="text-xs md:text-sm text-text-lighter font-mono mr-6">
                             {midi ? `${formatTime(progress)} / ${formatTime(duration)}` : "00:00 / 00:00"}
                         </span>
                     </div>

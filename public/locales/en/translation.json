@@ -172,6 +172,7 @@
     "logout": "Logout",
     "loading": "Loading profile...",
     "noPosts": "No posts found",
+    "noMusics": "No musics yet",
     "newProject": "New Project",
     "noInvites": "No invites found",
     "deleteProjectTitle": "Delete Project",
@@ -305,13 +306,16 @@
     "invites": "Invites"
   },
   "project": {
-    "deletedSuccess": "Project deleted successfully!"
+    "deletedSuccess": "Project deleted successfully!",
+    "view_collaborators": "View Collaborators",
+    "delete_project": "Delete project"
   },
   "fork": {
     "copiedSuccess": "Project copied to your profile!"
   },
   "share": {
-    "sharedSuccess": "Project shared"
+    "sharedSuccess": "Project shared",
+    "link_copied": "Post link copied to clipboard!"
   },
   "upload": {
     "imageTooLarge": "Image too large (maximum 2MB)",

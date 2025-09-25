@@ -171,6 +171,7 @@
     "logout": "Sair",
     "loading": "Carregando perfil...",
     "noPosts": "Nenhum post encontrado",
+    "noMusics": "Nenhuma música ainda",
     "newProject": "Novo Projeto",
     "noInvites": "Nenhum convite encontrado",
     "deleteProjectTitle": "Excluir Projeto",
@@ -304,13 +305,16 @@
     "invites": "Convites"
   },
   "project": {
-    "deletedSuccess": "Projeto excluído com sucesso!"
+    "deletedSuccess": "Projeto excluído com sucesso!",
+    "view_collaborators": "Ver Colaboradores",
+    "delete_project": "Excluir projeto"
   },
   "fork": {
     "copiedSuccess": "Projeto copiado para seu perfil!"
   },
   "share": {
-    "sharedSuccess": "Projeto compartilhado"
+    "sharedSuccess": "Projeto compartilhado",
+    "link_copied": "Link do post copiado para a área de transferência!"
   },
   "upload": {
     "imageTooLarge": "Imagem muito grande (máximo 2MB)",
