@@ -14,10 +14,10 @@ export default function EditorPage() {
     const { id: projectId } = params;
 
     const { state: projectState, actions: projectActions, projectData } = useProjectStates();
-    const { token, userId, loading: authLoading } = useAuth();
+    const { userId, loading: authLoading } = useAuth();
     const { playerState, playerActions } = useTonePlayer(projectState);
     const { apiState, apiActions } = useProjectAPI(projectId, projectActions);
-    const { forkProject, loading: forkLoading } = useForkProject(token);
+    const { forkProject, loading: forkLoading } = useForkProject();
 
     const { t } = useTranslation();
 
@@ -29,12 +29,6 @@ export default function EditorPage() {
     const isCollaborator = projectData.collaborators?.includes(userId);
     const isNewProject = projectId === "new";
     const isCurrentUserProject = isOwner || isCollaborator || isNewProject;
-
-    useEffect(() => {
-        if (!authLoading && !token) {
-            router.push("/login");
-        }
-    }, [token, authLoading, router]);
 
     const handlePlay = useCallback(() => {
         playerActions.playPause();

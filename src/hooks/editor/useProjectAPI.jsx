@@ -112,7 +112,8 @@ export const useProjectAPI = (projectId, projectActions) => {
             const payload = { ...projectData, midi: base64Midi };
 
             if (projectData.coverImage instanceof File) {
-                const imageUrl = await uploadToCloudinary(projectData.coverImage, 'project_covers');
+                // BUGFIX: Chamada corrigida, sem o segundo argumento.
+                const imageUrl = await uploadToCloudinary(projectData.coverImage);
                 payload.cover_image = imageUrl;
             }
 

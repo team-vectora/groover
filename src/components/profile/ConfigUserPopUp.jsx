@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+// CORREÇÃO: Importa a função de upload unificada
 import { uploadToCloudinary } from '../../lib/util/upload';
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
 import { toast } from 'react-toastify';
@@ -32,8 +33,8 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
     try {
       let profilePicUrl = profilePic;
       if (profilePicFile) {
-        // Passa o tipo 'avatar' para usar o endpoint correto
-        profilePicUrl = await uploadToCloudinary(profilePicFile, 'avatar');
+        // CORREÇÃO: Usa a função de upload unificada
+        profilePicUrl = await uploadToCloudinary(profilePicFile);
       }
 
       const res = await fetch(`${API_BASE_URL}/users/config`, {
@@ -54,7 +55,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
       }
     } catch (error) {
       console.error("Erro:", error);
-      toast.error(t('configUserPopup.apiError'));
+      toast.error(error.message || t('configUserPopup.apiError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -132,7 +133,6 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
 
   if (!open) return null;
 
-  // Se for onboarding, renderiza diretamente. Senão, usa o wrapper de popup.
   return isOnboarding ? popUpContent : (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         {popUpContent}

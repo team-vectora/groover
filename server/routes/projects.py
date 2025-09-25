@@ -8,18 +8,6 @@ import cloudinary.uploader
 
 projects_bp = Blueprint('projects', __name__)
 
-@projects_bp.route('/upload-image', methods=['POST'])
-@jwt_required()
-def upload_project_image():
-    if 'file' not in request.files:
-        return jsonify({'error': 'File not found'}), 400
-    try:
-        # Adicionada a predefinição para segurança
-        result = cloudinary.uploader.upload(request.files['file'], upload_preset='project_covers_preset')
-        return jsonify({'secure_url': result['secure_url']}), 200
-    except Exception as e:
-        return jsonify({'error': str(e), 'msg': 'Cloudinary upload failed'}), 500
-
 
 @projects_bp.route('', methods=['POST'])
 @jwt_required()

@@ -1,3 +1,4 @@
+# routes/users.py
 import os
 from flask import Blueprint, jsonify, request, render_template
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -10,20 +11,6 @@ import cloudinary.uploader
 
 users_bp = Blueprint('users', __name__)
 s = URLSafeSerializer(os.getenv('AUTH_KEY'))
-
-# ROTA ADICIONADA PARA LIDAR COM UPLOAD DE AVATAR
-@users_bp.route('/upload-avatar', methods=['POST'])
-@jwt_required()
-def upload_avatar():
-    if 'file' not in request.files:
-        return jsonify({'error': 'File not found'}), 400
-    try:
-        # Usamos um upload_preset específico para avatares para maior segurança
-        result = cloudinary.uploader.upload(request.files['file'], upload_preset='user_avatars')
-        return jsonify({'secure_url': result['secure_url']}), 200
-    except Exception as e:
-        # Retorna uma mensagem de erro mais clara
-        return jsonify({'error': str(e), 'msg': 'Cloudinary upload failed'}), 500
 
 
 @users_bp.route("/<username>", methods=["GET"])

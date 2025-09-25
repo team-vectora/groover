@@ -35,11 +35,11 @@ def upload_image():
     image_file = request.files['file']
 
     try:
-        # Adicionada a predefinição para segurança
-        result = cloudinary.uploader.upload(image_file, upload_preset='posts_preset')
+        result = cloudinary.uploader.upload(image_file)
         return jsonify({'secure_url': result['secure_url']}), 200
     except Exception as e:
-        return jsonify({'error': str(e), 'msg': 'Cloudinary upload failed'}), 500
+        return jsonify({'error': str(e)}), 500
+
 
 
 @posts_bp.route('', methods=['GET'])

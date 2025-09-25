@@ -1,7 +1,14 @@
-import {API_BASE_URL} from "../../config";
+// src/lib/util/upload.jsx
+
+import { API_BASE_URL } from "../../config";
 import i18n from 'i18next';
 
-export async function uploadToCloudinary(file, type = 'post') {
+/**
+ * Função genérica e unificada para fazer upload de imagens.
+ * Aponta para a rota de posts, que agora lida com todos os uploads.
+ * @param {File} file - O arquivo de imagem a ser enviado.
+ */
+export async function uploadToCloudinary(file) {
   const MAX_SIZE_MB = 2;
   const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
@@ -12,23 +19,16 @@ export async function uploadToCloudinary(file, type = 'post') {
   const formData = new FormData();
   formData.append("file", file);
 
-  let endpoint = '/posts/upload-image'; // Padrão para posts
-  if (type === 'avatar') {
-    endpoint = '/users/upload-avatar';
-  } else if (type === 'project_cover') {
-    endpoint = '/projects/upload-image';
-  }
-
-  const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const res = await fetch(`${API_BASE_URL}/posts/upload-image`, {
     method: "POST",
     body: formData,
-    credentials: "include",
+    credentials: "include", // Envia o cookie httpOnly de autenticação
   });
 
   if (!res.ok) {
-    const error = await res.json();
-    console.error("Cloudinary Upload Error:", error);
-    throw new Error(error.msg || i18n.t('upload.error'));
+    const error = await res.text();
+    console.error("Err:", error);
+    throw new Error(i18n.t('upload.error'));
   }
 
   const data = await res.json();
