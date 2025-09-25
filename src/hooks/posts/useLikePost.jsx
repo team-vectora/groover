@@ -10,10 +10,8 @@ export default function useLikePost(onSuccess) {
     try {
       const res = await fetch(`${API_BASE_URL}/posts/like`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: "include",
+        headers: { 'Content-Type': 'application/json' },
+        credentials: "include", // Usa o cookie para autenticação
         body: JSON.stringify({ post_id, owner_id }),
       });
 

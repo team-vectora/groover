@@ -125,18 +125,18 @@ def invite_user(project_id):
 
     invited_user = User.find_by_username(data['username'])
     if not invited_user:
-        return jsonify({'error': 'User not found'}), 404
+        return jsonify({'error': 'user_not_found'}), 404
 
     invited_user_id = str(invited_user['_id'])
     if invited_user_id == user_id:
-        return jsonify({'error': 'Cannot invite yourself'}), 400
+        return jsonify({'error': 'cannot_invite_yourself'}), 400
 
     if ObjectId(invited_user_id) in project.get('collaborators', []):
-        return jsonify({'error': 'User is already a collaborator'}), 400
+        return jsonify({'error': 'already_collaborator'}), 400
 
     # ✨ Nova Validação: Impede convites duplicados
     if Invitation.find_pending_invitation(project_id, invited_user_id):
-        return jsonify({'error': 'An invitation has already been sent to this user for this project'}), 409
+        return jsonify({'error': 'invitation_already_sent'}), 409
 
     invitation_id = Invitation.create_invitation(
         project_id=project_id,

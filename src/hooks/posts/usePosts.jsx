@@ -13,8 +13,7 @@ export default function usePosts() {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/posts`, {
-        method: "GET",
-        credentials: "include",
+        credentials: "include" // Usa o cookie para autenticação
       });
 
       const data = await res.json();
@@ -38,7 +37,7 @@ export default function usePosts() {
     } else {
       fetchPosts();
     }
-  }, [token]);
+  }, []);
 
   return { posts, loading, error, refetch: fetchPosts };
 }

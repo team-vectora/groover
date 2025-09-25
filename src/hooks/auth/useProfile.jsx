@@ -13,33 +13,15 @@ export default function useProfile(username) {
     error: null
   });
 
-  const fetchData = useCallback(async (isBackgroundUpdate = false) => {
+  const fetchData = useCallback(async () => {
     if (!username) return;
 
-    if (!isBackgroundUpdate) {
-      setProfileData(prev => ({ ...prev, loading: true, error: null }));
-    }
+    setProfileData(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      // Busca todos os dados em paralelo
-      const [userRes, postsRes, projectsRes, invitesRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/users/${username}`, {
-          credentials: "include",
-        }),
-        fetch(`${API_BASE_URL}/posts/username/${username}`, {
-          credentials: "include",
-        }),
-        fetch(`${API_BASE_URL}/projects/user/${username}`, {
-          credentials: "include",
-        }),
-        localStorage.getItem('username') === username
-            ? fetch(`${API_BASE_URL}/invitations`, {
-              credentials: "include",
-            })
-            : Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
-      ]);
-
-      if (!userRes.ok) throw new Error(t('errors.user_not_found'));
+      const res = await fetch(`${API_BASE_URL}/users/profile/${username}`, {
+        credentials: "include" // Usa o cookie para autenticação
+      });
 
       if (!res.ok) {
         const errorData = await res.json();
@@ -48,37 +30,23 @@ export default function useProfile(username) {
 
       const data = await res.json();
       setProfileData({ ...data, loading: false, error: null });
-      const newData = {
-        user: userData,
-        posts: postsData,
-        projects: projectsData,
-        invites: invitesData,
-        loading: false,
-        error: null
-      };
-
-      sessionStorage.setItem(cacheKey, JSON.stringify(newData));
-      setProfileData(newData);
 
     } catch (error) {
-      if (!isBackgroundUpdate) {
-        setProfileData(prev => ({
-          ...prev,
-          loading: false,
-          error: error.message
-        }));
-      } else {
-        console.error("Falha na atualização de perfil em segundo plano:", error);
-      }
+      setProfileData(prev => ({
+        ...prev,
+        loading: false,
+        error: error.message
+      }));
     }
   }, [username, t]);
 
   const refetch = useCallback(() => {
-    fetchData(false);
+    fetchData();
   }, [fetchData]);
 
+
   useEffect(() => {
-    fetchData(false);
+    fetchData();
 
     const handleFollowingUpdate = ({ detail }) => {
       setProfileData(prev => {
@@ -89,9 +57,8 @@ export default function useProfile(username) {
         let newIsFollowing = prev.user.is_following;
         const currentUserId = localStorage.getItem('id');
 
-        // Se o usuário do perfil visualizado é o que sofreu a ação
         if (prev.user._id === detail.userId) {
-          newIsFollowing = detail.isFollowing; // Atualiza o estado de "seguir"
+          newIsFollowing = detail.isFollowing;
           if (detail.isFollowing) {
             if (!newFollowers.includes(currentUserId)) newFollowers.push(currentUserId);
           } else {
@@ -100,7 +67,6 @@ export default function useProfile(username) {
           }
         }
 
-        // Se o usuário logado está em seu próprio perfil e seguiu/deixou de seguir alguém
         if (prev.user._id === currentUserId) {
           if (detail.isFollowing) {
             if (!newFollowing.includes(detail.userId)) newFollowing.push(detail.userId);
@@ -116,12 +82,11 @@ export default function useProfile(username) {
             ...prev.user,
             followers: newFollowers,
             following: newFollowing,
-            is_following: newIsFollowing // Garante que o estado seja repassado
+            is_following: newIsFollowing
           }
         };
       });
     };
-
 
     window.addEventListener('followingUpdated', handleFollowingUpdate);
 

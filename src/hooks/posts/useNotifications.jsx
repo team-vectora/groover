@@ -12,7 +12,7 @@ export default function useNotifications() {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/notifications`, {
-        credentials: "include",
+        credentials: "include" // Usa o cookie para autenticação
       });
       const data = await res.json();
       if (res.ok) {
@@ -31,10 +31,8 @@ export default function useNotifications() {
     try {
       const res = await fetch(`${API_BASE_URL}/notifications/check`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // Usa o cookie para autenticação
         body: JSON.stringify({ notification_id }),
       });
       const data = await res.json();
@@ -42,9 +40,9 @@ export default function useNotifications() {
         setError(data.error || t('toasts.error_marking_notification'));
       } else {
         setNotifications((prev) =>
-          prev.map((n) =>
-            n._id === notification_id ? { ...n, read: true } : n
-          )
+            prev.map((n) =>
+                n._id === notification_id ? { ...n, read: true } : n
+            )
         );
       }
     } catch (err) {

@@ -1,7 +1,7 @@
 // src/app/(groove-club)/p/[id]/page.jsx
 'use client';
 import { useState, useEffect, useContext } from "react";
-import { Post, CommentForm, CommentThread, LoadingDisc } from "../../../../components"; // Novos componentes
+import { Post, CommentForm, CommentThread, LoadingDisc } from "../../../../components";
 import { useParams } from "next/navigation";
 import { useAuth, useProfile } from "../../../../hooks";
 import { MidiContext } from "../../../../contexts/MidiContext";
@@ -16,29 +16,20 @@ function PostPage() {
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const { token, userId, username } = useAuth();
+    const { userId, username } = useAuth();
     const { setCurrentProject } = useContext(MidiContext);
-    const { projects } = useProfile(username, token);
-
-
-
+    const { projects } = useProfile(username);
 
     const fetchPost = async () => {
         if (!postId) return;
         setLoading(true);
         try {
             const res = await fetch(`${API_BASE_URL}/posts/${postId}`, {
-                method: "GET",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json"
-                }
+                credentials: "include" // Usa o cookie para autenticação
             });
-
             if (!res.ok) {
                 throw new Error("Post não encontrado");
             }
-
             const data = await res.json();
             if (!data) {
                 setError(true);
@@ -52,10 +43,9 @@ function PostPage() {
         }
     };
 
-
     useEffect(() => {
         fetchPost();
-    }, [postId, token]);
+    }, [postId]);
 
     if (loading) return <LoadingDisc />;
     if (error) return (
@@ -65,25 +55,18 @@ function PostPage() {
         </div>
     );
 
-
     return (
         <div className="py-8">
             <ToastContainer position="top-center" />
-            {/* Post Principal */}
             <Post
                 post={post}
-                token={token}
                 userId={userId}
                 setCurrentProject={setCurrentProject}
                 onPostCreated={fetchPost}
             />
-            {/* Formulário para novo comentário */}
-            <CommentForm postId={postId} token={token} onCommentAdded={fetchPost} projects={projects}/>
-
-            {/* Thread de Comentários */}
+            <CommentForm postId={postId} onCommentAdded={fetchPost} projects={projects}/>
             <CommentThread
                 comments={post.comments}
-                token={token}
                 userId={userId}
                 setCurrentProject={setCurrentProject}
                 onPostCreated={fetchPost}

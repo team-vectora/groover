@@ -12,16 +12,12 @@ export default function useDeletePost() {
     try {
       const response = await fetch(`${API_BASE_URL}/posts/${postId}`, {
         method: "DELETE",
-        credentials: "include",
+        credentials: "include" // Usa o cookie para autenticação
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(
-          data.error
-            ? t(`backend_errors.${data.error}`, { defaultValue: t('errors.delete_failed') })
-            : t('errors.delete_failed')
-        );
+        throw new Error(data.error ? t(`backend_errors.${data.error}`, { defaultValue: t('errors.delete_failed') }) : t('errors.delete_failed'));
       }
 
       toast.success(t('post.deletedSuccess'));
