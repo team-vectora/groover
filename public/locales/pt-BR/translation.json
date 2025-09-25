@@ -509,5 +509,10 @@
     "project_no_music": "O projeto não tem música para copiar",
     "following_id_required": "following_id obrigatório",
     "cant_follow_self": "Não é possível seguir a si mesmo."
+  },
+  "profileSetup": {
+    "title": "Finalizar cadastro",
+    "subtitle": "Personalize seu perfil para encontrar outros músicos!",
+    "skip": "Pular por enquanto"
   }
 }

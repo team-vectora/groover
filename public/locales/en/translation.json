@@ -511,5 +511,10 @@
     "project_no_music": "Project doesn't have music to copy",
     "following_id_required": "missing following_id",
     "cant_follow_self": "Can't follow itself."
+  },
+  "profileSetup": {
+    "title": "Finalize your registration",
+    "subtitle": "Customize your profile to find other musicians!",
+    "skip": "Skip for now"
   }
 }
