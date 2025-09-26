@@ -34,14 +34,3 @@ def see_notification():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-@notifications_bp.route("/send-test", methods=["GET"])
-def send_test_email():
-    msg = Message(
-        "Teste de Email",
-        sender=os.getenv("MAIL_USERNAME"),
-        recipients=["joaoaugusto.haupt@gmail.com"]
-    )
-    msg.body = "Funcionando com senha de app do Gmail!"
-    mail.send(msg)
-    return "Email enviado com sucesso!"

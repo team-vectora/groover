@@ -4,6 +4,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Post, User
 import cloudinary.uploader
+from utils.socket import socketio
 
 from models.notification import Notification
 
@@ -81,7 +82,23 @@ def post_like():
     user_id_owner = data.get('owner_id')
     user = User.get_user(user_id)
 
-    Notification.create(user_id=user_id_owner, type="like", actor=user["username"], post_id=post_id)
+    Notification.create(
+        user_id=user_id_owner,
+        type="like",
+        actor=user["username"],
+        post_id=post_id
+    )
+
+    socketio.emit(
+        "new_notification",
+        {
+            "user_id": user_id_owner,
+            "type": "like",
+            "actor": user["username"],
+            "post_id": post_id
+        },
+        room=f"user_{user_id_owner}"
+    )
 
     return jsonify(response), status
 
@@ -108,6 +125,8 @@ def add_comment_to_post(post_id):
     original_post = Post.get_post(post_id)
     if original_post and str(original_post['user']['_id']) != user_id:
         actor_user = User.get_user(user_id)
+
+        # Cria a notificação no banco
         Notification.create(
             user_id=str(original_post['user']['_id']),
             actor=actor_user['username'],
@@ -116,7 +135,22 @@ def add_comment_to_post(post_id):
             content=data.get('caption')
         )
 
+        # Dispara notificação via WebSocket
+        socketio.emit(
+            "new_notification",
+            {
+                "user_id": str(original_post['user']['_id']),
+                "type": "comment",
+                "actor": actor_user['username'],
+                "post_id": post_id,
+                "content": data.get('caption')
+            },
+            room=f"user_{original_post['user']['_id']}"  # sala do dono do post
+        )
+
+
     return jsonify({'message': 'Comentário adicionado', 'comment_id': str(comment_id)}), 201
+
 
 @posts_bp.route('/<post_id>', methods=['DELETE'])
 @jwt_required()

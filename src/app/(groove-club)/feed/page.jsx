@@ -1,37 +1,48 @@
 // src/app/(groove-club)/feed/page.jsx
 'use client';
-import { useContext, useEffect, useCallback } from "react";
+import { useContext, useEffect, useState } from "react";
 import { MidiContext } from "../../../contexts/MidiContext";
 import { Post, LoadingDisc } from "../../../components";
 import { useAuth, usePosts } from "../../../hooks/";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const POSTS_PER_BATCH = 10; // quantos posts mostrar de cada vez
+
 const FeedPage = () => {
     const { username, userId } = useAuth();
-    const { posts, setPosts, loading, error, updatePost } = usePosts();
+    const { posts: allPosts, loading, error, refetch, updatePost } = usePosts();
     const { setCurrentProject } = useContext(MidiContext);
 
-    const onPostDeleted = useCallback((deletedPostId) => {
-        setPosts(currentPosts => currentPosts.filter(post => post._id !== deletedPostId));
-    }, [setPosts]);
+    const [visiblePosts, setVisiblePosts] = useState([]);
+    const [nextIndex, setNextIndex] = useState(0);
 
-
-    // Efeito para RESTAURAR a posição do scroll ao entrar na página
     useEffect(() => {
-        // Só tenta restaurar se não estiver carregando e se houver posts
-        if (!loading && posts.length > 0) {
-            const scrollPosition = sessionStorage.getItem('feedScrollPosition');
-            if (scrollPosition) {
-                console.log(`%c[Feed] RESTAURANDO SCROLL: Posição encontrada: ${scrollPosition}.`, 'color: #2ecc71;');
-                // Usamos requestAnimationFrame para garantir que o DOM esteja pronto
-                requestAnimationFrame(() => {
-                    window.scrollTo(0, parseInt(scrollPosition, 10));
-                    sessionStorage.removeItem('feedScrollPosition');
-                });
-            }
+        if (!loading && allPosts.length > 0) {
+            const initialPosts = allPosts.slice(0, POSTS_PER_BATCH);
+            setVisiblePosts(initialPosts);
+            setNextIndex(initialPosts.length);
         }
-    }, [loading, posts]);
+    }, [loading, allPosts]);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollTop = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+
+            if (scrollTop + windowHeight >= documentHeight - 200) {
+                if (nextIndex < allPosts.length) {
+                    const morePosts = allPosts.slice(nextIndex, nextIndex + POSTS_PER_BATCH);
+                    setVisiblePosts(prev => [...prev, ...morePosts]);
+                    setNextIndex(prev => prev + morePosts.length);
+                }
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [nextIndex, allPosts]);
 
     return (
         <div className="flex gap-10">
@@ -42,7 +53,7 @@ const FeedPage = () => {
                 {error && <p className="text-red-500 text-center py-4">{error}</p>}
 
                 <div className="space-y-6">
-                    {posts.map((post) => (
+                    {visiblePosts.map((post) => (
                         <Post
                             key={post._id}
                             userId={userId}
@@ -50,10 +61,13 @@ const FeedPage = () => {
                             profileId={userId}
                             setCurrentProject={setCurrentProject}
                             onUpdatePost={updatePost}
-                            onPostDeleted={onPostDeleted}
                         />
                     ))}
                 </div>
+
+                {nextIndex >= allPosts.length && !loading && (
+                    <p className="text-center py-4 text-gray-500">Fim do feed</p>
+                )}
             </div>
         </div>
     );
