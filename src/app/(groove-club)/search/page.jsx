@@ -10,7 +10,6 @@ import { API_BASE_URL } from "../../../config";
 
 export default function SearchPage() {
     const { t, i18n } = useTranslation();
-    const { token } = useAuth();
     const [query, setQuery] = useState('');
     const [selectedTags, setSelectedTags] = useState([]);
     const [searchType, setSearchType] = useState('all');
@@ -38,11 +37,10 @@ export default function SearchPage() {
             setResults(data);
             setLoading(false);
         };
+        performSearch();
 
-        if (token) {
-            performSearch();
-        }
-    }, [debouncedQuery, selectedTags, searchType, token]);
+    }, [debouncedQuery, selectedTags, searchType]);
+
 
     const toggleTag = (tag) => {
         setSelectedTags(prev =>

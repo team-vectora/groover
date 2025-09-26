@@ -21,10 +21,10 @@ const CommentForm = ({ postId, token, onCommentAdded, projects }) => {
             await fetch(`${API_BASE_URL}/posts/${postId}/comment`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                credentials: "include",
-                body: JSON.stringify({ caption })
+                body: JSON.stringify({ caption }),
+                credentials: 'include'
             });
             setCaption('');
             onCommentAdded();
@@ -35,6 +35,7 @@ const CommentForm = ({ postId, token, onCommentAdded, projects }) => {
             setIsSubmitting(false);
         }
     };
+
 
     return (
         <>

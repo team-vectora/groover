@@ -1,10 +1,8 @@
-// src/components/posts/Post.jsx
-
 'use client';
 import { useState, useEffect } from 'react';
 import Link from "next/link";
 import Image from 'next/image';
-import {usePathname , useRouter} from "next/navigation";
+import { usePathname , useRouter } from "next/navigation";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faComment,
@@ -30,28 +28,20 @@ const HeartAnimation = ({ position, showHeart }) => {
             <svg xmlns="http://www.w3.org/2000/svg" fill="#a97f52" viewBox="0 0 24 24" className="w-20 h-20 opacity-80 animate-ping duration-1000">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
-            <div className="absolute">
-                <svg fill="#4c4e30" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 364.59 364.591" className="w-6 h-6 absolute top-8 left-12 animate-ping">
-                    <path d="M360.655,258.05V25c0-13.807-11.191-25-25-25H130.09c-13.807,0-25,11.193-25,25v206.27 c-10.569-3.184-22.145-4.271-34.058-2.768C29.527,233.738-0.293,268.3,4.427,305.695c4.719,37.396,42.189,63.464,83.694,58.226 c40.015-5.049,66.969-37.146,66.969-73.181V50h155.564v146.794c-10.591-3.2-22.19-4.297-34.134-2.79 c-41.504,5.237-71.323,39.798-66.604,77.193s42.188,63.464,83.694,58.227C332.951,324.458,360.655,293.275,360.655,258.05z"/>
-                </svg>
-                <svg fill="#4c4e30" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 364.59 364.591" className="w-5 h-5 absolute bottom-8 right-12 animate-ping">
-                    <path d="M360.655,258.05V25c0-13.807-11.191-25-25-25H130.09c-13.807,0-25,11.193-25,25v206.27 c-10.569-3.184-22.145-4.271-34.058-2.768C29.527,233.738-0.293,268.3,4.427,305.695c4.719,37.396,42.189,63.464,83.694,58.226 c40.015-5.049,66.969-37.146,66.969-73.181V50h155.564v146.794c-10.591-3.2-22.19-4.297-34.134-2.79 c-41.504,5.237-71.323,39.798-66.604,77.193s42.188,63.464,83.694,58.227C332.951,324.458,360.655,293.275,360.655,258.05z"/>
-                </svg>
-            </div>
         </div>
     );
 };
 
 export default function Post({
-                                 post,
-                                 token,
-                                 userId,
-                                 profileId,
-                                 setCurrentProject,
-                                 handleClickFork,
-                                 onPostCreated,
-                                 onUpdatePost
-                             }) {
+    post,
+    token,
+    userId,
+    profileId,
+    setCurrentProject,
+    handleClickFork,
+    onPostCreated,
+    onUpdatePost,
+}) {
     const { t } = useTranslation();
     const router = useRouter();
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -70,7 +60,6 @@ export default function Post({
     const handleNavigation = (path) => {
         if (pathname === '/feed') {
             const scrollY = window.scrollY.toString();
-            console.log(`%c[Sidebar] SALVANDO SCROLL: Clicou para sair do feed. Posição salva: ${scrollY}`, 'color: #e67e22;');
             sessionStorage.setItem('feedScrollPosition', scrollY);
         }
         router.push(path);
@@ -102,11 +91,8 @@ export default function Post({
     const { likePost } = useLikePost(() => {
         const newIsLiked = !isLiked;
         const newLikesCount = newIsLiked ? likesCount + 1 : likesCount - 1;
-
         setIsLiked(newIsLiked);
         setLikesCount(newLikesCount);
-
-        // Notifica a página pai sobre a mudança
         if (onUpdatePost) {
             onUpdatePost({
                 ...post,
@@ -117,6 +103,7 @@ export default function Post({
         }
     });
 
+    // Loop infinito
     const nextImage = () => setCurrentImageIndex(prev => (prev === post.photos.length - 1 ? 0 : prev + 1));
     const prevImage = () => setCurrentImageIndex(prev => (prev === 0 ? post.photos.length - 1 : prev - 1));
     const goToImage = index => setCurrentImageIndex(index);
@@ -159,6 +146,7 @@ export default function Post({
 
     return (
         <div className="flex flex-col gap-4 bg-bg-secondary p-5 w-full mx-auto rounded-lg border border-primary/40">
+            {/* Cabeçalho do post */}
             <div className="flex items-center gap-4">
                 <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-primary hover:border-accent-light transition duration-300 cursor-pointer">
                     <Image src={avatarUrl} alt="Avatar" fill className="object-cover" quality={100} unoptimized />
@@ -194,8 +182,10 @@ export default function Post({
                 </Link>
             )}
 
+            {/* Legenda */}
             <p className="break-words text-text-lighter">{post.caption}</p>
 
+            {/* Gêneros */}
             {post.genres?.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                     {post.genres.map((genre) => (
@@ -206,68 +196,82 @@ export default function Post({
                 </div>
             )}
 
+            {/* Carrossel de imagens */}
             {post.photos?.length > 0 && (
-                <div className="relative w-full group">
+                <div className="relative w-full group select-none">
+                    {/* Botão anterior */}
                     {post.photos.length > 1 && (
-                        <button onClick={prevImage} className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-primary bg-opacity-80 text-white w-10 h-10 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                            onClick={prevImage}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition"
+                        >
                             <FontAwesomeIcon icon={faChevronLeft} />
                         </button>
                     )}
 
-                    {/* Imagem atual */}
+                    {/* Imagem atual com swipe */}
                     <div
-                        className="relative w-full overflow-hidden flex"
+                        className="relative w-full overflow-hidden flex items-center justify-center"
                         onDoubleClick={handleLikeImage}
                     >
-                    <AnimatePresence initial={false} custom={currentImageIndex}>
-                      <motion.img
-                        key={currentImageIndex}
-                        src={post.photos[currentImageIndex]}
-                        alt={`Post image ${currentImageIndex + 1}`}
-                        className="w-full max-h-[500px] object-contain rounded-md mx-auto"
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -50 }}
-                        transition={{ duration: 0.4, ease: "easeInOut" }}
-                        drag="x"
-                        dragConstraints={{ left: 0, right: 0 }}
-                        onDragEnd={(event, { offset, velocity }) => {
-                          const swipe = Math.abs(offset.x);
-                          if (swipe > 50) {
-                            if (offset.x > 0) {
-                              prevImage();
-                            } else {
-                              nextImage();
-                            }
-                          }
-                        }}
-                      />
-                    </AnimatePresence>
+                        <AnimatePresence initial={false} custom={currentImageIndex}>
+                            <motion.img
+                                key={currentImageIndex}
+                                src={post.photos[currentImageIndex]}
+                                alt={`Post image ${currentImageIndex + 1}`}
+                                className="w-full max-h-[500px] object-contain rounded-md"
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -50 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                drag="x"
+                                dragConstraints={{ left: 0, right: 0 }}
+                                onDragEnd={(event, { offset }) => {
+                                    if (offset.x > 50) prevImage();
+                                    if (offset.x < -50) nextImage();
+                                }}
+                            />
+                        </AnimatePresence>
 
-                        {/* Animação de coração */}
+                        {/* Coração no double click */}
                         <HeartAnimation position={heartPos} showHeart={showHeart} />
                     </div>
+
+                    {/* Botão próximo */}
                     {post.photos.length > 1 && (
-                        <button onClick={nextImage} className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary bg-opacity-80 text-text-lighter w-10 h-10 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                            onClick={nextImage}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition"
+                        >
                             <FontAwesomeIcon icon={faChevronRight} />
                         </button>
                     )}
+
+                    {/* Paginação estilo bolinhas do Instagram */}
                     {post.photos.length > 1 && (
-                        <div className="flex justify-center items-center gap-2 mt-4">
+                        <div className="flex justify-center items-center gap-2 mt-2">
                             {post.photos.map((_, index) => (
-                                <button key={index} onClick={() => goToImage(index)} className={`w-3 h-3 rounded-full transition-colors ${index === currentImageIndex ? 'bg-accent' : 'bg-accent-light'}`} />
+                                <span
+                                    key={index}
+                                    onClick={() => goToImage(index)}
+                                    className={`w-2 h-2 rounded-full cursor-pointer transition ${
+                                        index === currentImageIndex ? "bg-accent" : "bg-gray-500/40"
+                                    }`}
+                                />
                             ))}
                         </div>
                     )}
                 </div>
             )}
 
+            {/* Projeto relacionado */}
             {post.project && (
                 <div onClick={() => handleProjectClick(post.project)}>
                     <ProjectCard project={post.project} profileId={profileId} setCurrentProject={setCurrentProject} handleClickFork={handleClickFork} />
                 </div>
             )}
 
+            {/* Botões de ação */}
             <div className="flex justify-center gap-8 mt-4 ">
                 <button onClick={handleLikeClick} disabled={isAnimating} className={`flex items-center gap-2 ${isAnimating ? 'opacity-50 cursor-not-allowed' : 'hover:text-accent-light'} transition-colors hover:cursor-pointer`}>
                     {isLiked ? (

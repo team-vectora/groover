@@ -306,7 +306,9 @@
     "invites": "Invites"
   },
   "project": {
+    "manage_collaborators": "Manage Collaborators",
     "deletedSuccess": "Project deleted successfully!",
+    "no_collaborators": "No Collaborators",
     "view_collaborators": "View Collaborators",
     "delete_project": "Delete project"
   },

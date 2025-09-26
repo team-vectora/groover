@@ -12,7 +12,7 @@ export default function useDeletePost() {
     try {
       const response = await fetch(`${API_BASE_URL}/posts/${postId}`, {
         method: "DELETE",
-        credentials: "include" // Usa o cookie para autenticação
+        credentials: "include"
       });
 
       if (!response.ok) {

@@ -11,16 +11,17 @@ export default function useLikePost(onSuccess) {
       const res = await fetch(`${API_BASE_URL}/posts/like`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: "include", // Usa o cookie para autenticação
+        credentials: "include",
         body: JSON.stringify({ post_id, owner_id }),
       });
+
+      const data = await res.json();
 
       if (!res.ok) {
         if (res.status === 401) {
           setError(t('errors.invalid_token'));
           return;
         }
-        const data = await res.json();
         setError(t(`backend_errors.${data.error}`, { defaultValue: t('errors.generic_error') }));
         return;
       }
