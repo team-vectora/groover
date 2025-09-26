@@ -3,22 +3,31 @@
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import { useTranslation } from "react-i18next";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faImage } from '@fortawesome/free-solid-svg-icons';
 
 const SaveMusicPopUp = ({
                             open, onSave, onCancel, title, setTitle,
-                            description, setDescription
+                            description, setDescription, onImageChange, coverImage
                         }) => {
     const { t } = useTranslation();
     const fileInputRef = useRef(null);
     const [preview, setPreview] = useState("");
 
+    useEffect(() => {
+        if (coverImage) {
+            setPreview(coverImage);
+        }
+    }, [coverImage]);
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             setPreview(URL.createObjectURL(file));
+            if (onImageChange) {
+                onImageChange(file);
+            }
         }
     };
 

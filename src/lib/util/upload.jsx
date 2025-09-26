@@ -2,6 +2,7 @@
 
 import { API_BASE_URL } from "../../config";
 import i18n from 'i18next';
+import { toast } from 'react-toastify';
 
 /**
  * Função genérica e unificada para fazer upload de imagens.
@@ -13,7 +14,8 @@ export async function uploadToCloudinary(file) {
   const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
   if (file.size > MAX_SIZE_BYTES) {
-    throw new Error(i18n.t('upload.imageTooLarge', { size: MAX_SIZE_MB }));
+    toast.error(i18n.t('upload.imageTooLarge', { size: MAX_SIZE_MB }));
+    return null;
   }
 
   const formData = new FormData();
@@ -28,7 +30,8 @@ export async function uploadToCloudinary(file) {
   if (!res.ok) {
     const error = await res.text();
     console.error("Err:", error);
-    throw new Error(i18n.t('upload.error'));
+    toast.error(i18n.t('upload.error'));
+    return null;
   }
 
   const data = await res.json();

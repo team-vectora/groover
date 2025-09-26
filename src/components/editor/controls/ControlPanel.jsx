@@ -3,7 +3,7 @@
 import { ChangeVolume, ChangeBpm, VersionManager, ConfirmationPopUp } from "../../";
 import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faTrash, faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faTrash, faPlay, faPause, faMusic } from '@fortawesome/free-solid-svg-icons';
 import { useState } from "react";
 
 const ControlPanel = ({
@@ -40,6 +40,14 @@ const ControlPanel = ({
     return (
         <div className="p-4 space-y-6 flex flex-col h-full">
             <div>
+                {/* Ajuste aqui: removi a altura fixa 'h-32' e usei 'aspect-video' para proporção */}
+                <div className="w-full aspect-video bg-bg-darker rounded-md flex items-center justify-center mb-4 overflow-hidden">
+                    {apiState.project?.cover_image ? (
+                        <img src={apiState.project.cover_image} alt="Album cover" className="w-full h-full object-cover rounded-md" />
+                    ) : (
+                        <FontAwesomeIcon icon={faMusic} className="text-5xl text-primary" />
+                    )}
+                </div>
                 <h1 className="text-sm font-bold uppercase text-accent mb-2 mt-4">
                     {projectState.title || t("editor.controls.panel.newProject")}
                 </h1>

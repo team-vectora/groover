@@ -24,6 +24,7 @@ export default function EditorPage() {
     const [openPop, setOpenPop] = useState(false);
     const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
     const [confirmationAction, setConfirmationAction] = useState(null);
+    const [coverImageFile, setCoverImageFile] = useState(null);
 
     const isOwner = projectData.owner === userId;
     const isCollaborator = projectData.collaborators?.includes(userId);
@@ -93,12 +94,14 @@ export default function EditorPage() {
 
             <SaveMusicPopUp
                 open={openPop}
-                onSave={() => { apiActions.handleSave(projectData); setOpenPop(false); }}
+                onSave={() => { apiActions.handleSave({ ...projectData, coverImage: coverImageFile }); setOpenPop(false); }}
                 onCancel={() => setOpenPop(false)}
                 title={projectState.title}
                 setTitle={projectActions.setTitle}
                 description={projectState.description}
                 setDescription={projectActions.setDescription}
+                onImageChange={setCoverImageFile}
+                coverImage={apiState.project?.cover_image}
             />
 
             <EditorLayout

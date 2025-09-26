@@ -19,9 +19,11 @@ const FeedPage = () => {
             const scrollPosition = sessionStorage.getItem('feedScrollPosition');
             if (scrollPosition) {
                 console.log(`%c[Feed] RESTAURANDO SCROLL: Posição encontrada: ${scrollPosition}.`, 'color: #2ecc71;');
-                // Adiciona um pequeno delay para garantir que o DOM esteja pronto
-                window.scrollTo(0, parseInt(scrollPosition, 10));
-                sessionStorage.removeItem('feedScrollPosition');
+                // Usamos requestAnimationFrame para garantir que o DOM esteja pronto
+                requestAnimationFrame(() => {
+                    window.scrollTo(0, parseInt(scrollPosition, 10));
+                    sessionStorage.removeItem('feedScrollPosition');
+                });
             }
         }
     }, [loading, posts]);
