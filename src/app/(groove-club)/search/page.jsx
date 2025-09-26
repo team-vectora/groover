@@ -1,3 +1,4 @@
+// src/app/(groove-club)/search/page.jsx
 'use client';
 import { useState, useEffect } from 'react';
 import { useAuth, useDebounce } from '../../../hooks';
@@ -28,13 +29,16 @@ export default function SearchPage() {
             }
 
             setLoading(true);
-            const tagsQuery = selectedTags.join(',');
-            const response = await fetch(`${API_BASE_URL}/search?q=${debouncedQuery}&tags=${tagsQuery}&type=${searchType}`, {
+            const params = new URLSearchParams({
+                q: debouncedQuery,
+                tags: selectedTags.join(','),
+                type: searchType,
+            });
+
+            const response = await fetch(`${API_BASE_URL}/search?${params.toString()}`, {
                 credentials: "include"
             });
             const data = await response.json();
-            console.log("Projects")
-            console.log(data)
             setResults(data);
             setLoading(false);
         };
@@ -83,7 +87,7 @@ export default function SearchPage() {
                         <h2 className="text-2xl font-bold mb-4 text-accent-light">{t('search.projects')}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {results.projects?.map((project, idx) => (
-                              <ProjectCard key={project._id || idx} project={project} isYourProfile={false} />
+                                <ProjectCard key={project._id || idx} project={project} isYourProfile={false} />
                             ))}
                         </div>
                     </section>

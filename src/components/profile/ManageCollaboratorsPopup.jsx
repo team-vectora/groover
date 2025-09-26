@@ -20,7 +20,7 @@ const ManageCollaboratorsPopup = ({ project, open, onClose, onCollaboratorChange
         if (!userToRemove) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/projects/${project.id}/collaborators/${userToRemove.id}`, {
+            const response = await fetch(`${API_BASE_URL}/projects/${project.id}/collaborators/${userToRemove._id}`, {
                 method: 'DELETE',
                 credentials: 'include',
             });
@@ -30,7 +30,7 @@ const ManageCollaboratorsPopup = ({ project, open, onClose, onCollaboratorChange
             }
 
             toast.success(`${userToRemove.username} foi removido.`);
-            setCollaborators(prev => prev.filter(c => c.id !== userToRemove.id));
+            setCollaborators(prev => prev.filter(c => c._id !== userToRemove._id));
             if (onCollaboratorChange) {
                 onCollaboratorChange();
             }
@@ -59,7 +59,7 @@ const ManageCollaboratorsPopup = ({ project, open, onClose, onCollaboratorChange
                         ) : (
                             <ul className="space-y-3">
                                 {collaborators.map(user => (
-                                    <li key={user.id} className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-primary/20">
+                                    <li key={user._id} className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-primary/20">
                                         <Link href={`/profile/${user.username}`} className="flex items-center gap-3" onClick={onClose}>
                                             <img src={user.avatar || '/img/default_avatar.png'} alt={user.username} className="w-12 h-12 rounded-full object-cover" />
                                             <div>

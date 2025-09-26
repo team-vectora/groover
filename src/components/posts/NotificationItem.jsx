@@ -21,9 +21,9 @@ export default function NotificationItem({ notification, onCheck }) {
     collaborator_update: faEdit,
   };
 
-    const { type, actor, content, post_id, project_id, created_at, read } = notification;
+  const { type, actor, content, post_id, project_id, created_at, read } = notification;
 
-    const message = t(`notifications.${type}`, { user: actor || "Alguém", content: content || "" });
+  const message = t(`notifications.${type}`, { user: actor || "Alguém", content: content || "" });
 
 
   const handleClick = () => {
@@ -37,7 +37,7 @@ export default function NotificationItem({ notification, onCheck }) {
         break;
       case 'invite_accepted':
       case 'collaborator_update':
-        router.push(`/profile/${currentUsername}?tab=musics`);
+        router.push(`/editor/${project_id}`);
         break;
       case 'like':
       case 'comment':
@@ -49,23 +49,23 @@ export default function NotificationItem({ notification, onCheck }) {
   };
 
   return (
-    <li
-      onClick={handleClick}
-      className={`relative z-50 flex items-start gap-3 p-3 rounded-lg cursor-pointer transition ${
-          read ? "opacity-60" : "bg-bg-secondary hover:bg-primary/20"
-      }`}
-    >
-      <FontAwesomeIcon
-          icon={icons[type] || faStar}
-          className="text-accent w-5 h-5 mt-1"
-      />
-      <div className="flex flex-col flex-1">
-        <span className="text-sm text-foreground">{message}</span>
-        <span className="text-xs text-foreground/70">
+      <li
+          onClick={handleClick}
+          className={`relative z-50 flex items-start gap-3 p-3 rounded-lg cursor-pointer transition ${
+              read ? "opacity-60" : "bg-bg-secondary hover:bg-primary/20"
+          }`}
+      >
+        <FontAwesomeIcon
+            icon={icons[type] || faStar}
+            className="text-accent w-5 h-5 mt-1"
+        />
+        <div className="flex flex-col flex-1">
+          <span className="text-sm text-foreground">{message}</span>
+          <span className="text-xs text-foreground/70">
           {new Date(created_at).toLocaleString()}
         </span>
-      </div>
-    </li>
+        </div>
+      </li>
 
   );
 }

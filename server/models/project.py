@@ -78,8 +78,11 @@ class Project:
             if 'midi' in project and project['midi']:
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
-            if 'collaborators' in project:
-                project['collaborators'] = [str(c) for c in project.get('collaborators', [])]
+
+            # **CORREÇÃO APLICADA AQUI**
+            collaborator_ids = project.get('collaborators', [])
+            project['collaborators'] = User.get_user_details_by_ids(collaborator_ids)
+
             project['user_id'] = str(project['user_id'])
             project['created_by'] = str(project.get('created_by', ''))
             project['last_updated_by'] = str(project.get('last_updated_by', ''))
@@ -99,8 +102,10 @@ class Project:
             if 'midi' in project and project.get('midi'):
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
+
             collaborator_ids = project.get('collaborators', [])
             project['collaborators'] = User.get_user_details_by_ids(collaborator_ids)
+
             project['user_id'] = str(project['user_id'])
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
@@ -126,7 +131,9 @@ class Project:
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
 
-            project['collaborators'] = [str(c) for c in project.get('collaborators', [])]
+            collaborator_ids = project.get('collaborators', [])
+            project['collaborators'] = User.get_user_details_by_ids(collaborator_ids)
+
             project['user_id'] = str(project['user_id'])
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
@@ -134,7 +141,6 @@ class Project:
             projects.append(project)
 
         return projects
-
 
     @staticmethod
     def get_project_full_data_without_user_id(project_id):
@@ -154,8 +160,8 @@ class Project:
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
 
-            if 'collaborators' in project:
-                project['collaborators'] = [str(id_collab) for id_collab in project['collaborators']]
+            collaborator_ids = project.get('collaborators', [])
+            project['collaborators'] = User.get_user_details_by_ids(collaborator_ids)
 
             project['created_by'] = User.get_user(project.get('created_by', ''))
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
@@ -176,6 +182,8 @@ class Project:
         result = []
         for p in projects:
             created_by_user = User.get_user(p.get('created_by'))
+            collaborator_ids = p.get('collaborators', [])
+            collaborators = User.get_user_details_by_ids(collaborator_ids)
             result.append({
                 'id': str(p['_id']),
                 'cover_image': p.get('cover_image'),
@@ -184,10 +192,10 @@ class Project:
                 'bpm': p.get('bpm', 120),
                 'created_at': p.get('created_at'),
                 'created_by': created_by_user,
-                'is_owner': str(p.get('user_id')) == str(user_id_obj)
+                'is_owner': str(p.get('user_id')) == str(user_id_obj),
+                'collaborators': collaborators
             })
         return result
-
 
     @staticmethod
     def get_user_projects(user_id):
@@ -211,7 +219,8 @@ class Project:
             'updated_at': p.get('updated_at'),
             'created_by': User.get_user(p.get('created_by')),
             'last_updated_by': User.get_user(p.get('last_updated_by')),
-            'is_owner': p.get('user_id') == user_id_obj
+            'is_owner': p.get('user_id') == user_id_obj,
+            'collaborators': User.get_user_details_by_ids(p.get('collaborators', []))
         } for p in projects]
 
     @staticmethod
@@ -258,6 +267,8 @@ class Project:
         results = []
         for p in projects_cursor:
             created_by_user = User.get_user(str(p.get('created_by')))
+            collaborator_ids = p.get('collaborators', [])
+            collaborators = User.get_user_details_by_ids(collaborator_ids)
             results.append({
                 'id': str(p['_id']),
                 'title': p.get('title', 'Untitled'),
@@ -267,6 +278,6 @@ class Project:
                 'created_at': p.get('created_at').isoformat() if p.get('created_at') else None,
                 'created_by': created_by_user,
                 'user_id': str(p.get('user_id')),
-                'collaborators': [str(c) for c in p.get('collaborators', [])]
+                'collaborators': collaborators
             })
         return results

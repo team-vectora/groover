@@ -1,6 +1,6 @@
 // src/app/(groove-club)/feed/page.jsx
 'use client';
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useCallback } from "react";
 import { MidiContext } from "../../../contexts/MidiContext";
 import { Post, LoadingDisc } from "../../../components";
 import { useAuth, usePosts } from "../../../hooks/";
@@ -9,8 +9,13 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const FeedPage = () => {
     const { username, userId } = useAuth();
-    const { posts, loading, error, updatePost } = usePosts();
+    const { posts, setPosts, loading, error, updatePost } = usePosts();
     const { setCurrentProject } = useContext(MidiContext);
+
+    const onPostDeleted = useCallback((deletedPostId) => {
+        setPosts(currentPosts => currentPosts.filter(post => post._id !== deletedPostId));
+    }, [setPosts]);
+
 
     // Efeito para RESTAURAR a posição do scroll ao entrar na página
     useEffect(() => {
@@ -45,6 +50,7 @@ const FeedPage = () => {
                             profileId={userId}
                             setCurrentProject={setCurrentProject}
                             onUpdatePost={updatePost}
+                            onPostDeleted={onPostDeleted}
                         />
                     ))}
                 </div>

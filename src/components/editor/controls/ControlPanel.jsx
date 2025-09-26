@@ -40,10 +40,16 @@ const ControlPanel = ({
     return (
         <div className="p-4 space-y-6 flex flex-col h-full">
             <div>
-                {/* Ajuste aqui: removi a altura fixa 'h-32' e usei 'aspect-video' para proporção */}
-                <div className="w-full aspect-video bg-bg-darker rounded-md flex items-center justify-center mb-4 overflow-hidden">
+                <div className="w-full aspect-video bg-bg-darker rounded-md flex items-center justify-center mb-4 overflow-hidden relative group">
                     {apiState.project?.cover_image ? (
-                        <img src={apiState.project.cover_image} alt="Album cover" className="w-full h-full object-cover rounded-md" />
+                        <>
+                            <img src={apiState.project.cover_image} alt="Album cover" className="w-full h-full object-cover rounded-md" />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={playerActions.playPause} className="w-16 h-16 bg-accent/80 rounded-full flex items-center justify-center text-white hover:bg-accent">
+                                    <FontAwesomeIcon icon={playerState.isPlaying ? faPause : faPlay} className="text-3xl" />
+                                </button>
+                            </div>
+                        </>
                     ) : (
                         <FontAwesomeIcon icon={faMusic} className="text-5xl text-primary" />
                     )}

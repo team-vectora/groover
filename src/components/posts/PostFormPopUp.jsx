@@ -60,14 +60,14 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
         genres: selectedGenres,
       };
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(body),
-    });
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
 
       const data = await response.json();
 
@@ -245,11 +245,11 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
             <select
                 value={selectedProject}
                 onChange={(e) => setSelectedProject(e.target.value)}
-                className="w-full p-3 bg-bg-darker: border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"
+                className="w-full p-3 bg-bg-darker border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"
             >
-              <option value="">{t('postForm.noProject')}</option>
+              <option value="" className="bg-bg-darker">{t('postForm.noProject')}</option>
               {projects.map((proj) => (
-                  <option key={proj.id} value={proj.id}>{proj.title}</option>
+                  <option key={proj.id} value={proj.id} className="bg-bg-darker">{proj.title}</option>
               ))}
             </select>
           </div>

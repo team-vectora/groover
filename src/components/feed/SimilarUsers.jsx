@@ -35,28 +35,28 @@ export default function SimilarUsers({ users = [], userId }) {
     }, []);
 
     if (!users || users.length === 0) {
-      return (
-        <section className="bg-bg-secondary rounded-lg p-4 border-2 border-primary sticky top-24">
-          <h2 className="text-2xl font-semibold text-accent-light mb-4 text-center">
-            {t("similarUsers.suggestionsTitle")}
-          </h2>
+        return (
+            <section className="bg-bg-secondary rounded-lg p-4 border-2 border-primary sticky top-24">
+                <h2 className="text-2xl font-semibold text-accent-light mb-4 text-center">
+                    {t("similarUsers.suggestionsTitle")}
+                </h2>
 
-          <div className="flex flex-col items-center justify-center py-6 px-4 bg-yellow-50 border border-yellow-300 rounded-lg shadow-md text-center">
-            <div className="text-4xl mb-3 text-yellow-500">
-              🌟
-            </div>
-            <p className="font-bold text-lg mb-2 text-yellow-800">
-              {t("similarUsers.noUsersTitle", "Nenhum usuário encontrado")}
-            </p>
-            <p className="text-sm text-yellow-700">
-              {t(
-                "similarUsers.noUsersDescription",
-                "Use mais tags e personalize suas preferências para receber recomendações de usuários."
-              )}
-            </p>
-          </div>
-        </section>
-      );
+                <div className="flex flex-col items-center justify-center py-6 px-4 bg-yellow-50/10 border border-yellow-300/20 rounded-lg shadow-md text-center">
+                    <div className="text-4xl mb-3 text-yellow-500">
+                        🌟
+                    </div>
+                    <p className="font-bold text-lg mb-2 text-yellow-300">
+                        {t("similarUsers.noUsersTitle", "Nenhum usuário encontrado")}
+                    </p>
+                    <p className="text-sm text-yellow-400">
+                        {t(
+                            "similarUsers.noUsersDescription",
+                            "Use mais tags e personalize suas preferências para receber recomendações de usuários."
+                        )}
+                    </p>
+                </div>
+            </section>
+        );
     }
 
 
@@ -83,13 +83,13 @@ export default function SimilarUsers({ users = [], userId }) {
                     >
                         <div className="flex items-center">
                             <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary flex-shrink-0">
-                              <Image
-                                src={user.avatar || "/img/default_avatar.png"}
-                                alt={user.username}
-                                width={48}
-                                height={48}
-                                className="object-cover w-full h-full"
-                              />
+                                <Image
+                                    src={user.avatar || "/img/default_avatar.png"}
+                                    alt={user.username}
+                                    width={48}
+                                    height={48}
+                                    className="object-cover w-full h-full"
+                                />
                             </div>
 
                             <div className="ml-3 mr-3">

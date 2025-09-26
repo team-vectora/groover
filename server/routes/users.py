@@ -22,6 +22,7 @@ def get_user_by_username(username):
         return jsonify({"error": "User not found"}), 404
     return jsonify(user), 200
 
+
 @users_bp.route("/profile/<username>", methods=["GET"])
 @jwt_required()
 def get_user_profile(username):
@@ -33,11 +34,31 @@ def get_user_profile(username):
 
     posts = Post.get_posts_by_username(username)
     projects = Project.get_user_projects_by_username(username)
-    invites = []
-    if user['_id'] == current_user_id:
-        invites = Invitation.find_pending_by_user(current_user_id)
 
-    profile_data = { "user": user, "posts": posts, "projects": projects, "invites": invites }
+    invites_cursor = []
+    # Apenas busca convites se o perfil visualizado for o do usuário logado
+    if str(user['_id']) == current_user_id:
+        invites_from_db = Invitation.find_pending_by_user(current_user_id)
+        # **CORREÇÃO APLICADA AQUI**
+        # Serializa os convites para converter ObjectId para string
+        for inv in invites_from_db:
+            project = Project.get_project(str(inv['project_id']))
+            from_user = User.get_user(str(inv['from_user_id']))
+            invites_cursor.append({
+                'id': str(inv['_id']),
+                'project': {
+                    'id': str(inv['project_id']),
+                    'title': project.get('title') if project else 'Unknown Project'
+                },
+                'from_user': {
+                    'id': str(inv['from_user_id']),
+                    'username': from_user.get('username') if from_user else 'Unknown User'
+                },
+                'status': inv['status'],
+                'created_at': inv['created_at'].isoformat()  # Converte datetime para string
+            })
+
+    profile_data = {"user": user, "posts": posts, "projects": projects, "invites": invites_cursor}
     return jsonify(profile_data), 200
 
 
@@ -54,9 +75,11 @@ def delete_email():
 
     html_body = render_template("delete_email.html", username=escape(user['username']), delete_url=delete_url)
 
-    msg = Message(subject="Confirm Account Deletion", recipients=[user["email"]], html=html_body, sender=os.getenv("MAIL_USERNAME"))
+    msg = Message(subject="Confirm Account Deletion", recipients=[user["email"]], html=html_body,
+                  sender=os.getenv("MAIL_USERNAME"))
     mail.send(msg)
     return jsonify({"message": "Check your email to confirm account deletion."}), 200
+
 
 @users_bp.route("/delete-confirm/<token>", methods=["GET"])
 def delete_confirm(token):
@@ -73,6 +96,7 @@ def delete_confirm(token):
 
     return render_template("delete_account_template.html", status=status)
 
+
 @users_bp.route("/similar", methods=["GET"])
 @jwt_required()
 def get_users_similar():
@@ -80,6 +104,7 @@ def get_users_similar():
     if users is None:
         return jsonify({"error": "User not found"}), 404
     return jsonify(users), 200
+
 
 @users_bp.route('/config', methods=['PUT'])
 @jwt_required()
@@ -93,6 +118,7 @@ def config_user():
         music_tags=data.get("music_tags") or []
     )
     return jsonify(result), status_code
+
 
 @users_bp.route('/follow', methods=['POST'])
 @jwt_required()
@@ -108,6 +134,7 @@ def post_follower():
     except ValueError as ve:
         return jsonify({'error': str(ve)}), 400
 
+
 @users_bp.route("/search", methods=["GET"])
 @jwt_required()
 def search_users():
@@ -116,6 +143,7 @@ def search_users():
     users = User.find_by_query(query, get_jwt_identity())
     return jsonify(users), 200
 
+
 @users_bp.route('/<username>/followers', methods=['GET'])
 @jwt_required()
 def get_followers_list(username):
@@ -123,6 +151,7 @@ def get_followers_list(username):
     if not user: return jsonify({"error": "User not found"}), 404
     followers_details = User.get_user_details_by_ids(user['followers'])
     return jsonify(followers_details), 200
+
 
 @users_bp.route('/<username>/following', methods=['GET'])
 @jwt_required()

@@ -21,7 +21,7 @@ export default function useDeletePost() {
       }
 
       toast.success(t('post.deletedSuccess'));
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(postId); // Passa o ID do post deletado
     } catch (err) {
       toast.error(err.message);
     } finally {
