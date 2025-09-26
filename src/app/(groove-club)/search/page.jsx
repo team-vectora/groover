@@ -30,7 +30,7 @@ export default function SearchPage() {
             setLoading(true);
             const tagsQuery = selectedTags.join(',');
             const response = await fetch(`${API_BASE_URL}/search?q=${debouncedQuery}&tags=${tagsQuery}&type=${searchType}`, {
-                headers: { Authorization: `Bearer ${token}` }
+                credentials: "include"
             });
             const data = await response.json();
             console.log("Projects")

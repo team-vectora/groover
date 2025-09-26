@@ -9,16 +9,15 @@ import { faImage } from '@fortawesome/free-solid-svg-icons';
 
 const SaveMusicPopUp = ({
                             open, onSave, onCancel, title, setTitle,
-                            description, setDescription, coverImage, setCoverImage
+                            description, setDescription
                         }) => {
     const { t } = useTranslation();
     const fileInputRef = useRef(null);
-    const [preview, setPreview] = useState(coverImage);
+    const [preview, setPreview] = useState("");
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setCoverImage(file);
             setPreview(URL.createObjectURL(file));
         }
     };
@@ -41,7 +40,7 @@ const SaveMusicPopUp = ({
                                 <FontAwesomeIcon icon={faImage} className="text-primary text-2xl" />
                             )}
                         </div>
-                        <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*"/>
+                        <input id="file-upload" type="file" ref={fileInputRef} accept="image/*" onChange={handleImageChange} className="hidden"/>
                         <div className="flex-1">
                             <input type="text" placeholder={t('editor.title')} value={title} onChange={(e) => setTitle(e.target.value)}
                                    className="w-full bg-bg-darker text-foreground border border-primary-light rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-light" required/>

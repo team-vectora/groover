@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const FeedPage = () => {
     const { username, userId } = useAuth();
-    const { posts, loading, error } = usePosts();
+    const { posts, loading, error, updatePost } = usePosts();
     const { setCurrentProject } = useContext(MidiContext);
 
     // Efeito para RESTAURAR a posição do scroll ao entrar na página
@@ -20,11 +20,8 @@ const FeedPage = () => {
             if (scrollPosition) {
                 console.log(`%c[Feed] RESTAURANDO SCROLL: Posição encontrada: ${scrollPosition}.`, 'color: #2ecc71;');
                 // Adiciona um pequeno delay para garantir que o DOM esteja pronto
-                setTimeout(() => {
-                    window.scrollTo(0, parseInt(scrollPosition, 10));
-                    // Limpa a posição somente após o uso para não interferir em outras navegações
-                    sessionStorage.removeItem('feedScrollPosition');
-                }, 100);
+                window.scrollTo(0, parseInt(scrollPosition, 10));
+                sessionStorage.removeItem('feedScrollPosition');
             }
         }
     }, [loading, posts]);
@@ -45,6 +42,7 @@ const FeedPage = () => {
                             post={post}
                             profileId={userId}
                             setCurrentProject={setCurrentProject}
+                            onUpdatePost={updatePost}
                         />
                     ))}
                 </div>

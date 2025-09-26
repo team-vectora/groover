@@ -15,7 +15,7 @@ import { API_BASE_URL } from "../../../../config";
 
 export default function ProfilePage({ params }) {
   const { t } = useTranslation();
-  const { user: username } = params;
+  const { user: username } = React.use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { userId, username: currentUsername } = useAuth();

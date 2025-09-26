@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-// CORREÇÃO: Importa a função de upload unificada
 import { uploadToCloudinary } from '../../lib/util/upload';
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
 import { toast } from 'react-toastify';
@@ -33,8 +32,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
     try {
       let profilePicUrl = profilePic;
       if (profilePicFile) {
-        // CORREÇÃO: Usa a função de upload unificada
-        profilePicUrl = await uploadToCloudinary(profilePicFile);
+        profilePicUrl = await uploadToCloudinary(profilePicFile, 'avatar');
       }
 
       const res = await fetch(`${API_BASE_URL}/users/config`, {
@@ -50,6 +48,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
         window.dispatchEvent(new Event('profileUpdated'));
         toast.success(t('configUserPopup.profileUpdatedSuccess'));
         if (onSuccess) onSuccess();
+        if (!isOnboarding) onClose(); // <-- LÓGICA RESTAURADA
       } else {
         toast.error(data.error || t('configUserPopup.updateError'));
       }

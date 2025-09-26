@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 const LivecodePage = () => {
   const { t } = useTranslation();
   const { token } = useAuth();
-  const { posts, loading, error } = usePosts(token);
+  const { posts, loading, error } = usePosts();
   const { setCurrentProject } = useContext(MidiContext);
 
   return (

@@ -23,9 +23,8 @@ const SharePopUp = ({ open, onClose, project, onShare }) => {
       }
       setLoading(true);
       try {
-        const token = localStorage.getItem('token');
         const response = await fetch(`${API_BASE_URL}/users/search?q=${debouncedSearchTerm}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          credentials: "include"
         });
         const data = await response.json();
         setUsers(data);

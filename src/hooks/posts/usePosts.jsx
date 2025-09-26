@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+// src/hooks/posts/usePosts.jsx
+import { useState, useEffect, useCallback } from 'react';
 import { API_BASE_URL } from '../../config';
 import { useTranslation } from 'react-i18next';
 
@@ -7,19 +8,16 @@ export default function usePosts() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { t } = useTranslation();
-  const cacheKey = 'feed_posts';
 
   const fetchPosts = async () => {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/posts`, {
-        credentials: "include" // Usa o cookie para autenticação
+        credentials: "include"
       });
-
       const data = await res.json();
       if (res.ok) {
         setPosts(data);
-        sessionStorage.setItem(cacheKey, JSON.stringify(data));
       } else {
         setError(data.error || t('livecode.error'));
       }
@@ -31,13 +29,18 @@ export default function usePosts() {
   };
 
   useEffect(() => {
-    const cachedPosts = sessionStorage.getItem(cacheKey);
-    if (cachedPosts) {
-      setPosts(JSON.parse(cachedPosts));
-    } else {
-      fetchPosts();
-    }
+    fetchPosts();
   }, []);
 
-  return { posts, loading, error, refetch: fetchPosts };
+  // FUNÇÃO ADICIONADA: Atualiza um post específico na lista de posts
+  const updatePost = useCallback((updatedPost) => {
+    setPosts(currentPosts =>
+        currentPosts.map(post =>
+            post._id === updatedPost._id ? updatedPost : post
+        )
+    );
+  }, []);
+
+
+  return { posts, loading, error, refetch: fetchPosts, updatePost };
 }

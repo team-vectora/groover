@@ -21,9 +21,9 @@ const CommentForm = ({ postId, token, onCommentAdded, projects }) => {
             await fetch(`${API_BASE_URL}/posts/${postId}/comment`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
+                credentials: "include",
                 body: JSON.stringify({ caption })
             });
             setCaption('');

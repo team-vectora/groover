@@ -50,6 +50,7 @@ export default function Post({
                                  setCurrentProject,
                                  handleClickFork,
                                  onPostCreated,
+                                 onUpdatePost
                              }) {
     const { t } = useTranslation();
     const router = useRouter();
@@ -98,13 +99,22 @@ export default function Post({
 
     const avatarUrl = post.user?.avatar || "/img/default_avatar.png";
 
-    const { likePost } = useLikePost(token, () => {
-        if (isLiked) {
-            setLikesCount(prev => prev - 1);
-        } else {
-            setLikesCount(prev => prev + 1);
+    const { likePost } = useLikePost(() => {
+        const newIsLiked = !isLiked;
+        const newLikesCount = newIsLiked ? likesCount + 1 : likesCount - 1;
+
+        setIsLiked(newIsLiked);
+        setLikesCount(newLikesCount);
+
+        // Notifica a página pai sobre a mudança
+        if (onUpdatePost) {
+            onUpdatePost({
+                ...post,
+                likes: newIsLiked
+                    ? [...post.likes, userId]
+                    : post.likes.filter(id => id !== userId),
+            });
         }
-        setIsLiked(!isLiked);
     });
 
     const nextImage = () => setCurrentImageIndex(prev => (prev === post.photos.length - 1 ? 0 : prev + 1));

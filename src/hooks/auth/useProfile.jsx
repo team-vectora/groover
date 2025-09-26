@@ -15,28 +15,20 @@ export default function useProfile(username) {
 
   const fetchData = useCallback(async () => {
     if (!username) return;
-
     setProfileData(prev => ({ ...prev, loading: true, error: null }));
-
     try {
       const res = await fetch(`${API_BASE_URL}/users/profile/${username}`, {
-        credentials: "include" // Usa o cookie para autenticação
+        credentials: "include"
       });
-
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || t('errors.user_not_found'));
       }
-
       const data = await res.json();
+      console.log(data)
       setProfileData({ ...data, loading: false, error: null });
-
     } catch (error) {
-      setProfileData(prev => ({
-        ...prev,
-        loading: false,
-        error: error.message
-      }));
+      setProfileData(prev => ({ ...prev, loading: false, error: error.message }));
     }
   }, [username, t]);
 
@@ -44,19 +36,24 @@ export default function useProfile(username) {
     fetchData();
   }, [fetchData]);
 
+  const updatePostInProfile = useCallback((updatedPost) => {
+    setProfileData(prev => ({
+      ...prev,
+      posts: prev.posts.map(post =>
+          post._id === updatedPost._id ? updatedPost : post
+      ),
+    }));
+  }, []);
 
   useEffect(() => {
     fetchData();
-
     const handleFollowingUpdate = ({ detail }) => {
       setProfileData(prev => {
         if (!prev.user) return prev;
-
         const newFollowing = [...prev.user.following];
         const newFollowers = [...prev.user.followers];
         let newIsFollowing = prev.user.is_following;
         const currentUserId = localStorage.getItem('id');
-
         if (prev.user._id === detail.userId) {
           newIsFollowing = detail.isFollowing;
           if (detail.isFollowing) {
@@ -66,7 +63,6 @@ export default function useProfile(username) {
             if (index > -1) newFollowers.splice(index, 1);
           }
         }
-
         if (prev.user._id === currentUserId) {
           if (detail.isFollowing) {
             if (!newFollowing.includes(detail.userId)) newFollowing.push(detail.userId);
@@ -75,7 +71,6 @@ export default function useProfile(username) {
             if (index > -1) newFollowing.splice(index, 1);
           }
         }
-
         return {
           ...prev,
           user: {
@@ -87,13 +82,11 @@ export default function useProfile(username) {
         };
       });
     };
-
     window.addEventListener('followingUpdated', handleFollowingUpdate);
-
     return () => {
       window.removeEventListener('followingUpdated', handleFollowingUpdate);
     };
   }, [fetchData]);
 
-  return { ...profileData, refetch };
+  return { ...profileData, refetch, updatePostInProfile  };
 }

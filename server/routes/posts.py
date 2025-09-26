@@ -85,6 +85,7 @@ def post_like():
 
     return jsonify(response), status
 
+
 @posts_bp.route('/<post_id>/comment', methods=['POST'])
 @jwt_required()
 def add_comment_to_post(post_id):
