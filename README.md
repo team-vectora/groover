@@ -2,7 +2,7 @@
   <img src="public/img/vetora_camiseta_costas_png.png" alt="Logo Groover - Estética Frutiger Aero" height="300" />
 </div>
 
-<h1 align="center">🎶 Groover: Criação Musical Colaborativa 🎹</h1>
+<h1 align="center">🎶 Groover: Criação Musical Colaborativa</h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Plataforma%20Online-blue?style=for-the-badge&logo=musicbrainz&logoColor=white" alt="Status Plataforma Online">
@@ -100,10 +100,10 @@ O Groover foi desenvolvido pelo **Team Vectora**, uma equipe de cinco estudantes
 
 Siga-nos e acompanhe as novidades do projeto e futuras iterações:
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/company/team-vectora/) 🎼
-[![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/teamvectora/) 🎼
-[![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@TeamVectora) 🎼
-[![GitHub (Repositório)](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/team-vectora/groover) 🎼
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/company/team-vectora/) 
+[![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/teamvectora/) 
+[![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@TeamVectora) 
+[![GitHub (Repositório)](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/team-vectora/groover) 
 
 ---
 
