@@ -16,6 +16,8 @@ export default function usePosts() {
         credentials: "include"
       });
       const data = await res.json();
+      console.log("Posts")
+      console.log(data)
       if (res.ok) {
         setPosts(data);
       } else {

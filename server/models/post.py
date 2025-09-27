@@ -123,7 +123,7 @@ class Post:
                             'if': {'$ifNull': ['$project', False]},
                             'then': {
                                 'id': {'$toString': '$project._id'},
-                                'cover_image': { '$ifNull': ['$project.cover_image', '/img/default_cover.png'] },
+                                'cover_image': {'$ifNull': ['$project.cover_image', '']},
                                 'user_id': {'$toString': '$project.user_id'},
                                 'title': {'$ifNull': ['$project.title', 'New Project']},
                                 'description': {'$ifNull': ['$project.description', '']},
@@ -250,6 +250,7 @@ class Post:
                             'if': {'$ifNull': ['$project', False]},
                             'then': {
                                 'id': {'$toString': '$project._id'},
+                                'cover_image': {'$ifNull': ['$project.cover_image', '']},
                                 'user_id': {'$toString': '$project.user_id'},
                                 'title': {'$ifNull': ['$project.title', 'New Project']},
                                 'description': {'$ifNull': ['$project.description', '']},
@@ -337,6 +338,7 @@ class Post:
                         'if': {'$ifNull': ['$project', False]},
                         'then': {
                             'id': {'$toString': '$project._id'},
+                                'cover_image': {'$ifNull': ['$project.cover_image', '']},
                             'user_id': {'$toString': '$project.user_id'},
                             'title': {'$ifNull': ['$project.title', 'New Project']},
                             'description': {'$ifNull': ['$project.description', '']},
@@ -423,6 +425,7 @@ class Post:
                             'if': {'$ifNull': ['$project', False]},
                             'then': {
                                 'id': {'$toString': '$project._id'},
+                                'cover_image': {'$ifNull': ['$project.cover_image', '']},
                                 'user_id': {'$toString': '$project.user_id'},
                                 'title': {'$ifNull': ['$project.title', 'New Project']},
                                 'description': {'$ifNull': ['$project.description', '']},
@@ -520,6 +523,7 @@ class Post:
                             'if': {'$ifNull': ['$project', False]},
                             'then': {
                                 'id': {'$toString': '$project._id'},
+                                'cover_image': {'$ifNull': ['$project.cover_image', '']},
                                 'user_id': {'$toString': '$project.user_id'},
                                 'title': {'$ifNull': ['$project.title', 'New Project']},
                                 'description': {'$ifNull': ['$project.description', '']},
@@ -621,8 +625,16 @@ class Post:
                         'if': {'$ifNull': ['$project', False]},
                         'then': {
                             'id': {'$toString': '$project._id'},
-                            'id': {'$toString': '$project._id'},
-                            'title': '$project.title',
+                            'cover_image': {'$ifNull': ['$project.cover_image', '']},
+                            'user_id': {'$toString': '$project.user_id'},
+                            'title': {'$ifNull': ['$project.title', 'New Project']},
+                            'description': {'$ifNull': ['$project.description', '']},
+                            'bpm': '$project.bpm',
+                            'instrument': {'$ifNull': ['$project.instrument', 'piano']},
+                            'volume': {'$ifNull': ['$project.volume', -10]},
+                            'tempo': '$project.tempo',
+                            'midi': '$project.midi',
+                            'created_at': '$project.created_at'
                         },
                         'else': None
                     }
@@ -632,4 +644,8 @@ class Post:
         posts = list(mongo.db.posts.aggregate(pipeline))
         for post in posts:
             post['likes'] = [str(like) for like in post.get('likes', [])]
+            # **CORREÇÃO APLICADA AQUI**
+            if post.get('project') and post['project'].get('midi') and isinstance(post['project']['midi'], bytes):
+                midi_b64 = base64.b64encode(post['project']['midi']).decode('utf-8')
+                post['project']['midi'] = f"data:audio/midi;base64,{midi_b64}"
         return posts
