@@ -109,6 +109,11 @@ export const useTonePlayer = (projectState) => {
             setIsPlaying(false);
             return;
         }
+        if (state === 'paused') {
+            Tone.Transport.start();
+            setIsPlaying(true);
+            return;
+        }
 
         stop();
 

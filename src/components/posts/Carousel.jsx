@@ -57,6 +57,7 @@ const Carousel = ({ slides = [], options = {} }) => {
         align: 'center',
         containScroll: 'trimSnaps',
         dragFree: false,
+        loop: true,
         ...options,
     });
 
@@ -74,7 +75,7 @@ const Carousel = ({ slides = [], options = {} }) => {
 
     return (
         <section className="relative w-full max-w-full mx-auto overflow-hidden group">
-            <div className="embla__viewport border-1 border-primary rounded-lg" ref={emblaRef}>
+            <div className="embla__viewport rounded-lg border-1 border-primary" ref={emblaRef}>
                 <div className="embla__container flex">
                     {slides.map((slide, index) => {
                         const src = typeof slide === 'string' ? slide : slide.src;
@@ -82,7 +83,8 @@ const Carousel = ({ slides = [], options = {} }) => {
 
                         return (
                             <div
-                                className="embla__slide relative flex-shrink-0 w-full"
+                                className="embla__slide relative min-w-0"
+                                style={{ flex: '0 0 100%' }} // **CORREÇÃO: Força a largura do slide para 100%**
                                 key={index}
                             >
                                 <div className="relative w-full aspect-video bg-transparent rounded-lg overflow-hidden">
@@ -96,7 +98,7 @@ const Carousel = ({ slides = [], options = {} }) => {
                                             unoptimized
                                         />
                                     ) : (
-                                        <div className="bg-gray-200 w-full h-full flex items-center justify-center rounded-lg">
+                                        <div className="bg-gray-800 w-full h-full flex items-center justify-center rounded-lg">
                                             <span>Imagem não disponível</span>
                                         </div>
                                     )}
@@ -129,7 +131,7 @@ const Carousel = ({ slides = [], options = {} }) => {
 
             {/* Indicadores de bolinha */}
             {slides.length > 1 && (
-                <div className="flex justify-center mt-4">
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center">
                     {scrollSnaps.map((_, index) => (
                         <DotButton
                             key={index}

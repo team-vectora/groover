@@ -3,7 +3,8 @@
 import { useRouter, useParams } from "next/navigation";
 import { useAuth, useProjectStates, useTonePlayer, useProjectAPI, useForkProject } from '../../../hooks';
 import { HeaderEditor, SaveMusicPopUp, EditorLayout, ConfirmationPopUp, LoadingDisc } from '../../../components';
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useContext } from "react";
+import { MidiContext } from "../../../contexts/MidiContext";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useTranslation } from "react-i18next";
@@ -13,12 +14,13 @@ export default function EditorPage() {
     const params = useParams();
     const { id: projectId } = params;
 
+    const { setIsEditorActive, stop: stopGlobalPlayer } = useContext(MidiContext);
+
     const { state: projectState, actions: projectActions, projectData } = useProjectStates();
     const { userId, loading: authLoading } = useAuth();
     const { playerState, playerActions } = useTonePlayer(projectState);
     const { apiState, apiActions } = useProjectAPI(projectId, projectActions);
     const { forkProject, loading: forkLoading } = useForkProject();
-
     const { t } = useTranslation();
 
     const [openPop, setOpenPop] = useState(false);
@@ -42,16 +44,12 @@ export default function EditorPage() {
         await forkProject(projectId);
     };
 
-    const handleClear = () => {
-        setConfirmationAction('clear');
-    };
+    const handleClear = () => setConfirmationAction('clear');
 
     const handleConfirmAction = () => {
-        if (confirmationAction === 'clear') {
-            if (projectState.activePatternId) {
-                projectActions.updatePatternNotes(projectState.activePatternId, []);
-                toast.info(t('toasts.patternCleared'));
-            }
+        if (confirmationAction === 'clear' && projectState.activePatternId) {
+            projectActions.updatePatternNotes(projectState.activePatternId, []);
+            toast.info(t('toasts.patternCleared'));
         }
         setConfirmationAction(null);
     };
@@ -77,11 +75,10 @@ export default function EditorPage() {
     return (
         <div className="flex flex-col h-screen bg-background text-foreground">
             <ToastContainer position="top-center" theme="dark" />
-
             <HeaderEditor
                 onPlaySong={handlePlay}
                 onStop={playerActions.stop}
-                isPlaying={playerState.isPlaying}
+                isPlaying={playerState.isPlaying || playerState.isPatternPlaying}
                 onExport={() => apiActions.exportToMIDI(projectData)}
                 onImport={apiActions.importFromMIDI}
                 onSave={() => setOpenPop(true)}
@@ -94,7 +91,6 @@ export default function EditorPage() {
                 isSequencerOpen={isSequencerOpen}
                 isControlPanelOpen={isControlPanelOpen}
             />
-
             <SaveMusicPopUp
                 open={openPop}
                 onSave={() => { apiActions.handleSave({ ...projectData, coverImage: coverImageFile }); setOpenPop(false); }}
@@ -106,7 +102,6 @@ export default function EditorPage() {
                 onImageChange={setCoverImageFile}
                 coverImage={apiState.project?.cover_image}
             />
-
             <EditorLayout
                 projectState={projectState}
                 projectActions={projectActions}
@@ -120,7 +115,6 @@ export default function EditorPage() {
                 setIsSequencerOpen={setIsSequencerOpen}
                 isControlPanelOpen={isControlPanelOpen}
             />
-
             <ConfirmationPopUp
                 open={!!confirmationAction}
                 onClose={() => setConfirmationAction(null)}
