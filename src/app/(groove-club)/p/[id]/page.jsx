@@ -3,7 +3,7 @@
 import { useState, useEffect, useContext } from "react";
 import { Post, CommentForm, CommentThread, LoadingDisc } from "../../../../components";
 import { useParams } from "next/navigation";
-import { useAuth, useProfile } from "../../../../hooks";
+import { useAuth, useProfile, useMidiPlayer } from "../../../../hooks";
 import { MidiContext } from "../../../../contexts/MidiContext";
 import { ToastContainer } from 'react-toastify';
 import { API_BASE_URL } from '../../../../config';
@@ -17,7 +17,7 @@ function PostPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { userId, username } = useAuth();
-    const { setCurrentProject } = useContext(MidiContext);
+    const { setCurrentProject } = useMidiPlayer();
     const { projects } = useProfile(username);
 
     const fetchPost = async () => {

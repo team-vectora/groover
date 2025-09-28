@@ -1,8 +1,6 @@
 'use client';
-import { useContext } from "react";
-import { MidiContext } from "../../../contexts/MidiContext";
 import { Post } from "../../../components";
-import { useAuth, usePosts } from "../../../hooks/";
+import { useAuth, usePosts, useMidiPlayer } from "../../../hooks/";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useTranslation } from "react-i18next";
@@ -11,7 +9,7 @@ const LivecodePage = () => {
   const { t } = useTranslation();
   const { token } = useAuth();
   const { posts, loading, error } = usePosts();
-  const { setCurrentProject } = useContext(MidiContext);
+  const { setCurrentProject } = useMidiPlayer();
 
   return (
     <div className="flex flex-col gap-10 w-full px-4 md:px-8 py-8 max-w-6xl mx-auto">

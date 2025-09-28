@@ -1,12 +1,12 @@
 'use client';
 import { useEffect, useState, useContext, useRef } from "react";
 import { motion } from "framer-motion";
-import { MidiContext } from "../../contexts/MidiContext";
+import { useMidiPlayer } from "../../hooks";
 import { AudioVisualizer } from "../../components";
 import * as Tone from "tone";
 
 export default function GrooveFeed() {
-  const { currentProject, setCurrentProject } = useContext(MidiContext);
+  const { currentProject, setCurrentProject } = useMidiPlayer();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [started, setStarted] = useState(false);

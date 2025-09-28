@@ -6,7 +6,6 @@ import { useState, useContext, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { MidiContext } from '../../../../contexts/MidiContext';
 import { useAuth, useProfile, useForkProject, useShareProject, useDeleteProject } from '../../../../hooks';
 import { ProfileHeader, ProfileTabs, Post, ProjectCard, Invite,
   PostFormPopUp, ConfigUserPopUp, SharePopUp, ConfirmationPopUp, FollowListPopup, LoadingDisc, ManageCollaboratorsPopup } from '../../../../components';
@@ -21,7 +20,6 @@ export default function ProfilePage({ params }) {
   const { userId, username: currentUsername } = useAuth();
   const { user, posts, projects, invites, loading, error, refetch } = useProfile(username);
 
-  const { setCurrentProject } = useContext(MidiContext);
   const [activeTab, setActiveTab] = useState('posts');
   const [openPostForm, setOpenPostForm] = useState(false);
   const [openConfig, setOpenConfig] = useState(false);
@@ -32,7 +30,7 @@ export default function ProfilePage({ params }) {
 
   const { forkProject } = useForkProject();
   const { shareProject: shareProjectApi } = useShareProject();
-  const { deleteProject: deletePost } = useDeleteProject();
+  const { deleteProject } = useDeleteProject();
 
   const isCurrentUser = currentUsername === username;
 
@@ -54,7 +52,7 @@ export default function ProfilePage({ params }) {
 
   const confirmDelete = async () => {
     if (projectToDelete) {
-      await deletePost(projectToDelete, refetch);
+      await deleteProject(projectToDelete, refetch);
       setProjectToDelete(null);
     }
   };
@@ -73,8 +71,7 @@ export default function ProfilePage({ params }) {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
-    router.push('/login');
+    router.push('/logout');
   };
 
   if (loading) return <LoadingDisc />;
@@ -89,7 +86,7 @@ export default function ProfilePage({ params }) {
         {activeTab === 'posts' && (
             <div className="space-y-6">
               {isCurrentUser && <div className="flex justify-end mb-4"><button className="bg-accent hover:bg-accent-light text-white p-2 rounded-full w-12 h-12 flex items-center justify-center text-2xl" onClick={() => setOpenPostForm(true)} title="Novo Post">+</button></div>}
-              {!posts?.length ? <p className="text-center text-gray-400">{t('profile.noPosts')}</p> : posts.map(post => <Post key={post._id} post={post} userId={userId} setCurrentProject={setCurrentProject} onPostCreated={refetch} />)}
+              {!posts?.length ? <p className="text-center text-gray-400">{t('profile.noPosts')}</p> : posts.map(post => <Post key={post._id} post={post} userId={userId} onPostCreated={refetch} />)}
             </div>
         )}
 
@@ -98,7 +95,7 @@ export default function ProfilePage({ params }) {
               {isCurrentUser && <button className="mb-4 px-4 py-2 bg-accent hover:bg-accent-light text-white rounded" onClick={() => router.push('/editor/new')}>{t('profile.newProject')}</button>}
               {!projects?.length ? <p className="text-center text-gray-400">{t('profile.noMusics')}</p> : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {projects.map(project => <ProjectCard key={project.id} project={project} isYourProfile={isCurrentUser} setCurrentProject={setCurrentProject} handleClickShare={handleShareProject} handleClickDelete={handleDeleteClick} handleManageCollaborators={handleManageCollaborators}/>)}
+                    {projects.map(project => <ProjectCard key={project.id} project={project} isYourProfile={isCurrentUser} handleClickShare={handleShareProject} handleClickDelete={handleDeleteClick} handleManageCollaborators={handleManageCollaborators}/>)}
                   </div>
               )}
             </div>

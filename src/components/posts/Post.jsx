@@ -8,21 +8,20 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faComment,
     faShareAlt,
-    faChevronLeft,
-    faChevronRight,
     faArrowUp,
     faEllipsisVertical,
     faTrash
 } from '@fortawesome/free-solid-svg-icons';
 import FollowButton from "../feed/FollowButton";
-import Carousel from "./Carousel"; // se estiver na mesma pasta
+import Carousel from "./Carousel";
 import ProjectCard from "../profile/ProjectCard";
 import ConfirmationPopUp from '../editor/ConfirmationPopUp';
 import { useAuth, useLikePost, useDeletePost, useOutsideClick } from "../../hooks";
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from "framer-motion";
 import { toast } from 'react-toastify';
-const OPTIONS = { loop: true }; // ✅
+
+const OPTIONS = { loop: true };
+
 const HeartAnimation = ({ position, showHeart }) => {
     if (!showHeart) return null;
     return (
@@ -35,18 +34,15 @@ const HeartAnimation = ({ position, showHeart }) => {
 };
 
 export default function Post({
-    post,
-    token,
-    userId,
-    profileId,
-    setCurrentProject,
-    handleClickFork,
-    onPostCreated,
-    onUpdatePost,
-}) {
+                                 post,
+                                 userId,
+                                 profileId,
+                                 handleClickFork,
+                                 onPostCreated,
+                                 onUpdatePost,
+                             }) {
     const { t } = useTranslation();
     const router = useRouter();
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showHeart, setShowHeart] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
     const [heartPos, setHeartPos] = useState({ x: 0, y: 0 });
@@ -54,7 +50,7 @@ export default function Post({
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isLiked, setIsLiked] = useState(post.likes.includes(userId));
     const [likesCount, setLikesCount] = useState(post.likes.length);
-    const { deletePost } = useDeletePost(token);
+    const { deletePost } = useDeletePost();
     const menuRef = useOutsideClick(() => setIsMenuOpen(false));
     const commentsCount = post.comment_count;
     const pathname = usePathname();
@@ -124,8 +120,6 @@ export default function Post({
         }
     };
 
-    const handleProjectClick = (project) => setCurrentProject(project);
-
     const handleShareClick = () => {
         navigator.clipboard.writeText(`${window.location.origin}/p/${post._id}`);
         toast.success(t("share.link_copied"));
@@ -193,13 +187,13 @@ export default function Post({
                 </div>
             )}
 
-
+            {/* Carrossel de Imagens */}
             {post.photos?.length > 0 && <Carousel slides={post.photos} options={OPTIONS} />}
 
             {/* Projeto relacionado */}
             {post.project && (
-                <div onClick={() => handleProjectClick(post.project)}>
-                    <ProjectCard project={post.project} profileId={profileId} setCurrentProject={setCurrentProject} handleClickFork={handleClickFork} />
+                <div>
+                    <ProjectCard project={post.project} profileId={profileId} handleClickFork={handleClickFork} />
                 </div>
             )}
 

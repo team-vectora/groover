@@ -1,9 +1,8 @@
 // src/app/(groove-club)/feed/page.jsx
 'use client';
 import { useContext, useEffect, useState } from "react";
-import { MidiContext } from "../../../contexts/MidiContext";
 import { Post, LoadingDisc } from "../../../components";
-import { useAuth, usePosts } from "../../../hooks/";
+import { useAuth, usePosts, useMidiPlayer } from "../../../hooks/";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -12,7 +11,7 @@ const POSTS_PER_BATCH = 10; // quantos posts mostrar de cada vez
 const FeedPage = () => {
     const { username, userId } = useAuth();
     const { posts: allPosts, loading, error, refetch, updatePost } = usePosts();
-    const { setCurrentProject } = useContext(MidiContext);
+    const { setCurrentProject } = useMidiPlayer();
 
     const [visiblePosts, setVisiblePosts] = useState([]);
     const [nextIndex, setNextIndex] = useState(0);

@@ -26,7 +26,7 @@ const StopIcon = (
 export default function MidiPlayer() {
     const { t } = useTranslation();
     const [collapsed, setCollapsed] = useState(false);
-    const { midi, isPlaying, progress, duration, currentProject, playPause, stop, seek, formatTime } = useMidiPlayer();
+    const { isLoaded, isPlaying, progress, duration, currentProject, playPause, stop, seek, formatTime } = useMidiPlayer();
 
     return (
         <div
@@ -51,7 +51,7 @@ export default function MidiPlayer() {
                             {currentProject?.title || t('midiPlayer.noProject')}
                         </span>
                         <span className="text-xs md:text-sm text-text-lighter font-mono mr-6">
-                            {midi ? `${formatTime(progress)} / ${formatTime(duration)}` : "00:00 / 00:00"}
+                            {isLoaded ? `${formatTime(progress)} / ${formatTime(duration)}` : "00:00 / 00:00"}
                         </span>
                     </div>
 
@@ -63,9 +63,9 @@ export default function MidiPlayer() {
                         step={0.01}
                         value={progress}
                         onChange={(e) => seek(parseFloat(e.target.value))}
-                        disabled={!midi}
+                        disabled={!isLoaded}
                         className={`w-full h-1 rounded-full appearance-none cursor-pointer
-                            ${!midi ? "opacity-50 cursor-not-allowed" : ""}
+                            ${!isLoaded ? "opacity-50 cursor-not-allowed" : ""}
                             bg-gradient-to-r from-accent-light to-accent`}
                     />
 
@@ -73,10 +73,10 @@ export default function MidiPlayer() {
                     <div className="flex justify-center items-center gap-6 mt-3">
                         <button
                             onClick={playPause}
-                            disabled={!midi}
+                            disabled={!isLoaded}
                             className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300
                                 ${isPlaying ? "bg-accent hover:bg-accent-light shadow-lg" : "bg-primary hover:bg-primary-light shadow-md"}
-                                ${!midi ? "opacity-50 cursor-not-allowed" : ""}`}
+                                ${!isLoaded ? "opacity-50 cursor-not-allowed" : ""}`}
                             aria-label={isPlaying ? t('midiPlayer.pause') : t('midiPlayer.play')}
                         >
                             {isPlaying ? PauseIcon : PlayIcon}
@@ -84,7 +84,7 @@ export default function MidiPlayer() {
 
                         <button
                             onClick={stop}
-                            disabled={!midi || (!isPlaying && progress === 0)}
+                            disabled={!isLoaded || (!isPlaying && progress === 0)}
                             className="flex items-center justify-center w-10 h-10 rounded-full bg-primary hover:bg-primary-light shadow-md disabled:opacity-50 transition-all duration-300"
                             aria-label={t('midiPlayer.stop')}
                         >
