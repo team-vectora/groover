@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from 'next/image';
 import { usePathname , useRouter } from "next/navigation";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import {
     faComment,
     faShareAlt,
@@ -14,13 +15,14 @@ import {
     faTrash
 } from '@fortawesome/free-solid-svg-icons';
 import FollowButton from "../feed/FollowButton";
+import Carousel from "./Carousel"; // se estiver na mesma pasta
 import ProjectCard from "../profile/ProjectCard";
 import ConfirmationPopUp from '../editor/ConfirmationPopUp';
 import { useAuth, useLikePost, useDeletePost, useOutsideClick } from "../../hooks";
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from 'react-toastify';
-
+const OPTIONS = { loop: true }; // ✅
 const HeartAnimation = ({ position, showHeart }) => {
     if (!showHeart) return null;
     return (
@@ -102,11 +104,6 @@ export default function Post({
             });
         }
     });
-
-    // Loop infinito
-    const nextImage = () => setCurrentImageIndex(prev => (prev === post.photos.length - 1 ? 0 : prev + 1));
-    const prevImage = () => setCurrentImageIndex(prev => (prev === 0 ? post.photos.length - 1 : prev - 1));
-    const goToImage = index => setCurrentImageIndex(index);
 
     const handleLikeImage = (e) => {
         if (isAnimating) return;
@@ -196,73 +193,8 @@ export default function Post({
                 </div>
             )}
 
-            {/* Carrossel de imagens */}
-            {post.photos?.length > 0 && (
-                <div className="relative w-full group select-none">
-                    {/* Botão anterior */}
-                    {post.photos.length > 1 && (
-                        <button
-                            onClick={prevImage}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition"
-                        >
-                            <FontAwesomeIcon icon={faChevronLeft} />
-                        </button>
-                    )}
 
-                    {/* Imagem atual com swipe */}
-                    <div
-                        className="relative w-full overflow-hidden flex items-center justify-center"
-                        onDoubleClick={handleLikeImage}
-                    >
-                        <AnimatePresence initial={false} custom={currentImageIndex}>
-                            <motion.img
-                                key={currentImageIndex}
-                                src={post.photos[currentImageIndex]}
-                                alt={`Post image ${currentImageIndex + 1}`}
-                                className="w-full max-h-[500px] object-contain rounded-md"
-                                initial={{ opacity: 0, x: 50 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -50 }}
-                                transition={{ duration: 0.3, ease: "easeInOut" }}
-                                drag="x"
-                                dragConstraints={{ left: 0, right: 0 }}
-                                onDragEnd={(event, { offset }) => {
-                                    if (offset.x > 50) prevImage();
-                                    if (offset.x < -50) nextImage();
-                                }}
-                            />
-                        </AnimatePresence>
-
-                        {/* Coração no double click */}
-                        <HeartAnimation position={heartPos} showHeart={showHeart} />
-                    </div>
-
-                    {/* Botão próximo */}
-                    {post.photos.length > 1 && (
-                        <button
-                            onClick={nextImage}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition"
-                        >
-                            <FontAwesomeIcon icon={faChevronRight} />
-                        </button>
-                    )}
-
-                    {/* Paginação estilo bolinhas do Instagram */}
-                    {post.photos.length > 1 && (
-                        <div className="flex justify-center items-center gap-2 mt-2">
-                            {post.photos.map((_, index) => (
-                                <span
-                                    key={index}
-                                    onClick={() => goToImage(index)}
-                                    className={`w-2 h-2 rounded-full cursor-pointer transition ${
-                                        index === currentImageIndex ? "bg-accent" : "bg-gray-500/40"
-                                    }`}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
+            {post.photos?.length > 0 && <Carousel slides={post.photos} options={OPTIONS} />}
 
             {/* Projeto relacionado */}
             {post.project && (

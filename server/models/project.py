@@ -10,7 +10,6 @@ from utils.similarity import cosine_similarity
 from .music import Music
 from .user import User
 
-
 class Project:
     @staticmethod
     def create_project(user_id, project_data):
@@ -176,7 +175,7 @@ class Project:
         projects_cursor = mongo.db.projects.find({
             '$or': [{'user_id': user_id_obj}, {'collaborators': user_id_obj}]
         })
-        
+
         projects = list(projects_cursor)
         if not projects:
             return []

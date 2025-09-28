@@ -2,7 +2,6 @@ from datetime import datetime
 from bson.objectid import ObjectId
 from utils.db import mongo
 
-
 class Music:
     @staticmethod
     def create_music(project_id, music_data, user_id):

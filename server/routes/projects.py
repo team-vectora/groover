@@ -4,10 +4,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Project, Music, User, Invitation, Notification
 import base64
 from bson.binary import Binary
-import cloudinary.uploader
 
 projects_bp = Blueprint('projects', __name__)
-
 
 @projects_bp.route('', methods=['POST'])
 @jwt_required()

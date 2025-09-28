@@ -1,4 +1,3 @@
-// src/components/editor/controls/ControlPanel.jsx
 "use client";
 import { ChangeVolume, ChangeBpm, VersionManager, ConfirmationPopUp } from "../../";
 import { useTranslation } from "react-i18next";
@@ -17,7 +16,6 @@ const ControlPanel = ({
 
     const [patternToDelete, setPatternToDelete] = useState(null);
 
-    // Ordena por data de criação para manter a ordem estável
     const patternList = Object.values(patterns).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
     const patternDisplayMap = patternList.reduce((acc, pattern, index) => {

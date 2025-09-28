@@ -9,8 +9,8 @@ from utils.mail import mail
 from .followers import Followers
 from markupsafe import escape
 from werkzeug.security import generate_password_hash
-
 from utils.similarity import cosine_similarity
+
 s = URLSafeTimedSerializer(os.getenv('AUTH_KEY'))
 
 EMAIL_CONTENT = {

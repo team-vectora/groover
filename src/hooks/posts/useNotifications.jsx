@@ -1,4 +1,3 @@
-// src/hooks/posts/useNotifications.jsx
 'use client';
 import { useState, useEffect, useRef } from "react";
 import { API_BASE_URL } from "../../config";
@@ -12,7 +11,6 @@ export default function useNotifications() {
   const [error, setError] = useState("");
   const socketRef = useRef(null);
 
-  // Função para buscar notificações do backend
   const fetchNotifications = async () => {
     setLoading(true);
     try {
@@ -32,7 +30,6 @@ export default function useNotifications() {
     }
   };
 
-  // Marca uma notificação como lida
   const checkNotification = async (notification_id) => {
     try {
       const res = await fetch(`${API_BASE_URL}/notifications/check`, {

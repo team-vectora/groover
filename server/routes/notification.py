@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Notification
 from utils.mail import mail
 from flask_mail import Message
-import os
+
 notifications_bp = Blueprint('notifications', __name__)
 
 @notifications_bp.route("", methods=["GET"])

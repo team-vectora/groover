@@ -23,6 +23,7 @@ export default function EditorPage() {
 
     const [openPop, setOpenPop] = useState(false);
     const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
+    const [isSequencerOpen, setIsSequencerOpen] = useState(false);
     const [confirmationAction, setConfirmationAction] = useState(null);
     const [coverImageFile, setCoverImageFile] = useState(null);
 
@@ -89,6 +90,8 @@ export default function EditorPage() {
                 isCurrentUserProject={isCurrentUserProject}
                 title={projectState.title}
                 setIsControlPanelOpen={setIsControlPanelOpen}
+                setIsSequencerOpen={setIsSequencerOpen}
+                isSequencerOpen={isSequencerOpen}
                 isControlPanelOpen={isControlPanelOpen}
             />
 
@@ -113,6 +116,8 @@ export default function EditorPage() {
                 apiActions={apiActions}
                 isCurrentUserProject={isCurrentUserProject}
                 setIsControlPanelOpen={setIsControlPanelOpen}
+                isSequencerOpen={isSequencerOpen}
+                setIsSequencerOpen={setIsSequencerOpen}
                 isControlPanelOpen={isControlPanelOpen}
             />
 

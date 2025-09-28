@@ -1,9 +1,6 @@
-# models/invitation.py
-
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.db import mongo
-
 
 class Invitation:
     @staticmethod

@@ -1,4 +1,3 @@
-// src/components/editor/controls/Sequencer.jsx
 "use client";
 import { useTranslation } from "react-i18next";
 import ChannelControls from './ChannelControls';
@@ -6,13 +5,13 @@ import ConfirmationPopUp from '../../editor/ConfirmationPopUp';
 import { useState, useRef, useEffect } from "react";
 import Playhead from '../Playhead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faChevronRight, faPlus, faTrash, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 const TICKS_PER_BAR = 32;
 const BARS_PER_PAGE = 8;
 const BAR_WIDTH_PX = 80;
 
-const Sequencer = ({ projectState, projectActions, playerState }) => {
+const Sequencer = ({ projectState, projectActions, playerState, isMobileOpen, onClose }) => {
     const { t } = useTranslation();
     const { channels, patterns, songStructure, activePatternId } = projectState;
     const { setPatternInStructure, setActivePatternId, setChannelInstrument, deleteChannel, addPage, removePage } = projectActions;
@@ -37,11 +36,8 @@ const Sequencer = ({ projectState, projectActions, playerState }) => {
         }
     }, [channels]);
 
-    // Ordena por data de criação para manter a ordem estável
     const patternList = Object.values(patterns).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-    const patternDisplayMap = patternList.reduce((acc, pattern, index) => {
-        acc[pattern.id] = index + 1; return acc;
-    }, {});
+    const patternDisplayMap = patternList.reduce((acc, pattern, index) => { acc[pattern.id] = index + 1; return acc; }, {});
 
     const barCount = songStructure[0]?.length || 0;
     const pageCount = Math.ceil(barCount / BARS_PER_PAGE);
@@ -70,7 +66,6 @@ const Sequencer = ({ projectState, projectActions, playerState }) => {
 
     const startBar = currentPage * BARS_PER_PAGE;
     const endBar = startBar + BARS_PER_PAGE;
-
     const playheadPage = Math.floor(playheadPositionInTicks / (TICKS_PER_BAR * BARS_PER_PAGE));
 
     useEffect(() => {
@@ -79,8 +74,19 @@ const Sequencer = ({ projectState, projectActions, playerState }) => {
         }
     }, [playheadPositionInTicks, isPlaying, playheadPage]);
 
-    return (
-        <div className="h-full w-full flex flex-col relative">
+    // Botão de fechar elegante
+    const CloseButton = () => (
+        <button
+            className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center
+                       bg-red-500/80 text-white hover:bg-red-600 transition-colors duration-200 shadow-md z-20"
+            onClick={onClose}
+        >
+            <FontAwesomeIcon icon={faTimes} />
+        </button>
+    );
+
+    const SequencerContent = (
+        <div className="h-full w-full flex flex-col relative bg-bg-secondary p-2 rounded-lg">
             <div className="flex justify-between items-center mb-2 flex-shrink-0">
                 <h3 className="text-sm font-bold uppercase text-accent">
                     {t("editor.sequencer.title")}
@@ -93,10 +99,11 @@ const Sequencer = ({ projectState, projectActions, playerState }) => {
                     <button onClick={() => setPageToDelete(currentPage)} disabled={pageCount <= 1} className="px-2 py-1 text-xs rounded border border-red-500/50 text-red-500/80 disabled:opacity-50"><FontAwesomeIcon icon={faTrash} /></button>
                 </div>
             </div>
+
             <div className="overflow-auto flex-grow relative">
                 <div className="absolute top-0 h-full pointer-events-none z-30" style={{
                     left: `${channelHeaderWidth}px`,
-                    width: `${BARS_PER_PAGE * BAR_WIDTH_PX}px` // A largura é sempre a da página visível
+                    width: `${BARS_PER_PAGE * BAR_WIDTH_PX}px`
                 }}>
                     <Playhead
                         isPlaying={isPlaying}
@@ -107,59 +114,61 @@ const Sequencer = ({ projectState, projectActions, playerState }) => {
                         totalBars={barCount}
                     />
                 </div>
+
                 <table className="relative w-full border-collapse">
                     <thead>
-                    <tr>
-                        <th ref={channelHeaderRef} className="sticky left-0 bg-bg-secondary p-2 border border-primary z-20 min-w-[200px]">{t('editor.sequencer.channel')}</th>
-                        {Array.from({ length: BARS_PER_PAGE }).map((_, index) => {
-                            const barIndex = startBar + index;
-                            if (barIndex >= barCount) return null;
-                            return (
-                                <th key={barIndex} className="p-2 border border-primary text-xs font-normal text-gray-400" style={{ width: `${BAR_WIDTH_PX}px`, minWidth: `${BAR_WIDTH_PX}px` }}>
-                                    {barIndex + 1}
-                                </th>
-                            );
-                        })}
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {channels.map((channel, channelIndex) => (
-                        <tr key={channel.id} className="group">
-                            <td className="sticky left-0 bg-bg-secondary group-hover:bg-bg-darker p-2 border border-primary z-20 transition-colors">
-                                <ChannelControls
-                                    channel={channel} channelIndex={channelIndex}
-                                    setInstrument={setChannelInstrument}
-                                    instruments={playerState.instruments}
-                                    onDelete={() => setChannelToDelete(channelIndex)}
-                                    channelCount={channels.length}
-                                />
-                            </td>
-                            {songStructure[channelIndex]?.slice(startBar, endBar).map((patternId, index) => {
+                        <tr>
+                            <th ref={channelHeaderRef} className="sticky left-0 bg-bg-secondary p-2 border border-primary z-20 min-w-[200px]">{t('editor.sequencer.channel')}</th>
+                            {Array.from({ length: BARS_PER_PAGE }).map((_, index) => {
                                 const barIndex = startBar + index;
+                                if (barIndex >= barCount) return null;
                                 return (
-                                    <td key={`${channelIndex}-${barIndex}`}
-                                        className={`border border-primary text-center cursor-pointer transition-colors ${patternId === activePatternId ? 'bg-accent/50' : 'hover:bg-primary/30'}`}
-                                        onClick={() => handleCellClick(channelIndex, barIndex)}>
-                                        <select
-                                            value={patternId || ''}
-                                            onChange={(e) => setPatternInStructure(channelIndex, barIndex, e.target.value || null)}
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="w-full h-full p-2 bg-transparent text-center appearance-none focus:outline-none text-foreground">
-                                            <option value="" className="bg-bg-darker text-gray-400">-</option>
-                                            {patternList.map(p => (
-                                                <option key={p.id} value={p.id} className="bg-bg-darker font-semibold">
-                                                    P{patternDisplayMap[p.id]}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </td>
+                                    <th key={barIndex} className="p-2 border border-primary text-xs font-normal text-gray-400" style={{ width: `${BAR_WIDTH_PX}px`, minWidth: `${BAR_WIDTH_PX}px` }}>
+                                        {barIndex + 1}
+                                    </th>
                                 );
                             })}
                         </tr>
-                    ))}
+                    </thead>
+                    <tbody>
+                        {channels.map((channel, channelIndex) => (
+                            <tr key={channel.id} className="group">
+                                <td className="sticky left-0 bg-bg-secondary group-hover:bg-bg-darker p-2 border border-primary z-20 transition-colors">
+                                    <ChannelControls
+                                        channel={channel} channelIndex={channelIndex}
+                                        setInstrument={setChannelInstrument}
+                                        instruments={playerState.instruments}
+                                        onDelete={() => setChannelToDelete(channelIndex)}
+                                        channelCount={channels.length}
+                                    />
+                                </td>
+                                {songStructure[channelIndex]?.slice(startBar, endBar).map((patternId, index) => {
+                                    const barIndex = startBar + index;
+                                    return (
+                                        <td key={`${channelIndex}-${barIndex}`}
+                                            className={`border border-primary text-center cursor-pointer transition-colors ${patternId === activePatternId ? 'bg-accent/50' : 'hover:bg-primary/30'}`}
+                                            onClick={() => handleCellClick(channelIndex, barIndex)}>
+                                            <select
+                                                value={patternId || ''}
+                                                onChange={(e) => setPatternInStructure(channelIndex, barIndex, e.target.value || null)}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="w-full h-full p-2 bg-transparent text-center appearance-none focus:outline-none text-foreground">
+                                                <option value="" className="bg-bg-darker text-gray-400">-</option>
+                                                {patternList.map(p => (
+                                                    <option key={p.id} value={p.id} className="bg-bg-darker font-semibold">
+                                                        P{patternDisplayMap[p.id]}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                    );
+                                })}
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
+
             <ConfirmationPopUp
                 open={channelToDelete !== null}
                 onClose={() => setChannelToDelete(null)}
@@ -176,5 +185,21 @@ const Sequencer = ({ projectState, projectActions, playerState }) => {
             />
         </div>
     );
+
+    // Renderiza popup no mobile ou inline no desktop
+    if (isMobileOpen) {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center md:hidden">
+                <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+                <div className="relative w-[90%] max-w-md h-4/5 bg-bg-darker rounded-lg z-10 flex flex-col">
+                    <CloseButton />
+                    <div className="flex-1 overflow-y-auto">{SequencerContent}</div>
+                </div>
+            </div>
+        );
+    }
+
+    return SequencerContent;
 };
+
 export default Sequencer;

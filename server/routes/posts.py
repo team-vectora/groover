@@ -5,7 +5,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Post, User
 import cloudinary.uploader
 from utils.socket import socketio
-
 from models.notification import Notification
 
 posts_bp = Blueprint('posts', __name__)

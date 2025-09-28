@@ -1,5 +1,3 @@
-# models/post.py
-
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.db import mongo
@@ -10,7 +8,6 @@ from utils.similarity import cosine_similarity
 import pytz
 
 from models import User
-
 
 class Post:
     @staticmethod

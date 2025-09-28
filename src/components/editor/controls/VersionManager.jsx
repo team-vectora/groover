@@ -1,4 +1,3 @@
-// src/components/editor/controls/VersionManager.jsx
 "use client";
 import { useTranslation } from "react-i18next";
 
@@ -19,7 +18,6 @@ const VersionManager = ({ versions, currentMusicId, handleVersionChange }) => {
     // Ordena as versões da mais nova para a mais antiga
     const sortedVersions = versions.slice().sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
     const latestVersionId = sortedVersions.length > 0 ? sortedVersions[0].music_id : null;
-
 
     return (
         <div>
