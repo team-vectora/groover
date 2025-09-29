@@ -82,10 +82,12 @@ def remove_collaborator(project_id, collaborator_id):
     return jsonify({'message': 'Collaborator removed'}), 200
 
 
-@projects_bp.route('/teste', methods=["GET"])
+@projects_bp.route('/explore', methods=["GET"])
 @jwt_required()
-def teste():
-    return Project.get_recent_projects()
+def explore_feed():
+    # A rota agora chama o novo método mais robusto
+    projects = Project.get_explore_feed()
+    return jsonify(projects), 200
 
 
 @projects_bp.route('/<project_id>', methods=['GET'])

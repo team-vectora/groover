@@ -1,88 +1,65 @@
+// src/components/posts/AudioVisualizer.jsx
 import { useEffect, useRef } from "react";
-import * as Tone from "tone";
 import AudioMotionAnalyzer from "audiomotion-analyzer";
-import { Midi } from "@tonejs/midi";
+import { useMidiPlayer } from "../../hooks";
 
-// Converte base64 para Uint8Array
-function base64ToUint8Array(base64) {
-  const raw = atob(base64);
-  const array = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) {
-    array[i] = raw.charCodeAt(i);
-  }
-  return array;
-}
+const VISUAL_PRESETS = [
+    { mode: 10, gradient: 'prism', radial: true, spinSpeed: 2, reflexRatio: 0.5 },
+    { mode: 4, gradient: 'rainbow', radial: false, reflexRatio: 0.6, lineWidth: 2 },
+    { mode: 7, gradient: 'orangered', radial: true, spinSpeed: -1, reflexRatio: 0.4 },
+    { mode: 2, gradient: 'classic', radial: false, reflexRatio: 0.7, lineWidth: 3 },
+    { mode: 5, gradient: 'steelblue', radial: false, reflexRatio: 0.3, lineWidth: 2.5, spinSpeed: 0 }
+];
 
-export default function AudioVisualizer({ midiData, start }) {
-  const containerRef = useRef(null);
-  const partRef = useRef(null);
+export default function AudioVisualizer({ isPlaying }) {
+    const containerRef = useRef(null);
+    const analyzerInstanceRef = useRef(null);
+    const { analyzerNode } = useMidiPlayer();
 
-  useEffect(() => {
-    if (!midiData || !start) return;
+    // Este useEffect agora gerencia o ciclo de vida completo do visualizador.
+    useEffect(() => {
+        // Se temos um nó de áudio válido vindo do contexto...
+        if (containerRef.current && analyzerNode) {
+            const randomPreset = VISUAL_PRESETS[Math.floor(Math.random() * VISUAL_PRESETS.length)];
 
-    const midiArray = base64ToUint8Array(midiData.split(",")[1]);
-    const midi = new Midi(midiArray);
+            // Cria a nova instância do visualizador, conectando-a ao nó de áudio.
+            analyzerInstanceRef.current = new AudioMotionAnalyzer(containerRef.current, {
+                source: analyzerNode,
+                height: 400,
+                width: 400,
+                ...randomPreset,
+                overlay: true,
+                bgAlpha: 0,
+                showScaleX: false,
+            });
+        }
 
-    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
-    const analyzerNode = Tone.context.createAnalyser();
-    synth.connect(analyzerNode);
+        // --- INÍCIO DA CORREÇÃO CRÍTICA ---
+        // A função de limpeza (o return do useEffect) é executada quando o componente
+        // é desmontado ou ANTES que o efeito seja executado novamente (quando analyzerNode muda).
+        return () => {
+            if (analyzerInstanceRef.current) {
+                // Destrói a instância ANTERIOR do visualizador para evitar o erro InvalidAccessError.
+                analyzerInstanceRef.current.destroy();
+                analyzerInstanceRef.current = null;
+            }
+        };
+        // --- FIM DA CORREÇÃO CRÍTICA ---
 
-    const analyzer = new AudioMotionAnalyzer(containerRef.current, {
-      source: analyzerNode,
-      width: containerRef.current.offsetWidth,
-      height: containerRef.current.offsetWidth,
-      gradient: "rainbow",
-      bands: 256,
-      scale: "linear",
-      gain: 0.5,
-      smoothing: 0.8,
-      effects: ["led", "reflection"],
-      backgroundColor: "#111",
-      showScale: true,
-      showLeds: true,
-      ledSpacing: 1.5,
-      reflectionAlpha: 0.2,
-    });
+        // A dependência em 'analyzerNode' garante que este ciclo de destruir-e-recriar
+        // aconteça toda vez que uma nova música é carregada no MidiContext.
+    }, [analyzerNode]);
 
-    Tone.Transport.cancel();
-    Tone.Transport.stop();
-    Tone.Transport.position = 0;
-
-    const notes = midi.tracks.flatMap(track =>
-      track.notes.map(n => ({
-        time: n.time,
-        name: n.name,
-        duration: n.duration,
-        velocity: n.velocity
-      }))
+    return (
+        <div className="relative w-full h-full flex items-center justify-center">
+            <div
+                ref={containerRef}
+                className="w-[400px] h-[400px] transition-all duration-500 ease-in-out"
+                style={{
+                    transform: isPlaying ? 'scale(1.1)' : 'scale(1)',
+                    filter: isPlaying ? 'drop-shadow(0 0 25px var(--color-accent))' : 'drop-shadow(0 0 10px var(--color-primary))'
+                }}
+            />
+        </div>
     );
-
-    const part = new Tone.Part((time, note) => {
-      synth.triggerAttackRelease(note.name, note.duration, time, note.velocity);
-    }, notes);
-
-    part.start(0);
-    partRef.current = part;
-
-    Tone.Transport.start();
-
-    return () => {
-      Tone.Transport.cancel();
-      Tone.Transport.stop();
-      part.dispose();
-      synth.dispose();
-      analyzer.destroy();
-    };
-  }, [midiData, start]);
-
-  return (
-<div className="relative w-full h-full rounded-xl shadow-lg border-2 border-white overflow-hidden">
-  <div
-    ref={containerRef}
-    className="w-full h-full bg-black rounded-xl"
-    style={{ touchAction: "none" }}
-  />
-</div>
-
-  );
 }

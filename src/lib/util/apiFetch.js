@@ -29,7 +29,7 @@ export const apiFetch = async (endpoint, options = {}) => {
 
     const response = await fetch(url, fetchOptions);
 
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 422) {
         handleLogout();
         throw new Error("Unauthorized");
     }

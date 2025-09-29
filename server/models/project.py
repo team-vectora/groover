@@ -82,12 +82,51 @@ class Project:
             project['collaborators'] = User.get_user_details_by_ids(collaborator_ids)
 
             project['user_id'] = str(project['user_id'])
-            # --- INÍCIO DA CORREÇÃO ---
-            # Altera a linha para ir buscar o objeto completo do utilizador, em vez de apenas o ID.
             project['created_by'] = User.get_user(project.get('user_id', ''))
-            # --- FIM DA CORREÇÃO ---
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
+
         return project
+
+    @staticmethod
+    def get_explore_feed(sample_size=15, pool_size=50):
+        """
+        Busca uma grande quantidade de projetos recentes e retorna uma amostra aleatória,
+        garantindo que os dados do usuário criador sejam incluídos corretamente.
+        """
+        pipeline = [
+            {'$sort': {'created_at': -1}},
+            {'$limit': pool_size},
+        ]
+
+        recent_projects = list(mongo.db.projects.aggregate(pipeline))
+
+        actual_sample_size = min(sample_size, len(recent_projects))
+        random_sample = random.sample(recent_projects, actual_sample_size)
+
+        projects = []
+        for p in random_sample:
+            project = p.copy()
+            project['_id'] = str(project['_id'])
+            if 'current_music_id' in project:
+                project['current_music_id'] = str(project['current_music_id'])
+            if 'music_versions' in project:
+                for version in project['music_versions']:
+                    version['music_id'] = str(version['music_id'])
+                    version['update_by'] = str(version.get('update_by', ''))
+            if 'midi' in project and project['midi']:
+                midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
+                project['midi'] = f"data:audio/midi;base64,{midi_b64}"
+
+            collaborator_ids = project.get('collaborators', [])
+            project['collaborators'] = User.get_user_details_by_ids(collaborator_ids)
+
+            project['user_id'] = str(project['user_id'])
+            project['created_by'] = User.get_user(project.get('user_id', ''))
+            project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
+
+            projects.append(project)
+
+        return projects
 
     @staticmethod
     def get_project_full_data(project_id):
