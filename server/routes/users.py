@@ -73,7 +73,43 @@ def delete_email():
     token = s.dumps(user["email"], salt=os.getenv("SALT_DELETE"))
     delete_url = f"{request.host_url}api/users/delete-confirm/{token}"
 
-    html_body = render_template("delete_email.html", username=escape(user['username']), delete_url=delete_url)
+    html_body = html_body = f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; background-color:#0a090d; color:#e6e8e3; padding:20px;">
+        <div style="max-width:600px; margin:auto; background:#121113; border-radius:10px; padding:30px; box-shadow:0 2px 10px rgba(0,0,0,0.5);">
+          <h2 style="color:#4c4e30; text-align:center;">Groover Account Deletion</h2>
+          <p style="font-size:16px; line-height:1.5; color:#e6e8e3;">
+            Hello {escape(user['username'])}, we received a request to delete your Groover account.
+          </p>
+          <p style="font-size:16px; line-height:1.5; color:#e6e8e3;">
+            To confirm the deletion, please click the button below. This link expires in 5 minutes.
+          </p>
+          <p style="text-align:center; margin:30px 0;">
+            <a href="{delete_url}" style="
+              display:inline-block;
+              padding:14px 28px;
+              background:#a97f52;
+              color:#ffffff;
+              text-decoration:none;
+              border-radius:6px;
+              font-weight:bold;
+              font-size:16px;
+              transition:all 0.3s;
+            " onmouseover="this.style.background='#c1915d';">
+              Confirm Deletion
+            </a>
+          </p>
+          <p style="font-size:12px; color:#e6e8e3; text-align:center; margin-top:20px;">
+            If you didn’t request this deletion, you can safely ignore this email.
+          </p>
+          <hr style="border:none; border-top:1px solid #070608; margin:20px 0;">
+          <p style="font-size:12px; color:#61673e; text-align:center;">
+            © 2025 Groover. All rights reserved.
+          </p>
+        </div>
+      </body>
+    </html>
+    """
 
     msg = Message(subject="Confirm Account Deletion", recipients=[user["email"]], html=html_body,
                   sender=os.getenv("MAIL_USERNAME"))

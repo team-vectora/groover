@@ -1,8 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Notification
-from utils.mail import mail
-from flask_mail import Message
 
 notifications_bp = Blueprint('notifications', __name__)
 
