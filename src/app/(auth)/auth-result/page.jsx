@@ -36,7 +36,7 @@ function AuthResultContent() {
                 <div className="text-6xl mb-6">{icon}</div>
                 <h1 className="text-3xl font-bold text-accent-light mb-4">{title}</h1>
                 <p className="text-foreground mb-8">{message}</p>
-                <Link href="/login" className="px-6 py-3 bg-primary hover:bg-primary-light text-white font-semibold rounded-lg transition">
+                <Link href="/login" className="px-6 py-3 bg-primary hover:bg-primary-light text-text-lighter font-semibold rounded-lg transition">
                     {t('authResult.loginButton')}
                 </Link>
             </div>

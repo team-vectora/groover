@@ -67,7 +67,7 @@ export default function GrooveFeed() {
     };
 
     if (loading) return <LoadingDisc />;
-    if (!projects.length) return <p className="text-center text-white py-8">Nenhum projeto encontrado</p>;
+    if (!projects.length) return <p className="text-center text-text-lighter py-8">Nenhum projeto encontrado</p>;
 
     return (
         <motion.div
@@ -90,13 +90,13 @@ export default function GrooveFeed() {
                         <div className="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <button
                                 onClick={(e) => { e.stopPropagation(); handlePlayRequest(project); }}
-                                className="w-20 h-20 bg-black/30 backdrop-blur-sm rounded-full text-white/70 hover:bg-black/50 hover:text-white transition-all duration-300 flex items-center justify-center"
+                                className="w-20 h-20 bg-black/30 backdrop-blur-sm rounded-full text-text-lighter/70 hover:bg-black/50 hover:text-text-lighter transition-all duration-300 flex items-center justify-center"
                                 aria-label="Play/Pause"
                             >
                                 <FontAwesomeIcon icon={isCurrentlyPlaying(project) ? faPause : faPlay} className="text-4xl" />
                             </button>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 p-4 bg-gradient-to-t from-black/80 to-transparent text-white z-20">
+                        <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 p-4 bg-gradient-to-t from-black/80 to-transparent text-text-lighter z-20">
                             <h3 className="font-bold text-lg truncate">{project.title || "Untitled Project"}</h3>
                             <Link href={`/profile/${project.created_by?.username}`} className="flex items-center gap-2 group/user w-fit">
                                 {project.created_by?.avatar && (

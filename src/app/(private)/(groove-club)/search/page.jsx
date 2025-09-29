@@ -128,7 +128,7 @@ export default function SearchPage() {
                     <button
                         key={btn.value}
                         onClick={() => setSearchType(btn.value)}
-                        className={`px-3 py-1 rounded-full text-sm transition ${searchType === btn.value ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'}`}
+                        className={`px-3 py-1 rounded-full text-sm transition ${searchType === btn.value ? 'bg-accent text-text-lighter' : 'bg-primary hover:bg-primary-light'}`}
                     >
                         {btn.label}
                     </button>
@@ -150,7 +150,7 @@ export default function SearchPage() {
                             <button
                                 key={genre}
                                 onClick={() => toggleTag(genre)}
-                                className={`px-3 py-1 rounded-full text-sm transition ${selectedTags.includes(genre) ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'}`}
+                                className={`px-3 py-1 rounded-full text-sm transition ${selectedTags.includes(genre) ? 'bg-accent text-text-lighter' : 'bg-primary hover:bg-primary-light'}`}
                             >
                                 {t(`genres.${genre}`)}
                             </button>

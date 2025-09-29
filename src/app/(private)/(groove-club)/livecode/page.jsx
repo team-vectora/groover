@@ -13,7 +13,7 @@ const LivecodePage = () => {
   return (
     <div className="flex flex-col gap-10 w-full px-4 md:px-8 py-8 max-w-6xl mx-auto">
       {/* Seção de Livecode Song */}
-      <section className="bg-zinc-900 text-white rounded-2xl shadow-lg p-6 md:p-8 animate-fade-in">
+      <section className="bg-zinc-900 text-text-lighter rounded-2xl shadow-lg p-6 md:p-8 animate-fade-in">
         <h2 className="text-2xl md:text-3xl font-bold mb-4">🎵 {t('livecode.title')}</h2>
         <p className="text-zinc-300 mb-6 md:text-lg">
           {t('livecode.description.part1')}{" "}

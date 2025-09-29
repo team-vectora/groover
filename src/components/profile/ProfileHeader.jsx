@@ -32,7 +32,7 @@ const ProfileHeader = ({ user, isCurrentUser, onEdit, onLogout, onFollowersClick
               <Image src={user?.avatar || "/img/default_avatar.png"} alt={t('profile.avatarAlt')} fill className="object-cover" quality={100} />
             </div>
             {isCurrentUser && (
-                <button onClick={onEdit} className="absolute -bottom-2 -right-2 bg-accent hover:bg-accent-light text-white w-10 h-10 flex items-center justify-center rounded-full shadow transition-transform hover:rotate-45 cursor-pointer" title={t('profile.editProfile')}>
+                <button onClick={onEdit} className="absolute -bottom-2 -right-2 bg-accent hover:bg-accent-light text-text-lighter w-10 h-10 flex items-center justify-center rounded-full shadow transition-transform hover:rotate-45 cursor-pointer" title={t('profile.editProfile')}>
                   <FontAwesomeIcon icon={faCog} />
                 </button>
             )}
@@ -52,14 +52,14 @@ const ProfileHeader = ({ user, isCurrentUser, onEdit, onLogout, onFollowersClick
             </div>
             <div className="flex flex-wrap gap-2 justify-center md:justify-start">
               {getFavoriteGenres().map((genre) => (
-                  <span key={genre} className="px-3 py-1 bg-primary text-white rounded-full text-sm">
+                  <span key={genre} className="px-3 py-1 bg-primary text-text-lighter rounded-full text-sm">
                                 {genre.charAt(0).toUpperCase() + genre.slice(1)}
                             </span>
               ))}
             </div>
           </div>
           {isCurrentUser ? (
-              <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-700 text-white rounded-lg transition cursor-pointer">
+              <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-700 text-text-lighter rounded-lg transition cursor-pointer">
                 <FontAwesomeIcon icon={faSignOutAlt} />
                 {t('profile.logout')}
               </button>

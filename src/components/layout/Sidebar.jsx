@@ -156,7 +156,7 @@ const Sidebar = () => {
           <img src="/img/groover_logo.png" alt="Groover Logo" className="w-28" />
           <div className="flex items-center gap-4 absolute right-4">
             <button onClick={() => setIsMenuOpen(true)}>
-              <FontAwesomeIcon icon={faBars} className="w-6 h-6 text-white" />
+              <FontAwesomeIcon icon={faBars} className="w-6 h-6 text-text-lighter" />
             </button>
           </div>
         </div>
@@ -201,7 +201,7 @@ const Sidebar = () => {
                     </ul>
                 )}
               </li>
-              <button onClick={() => handleNavigation(`/profile/${username}?newPost=true`)} className="flex items-center w-full p-3 bg-accent hover:bg-accent-light text-white rounded-lg transition-colors mt-2">
+              <button onClick={() => handleNavigation(`/profile/${username}?newPost=true`)} className="flex items-center w-full p-3 bg-accent hover:bg-accent-light text-text-lighter rounded-lg transition-colors mt-2">
                 <FontAwesomeIcon icon={faPlus} className="mr-3 w-6 h-6" />
                 <span>{t("sidebar.new_post")}</span>
               </button>
@@ -264,7 +264,7 @@ const Sidebar = () => {
                 )}
               </li>
               <li>
-                <button onClick={() => handleNavigation(`/profile/${username}?newPost=true`)} className="flex items-center w-full p-3 bg-[var(--color-accent)] hover:bg-accent-light text-white rounded-lg transition-colors mt-2 cursor-pointer">
+                <button onClick={() => handleNavigation(`/profile/${username}?newPost=true`)} className="flex items-center w-full p-3 bg-[var(--color-accent)] hover:bg-accent-light text-text-lighter rounded-lg transition-colors mt-2 cursor-pointer">
                   <FontAwesomeIcon icon={faPlus} className="mr-3 w-6 h-6" />
                   <span>{t("sidebar.new_post")}</span>
                 </button>

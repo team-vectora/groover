@@ -113,14 +113,14 @@ const Carousel = ({ slides = [], options = {} }) => {
             {slides.length > 1 && (
                 <>
                     <button
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-text-lighter w-8 h-8 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                         onClick={scrollPrev}
                         aria-label="Previous slide"
                     >
                         <FontAwesomeIcon icon={faChevronLeft} />
                     </button>
                     <button
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-text-lighter w-8 h-8 rounded-full flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                         onClick={scrollNext}
                         aria-label="Next slide"
                     >

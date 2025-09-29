@@ -57,7 +57,7 @@ const ProjectCard = ({ isYourProfile, project, handleClickShare, handleClickDele
                     <>
                         <img src={project.cover_image} alt="Capa do projeto" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={handlePlayRequest} className="w-12 h-12 bg-accent/80 rounded-full flex items-center justify-center text-white hover:bg-accent">
+                            <button onClick={handlePlayRequest} className="w-12 h-12 bg-accent/80 rounded-full flex items-center justify-center text-text-lighter hover:bg-accent">
                                 <FontAwesomeIcon icon={isCurrentlyPlaying ? faPause : faPlay} className="text-2xl" />
                             </button>
                         </div>
@@ -66,7 +66,7 @@ const ProjectCard = ({ isYourProfile, project, handleClickShare, handleClickDele
                     <div className="absolute inset-0 flex items-center justify-center">
                         <FontAwesomeIcon icon={faMusic} className="text-accent text-4xl opacity-50" />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={handlePlayRequest} className="w-12 h-12 bg-accent/80 rounded-full flex items-center justify-center text-white hover:bg-accent">
+                            <button onClick={handlePlayRequest} className="w-12 h-12 bg-accent/80 rounded-full flex items-center justify-center text-text-lighter hover:bg-accent">
                                 <FontAwesomeIcon icon={isCurrentlyPlaying ? faPause : faPlay} className="text-2xl" />
                             </button>
                         </div>

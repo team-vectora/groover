@@ -29,7 +29,7 @@ const FollowButton = ({ followingId, userId, isFollowing, setIsFollowing, onTogg
         px-5 py-1.5 rounded-full text-sm font-medium transition-all duration-200
         shadow-sm
         ${isFollowing
-                ? 'bg-primary text-white hover:bg-primary/90'
+                ? 'bg-primary text-text-lighter hover:bg-primary/90'
                 : 'bg-accent-light text-text-lighter hover:border-primary hover:text-primary'}
         ${loading ? 'opacity-60 cursor-not-allowed' : ''}
       `}

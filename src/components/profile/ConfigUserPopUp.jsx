@@ -90,7 +90,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
             <label className="block mb-2 text-sm text-text-lighter">{t('configUserPopup.profilePicture')}</label>
             <div className="inline-block relative">
               <img src={previewUrl} alt="Preview" className="w-24 h-24 rounded-full object-cover border-2 border-primary-light"/>
-              <button type="button" onClick={() => fileInputRef.current.click()} className="absolute -bottom-1 -right-1 bg-accent hover:bg-accent-light text-white w-8 h-8 flex items-center justify-center rounded-full shadow transition-transform hover:scale-110">
+              <button type="button" onClick={() => fileInputRef.current.click()} className="absolute -bottom-1 -right-1 bg-accent hover:bg-accent-light w-8 h-8 flex items-center justify-center rounded-full shadow transition-transform hover:scale-110">
                 +
               </button>
             </div>
@@ -100,7 +100,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
           <div className="mb-5">
             <label className="block mb-2 text-sm text-text-lighter">{t('configUserPopup.bio')}</label>
             <textarea value={changedBio} onChange={(e) => setChangedBio(e.target.value)} placeholder={t('configUserPopup.bioPlaceholder')}
-                      rows={2} maxLength={50} className="w-full p-3 bg-bg-darker border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"/>
+                      rows={2} maxLength={50} className="w-full p-3 bg-bg-darker border border-primary rounded-md  focus:outline-none focus:border-accent-light"/>
             <div className="text-right text-xs text-primary-light mt-1">{changedBio.length}/50</div>
           </div>
 

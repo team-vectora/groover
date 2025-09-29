@@ -62,7 +62,7 @@ const SaveMusicPopUp = ({
                         className="w-full h-24 bg-bg-darker text-foreground border border-primary-light rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-light"
                         required
                     />
-                    <button type="submit" className="bg-accent hover:bg-accent-light text-white px-4 py-2 rounded transition">
+                    <button type="submit" className="bg-accent hover:bg-accent-light text-text-lighter px-4 py-2 rounded transition">
                         {t('editor.save')}
                     </button>
                 </form>

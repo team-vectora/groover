@@ -27,7 +27,7 @@ const EditorLayout = ({
           />
           <div className="relative bg-bg-darker max-w-md h-4/5 rounded-lg z-10 flex flex-col w-[90%]">
             <button
-              className="absolute top-2 right-2 w-8 h-8  text-white rounded-full flex items-center justify-center z-20"
+              className="absolute top-2 right-2 w-8 h-8  text-text-lighter rounded-full flex items-center justify-center z-20"
               onClick={() => setIsControlPanelOpen(false)}
             >
               <FontAwesomeIcon icon={faTimes} />
@@ -55,7 +55,7 @@ const EditorLayout = ({
           />
           <div className="relative bg-bg-darker max-w-md h-4/5 rounded-lg z-10 flex flex-col w-[90%]">
             <button
-              className="absolute top-2 right-2 w-8 h-8  text-white rounded-full flex items-center justify-center z-20"
+              className="absolute top-2 right-2 w-8 h-8  text-text-lighter rounded-full flex items-center justify-center z-20"
               onClick={() => setIsSequencerOpen(false)}
             >
               <FontAwesomeIcon icon={faTimes} />

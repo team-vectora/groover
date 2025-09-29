@@ -43,7 +43,7 @@ const ControlPanel = ({
                         <>
                             <img src={apiState.project.cover_image} alt="Album cover" className="w-full h-full object-cover rounded-md" />
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={playerActions.playPause} className="w-16 h-16 bg-accent/80 rounded-full flex items-center justify-center text-white hover:bg-accent">
+                                <button onClick={playerActions.playPause} className="w-16 h-16 bg-accent/80 rounded-full flex items-center justify-center text-text-lighter hover:bg-accent">
                                     <FontAwesomeIcon icon={playerState.isPlaying ? faPause : faPlay} className="text-3xl" />
                                 </button>
                             </div>
@@ -94,7 +94,7 @@ const ControlPanel = ({
                     </div>
                     <div className="max-h-32 overflow-y-auto border border-primary rounded-md p-1 space-y-1">
                         {patternList.map(p => (
-                            <div key={p.id} className={`flex items-center justify-between p-2 rounded-md transition group ${activePatternId === p.id ? 'bg-accent text-white' : 'hover:bg-primary/30'}`}>
+                            <div key={p.id} className={`flex items-center justify-between p-2 rounded-md transition group ${activePatternId === p.id ? 'bg-accent text-text-lighter' : 'hover:bg-primary/30'}`}>
                                 <button
                                     onClick={() => setActivePatternId(p.id)}
                                     className="flex-grow text-left text-sm"

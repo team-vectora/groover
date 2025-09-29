@@ -64,7 +64,7 @@ const SharePopUp = ({ open, onClose, project, onShare }) => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={t('sharePopup.placeholder')}
-                className="w-full p-3 bg-bg-darker border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"
+                className="w-full p-3 bg-bg-darker border border-primary rounded-md text-text-lighter focus:outline-none focus:border-accent-light"
             />
             <div className="mt-4 max-h-60 overflow-y-auto">
               {loading && <p>{t('sharePopup.loading')}</p>}

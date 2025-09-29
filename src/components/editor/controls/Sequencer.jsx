@@ -78,7 +78,7 @@ const Sequencer = ({ projectState, projectActions, playerState, isMobileOpen, on
     const CloseButton = () => (
         <button
             className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center
-                       bg-red-500/80 text-white hover:bg-red-600 transition-colors duration-200 shadow-md z-20"
+                       bg-red-500/80 text-text-lighter hover:bg-red-600 transition-colors duration-200 shadow-md z-20"
             onClick={onClose}
         >
             <FontAwesomeIcon icon={faTimes} />

@@ -27,7 +27,7 @@ const Invite = ({ invite, onActionComplete }) => {
                 <button
                     onClick={() => handleInvite(invite.id, 'accept', onActionComplete)}
                     disabled={loading}
-                    className="bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded-full h-10 w-10 flex items-center justify-center transition-colors disabled:opacity-50"
+                    className="bg-green-600 hover:bg-green-700 text-text-lighter font-bold p-2 rounded-full h-10 w-10 flex items-center justify-center transition-colors disabled:opacity-50"
                     aria-label={t('confirmation.confirm')}
                 >
                     <FontAwesomeIcon icon={faCheck} />
@@ -35,7 +35,7 @@ const Invite = ({ invite, onActionComplete }) => {
                 <button
                     onClick={() => handleInvite(invite.id, 'reject', onActionComplete)}
                     disabled={loading}
-                    className="bg-red-600 hover:bg-red-700 text-white font-bold p-2 rounded-full h-10 w-10 flex items-center justify-center transition-colors disabled:opacity-50"
+                    className="bg-red-600 hover:bg-red-700 text-text-lighter font-bold p-2 rounded-full h-10 w-10 flex items-center justify-center transition-colors disabled:opacity-50"
                     aria-label={t('confirmation.cancel')}
                 >
                     <FontAwesomeIcon icon={faTimes} />
