@@ -11,44 +11,39 @@ const VISUAL_PRESETS = [
     { mode: 5, gradient: 'steelblue', radial: false, reflexRatio: 0.3, lineWidth: 2.5, spinSpeed: 0 }
 ];
 
-export default function AudioVisualizer({ isPlaying }) {
+export default function AudioVisualizer() {
     const containerRef = useRef(null);
-    const analyzerInstanceRef = useRef(null);
-    const { analyzerNode } = useMidiPlayer();
+    const audioMotionRef = useRef(null);
+    const { analyserRef, isPlaying } = useMidiPlayer();
 
     // Este useEffect agora gerencia o ciclo de vida completo do visualizador.
     useEffect(() => {
-        // Se temos um nó de áudio válido vindo do contexto...
-        if (containerRef.current && analyzerNode) {
-            const randomPreset = VISUAL_PRESETS[Math.floor(Math.random() * VISUAL_PRESETS.length)];
+        if (!analyserRef?.current || !containerRef.current) return;
 
-            // Cria a nova instância do visualizador, conectando-a ao nó de áudio.
-            analyzerInstanceRef.current = new AudioMotionAnalyzer(containerRef.current, {
-                source: analyzerNode,
-                height: 400,
-                width: 400,
-                ...randomPreset,
-                overlay: true,
-                bgAlpha: 0,
-                showScaleX: false,
-            });
+        if (audioMotionRef.current) {
+            audioMotionRef.current.destroy();
         }
 
-        // --- INÍCIO DA CORREÇÃO CRÍTICA ---
-        // A função de limpeza (o return do useEffect) é executada quando o componente
-        // é desmontado ou ANTES que o efeito seja executado novamente (quando analyzerNode muda).
-        return () => {
-            if (analyzerInstanceRef.current) {
-                // Destrói a instância ANTERIOR do visualizador para evitar o erro InvalidAccessError.
-                analyzerInstanceRef.current.destroy();
-                analyzerInstanceRef.current = null;
-            }
-        };
-        // --- FIM DA CORREÇÃO CRÍTICA ---
+        const preset = VISUAL_PRESETS[Math.floor(Math.random() * VISUAL_PRESETS.length)];
 
-        // A dependência em 'analyzerNode' garante que este ciclo de destruir-e-recriar
-        // aconteça toda vez que uma nova música é carregada no MidiContext.
-    }, [analyzerNode]);
+        const audioMotion = new AudioMotionAnalyzer(containerRef.current, {
+            source: analyserRef.current,
+            height: 400,
+            width: 400,
+            ...preset,
+            overlay: true,
+            bgAlpha: 0,
+            showScaleX: false,
+        });
+
+        audioMotionRef.current = audioMotion;
+
+        return () => {
+            audioMotionRef.current?.destroy();
+            audioMotionRef.current = null;
+        };
+    }, [analyserRef, isPlaying]);
+
 
     return (
         <div className="relative w-full h-full flex items-center justify-center">

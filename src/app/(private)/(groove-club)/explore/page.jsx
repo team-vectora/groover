@@ -15,9 +15,31 @@ export default function GrooveFeed() {
     const [loading, setLoading] = useState(true);
     const projectRefs = useRef([]);
 
-    const isCurrentlyPlaying = useCallback((project) => {
+    const isCurrentlyPlaying = (project) => {
         return currentProject?._id === project._id && isPlaying;
-    }, [currentProject, isPlaying]);
+    };
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const idx = parseInt(entry.target.dataset.index, 10);
+                        const newProject = projects[idx];
+                        if (!(currentProject) || (newProject && currentProject?._id !== newProject._id)) {
+                            console.log("Setando novo projeto")
+                            setCurrentProject(newProject);
+                        }
+                    }
+                });
+            },
+            { root: null, rootMargin: "0px", threshold: 0.7 }
+        );
+
+        const refs = projectRefs.current;
+        refs.forEach((ref) => { if (ref) observer.observe(ref); });
+        return () => { refs.forEach((ref) => { if (ref) observer.unobserve(ref); }); };
+    }, [projects, currentProject, setCurrentProject]);
 
     useEffect(() => {
         const fetchProjects = async () => {
@@ -36,26 +58,12 @@ export default function GrooveFeed() {
         fetchProjects();
     }, []);
 
-    // O IntersectionObserver foi REMOVIDO para evitar a troca automática e instável de música.
-    // A interação agora é 100% controlada pelo clique do usuário.
-
     const handlePlayRequest = (project) => {
-        // Se a música clicada já está carregada, apenas alterna o play/pause.
-        if (currentProject?._id === project._id) {
+        console.log("Play")
+        setCurrentProject(project);
+        setTimeout(() => {
             playPause();
-        } else {
-            // Lógica "segura" que funciona em outras partes do app:
-            // 1. Se algo estiver tocando, primeiro envia um comando de PAUSA.
-            if (isPlaying) {
-                playPause();
-            }
-            // 2. Define o novo projeto (o MidiContext vai limpar o anterior).
-            setCurrentProject(project);
-            // 3. Agenda o play da nova música após um breve delay.
-            setTimeout(() => {
-                playPause();
-            }, 150);
-        }
+        }, 150);
     };
 
     if (loading) return <LoadingDisc />;
