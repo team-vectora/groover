@@ -190,10 +190,10 @@ const Sidebar = () => {
                 </button>
                 {isNotifOpen && (
                     <ul className="absolute top-full left-0 mt-2 w-full max-h-96 overflow-y-auto bg-[var(--color-accent-sidebar)] border border-primary rounded-lg shadow-lg z-[9999]">
-                      {loading && <li className="p-3 text-sm text-gray-400">{t("sidebar.loading")}</li>}
+                      {loading && <li className="p-3 text-sm text-text-lighter">{t("sidebar.loading")}</li>}
                       {error && <li className="p-3 text-sm text-red-400">{error}</li>}
                       {!loading && notifications.length === 0 && (
-                          <li className="p-3 text-sm text-gray-400">{t("sidebar.no_notifications")}</li>
+                          <li className="p-3 text-sm text-text-lighter">{t("sidebar.no_notifications")}</li>
                       )}
                       {notifications.map((notif) => (
                           <NotificationItem key={notif._id} notification={notif} onCheck={() => handleCheckNotification(notif._id)} />
@@ -252,10 +252,10 @@ const Sidebar = () => {
                 </button>
                 {isNotifOpen && (
                     <ul className="absolute top-full left-0 mt-2 w-70 max-h-96 overflow-y-auto bg-[var(--color-accent-sidebar)] border border-primary rounded-lg shadow-lg z-[9999]">
-                      {loading && <li className="p-3 text-sm text-gray-400">{t("sidebar.loading")}</li>}
+                      {loading && <li className="p-3 text-sm text-text-lighter">{t("sidebar.loading")}</li>}
                       {error && <li className="p-3 text-sm text-red-400">{error}</li>}
                       {!loading && notifications.length === 0 && (
-                          <li className="p-3 text-sm text-gray-400">{t("sidebar.no_notifications")}</li>
+                          <li className="p-3 text-sm text-text-lighter">{t("sidebar.no_notifications")}</li>
                       )}
                       {notifications.map((notif) => (
                           <NotificationItem key={notif._id} notification={notif} onCheck={() => handleCheckNotification(notif._id)} />

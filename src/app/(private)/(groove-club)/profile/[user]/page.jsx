@@ -86,14 +86,14 @@ export default function ProfilePage({ params }) {
         {activeTab === 'posts' && (
             <div className="space-y-6">
               {isCurrentUser && <div className="flex justify-end mb-4"><button className="bg-accent hover:bg-accent-light text-white p-2 rounded-full w-12 h-12 flex items-center justify-center text-2xl" onClick={() => setOpenPostForm(true)} title="Novo Post">+</button></div>}
-              {!posts?.length ? <p className="text-center text-gray-400">{t('profile.noPosts')}</p> : posts.map(post => <Post key={post._id} post={post} userId={userId} onPostCreated={refetch} />)}
+              {!posts?.length ? <p className="text-center text-text-lighter">{t('profile.noPosts')}</p> : posts.map(post => <Post key={post._id} post={post} userId={userId} onPostCreated={refetch} />)}
             </div>
         )}
 
         {activeTab === 'musics' && (
             <div>
               {isCurrentUser && <button className="mb-4 px-4 py-2 bg-accent hover:bg-accent-light text-white rounded" onClick={() => router.push('/editor/new')}>{t('profile.newProject')}</button>}
-              {!projects?.length ? <p className="text-center text-gray-400">{t('profile.noMusics')}</p> : (
+              {!projects?.length ? <p className="text-center text-text-lighter">{t('profile.noMusics')}</p> : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {projects.map(project => <ProjectCard key={project.id} project={project} isYourProfile={isCurrentUser} handleClickShare={handleShareProject} handleClickDelete={handleDeleteClick} handleManageCollaborators={handleManageCollaborators}/>)}
                   </div>
@@ -103,7 +103,7 @@ export default function ProfilePage({ params }) {
 
         {activeTab === 'invites' && isCurrentUser && (
             <div>
-              {!invites?.length ? <p className="text-center text-gray-400">{t('profile.noInvites')}</p> : <div className="space-y-4">{invites.map(invite => <Invite key={invite.id} invite={invite} onActionComplete={refetch} />)}</div>}
+              {!invites?.length ? <p className="text-center text-text-lighter">{t('profile.noInvites')}</p> : <div className="space-y-4">{invites.map(invite => <Invite key={invite.id} invite={invite} onActionComplete={refetch} />)}</div>}
             </div>
         )}
 

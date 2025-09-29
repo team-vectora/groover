@@ -97,7 +97,7 @@ const FeedPage = () => {
                 {error && <p className="text-red-500 text-center py-4">{error}</p>}
 
                 {posts.length === 0 && !loading && (
-                    <p className="text-center py-4 text-gray-500">Nenhum post para mostrar.</p>
+                    <p className="text-center py-4 text-text-lighter0">Nenhum post para mostrar.</p>
                 )}
 
                 <div className="space-y-6">
@@ -114,7 +114,7 @@ const FeedPage = () => {
                 </div>
 
                 {visiblePostsCount >= posts.length && !loading && posts.length > 0 && (
-                    <p className="text-center py-4 text-gray-500">Fim do feed</p>
+                    <p className="text-center py-4 text-text-lighter">Fim do feed</p>
                 )}
             </div>
         </div>

@@ -21,7 +21,7 @@ module.exports = {
           DEFAULT: "var(--color-accent)",
           light: "var(--color-accent-light)",
         },
-        "accent-sidebar": "var(--color-accent-sidebar)", // ✅ aqui!
+        "accent-sidebar": "var(--color-accent-sidebar)",
         "text-lighter": "var(--color-text-lighter)",
       },
       animation: {

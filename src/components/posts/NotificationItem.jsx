@@ -52,7 +52,7 @@ export default function NotificationItem({ notification, onCheck }) {
       <li
           onClick={handleClick}
           className={`relative z-50 flex items-start gap-3 p-3 rounded-lg cursor-pointer transition ${
-              read ? "opacity-60" : "bg-bg-secondary hover:bg-primary/20"
+              read ? "opacity-60" : "bg-bg-secondary hover:bg-primary"
           }`}
       >
         <FontAwesomeIcon

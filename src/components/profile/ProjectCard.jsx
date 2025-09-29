@@ -35,7 +35,7 @@ const ProjectCard = ({ isYourProfile, project, handleClickShare, handleClickDele
         <div onClick={() => setCurrentProject(project)} className="relative flex flex-col md:flex-row items-center gap-4 p-4 pr-5 bg-bg-secondary rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-[1.02] border-2 border-primary/70">
             {isYourProfile && (
                 <div ref={menuRef} className="absolute top-0 right-1 z-10">
-                    <button onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }} className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-primary/30 transition">
+                    <button onClick={(e) => { e.stopPropagation(); setIsMenuOpen(!isMenuOpen); }} className="text-text-lighter hover:text-white p-2 rounded-full hover:bg-primary/30 transition">
                         <FontAwesomeIcon icon={faEllipsisVertical} />
                     </button>
                     {isMenuOpen && (

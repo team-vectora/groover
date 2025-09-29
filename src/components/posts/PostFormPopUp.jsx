@@ -130,7 +130,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
               <button
                   onClick={onClose}
                   disabled={isSubmitting}
-                  className="text-gray-400 hover:text-white"
+                  className="text-text-lighter hover:text-white"
               >
                 <FontAwesomeIcon icon={faTimes} size="lg" />
               </button>
@@ -150,7 +150,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
               </div>
             </div>
 
-            <label className="block mb-2 text-sm text-gray-300">{t('postForm.selectTags')}</label>
+            <label className="block mb-2 text-sm text-text-lighter">{t('postForm.selectTags')}</label>
             <div className="grid grid-cols-3 md:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 mb-4 bg-bg-darker border border-primary rounded-md">
               {GENRES.map((genre) => (
                   <button
@@ -241,7 +241,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
                 className="hidden"
             />
 
-            <label className="block mb-2 text-sm text-gray-300 w-full">{t('postForm.projectLabel')}</label>
+            <label className="block mb-2 text-sm text-text-lighter w-full">{t('postForm.projectLabel')}</label>
             <select
                 value={selectedProject}
                 onChange={(e) => setSelectedProject(e.target.value)}

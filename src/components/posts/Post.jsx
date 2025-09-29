@@ -153,7 +153,7 @@ export default function Post({
                 {userId !== post.user?._id && <FollowButton followingId={post.user._id} userId={userId} isFollowing={isFollowing} setIsFollowing={setIsFollowing} />}
                 {userId === post.user?._id && (
                     <div className="relative" ref={menuRef}>
-                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-400 hover:text-white cursor-pointer">
+                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-text-lighter hover:text-text-lighter cursor-pointer">
                             <FontAwesomeIcon icon={faEllipsisVertical} />
                         </button>
                         {isMenuOpen && (

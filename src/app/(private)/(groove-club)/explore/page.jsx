@@ -102,7 +102,7 @@ export default function GrooveFeed() {
                                 {project.created_by?.avatar && (
                                     <img src={project.created_by.avatar} alt={project.created_by?.username || "Autor"} className="w-8 h-8 rounded-full object-cover border-2 border-transparent group-hover/user:border-accent transition" />
                                 )}
-                                <p className="text-sm text-gray-300 group-hover/user:underline truncate">{project.created_by?.username || "Desconhecido"}</p>
+                                <p className="text-sm text-text-lighter group-hover/user:underline truncate">{project.created_by?.username || "Desconhecido"}</p>
                             </Link>
                         </div>
                     </motion.div>

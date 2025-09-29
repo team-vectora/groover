@@ -55,7 +55,7 @@ const ControlPanel = ({
                 <h1 className="text-sm font-bold uppercase text-accent mb-2 mt-4">
                     {projectState.title || t("editor.controls.panel.newProject")}
                 </h1>
-                <p className="text-sm text-gray-400 h-10 overflow-y-auto">
+                <p className="text-sm text-text-lighter h-10 overflow-y-auto">
                     {projectState.description || t("editor.controls.panel.noDescription")}
                 </p>
             </div>

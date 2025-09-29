@@ -48,13 +48,13 @@ const ManageCollaboratorsPopup = ({ project, open, onClose, onCollaboratorChange
                 <div className="bg-bg-secondary rounded-xl w-full max-w-md border border-primary">
                     <div className="flex justify-between items-center px-5 py-4 border-b border-primary">
                         <h3 className="text-lg font-semibold text-accent-light">{t('project.manage_collaborators')}</h3>
-                        <button onClick={onClose} className="text-gray-400 hover:text-white">
+                        <button onClick={onClose} className="text-text-lighter hover:text-white">
                             <FontAwesomeIcon icon={faTimes} size="lg" />
                         </button>
                     </div>
                     <div className="p-5 max-h-80 overflow-y-auto">
                         {collaborators.length === 0 ? (
-                            <p className="text-center text-gray-400">{t('project.no_collaborators')}</p>
+                            <p className="text-center text-text-lighter">{t('project.no_collaborators')}</p>
                         ) : (
                             <ul className="space-y-3">
                                 {collaborators.map(user => (

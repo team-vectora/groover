@@ -35,7 +35,7 @@ const FollowListPopup = ({ title, users, onClose, isLoading, isCurrentUserFollow
             <div ref={popupRef} className="bg-bg-secondary rounded-xl w-full max-w-md border border-primary">
                 <div className="flex justify-between items-center px-5 py-4 border-b border-primary">
                     <h3 className="text-lg font-semibold text-accent-light">{title}</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white">
+                    <button onClick={onClose} className="text-text-lighter hover:text-white">
                         <FontAwesomeIcon icon={faTimes} size="lg" />
                     </button>
                 </div>
@@ -52,7 +52,7 @@ const FollowListPopup = ({ title, users, onClose, isLoading, isCurrentUserFollow
                                         <img src={user.avatar || '/img/default_avatar.png'} alt={user.username} className="w-12 h-12 rounded-full object-cover" />
                                         <div>
                                             <p className="font-semibold hover:underline">{user.username}</p>
-                                            <p className="text-sm text-gray-400 line-clamp-1">{user.bio}</p>
+                                            <p className="text-sm text-text-lighter line-clamp-1">{user.bio}</p>
                                         </div>
                                     </Link>
                                     {isCurrentUserFollowingList && (

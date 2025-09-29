@@ -123,7 +123,7 @@ const Sequencer = ({ projectState, projectActions, playerState, isMobileOpen, on
                                 const barIndex = startBar + index;
                                 if (barIndex >= barCount) return null;
                                 return (
-                                    <th key={barIndex} className="p-2 border border-primary text-xs font-normal text-gray-400" style={{ width: `${BAR_WIDTH_PX}px`, minWidth: `${BAR_WIDTH_PX}px` }}>
+                                    <th key={barIndex} className="p-2 border border-primary text-xs font-normal text-text-lighter" style={{ width: `${BAR_WIDTH_PX}px`, minWidth: `${BAR_WIDTH_PX}px` }}>
                                         {barIndex + 1}
                                     </th>
                                 );
@@ -153,7 +153,7 @@ const Sequencer = ({ projectState, projectActions, playerState, isMobileOpen, on
                                                 onChange={(e) => setPatternInStructure(channelIndex, barIndex, e.target.value || null)}
                                                 onClick={(e) => e.stopPropagation()}
                                                 className="w-full h-full p-2 bg-transparent text-center appearance-none focus:outline-none text-foreground">
-                                                <option value="" className="bg-bg-darker text-gray-400">-</option>
+                                                <option value="" className="bg-bg-darker text-text-lighter">-</option>
                                                 {patternList.map(p => (
                                                     <option key={p.id} value={p.id} className="bg-bg-darker font-semibold">
                                                         P{patternDisplayMap[p.id]}

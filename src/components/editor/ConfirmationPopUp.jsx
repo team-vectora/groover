@@ -31,7 +31,7 @@ const ConfirmationPopUp = ({
                         {title || t("confirmation.title")}
                     </h3>
 
-                    <p className="text-gray-400 mb-6 text-sm sm:text-base">
+                    <p className="text-text-lighter mb-6 text-sm sm:text-base">
                         {message || t("confirmation.message")}
                     </p>
 

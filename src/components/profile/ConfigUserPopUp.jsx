@@ -80,14 +80,14 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
         <div className="flex justify-between items-center px-5 py-4 border-b border-primary">
           <h3 className="text-lg font-semibold text-accent-light">{t('configUserPopup.configureProfile')}</h3>
           {!isOnboarding && (
-              <button onClick={onClose} disabled={isSubmitting} className="text-gray-400 hover:text-white">
+              <button onClick={onClose} disabled={isSubmitting} className="text-text-lighter hover:text-white">
                 <FontAwesomeIcon icon={faTimes} size="lg" />
               </button>
           )}
         </div>
         <form onSubmit={handleSubmit} className="p-5">
           <div className="mb-5 text-center">
-            <label className="block mb-2 text-sm text-gray-300">{t('configUserPopup.profilePicture')}</label>
+            <label className="block mb-2 text-sm text-text-lighter">{t('configUserPopup.profilePicture')}</label>
             <div className="inline-block relative">
               <img src={previewUrl} alt="Preview" className="w-24 h-24 rounded-full object-cover border-2 border-primary-light"/>
               <button type="button" onClick={() => fileInputRef.current.click()} className="absolute -bottom-1 -right-1 bg-accent hover:bg-accent-light text-white w-8 h-8 flex items-center justify-center rounded-full shadow transition-transform hover:scale-110">
@@ -98,14 +98,14 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
           </div>
 
           <div className="mb-5">
-            <label className="block mb-2 text-sm text-gray-300">{t('configUserPopup.bio')}</label>
+            <label className="block mb-2 text-sm text-text-lighter">{t('configUserPopup.bio')}</label>
             <textarea value={changedBio} onChange={(e) => setChangedBio(e.target.value)} placeholder={t('configUserPopup.bioPlaceholder')}
                       rows={2} maxLength={50} className="w-full p-3 bg-bg-darker border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"/>
             <div className="text-right text-xs text-primary-light mt-1">{changedBio.length}/50</div>
           </div>
 
           <div className="mb-5">
-            <label className="block mb-2 text-sm text-gray-300">{t('configUserPopup.selectGenres')}</label>
+            <label className="block mb-2 text-sm text-text-lighter">{t('configUserPopup.selectGenres')}</label>
             <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto p-2 bg-bg-darker border border-primary rounded-md">
               {GENRES.map((tag) => (
                   <button key={tag} type="button" onClick={() => toggleTag(tag)}
@@ -121,7 +121,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
               {isSubmitting ? <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div> : t('configUserPopup.saveChanges')}
             </button>
             {isOnboarding && (
-                <button type="button" onClick={onSkip} className="w-full py-2 text-sm text-gray-400 hover:text-white transition">
+                <button type="button" onClick={onSkip} className="w-full py-2 text-sm text-text-lighter hover:text-white transition">
                   {t('profileSetup.skip')}
                 </button>
             )}

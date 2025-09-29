@@ -39,15 +39,15 @@ const ProfileHeader = ({ user, isCurrentUser, onEdit, onLogout, onFollowersClick
           </div>
           <div className="flex-1 text-center md:text-left">
             <h1 className="text-3xl font-bold text-accent-light mb-2">{user?.username || t('profile.user')}</h1>
-            <p className="text-gray-300 mb-4">{user?.bio}</p>
+            <p className="text-text-lighter mb-4">{user?.bio}</p>
             <div className="flex justify-center md:justify-start gap-6 mb-4">
               <div onClick={onFollowersClick} className="cursor-pointer">
                 <span className="font-bold">{user?.followers?.length || 0}</span>
-                <span className="text-gray-400 ml-1">{t('profile.followers')}</span>
+                <span className="text-text-lighter ml-1">{t('profile.followers')}</span>
               </div>
               <div onClick={onFollowingClick} className="cursor-pointer">
                 <span className="font-bold">{user?.following?.length || 0}</span>
-                <span className="text-gray-400 ml-1">{t('profile.following')}</span>
+                <span className="text-text-lighter ml-1">{t('profile.following')}</span>
               </div>
             </div>
             <div className="flex flex-wrap gap-2 justify-center md:justify-start">

@@ -13,7 +13,7 @@ const ProfileTabs = ({
                 className={`px-4 py-2 font-medium ${
                     activeTab === 'posts'
                         ? 'text-accent-light border-b-2 border-accent-light'
-                        : 'text-gray-400 hover:text-gray-300'
+                        : 'text-text-lighter hover:text-gray-300'
                 }`}
                 onClick={() => setActiveTab('posts')}
             >
@@ -24,7 +24,7 @@ const ProfileTabs = ({
                 className={`px-4 py-2 font-medium ${
                     activeTab === 'musics'
                         ? 'text-accent-light border-b-2 border-accent-light'
-                        : 'text-gray-400 hover:text-gray-300'
+                        : 'text-text-lighter hover:text-gray-300'
                 }`}
                 onClick={() => setActiveTab('musics')}
             >

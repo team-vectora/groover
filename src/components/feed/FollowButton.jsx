@@ -30,7 +30,7 @@ const FollowButton = ({ followingId, userId, isFollowing, setIsFollowing, onTogg
         shadow-sm
         ${isFollowing
                 ? 'bg-primary text-white hover:bg-primary/90'
-                : 'bg-white border border-gray-300 text-gray-800 hover:border-primary hover:text-primary'}
+                : 'bg-accent-light text-text-lighter hover:border-primary hover:text-primary'}
         ${loading ? 'opacity-60 cursor-not-allowed' : ''}
       `}
         >

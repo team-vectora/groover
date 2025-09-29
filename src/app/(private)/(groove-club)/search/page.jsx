@@ -62,7 +62,7 @@ export default function SearchPage() {
             (results.posts?.length || 0) > 0 ||
             (results.projects?.length || 0) > 0;
 
-        if (!hasResults) return <p className="text-center mt-8 text-gray-400">{t('search.noResults')}</p>;
+        if (!hasResults) return <p className="text-center mt-8 text-text-lighter">{t('search.noResults')}</p>;
 
         return (
             <div className="space-y-12 mt-8">
@@ -119,7 +119,7 @@ export default function SearchPage() {
                     placeholder={t('search.placeholder')}
                     className="w-full p-4 pl-12 bg-bg-secondary rounded-lg border border-primary focus:outline-none focus:ring-2 focus:ring-accent"
                 />
-                <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-lighter" />
             </div>
 
             <div className="flex items-center gap-2 mb-4">

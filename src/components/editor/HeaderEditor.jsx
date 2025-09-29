@@ -29,7 +29,7 @@ const HeaderEditor = ({
 <header className="bg-bg-darker flex flex-col md:flex-row items-center justify-between gap-3 md:gap-6 p-3 flex-shrink-0 w-full fixed z-20">
 
   <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
-    <Link href="/feed" className="text-gray-400 hover:text-accent transition-colors" title={t("header.backToFeed")}>
+    <Link href="/feed" className="text-text-lighter hover:text-accent transition-colors" title={t("header.backToFeed")}>
       <FontAwesomeIcon icon={faHouse} className="h-5 w-5 mb-1" />
     </Link>
     <Image src="/img/groover_logo.png" alt="Logo" width={40} height={40} />
