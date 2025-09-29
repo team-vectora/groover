@@ -23,6 +23,9 @@ def create_post():
         genres=data.get('genres')
     )
 
+    # Notifica todos os clientes sobre o novo post
+    socketio.emit("new_post_notification")
+
     return jsonify({'message': 'Post created', 'post_id': str(post_id)}), 201
 
 
@@ -88,16 +91,8 @@ def post_like():
         post_id=post_id
     )
 
-    socketio.emit(
-        "new_notification",
-        {
-            "user_id": user_id_owner,
-            "type": "like",
-            "actor": user["username"],
-            "post_id": post_id
-        },
-        room=f"user_{user_id_owner}"
-    )
+    socketio.emit("new_notification")
+
 
     return jsonify(response), status
 
@@ -135,17 +130,7 @@ def add_comment_to_post(post_id):
         )
 
         # Dispara notificação via WebSocket
-        socketio.emit(
-            "new_notification",
-            {
-                "user_id": str(original_post['user']['_id']),
-                "type": "comment",
-                "actor": actor_user['username'],
-                "post_id": post_id,
-                "content": data.get('caption')
-            },
-            room=f"user_{original_post['user']['_id']}"  # sala do dono do post
-        )
+        socketio.emit("new_notification")
 
 
     return jsonify({'message': 'Comentário adicionado', 'comment_id': str(comment_id)}), 201

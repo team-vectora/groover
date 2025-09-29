@@ -1,6 +1,6 @@
 // src/lib/util/upload.jsx
 
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import i18n from 'i18next';
 import { toast } from 'react-toastify';
 
@@ -21,7 +21,7 @@ export async function uploadToCloudinary(file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch(`${API_BASE_URL}/posts/upload-image`, {
+  const res = await apiFetch(`/posts/upload-image`, {
     method: "POST",
     body: formData,
     credentials: "include", // Envia o cookie httpOnly de autenticação

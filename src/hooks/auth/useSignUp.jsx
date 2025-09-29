@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
@@ -14,7 +14,7 @@ export default function useSignUp() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+      const response = await apiFetch(`/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password: senha, lang: i18n.language }),

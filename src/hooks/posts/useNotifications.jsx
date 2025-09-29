@@ -1,20 +1,19 @@
 'use client';
-import { useState, useEffect, useRef } from "react";
-import { API_BASE_URL } from "../../config";
-import { io } from "socket.io-client";
+import { useState, useEffect, useCallback } from "react";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
 export default function useNotifications() {
   const { t } = useTranslation();
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Inicia como true
   const [error, setError] = useState("");
-  const socketRef = useRef(null);
 
-  const fetchNotifications = async () => {
+  // useCallback para garantir que a função seja estável
+  const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/notifications`, {
+      const res = await apiFetch(`/notifications`, {
         credentials: "include",
       });
       const data = await res.json();
@@ -28,11 +27,11 @@ export default function useNotifications() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]); // A dependência em 't' é estável
 
   const checkNotification = async (notification_id) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/notifications/check`, {
+      const res = await apiFetch(`/notifications/check`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -42,10 +41,9 @@ export default function useNotifications() {
       if (!res.ok) {
         setError(data.error || t("toasts.error_marking_notification"));
       } else {
+        // Atualiza o estado local para refletir a mudança imediatamente
         setNotifications((prev) =>
-          prev.map((n) =>
-            n._id === notification_id ? { ...n, read: true } : n
-          )
+            prev.filter((n) => n._id !== notification_id)
         );
       }
     } catch (err) {
@@ -53,42 +51,12 @@ export default function useNotifications() {
     }
   };
 
+  // Efeito para buscar as notificações apenas uma vez quando o hook é montado
   useEffect(() => {
     fetchNotifications();
+  }, [fetchNotifications]);
 
-    // Evita múltiplas conexões
-    if (socketRef.current) return;
-
-    const socket = io("http://localhost:5000", {
-      withCredentials: true,
-      transports: ["websocket"],
-    });
-
-    socketRef.current = socket;
-
-    // Socket se conecta e backend já associa o usuário à sua sala via JWT
-    socket.on("connect", () => {
-      console.log("Socket conectado:", socket.id);
-    });
-
-    // Recebe notificações
-    socket.on("new_notification", (data) => {
-      console.log("Nova notificação recebida via socket:", data);
-      fetchNotifications(); // 🔥 sincroniza de novo com o backend
-    });
-
-    socket.on("connect_error", (err) => {
-      console.error("Erro de conexão socket:", err);
-    });
-
-    return () => {
-      socket.off("connect");
-      socket.off("new_notification");
-      socket.off("connect_error");
-      socket.disconnect();
-      socketRef.current = null;
-    };
-  }, []);
+  // REMOVEMOS O useEffect que conectava ao socket daqui.
 
   return { notifications, loading, error, refetch: fetchNotifications, checkNotification };
 }

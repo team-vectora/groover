@@ -1,12 +1,11 @@
 // src/app/(groove-club)/p/[id]/page.jsx
 'use client';
 import { useState, useEffect, useContext } from "react";
-import { Post, CommentForm, CommentThread, LoadingDisc } from "../../../../components";
+import { Post, CommentForm, CommentThread, LoadingDisc } from "../../../../../components";
 import { useParams } from "next/navigation";
-import { useAuth, useProfile, useMidiPlayer } from "../../../../hooks";
-import { MidiContext } from "../../../../contexts/MidiContext";
+import {useAuth , useProfile , useMidiPlayer , usePosts} from "../../../../../hooks";
 import { ToastContainer } from 'react-toastify';
-import { API_BASE_URL } from '../../../../config';
+import { apiFetch } from '../../../../../lib/util/apiFetch';
 import 'react-toastify/dist/ReactToastify.css';
 import { useTranslation } from "react-i18next";
 
@@ -20,11 +19,13 @@ function PostPage() {
     const { setCurrentProject } = useMidiPlayer();
     const { projects } = useProfile(username);
 
+    const { refetch, updatePostInCache } = usePosts();
+
     const fetchPost = async () => {
         if (!postId) return;
         setLoading(true);
         try {
-            const res = await fetch(`${API_BASE_URL}/posts/${postId}`, {
+            const res = await apiFetch(`/posts/${postId}`, {
                 credentials: "include" // Usa o cookie para autenticação
             });
             if (!res.ok) {
@@ -35,6 +36,7 @@ function PostPage() {
                 setError(true);
             }
             setPost(data);
+            updatePostInCache(data);
         } catch (err) {
             console.error("Erro ao buscar post:", err);
             setError(err.message);

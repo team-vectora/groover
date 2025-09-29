@@ -15,12 +15,16 @@ import {
   faSearch,
   faCompactDisc,
   faCompass,
+  faSync,
 } from "@fortawesome/free-solid-svg-icons";
 import useNotifications from "../../hooks/posts/useNotifications";
 import NotificationItem from "../posts/NotificationItem";
 import Image from "next/image";
 import { useOutsideClick } from "../../hooks";
 import { useTranslation } from "react-i18next";
+import { io } from "socket.io-client";
+
+const restoreStyle = "color: #8be9fd; font-weight: bold;";
 
 const Sidebar = () => {
   const { t } = useTranslation();
@@ -28,19 +32,47 @@ const Sidebar = () => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("/img/default_avatar.png");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [token, setToken] = useState(null);
+  const [showFeedReload, setShowFeedReload] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
+  // O hook agora só nos dá os dados e a função para recarregar
+  const { notifications, loading, error, checkNotification, refetch } = useNotifications();
+
+  // <-- INÍCIO DA CORREÇÃO -->
+  // Unificamos toda a lógica de WebSocket em um único useEffect
   useEffect(() => {
+    // Busca os dados do usuário do localStorage
     const storedUsername = localStorage.getItem("username");
     const storedAvatar = localStorage.getItem("avatar");
-    const storedToken = localStorage.getItem("token");
-
     if (storedUsername) setUsername(storedUsername);
-    if (storedToken) setToken(storedToken);
     if (storedAvatar && storedAvatar !== "null") setAvatarUrl(storedAvatar);
-  }, []);
+
+    // Cria UMA ÚNICA conexão de socket
+    const socket = io("http://localhost:5000", {
+      withCredentials: true,
+      transports: ["websocket"],
+    });
+
+    // Ouvinte para a atualização do FEED
+    socket.on("new_post_notification", () => {
+      setShowFeedReload(true);
+    });
+
+    // Ouvinte para as NOTIFICAÇÕES PESSOAIS (like, comentário, etc.)
+    socket.on("new_notification", (data) => {
+      console.log("Nova notificação recebida, recarregando lista...", data);
+      refetch(); // Chama a função do hook para buscar a nova lista de notificações
+    });
+
+    // Função de limpeza para desconectar o socket quando o componente for desmontado
+    return () => {
+      socket.off("new_post_notification");
+      socket.off("new_notification");
+      socket.disconnect();
+    };
+  }, [pathname, refetch]); // Adicionamos refetch às dependências
+  // <-- FIM DA CORREÇÃO -->
 
   useEffect(() => {
     const handleProfileUpdate = () => {
@@ -58,7 +90,6 @@ const Sidebar = () => {
     };
   }, []);
 
-  const { notifications, loading, error, checkNotification } = useNotifications(token || "");
 
   const navItems = [
     { icon: faHome, label: "feed", path: "/feed" },
@@ -71,14 +102,53 @@ const Sidebar = () => {
   const notifRef = useOutsideClick(() => setIsNotifOpen(false));
 
   const handleNavigation = (path) => {
-    if (pathname === '/feed') {
-      const scrollY = window.scrollY.toString();
-      console.log(`%c[Sidebar] SALVANDO SCROLL: Clicou para sair do feed. Posição salva: ${scrollY}`, 'color: #e67e22;');
-      sessionStorage.setItem('feedScrollPosition', scrollY);
+    if (pathname === '/feed' && path === '/feed') {
+      console.log(`%c[FeedPage] A limpar o cache para o próximo refresh.`, restoreStyle);
+      sessionStorage.removeItem('feedState');
+      setShowFeedReload(false);
+      setIsMenuOpen(false);
+      window.location.reload();
+      return;
+    }
+    if (pathname === '/feed' && path !== '/feed') {
+      const feedState = JSON.parse(sessionStorage.getItem('feedState') || '{}');
+      sessionStorage.setItem('feedState', JSON.stringify({
+        ...feedState,
+        scrollPosition: window.scrollY
+      }));
     }
     router.push(path);
     setIsMenuOpen(false);
   };
+
+  const handleCheckNotification = (notificationId) => {
+    // Encontra a notificação para saber o destino
+    const notification = notifications.find(n => n._id === notificationId);
+    if (!notification) return;
+
+    // Marca como lida
+    checkNotification(notificationId);
+
+    // Navega para o local apropriado
+    const { type, post_id, project_id } = notification;
+    switch(type) {
+      case 'invitation_received':
+        router.push(`/profile/${username}?tab=invites`);
+        break;
+      case 'invite_accepted':
+      case 'collaborator_update':
+        router.push(`/editor/${project_id}`);
+        break;
+      case 'like':
+      case 'comment':
+        if (post_id) router.push(`/p/${post_id}`);
+        break;
+      default:
+        break;
+    }
+    setIsNotifOpen(false); // Fecha o popup de notificações após o clique
+  };
+
 
   return (
       <>
@@ -103,6 +173,9 @@ const Sidebar = () => {
                   <button key={item.path} onClick={() => handleNavigation(item.path)} className="flex items-center w-full p-3 hover:bg-[var(--color-accent-sidebar)] text-text-lighter rounded-lg transition-colors cursor-pointer">
                     <FontAwesomeIcon icon={item.icon} className="mr-3 w-6 h-6" />
                     <span>{t(`sidebar.${item.label}`)}</span>
+                    {item.label === 'feed' && showFeedReload && (
+                        <FontAwesomeIcon icon={faSync} className="ml-auto text-accent animate-spin" />
+                    )}
                   </button>
               ))}
               <li className="relative" ref={notifRef}>
@@ -123,7 +196,7 @@ const Sidebar = () => {
                           <li className="p-3 text-sm text-gray-400">{t("sidebar.no_notifications")}</li>
                       )}
                       {notifications.map((notif) => (
-                          <NotificationItem key={notif._id} notification={notif} onCheck={() => checkNotification(notif._id)} />
+                          <NotificationItem key={notif._id} notification={notif} onCheck={() => handleCheckNotification(notif._id)} />
                       ))}
                     </ul>
                 )}
@@ -142,7 +215,7 @@ const Sidebar = () => {
                 <FontAwesomeIcon icon={faGear} className="mr-3 w-6 h-6" />
                 <span>{t("sidebar.settings")}</span>
               </button>
-              <button onClick={() => { localStorage.removeItem("token"); handleNavigation("/logout"); }} className="flex items-center w-full p-2 mt-2 hover:bg-accent-sidebar rounded-lg text-red-400">
+              <button onClick={() => { localStorage.clear(); sessionStorage.clear(); handleNavigation("/login"); }} className="flex items-center w-full p-2 mt-2 hover:bg-accent-sidebar rounded-lg text-red-400">
                 <FontAwesomeIcon icon={faSignOutAlt} className="mr-3 w-6 h-6" />
                 <span>{t("sidebar.logout")}</span>
               </button>
@@ -161,6 +234,9 @@ const Sidebar = () => {
                     <button onClick={() => handleNavigation(item.path)} className="flex items-center w-full p-3 hover:bg-[var(--color-accent-sidebar)] text-text-lighter rounded-lg transition-colors cursor-pointer">
                       <FontAwesomeIcon icon={item.icon} className="mr-3 w-6 h-6" />
                       <span>{t(`sidebar.${item.label}`)}</span>
+                      {item.label === 'feed' && showFeedReload && (
+                          <FontAwesomeIcon icon={faSync} className="ml-auto text-accent animate-spin" />
+                      )}
                     </button>
                   </li>
               ))}
@@ -182,7 +258,7 @@ const Sidebar = () => {
                           <li className="p-3 text-sm text-gray-400">{t("sidebar.no_notifications")}</li>
                       )}
                       {notifications.map((notif) => (
-                          <NotificationItem key={notif._id} notification={notif} onCheck={() => checkNotification(notif._id)} />
+                          <NotificationItem key={notif._id} notification={notif} onCheck={() => handleCheckNotification(notif._id)} />
                       ))}
                     </ul>
                 )}
@@ -204,7 +280,7 @@ const Sidebar = () => {
               <FontAwesomeIcon icon={faGear} className="mr-3 w-6 h-6" />
               <span>{t("sidebar.settings")}</span>
             </button>
-            <button onClick={() => { localStorage.removeItem("token"); handleNavigation("/logout"); }} className="flex items-center w-full p-2 mt-2 hover:bg-[var(--color-accent-sidebar)] cursor-pointer rounded-lg text-red-400">
+            <button onClick={() => { localStorage.clear(); sessionStorage.clear(); handleNavigation("/login"); }} className="flex items-center w-full p-2 mt-2 hover:bg-[var(--color-accent-sidebar)] cursor-pointer rounded-lg text-red-400">
               <FontAwesomeIcon icon={faSignOutAlt} className="mr-3 w-6 h-6" />
               <span>{t("sidebar.logout")}</span>
             </button>

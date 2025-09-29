@@ -4,11 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTranslation } from "react-i18next";
 
-export default function SimilarUsers({ users = [], userId }) {
+export default function SimilarUsers({ users = [], userId, isLoading }) {
     const { t } = useTranslation();
     const [page, setPage] = useState(0);
     const [followingStates, setFollowingStates] = useState({});
     const pageSize = 3;
+
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -34,6 +35,14 @@ export default function SimilarUsers({ users = [], userId }) {
         };
     }, []);
 
+    if (isLoading) {
+        return (
+            <section className="bg-bg-secondary rounded-lg p-4 border-2 border-primary sticky top-24 flex justify-center items-center">
+                <p>Carregando sugestões...</p>
+            </section>
+        );
+    }
+
     if (!users || users.length === 0) {
         return (
             <section className="bg-bg-secondary rounded-lg p-4 border-2 border-primary sticky top-24">
@@ -58,8 +67,6 @@ export default function SimilarUsers({ users = [], userId }) {
             </section>
         );
     }
-
-
 
     const startIndex = page * pageSize;
     const visibleUsers = users.slice(startIndex, startIndex + pageSize);

@@ -58,7 +58,9 @@ export default function Post({
     const handleNavigation = (path) => {
         if (pathname === '/feed') {
             const scrollY = window.scrollY.toString();
-            sessionStorage.setItem('feedScrollPosition', scrollY);
+            console.log(`%c[Sidebar] SALVANDO SCROLL: Clicou para sair do feed. Posição salva: ${scrollY}`, 'color: #e67e22;');
+            sessionStorage.setItem('savedScrollY', scrollY);
+            sessionStorage.setItem('useLastPostLengthSave', 'true');
         }
         router.push(path);
         setIsMenuOpen(false);

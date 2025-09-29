@@ -2,12 +2,12 @@
 import os
 from flask import Blueprint, jsonify, request, render_template
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User, Followers, Post, Project, Invitation
+from models import User, Followers, Post, Project, Invitation, Notification
 from itsdangerous import URLSafeSerializer, SignatureExpired
 from flask_mail import Message
 from utils.mail import mail
 from html import escape
-import cloudinary.uploader
+from utils.socket import socketio
 
 users_bp = Blueprint('users', __name__)
 s = URLSafeSerializer(os.getenv('AUTH_KEY'))
@@ -130,6 +130,24 @@ def post_follower():
     try:
         result = Followers.create_follow(user_id, following_id)
         status_code = 201 if result.get('status') == 'followed' else 200
+
+        # --- INÍCIO DA CORREÇÃO ---
+        # Se a ação foi "followed", cria e envia a notificação
+        if result.get('status') == 'followed':
+            actor_user = User.get_user(user_id) # O usuário que clicou em seguir
+            if actor_user:
+                # Cria a notificação no banco de dados
+                Notification.create(
+                    user_id=following_id,       # O usuário que foi seguido recebe
+                    type='new_follower',
+                    actor=actor_user['username']
+                )
+                # Emite o evento via WebSocket
+                socketio.emit(
+                    "new_notification"
+                )
+        # --- FIM DA CORREÇÃO ---
+
         return jsonify(result), status_code
     except ValueError as ve:
         return jsonify({'error': str(ve)}), 400

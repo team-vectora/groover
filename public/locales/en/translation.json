@@ -310,7 +310,9 @@
     "deletedSuccess": "Project deleted successfully!",
     "no_collaborators": "No Collaborators",
     "view_collaborators": "View Collaborators",
-    "delete_project": "Delete project"
+    "delete_project": "Delete project",
+    "remove_collaborator_title": "Remove Collaborator",
+    "remove_collaborator_confirmation": "Are you sure you want to remove {{user}} as a collaborator? This action cannot be undone."
   },
   "fork": {
     "copiedSuccess": "Project copied to your profile!"

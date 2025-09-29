@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Midi } from "@tonejs/midi";
 import * as Tone from "tone";
 import { NOTES } from "../../constants";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { toast } from 'react-toastify';
 import { uploadToCloudinary } from '../../lib/util/upload';
 
@@ -86,7 +86,7 @@ export const useProjectAPI = (projectId, projectActions) => {
             }
             setLoading(true);
             try {
-                const res = await fetch(`${API_BASE_URL}/projects/${projectId}`, { credentials: "include" });
+                const res = await apiFetch(`/projects/${projectId}`, { credentials: "include" });
                 if (!res.ok) throw new Error('Failed to load project');
                 const data = await res.json();
                 setProject(data);
@@ -122,7 +122,7 @@ export const useProjectAPI = (projectId, projectActions) => {
 
             if (projectId !== "new") payload.id = projectId;
 
-            const response = await fetch(`${API_BASE_URL}/projects`, {
+            const response = await apiFetch(`/projects`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
@@ -218,7 +218,7 @@ export const useProjectAPI = (projectId, projectActions) => {
         if (!musicId || musicId === currentMusicId) return;
         setLoading(true);
         try {
-            const res = await fetch(`${API_BASE_URL}/projects/${projectId}/versions/${musicId}`, { credentials: "include" });
+            const res = await apiFetch(`/projects/${projectId}/versions/${musicId}`, { credentials: "include" });
             if (!res.ok) throw new Error('Failed to load version');
             const versionData = await res.json();
             projectActions.loadProjectData({ ...project, ...versionData });

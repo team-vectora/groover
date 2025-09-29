@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../../config';
+import { apiFetch } from '../../lib/util/apiFetch';
 import { useTranslation } from 'react-i18next';
 
 export default function useSimilarUsers() {
@@ -11,7 +11,7 @@ export default function useSimilarUsers() {
   const fetchSimilarUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/users/similar`, {
+      const res = await apiFetch(`/users/similar`, {
         credentials: 'include',
       });
 

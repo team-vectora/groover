@@ -6,11 +6,11 @@ import { useState, useContext, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useAuth, useProfile, useForkProject, useShareProject, useDeleteProject } from '../../../../hooks';
+import { useAuth, useProfile, useForkProject, useShareProject, useDeleteProject } from '../../../../../hooks';
 import { ProfileHeader, ProfileTabs, Post, ProjectCard, Invite,
-  PostFormPopUp, ConfigUserPopUp, SharePopUp, ConfirmationPopUp, FollowListPopup, LoadingDisc, ManageCollaboratorsPopup } from '../../../../components';
+  PostFormPopUp, ConfigUserPopUp, SharePopUp, ConfirmationPopUp, FollowListPopup, LoadingDisc, ManageCollaboratorsPopup } from '../../../../../components';
 import { useTranslation } from 'react-i18next';
-import { API_BASE_URL } from "../../../../config";
+import { apiFetch } from "../../../../../lib/util/apiFetch";
 
 export default function ProfilePage({ params }) {
   const { t } = useTranslation();
@@ -61,7 +61,7 @@ export default function ProfilePage({ params }) {
     setFollowList({ open: true, type, users: [], isLoading: true });
     try {
       const endpoint = type === 'followers' ? 'followers' : 'following';
-      const res = await fetch(`${API_BASE_URL}/users/${username}/${endpoint}`, { credentials: "include" });
+      const res = await apiFetch(`/users/${username}/${endpoint}`, { credentials: "include" });
       const data = await res.json();
       setFollowList({ open: true, type, users: data, isLoading: false });
     } catch (err) {
@@ -112,7 +112,7 @@ export default function ProfilePage({ params }) {
         {shareProject && <SharePopUp open={!!shareProject} onClose={() => setShareProject(null)} project={shareProject} onShare={shareProjectApi} />}
         {followList.open && <FollowListPopup title={followList.type === 'followers' ? t('profile.followers') : t('profile.following')} users={followList.users} isLoading={followList.isLoading} onClose={() => setFollowList({ open: false, type: '', users: [], isLoading: false })} isCurrentUserFollowingList={isCurrentUser && followList.type === 'following'} refetchProfile={refetch} />}
         {projectToDelete && <ConfirmationPopUp open={!!projectToDelete} onClose={() => setProjectToDelete(null)} onConfirm={confirmDelete} title={t('profile.deleteProjectTitle')} message={t('profile.deleteProjectConfirmation')} />}
-        {projectToManage && <ManageCollaboratorsPopup project={projectToManage} open={!!projectToManage} onClose={() => setProjectToManage(null)} onCollaboratorChange={refetch} />}
+        {projectToManage && <ManageCollaboratorsPopup project={projectToManage} open={!!projectToManage} onClose={() => setProjectToManage(null)} onCollaboratorChange={() => {refetch}} />}
       </div>
   );
 }

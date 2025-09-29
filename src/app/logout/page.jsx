@@ -14,6 +14,7 @@ export default function LogoutPage() {
         const savedLang = localStorage.getItem("lang");
 
         localStorage.clear();
+        sessionStorage.clear();
 
         if (savedTheme) localStorage.setItem("theme", savedTheme);
         if (savedLang) localStorage.setItem("lang", savedLang);

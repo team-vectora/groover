@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
 export default function useForkProject() {
@@ -12,7 +12,7 @@ export default function useForkProject() {
   const forkProject = async (projectId) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/projects/fork`, {
+      const response = await apiFetch(`/projects/fork`, {
         method: "POST",
         credentials: "include", // envia o cookie HTTP-only
         headers: {

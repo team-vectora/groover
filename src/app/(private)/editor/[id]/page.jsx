@@ -1,10 +1,10 @@
 // src/app/editor/[id]/page.jsx
 'use client';
 import { useRouter, useParams } from "next/navigation";
-import { useAuth, useProjectStates, useTonePlayer, useProjectAPI, useForkProject } from '../../../hooks';
-import { HeaderEditor, SaveMusicPopUp, EditorLayout, ConfirmationPopUp, LoadingDisc } from '../../../components';
+import { useAuth, useProjectStates, useTonePlayer, useProjectAPI, useForkProject } from '../../../../hooks';
+import { HeaderEditor, SaveMusicPopUp, EditorLayout, ConfirmationPopUp, LoadingDisc } from '../../../../components';
 import { useEffect, useState, useCallback, useContext } from "react";
-import { MidiContext } from "../../../contexts/MidiContext";
+import { MidiContext } from "../../../../contexts/MidiContext";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useTranslation } from "react-i18next";

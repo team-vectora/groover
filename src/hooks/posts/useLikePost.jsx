@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
 export default function useLikePost(onSuccess) {
@@ -8,7 +8,7 @@ export default function useLikePost(onSuccess) {
 
   const likePost = async (post_id, owner_id) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/posts/like`, {
+      const res = await apiFetch(`/posts/like`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: "include",

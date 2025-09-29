@@ -1,6 +1,5 @@
 'use client';
-import { Post } from "../../../components";
-import { useAuth, usePosts, useMidiPlayer } from "../../../hooks/";
+import { useAuth, usePosts, useMidiPlayer } from "../../../../hooks/";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useTranslation } from "react-i18next";

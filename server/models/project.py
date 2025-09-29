@@ -168,6 +168,7 @@ class Project:
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
         return project
 
+
     @staticmethod
     def get_user_projects_by_username(username):
         user = User.find_by_username(username)
@@ -192,6 +193,10 @@ class Project:
                 'title': p.get('title', 'Untitled'),
                 'description': p.get('description', ''),
                 'bpm': p.get('bpm', 120),
+                # --- INÍCIO DA CORREÇÃO ---
+                'midi': (f"data:audio/midi;base64," + base64.b64encode(p['midi']).decode('utf-8')
+                         if 'midi' in p and p.get('midi') else None),
+                # --- FIM DA CORREÇÃO ---
                 'created_at': p.get('created_at'),
                 'created_by': created_by_user,
                 'is_owner': str(p.get('user_id')) == str(user_id_obj),

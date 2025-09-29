@@ -1,13 +1,13 @@
 // src/app/(groove-club)/search/page.jsx
 'use client';
 import { useState, useEffect } from 'react';
-import {useAuth , useDebounce , usePosts} from '../../../hooks';
-import { GENRES } from '../../../constants';
-import { Post, ProjectCard, UserSearchResult, LoadingDisc } from '../../../components';
+import {useAuth , useDebounce , usePosts} from '../../../../hooks';
+import { GENRES } from '../../../../constants';
+import { Post, ProjectCard, UserSearchResult, LoadingDisc } from '../../../../components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { useTranslation } from 'react-i18next';
-import { API_BASE_URL } from "../../../config";
+import { apiFetch } from "../../../../lib/util/apiFetch";
 
 export default function SearchPage() {
     const { t, i18n } = useTranslation();
@@ -36,7 +36,7 @@ export default function SearchPage() {
                 type: searchType,
             });
 
-            const response = await fetch(`${API_BASE_URL}/search?${params.toString()}`, {
+            const response = await apiFetch(`/search?${params.toString()}`, {
                 credentials: "include"
             });
             const data = await response.json();

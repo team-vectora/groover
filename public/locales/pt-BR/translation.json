@@ -309,7 +309,9 @@
     "deletedSuccess": "Projeto excluído com sucesso!",
     "no_collaborators": "Nenhum Colaborador",
     "view_collaborators": "Ver Colaboradores",
-    "delete_project": "Excluir projeto"
+    "delete_project": "Excluir projeto",
+    "remove_collaborator_title": "Remover Colaborador",
+    "remove_collaborator_confirmation": "Tem certeza de que deseja remover {{user}} como colaborador? Esta ação não pode ser desfeita."
   },
   "fork": {
     "copiedSuccess": "Projeto copiado para seu perfil!"

@@ -7,7 +7,7 @@ import { uploadToCloudinary } from '../../lib/util/upload';
 import { GENRES } from '../../constants'
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
 import { toast } from 'react-toastify';
-import {API_BASE_URL} from "../../config";
+import {apiFetch} from "../../lib/util/apiFetch";
 import { useTranslation } from 'react-i18next';
 
 
@@ -52,7 +52,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
         );
       }
 
-      const url = isComment ? `${API_BASE_URL}/posts/${postId}/comment` : `${API_BASE_URL}/posts`;
+      const url = isComment ? `/posts/${postId}/comment` : `/posts`;
       const body = {
         caption,
         photos: photoUrls,
@@ -60,7 +60,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
         genres: selectedGenres,
       };
 
-      const response = await fetch(url, {
+      const response = await apiFetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

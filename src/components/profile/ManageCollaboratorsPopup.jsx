@@ -5,14 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faTrash, faUser } from '@fortawesome/free-solid-svg-icons';
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
-import { API_BASE_URL } from '../../config';
+import { apiFetch } from '../../lib/util/apiFetch';
 import { toast } from 'react-toastify';
 import Link from 'next/link';
 import { ConfirmationPopUp } from '..';
 
 const ManageCollaboratorsPopup = ({ project, open, onClose, onCollaboratorChange }) => {
     const { t } = useTranslation();
-    const popupRef = useOutsideClick(onClose);
     const [collaborators, setCollaborators] = useState(project.collaborators || []);
     const [userToRemove, setUserToRemove] = useState(null);
 
@@ -20,7 +19,7 @@ const ManageCollaboratorsPopup = ({ project, open, onClose, onCollaboratorChange
         if (!userToRemove) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/projects/${project.id}/collaborators/${userToRemove._id}`, {
+            const response = await apiFetch(`/projects/${project.id}/collaborators/${userToRemove.id}`, {
                 method: 'DELETE',
                 credentials: 'include',
             });
@@ -30,7 +29,7 @@ const ManageCollaboratorsPopup = ({ project, open, onClose, onCollaboratorChange
             }
 
             toast.success(`${userToRemove.username} foi removido.`);
-            setCollaborators(prev => prev.filter(c => c._id !== userToRemove._id));
+            setCollaborators(prev => prev.filter(c => c.id !== userToRemove.id));
             if (onCollaboratorChange) {
                 onCollaboratorChange();
             }
@@ -46,7 +45,7 @@ const ManageCollaboratorsPopup = ({ project, open, onClose, onCollaboratorChange
     return (
         <>
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                <div ref={popupRef} className="bg-bg-secondary rounded-xl w-full max-w-md border border-primary">
+                <div className="bg-bg-secondary rounded-xl w-full max-w-md border border-primary">
                     <div className="flex justify-between items-center px-5 py-4 border-b border-primary">
                         <h3 className="text-lg font-semibold text-accent-light">{t('project.manage_collaborators')}</h3>
                         <button onClick={onClose} className="text-gray-400 hover:text-white">
@@ -59,7 +58,7 @@ const ManageCollaboratorsPopup = ({ project, open, onClose, onCollaboratorChange
                         ) : (
                             <ul className="space-y-3">
                                 {collaborators.map(user => (
-                                    <li key={user._id} className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-primary/20">
+                                    <li key={user.id} className="flex items-center justify-between gap-3 p-2 rounded-md hover:bg-primary/20">
                                         <Link href={`/profile/${user.username}`} className="flex items-center gap-3" onClick={onClose}>
                                             <img src={user.avatar || '/img/default_avatar.png'} alt={user.username} className="w-12 h-12 rounded-full object-cover" />
                                             <div>

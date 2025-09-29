@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { API_BASE_URL } from '../../config';
+import { apiFetch } from '../../lib/util/apiFetch';
 import { useTranslation } from 'react-i18next';
 
 export default function useProfile(username) {
@@ -17,18 +17,20 @@ export default function useProfile(username) {
     if (!username) return;
     setProfileData(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const res = await fetch(`${API_BASE_URL}/users/profile/${username}`, {
-        credentials: "include"
-      });
+      // SUBSTITUA 'fetch' por 'apiFetch'
+      const res = await apiFetch(`/users/profile/${username}`);
+
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || t('errors.user_not_found'));
       }
       const data = await res.json();
-      console.log(data)
       setProfileData({ ...data, loading: false, error: null });
     } catch (error) {
-      setProfileData(prev => ({ ...prev, loading: false, error: error.message }));
+      // O erro 401 já foi tratado. Outros erros (ex: "User not found") caem aqui.
+      if (error.message !== "Unauthorized") {
+        setProfileData(prev => ({ ...prev, loading: false, error: error.message }));
+      }
     }
   }, [username, t]);
 

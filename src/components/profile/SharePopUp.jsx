@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
 import useDebounce from '../../hooks/search/useDebounce';
-import { API_BASE_URL } from '../../config';
+import { apiFetch } from '../../lib/util/apiFetch';
 import { toast } from 'react-toastify';
 
 const SharePopUp = ({ open, onClose, project, onShare }) => {
@@ -23,7 +23,7 @@ const SharePopUp = ({ open, onClose, project, onShare }) => {
       }
       setLoading(true);
       try {
-        const response = await fetch(`${API_BASE_URL}/users/search?q=${debouncedSearchTerm}`, {
+        const response = await apiFetch(`/users/search?q=${debouncedSearchTerm}`, {
           credentials: "include"
         });
         const data = await response.json();

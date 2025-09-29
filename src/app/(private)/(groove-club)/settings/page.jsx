@@ -1,11 +1,11 @@
 // src/app/(groove-club)/settings/page.jsx
 'use client';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../../../../contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
-import { useDeleteAccount } from '../../../hooks/settings/useDeleteAccount';
+import { useDeleteAccount } from '../../../../hooks/settings/useDeleteAccount';
 
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();

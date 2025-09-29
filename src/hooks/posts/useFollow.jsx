@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
 export default function useFollow() {
@@ -12,7 +12,7 @@ export default function useFollow() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/users/follow`, {
+      const response = await apiFetch(`/users/follow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -25,20 +25,41 @@ export default function useFollow() {
 
       if (!response.ok) {
         throw new Error(
-          data.error
-            ? t(`backend_errors.${data.error}`, { defaultValue: t('toasts.error_following') })
-            : t('toasts.error_following')
+            data.error
+                ? t(`backend_errors.${data.error}`, { defaultValue: t('toasts.error_following') })
+                : t('toasts.error_following')
         );
       }
 
       const newIsFollowing = !currentFollowingState;
 
+      // <-- INÍCIO DA CORREÇÃO: CENTRALIZAÇÃO DA LÓGICA NO LOCALSTORAGE -->
+      // 1. Pega a lista atual de "seguindo" do localStorage.
+      const followingList = JSON.parse(localStorage.getItem("following") || "[]");
+
+      // 2. Adiciona ou remove o ID do usuário da lista.
+      if (newIsFollowing) {
+        if (!followingList.includes(followingId)) {
+          followingList.push(followingId);
+        }
+      } else {
+        const index = followingList.indexOf(followingId);
+        if (index > -1) {
+          followingList.splice(index, 1);
+        }
+      }
+
+      // 3. Salva a lista atualizada de volta no localStorage.
+      localStorage.setItem("following", JSON.stringify(followingList));
+      // <-- FIM DA CORREÇÃO -->
+
+      // 4. Dispara o evento para notificar todos os componentes abertos.
       const event = new CustomEvent('followingUpdated', {
         detail: { userId: followingId, isFollowing: newIsFollowing }
       });
       window.dispatchEvent(event);
 
-      // Chama a callback de sucesso, se ela existir
+      // Chama a callback de sucesso, se ela existir.
       if (onSuccess) {
         onSuccess(newIsFollowing);
       }

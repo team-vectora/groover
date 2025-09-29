@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
 export default function useShareProject() {
@@ -10,7 +10,7 @@ export default function useShareProject() {
   const shareProject = async (projectId, username) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/projects/${projectId}/invite`, {
+      const response = await apiFetch(`/projects/${projectId}/invite`, {
         method: "POST",
         credentials: "include",
         headers: {

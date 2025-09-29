@@ -6,7 +6,7 @@ import { uploadToCloudinary } from '../../lib/util/upload';
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
 import { toast } from 'react-toastify';
 import { GENRES } from '../../constants';
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from 'react-i18next';
 
 const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, isOnboarding = false, onSkip }) => {
@@ -35,7 +35,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
         profilePicUrl = await uploadToCloudinary(profilePicFile, 'avatar');
       }
 
-      const res = await fetch(`${API_BASE_URL}/users/config`, {
+      const res = await apiFetch(`/users/config`, {
         method: "PUT",
         body: JSON.stringify({ avatar: profilePicUrl, music_tags: musicTags, bio: changedBio }),
         credentials: "include",

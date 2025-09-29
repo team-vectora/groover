@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
 export default function useHandleInvite() {
@@ -10,7 +10,7 @@ export default function useHandleInvite() {
   const handleInvite = async (inviteId, response, onComplete) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/invitations/${inviteId}/respond`, {
+      const res = await apiFetch(`/invitations/${inviteId}/respond`, {
         method: "POST",
         credentials: "include",
         headers: {

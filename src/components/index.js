@@ -25,6 +25,7 @@ export { default as SimilarUsers } from './feed/SimilarUsers';
 export { default as PlayerWrapper } from './layout/PlayerWrapper';
 export { default as MusicNotesDetail } from './layout/MusicNotesDetail';
 export { default as Sidebar } from './layout/Sidebar';
+export { default as AuthGuard } from './auth/AuthGuard';
 
 // Posts
 export { default as Post } from './posts/Post';

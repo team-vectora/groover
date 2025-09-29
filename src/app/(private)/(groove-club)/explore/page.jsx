@@ -1,6 +1,6 @@
 // src/app/(groove-club)/explore/page.jsx
 'use client';
-import { GrooveFeed } from "../../../components";
+import { GrooveFeed } from "../../../../components";
 
 const ExplorePage = () => {
     return (

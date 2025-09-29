@@ -4,8 +4,10 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Project, Music, User, Invitation, Notification
 import base64
 from bson.binary import Binary
+from utils.socket import socketio  # <-- ADICIONADO
 
 projects_bp = Blueprint('projects', __name__)
+
 
 @projects_bp.route('', methods=['POST'])
 @jwt_required()
@@ -38,16 +40,22 @@ def save_project():
 
     if project_id:
         project = Project.get_project_full_data(project_id)
-        if str(project.get('user_id')) != user_id and user_id not in [c['id'] for c in project.get('collaborators', [])]:
+        if str(project.get('user_id')) != user_id and user_id not in [c['id'] for c in
+                                                                      project.get('collaborators', [])]:
             return jsonify({'error': 'Permission denied'}), 403
 
         if str(project.get('user_id')) != user_id:
             actor_user = User.get_user(user_id)
+            owner_id = str(project.get('user_id'))
             Notification.create(
-                user_id=str(project.get('user_id')),
+                user_id=owner_id,
                 actor=actor_user['username'], type="collaborator_update",
                 project_id=project_id, content=project.get('title')
             )
+
+            # <-- INÍCIO DA CORREÇÃO 1 -->
+            socketio.emit("new_notification")
+            # <-- FIM DA CORREÇÃO 1 -->
 
         Music.create_music(project_id=project_id, music_data=music_data, user_id=user_id)
         Project.update_project(project_id, user_id, project_data)
@@ -73,10 +81,12 @@ def remove_collaborator(project_id, collaborator_id):
     Project.remove_collaborator(project_id, collaborator_id)
     return jsonify({'message': 'Collaborator removed'}), 200
 
+
 @projects_bp.route('/teste', methods=["GET"])
 @jwt_required()
 def teste():
     return Project.get_recent_projects()
+
 
 @projects_bp.route('/<project_id>', methods=['GET'])
 @jwt_required()
@@ -159,6 +169,10 @@ def invite_user(project_id):
         content=project.get('title')
     )
 
+    # <-- INÍCIO DA CORREÇÃO 2 -->
+    socketio.emit("new_notification")
+    # <-- FIM DA CORREÇÃO 2 -->
+
     return jsonify({'message': 'Invitation sent', 'invitation_id': str(invitation_id)}), 201
 
 
@@ -185,7 +199,8 @@ def fork_project():
         'description': original_project.get('description', ''),
         'bpm': original_project.get('bpm', 120),
         'volume': original_project.get('volume', -10),
-        'midi': Binary(base64.b64decode(original_project.get('midi', '').split(',')[-1])) if original_project.get('midi') else None
+        'midi': Binary(base64.b64decode(original_project.get('midi', '').split(',')[-1])) if original_project.get(
+            'midi') else None
     }
     new_project_id = Project.create_project(user_id, new_project_data)
 

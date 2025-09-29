@@ -9,7 +9,7 @@ import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { useTranslation } from "react-i18next";
 import { ForgotPasswordPopup } from "../../../components";
 
-import { API_BASE_URL } from "../../../config";
+import { apiFetch } from "../../../lib/util/apiFetch";
 
 const LoginPage = () => {
     const { t } = useTranslation();
@@ -128,7 +128,7 @@ const LoginPage = () => {
                 isOpen={isPopupOpen}
                 onClose={() => setIsPopupOpen(false)}
                 onSendEmail={async (email) => {
-                    const res = await fetch(`${API_BASE_URL}/auth/forgot_password`, {
+                    const res = await apiFetch(`/auth/forgot_password`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ email })

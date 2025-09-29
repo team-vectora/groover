@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
 export default function useLogin() {
@@ -12,7 +12,7 @@ export default function useLogin() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signin`, {
+      const response = await apiFetch(`/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password: senha }),

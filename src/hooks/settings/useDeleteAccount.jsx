@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
 export function useDeleteAccount() {
@@ -12,7 +12,7 @@ export function useDeleteAccount() {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/users/delete`, {
+      const response = await apiFetch(`/users/delete`, {
         method: "POST",
         credentials: "include",
         headers: {

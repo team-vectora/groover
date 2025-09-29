@@ -1,11 +1,28 @@
 'use client'
-import '../../styles/global.css'
-import { Sidebar, PlayerWrapper, SimilarUsers } from "../../components";
-import { useSimilarUsers, useAuth } from "../../hooks";
+import '../../../styles/global.css'
+import { Sidebar, PlayerWrapper, SimilarUsers } from "../../../components";
+import { useSimilarUsers, useAuth } from "../../../hooks";
+import {usePathname} from "next/navigation";
+import {useEffect} from "react";
 
 export default function RootLayout({ children }) {
   const { token, userId } = useAuth();
   const { similarUsers, loading: similarLoading } = useSimilarUsers(token);
+
+  const pathname = usePathname();
+
+  // NOVO: Este useEffect irá rastrear as mudanças de rota
+  useEffect(() => {
+    // A lógica é: o valor que está salvo é o da página anterior.
+    // Nós o lemos e depois salvamos o valor da página ATUAL para a PRÓXIMA navegação.
+    const previousPath = sessionStorage.getItem('currentPath');
+    console.log(`[Layout] Navegação: de ${previousPath || 'N/A'} para ${pathname}`);
+
+    // Salva o caminho atual para que ele se torne o "anterior" na próxima mudança de rota.
+    sessionStorage.setItem('previousPath', previousPath);
+    sessionStorage.setItem('currentPath', pathname);
+
+  }, [pathname]);
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-foreground">
@@ -40,11 +57,7 @@ export default function RootLayout({ children }) {
 
         {/* SimilarUsers só aparece no desktop */}
         <div className="hidden xl:flex w-full flex-shrink-0 sticky top-24 h-fit">
-          {similarLoading ? (
-            <p className="text-center py-4">Carregando sugestões...</p>
-          ) : (
-            <SimilarUsers users={similarUsers} userId={userId} />
-          )}
+          <SimilarUsers users={similarUsers} userId={userId} isLoading={similarLoading} />
         </div>
       </div>
     </div>
