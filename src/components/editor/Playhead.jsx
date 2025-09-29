@@ -12,11 +12,15 @@ const Playhead = ({
                       currentPage, // for sequencer
                       totalBars, // for sequencer
                   }) => {
+
+    const isPaused = !isPlaying && !isPatternPlaying && playheadPositionInTicks > 0;
+
     const calculatePosition = () => {
-        if (!isPlaying && !isPatternPlaying) return -1; // Oculta se não estiver tocando
+        if (!isPlaying && !isPatternPlaying && playheadPositionInTicks === 0) {
+            return -1;
+        }
 
         if (container === "pianoroll") {
-            // No PianoRoll, a posição é sempre relativa ao início do pattern (0 a 31 ticks)
             const positionInPattern = playheadPositionInTicks % TICKS_PER_BAR;
             return (positionInPattern / TICKS_PER_BAR) * 100;
         }
@@ -26,16 +30,14 @@ const Playhead = ({
             const currentPageStartTick = currentPage * ticksPerPage;
             const currentPageEndTick = currentPageStartTick + ticksPerPage;
 
-            // Verifica se o playhead está na página atual
             if (
                 playheadPositionInTicks >= currentPageStartTick &&
                 playheadPositionInTicks < currentPageEndTick
             ) {
-                // Calcula a posição relativa à página atual
                 const positionInPage = playheadPositionInTicks - currentPageStartTick;
                 return (positionInPage / ticksPerPage) * 100;
             }
-            return -1; // Oculta se não estiver na página visível
+            return -1;
         }
 
         return -1;
@@ -44,31 +46,37 @@ const Playhead = ({
     const leftPosition = calculatePosition();
 
     if (leftPosition < 0) {
-        return null; // Não renderiza o playhead se ele não deve ser visível
+        return null;
     }
 
     return (
         <>
+            {/* --- INÍCIO DA CORREÇÃO --- */}
             <div
-                className="absolute top-0 h-full w-0.5 bg-primary pointer-events-none z-30"
+                // A classe "w-0.5" foi alterada para "w-1" para duplicar a espessura.
+                className="absolute top-0 h-full w-1 bg-primary pointer-events-none z-30 transition-opacity duration-300"
                 style={{
                     left: `${leftPosition}%`,
-                    animation: "pulseOpacity 2s infinite ease-in-out",
+                    animation: (!(isPlaying || isPatternPlaying)) ? "pulseOpacity 2s infinite ease-in-out" : "none",
+                    opacity: isPaused ? 0.6 : 1,
+                    // Adicionado um pequeno brilho para melhor visibilidade
+                    boxShadow: '0 0 3px var(--color-primary-light)'
                 }}
             />
+            {/* --- FIM DA CORREÇÃO --- */}
             <style jsx>{`
-        @keyframes pulseOpacity {
-          0% {
-            opacity: 0.9;
-          }
-          50% {
-            opacity: 0.5;
-          }
-          100% {
-            opacity: 0.9;
-          }
-        }
-      `}</style>
+              @keyframes pulseOpacity {
+                0% {
+                  opacity: 0.9;
+                }
+                50% {
+                  opacity: 0.5;
+                }
+                100% {
+                  opacity: 0.9;
+                }
+              }
+            `}</style>
         </>
     );
 };

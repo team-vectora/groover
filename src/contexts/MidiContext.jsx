@@ -3,7 +3,8 @@
 import React, { createContext, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import * as Tone from "tone";
 import { Midi } from "@tonejs/midi";
-import { usePathname } from "next/navigation"; // 1. Importar o hook de navegação
+import { usePathname } from "next/navigation";// 1. Importar o hook de navegação
+import {useTonePlayer} from "../hooks";
 
 export const MidiContext = createContext(null);
 
@@ -35,16 +36,17 @@ export function MidiProvider({ children }) {
 
   const stop = useCallback(() => {
     Tone.Transport.stop();
-    Tone.Transport.position = 0;
+    Tone.Transport.cancel(0); // Limpa TODOS os eventos agendados
 
+    // O partRef precisa de ser eliminado, pois cancel() não o remove
     if (partRef.current) {
-      partRef.current.stop(0);
       partRef.current.dispose();
       partRef.current = null;
     }
 
     synthRef.current?.releaseAll();
 
+    Tone.Transport.position = 0;
     setIsPlaying(false);
     setProgress(0);
 

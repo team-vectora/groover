@@ -1,7 +1,7 @@
 // src/app/(groove-club)/search/page.jsx
 'use client';
 import { useState, useEffect } from 'react';
-import { useAuth, useDebounce } from '../../../hooks';
+import {useAuth , useDebounce , usePosts} from '../../../hooks';
 import { GENRES } from '../../../constants';
 import { Post, ProjectCard, UserSearchResult, LoadingDisc } from '../../../components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,8 +15,10 @@ export default function SearchPage() {
     const [selectedTags, setSelectedTags] = useState([]);
     const [searchType, setSearchType] = useState('all');
     const [tagsExpanded, setTagsExpanded] = useState(false);
+    const { updatePost } = usePosts();
     const [results, setResults] = useState({ users: [], posts: [], projects: [] });
     const [loading, setLoading] = useState(false);
+    const { userId } = useAuth();
 
     const debouncedQuery = useDebounce(query, 500);
 
@@ -76,7 +78,11 @@ export default function SearchPage() {
                     <section>
                         <h2 className="text-2xl font-bold mb-4 text-accent-light">{t('search.posts')}</h2>
                         <div className="space-y-6">
-                            {results.posts.map(post => <Post key={post._id} post={post} />)}
+                            {results.posts.map(post => <Post key={post._id}
+                                                             userId={userId}
+                                                             post={post}
+                                                             profileId={userId}
+                                                             onUpdatePost={updatePost}  />)}
                         </div>
                     </section>
                 )}

@@ -78,13 +78,15 @@ class Project:
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
 
-            # **CORREÇÃO APLICADA AQUI**
             collaborator_ids = project.get('collaborators', [])
             project['collaborators'] = User.get_user_details_by_ids(collaborator_ids)
 
             project['user_id'] = str(project['user_id'])
-            project['created_by'] = str(project.get('created_by', ''))
-            project['last_updated_by'] = str(project.get('last_updated_by', ''))
+            # --- INÍCIO DA CORREÇÃO ---
+            # Altera a linha para ir buscar o objeto completo do utilizador, em vez de apenas o ID.
+            project['created_by'] = User.get_user(project.get('user_id', ''))
+            # --- FIM DA CORREÇÃO ---
+            project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
         return project
 
     @staticmethod

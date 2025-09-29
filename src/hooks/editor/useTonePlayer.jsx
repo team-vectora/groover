@@ -80,15 +80,19 @@ export const useTonePlayer = (projectState) => {
 
     const stop = useCallback(() => {
         Tone.Transport.stop();
-        scheduledEventsRef.current.forEach(id => Tone.Transport.clear(id));
-        scheduledEventsRef.current = [];
+        Tone.Transport.cancel(0); // Limpa todos os eventos agendados a partir do tempo 0
+
+        scheduledEventsRef.current = []; // Limpa a nossa referência interna também
+
         Tone.Transport.position = 0;
         setPlayheadPositionInTicks(0);
+
         Object.values(synthsRef.current).forEach(synth => synth.releaseAll());
+
         setIsPlaying(false);
         setIsPatternPlaying(false);
+
         if (patternPartRef.current) {
-            patternPartRef.current.stop();
             patternPartRef.current.dispose();
             patternPartRef.current = null;
         }
