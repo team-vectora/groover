@@ -48,10 +48,10 @@ const Sidebar = () => {
     if (storedUsername) setUsername(storedUsername);
     if (storedAvatar && storedAvatar !== "null") setAvatarUrl(storedAvatar);
 
-    // Cria UMA ÚNICA conexão de socket
-    const socket = io("http://localhost:5000", {
-      withCredentials: true,
-      transports: ["websocket"],
+    // Conexão de socket para produção
+    const socket = io("https://groover-api.onrender.com", {
+      withCredentials: true, // permite enviar cookies ou JWT
+      transports: ["websocket"], // força WebSocket
     });
 
     // Ouvinte para a atualização do FEED

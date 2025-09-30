@@ -161,7 +161,7 @@ def signin():
         access_token,
         httponly=True,
         secure=True,
-        samesite="None",   
+        samesite="None",
         max_age=60 * 60 * 24
     )
 
