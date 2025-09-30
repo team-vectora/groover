@@ -24,7 +24,7 @@ from utils.socket import socketio
 def create_app():
     app = Flask(__name__)
 
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    frontend_url = os.getenv("FRONTEND_URL")
 
     CORS(app,
          supports_credentials=True,
