@@ -1,20 +1,18 @@
 import { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../../config';
+import { apiFetch } from '../../lib/util/apiFetch';
 import { useTranslation } from 'react-i18next';
 
-export default function useSimilarUsers(token) {
+export default function useSimilarUsers() {
   const [similarUsers, setSimilarUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { t } = useTranslation();
 
   const fetchSimilarUsers = async () => {
-    if (!token) return;
-
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/users/similar`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiFetch(`/users/similar`, {
+        credentials: 'include',
       });
 
       if (!res.ok) {
@@ -32,7 +30,7 @@ export default function useSimilarUsers(token) {
 
   useEffect(() => {
     fetchSimilarUsers();
-  }, [token]);
+  }, []);
 
   return {
     similarUsers,

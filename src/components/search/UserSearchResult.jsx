@@ -22,7 +22,7 @@ export default function UserSearchResult({ user }) {
                 <Image src={user.avatar || '/img/default_avatar.png'} alt={user.username} width={50} height={50} className="rounded-full" />
                 <div>
                     <p className="font-bold text-foreground">{user.username}</p>
-                    <p className="text-sm text-text-lighter dark:text-gray-400">{user.bio}</p>
+                    <p className="text-sm text-text-lighter dark:text-text-lighter">{user.bio}</p>
                 </div>
             </Link>
             {userId !== user.id && (

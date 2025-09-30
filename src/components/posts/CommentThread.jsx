@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 const CommentThread = ({ comments, token, userId, setCurrentProject, handleClickFork, onPostCreated }) => {
     const { t } = useTranslation();
     if (!comments || comments.length === 0) {
-        return <p className="text-center text-gray-500 mt-8">{t('post.noComments')}</p>;
+        return <p className="text-center text-text-lighter mt-8">{t('post.noComments')}</p>;
     }
 
     return (

@@ -5,6 +5,9 @@ export { default as ChangeVolume } from './editor/controls/ChangeVolume';
 export { default as ControlPanel } from './editor/controls/ControlPanel';
 export { default as SelectRitmo } from './editor/controls/SelectRitmo';
 export { default as VersionManager } from './editor/controls/VersionManager';
+export { default as Sequencer } from './editor/controls/Sequencer';
+export { default as ChannelControls } from './editor/controls/ChannelControls';
+export { default as Playhead } from './editor/Playhead'; // ADICIONE ESTA LINHA
 
 export { default as HeaderEditor } from './editor/HeaderEditor';
 export { default as PianoRoll } from './editor/PianoRoll';
@@ -22,12 +25,14 @@ export { default as SimilarUsers } from './feed/SimilarUsers';
 export { default as PlayerWrapper } from './layout/PlayerWrapper';
 export { default as MusicNotesDetail } from './layout/MusicNotesDetail';
 export { default as Sidebar } from './layout/Sidebar';
+export { default as AuthGuard } from './auth/AuthGuard';
 
 // Posts
 export { default as Post } from './posts/Post';
 export { default as PostFormPopUp } from './posts/PostFormPopUp';
 export { default as CommentForm } from './posts/CommentForm';
 export { default as CommentThread } from './posts/CommentThread';
+export { default as AudioVisualizer } from './posts/AudioVisualizer';
 
 // Profile
 export { default as ConfigUserPopUp } from './profile/ConfigUserPopUp';
@@ -37,9 +42,11 @@ export { default as ProfileTabs } from './profile/ProfileTabs';
 export { default as ProjectCard } from './profile/ProjectCard';
 export { default as SharePopUp } from './profile/SharePopUp';
 export { default as FollowListPopup } from './profile/FollowListPopup';
+export { default as ManageCollaboratorsPopup } from './profile/ManageCollaboratorsPopup';
 
 // Search
 export { default as UserSearchResult } from './search/UserSearchResult';
+export { default as GrooveFeed } from './feed/GrooveFeed';
 
 export { default as ForgotPasswordPopup } from './auth/ForgotPasswordPopup';
 

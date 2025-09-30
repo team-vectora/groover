@@ -1,170 +1,171 @@
 // src/hooks/editor/useProjectStates.jsx
 "use client";
-import { useState, useEffect, useCallback } from 'react';
-import { ROWS, INITIAL_COLS } from '../../constants'; // Arquivo de constantes
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { v4 as uuidv4 } from 'uuid';
 
-// ✅ FUNÇÕES ATUALIZADAS: Criam a nova estrutura de dados compacta
-const createNote = (duration = 1) => Array(duration).fill(null);
+// Adicionado 'createdAt' para ordenação estável
+const createNewPattern = () => ({ id: uuidv4(), notes: [], createdAt: new Date().toISOString() });
+const createNewChannel = () => ({ id: uuidv4(), instrument: 'piano', volume: -10 });
+const INITIAL_BAR_COUNT = 8;
 
-const createNewMatrix = () =>
-    Array.from({ length: INITIAL_COLS }, () =>
-        Array.from({ length: ROWS }, () => createNote())
-    );
-
-// ✅ NOVA FUNÇÃO: Garante que a estrutura de dados seja segura para iteração
-const rehydrateLayers = (layers, rows) => {
-    if (!layers || layers.length === 0) return [];
-
-    return layers.map(page => {
-        if (!page) return [];
-
-        return page.map(column => {
-            // Encontra o maior número de subdivisões nesta coluna para usá-lo como base
-            const maxSubdivisions = Math.max(1, ...column.map(noteArray => Array.isArray(noteArray) ? noteArray.length : 1));
-
-            return (column || []).map(noteArray => {
-                // Se a célula for nula (problema das versões antigas),
-                // cria um array de nulos com o tamanho correto da subdivisão da coluna.
-                if (noteArray === null) {
-                    return Array(maxSubdivisions).fill(null);
-                }
-                // Garante que o que veio é um array
-                return Array.isArray(noteArray) ? noteArray : [noteArray];
-            });
-        });
-    });
-};
-
-const createNewPage = () =>
-    Array.from({ length: 10 }, () =>
-        Array.from({ length: ROWS }, () => createNote())
-    );
-
-export const useProjectState = () => {
+export const useProjectStates = () => {
     const { t } = useTranslation();
-    const [title, setTitle] = useState("Novo Projeto");
+    const [title, setTitle] = useState("New Project");
     const [description, setDescription] = useState("");
     const [bpm, setBpm] = useState(120);
-    const [instrument, setInstrument] = useState('piano');
     const [volume, setVolume] = useState(-10);
-    const [rhythm, setRhythm] = useState(1);
-    const [collaborators, setCollaborators] = useState([]);
-    const [ownerId, setOwnerId] = useState(null);
+    const [owner, setOwner] = useState(null);
 
-    const [pages, setPages] = useState([createNewMatrix()]);
-    const [activePage, setActivePage] = useState(0);
-    const [selectedColumn, setSelectedColumn] = useState(null);
+    const [channels, setChannels] = useState([createNewChannel()]);
+    const [patterns, setPatterns] = useState(() => {
+        const newPattern = createNewPattern();
+        return { [newPattern.id]: newPattern };
+    });
+    const [songStructure, setSongStructure] = useState([Array(INITIAL_BAR_COUNT).fill(null)]);
 
-    // ✅ ATUALIZADO: Lida com a nova estrutura de nota (que é um array)
-    useEffect(() => {
-        if (selectedColumn === null) return;
+    const [activeChannelIndex, setActiveChannelIndex] = useState(0);
+    const [activePatternId, setActivePatternId] = useState(Object.keys(patterns)[0]);
 
-        setPages((prevPages) => {
-            const newPages = [...prevPages];
-            const currentMatrix = [...newPages[activePage]];
+    // --- Ações ---
 
-            const updatedCol = currentMatrix[selectedColumn].map(noteArray => {
-                const oldSubNotes = noteArray || [null];
-                const newSubNotes = Array.from({ length: rhythm }, (_, i) =>
-                    oldSubNotes[i] || null
-                );
-                return newSubNotes;
-            });
+    const addChannel = useCallback(() => {
+        setChannels(prev => [...prev, createNewChannel()]);
+        setSongStructure(prev => [...prev, Array(prev[0]?.length || INITIAL_BAR_COUNT).fill(null)]);
+    }, []);
 
-            currentMatrix[selectedColumn] = updatedCol;
-            newPages[activePage] = currentMatrix;
-            return newPages;
+    const deleteChannel = useCallback((channelIndex) => {
+        if (channels.length <= 1) return; // Não permite excluir o último canal
+        setChannels(prev => prev.filter((_, index) => index !== channelIndex));
+        setSongStructure(prev => prev.filter((_, index) => index !== channelIndex));
+        if (activeChannelIndex >= channelIndex) {
+            setActiveChannelIndex(prev => Math.max(0, prev - 1));
+        }
+    }, [channels.length, activeChannelIndex]);
+
+    const setChannelInstrument = useCallback((channelIndex, newInstrument) => {
+        setChannels(prev => prev.map((channel, index) =>
+            index === channelIndex ? { ...channel, instrument: newInstrument } : channel
+        ));
+    }, []);
+
+    const createNewPatternAndSelect = useCallback(() => {
+        const newPattern = createNewPattern();
+        setPatterns(prev => ({ ...prev, [newPattern.id]: newPattern }));
+        setActivePatternId(newPattern.id);
+        return newPattern.id;
+    }, []);
+
+    const deletePattern = useCallback((patternIdToDelete) => {
+        if (Object.keys(patterns).length <= 1) return; // Não permite excluir o último padrão
+
+        const newPatterns = { ...patterns };
+        delete newPatterns[patternIdToDelete];
+        setPatterns(newPatterns);
+
+        setSongStructure(prev => prev.map(channel =>
+            channel.map(pId => (pId === patternIdToDelete ? null : pId))
+        ));
+
+        if (activePatternId === patternIdToDelete) {
+            const remainingPatterns = Object.keys(newPatterns);
+            setActivePatternId(remainingPatterns.length > 0 ? remainingPatterns[0] : null);
+        }
+    }, [patterns, activePatternId]);
+
+
+    const updatePatternNotes = useCallback((patternId, newNotes) => {
+        if (!patternId) return;
+        setPatterns(prev => ({
+            ...prev,
+            [patternId]: { ...prev[patternId], notes: newNotes }
+        }));
+    }, []);
+
+    const setPatternInStructure = useCallback((channelIndex, barIndex, patternId) => {
+        setSongStructure(prev => {
+            const newStructure = prev.map(row => [...row]);
+            newStructure[channelIndex][barIndex] = patternId;
+            return newStructure;
         });
-        setSelectedColumn(null);
-    }, [rhythm, selectedColumn, activePage]);
+    }, []);
 
     const addPage = useCallback(() => {
-        setPages(prev => [...prev, createNewMatrix()]);
-        setActivePage(pages.length);
-    }, [pages.length]);
-
-    const movePage = useCallback((change) => {
-        const nextPage = activePage + change;
-
-        if (nextPage < 0) {
-            setPages(prevPages => [createNewMatrix(), ...prevPages]);
-            setActivePage(0);
-        } else if (nextPage >= pages.length) {
-            setPages(prevPages => [...prevPages, createNewMatrix()]);
-            setActivePage(pages.length);
-        } else {
-            setActivePage(nextPage);
-        }
-    }, [activePage, pages]);
-
-    const deletePage = useCallback((pageIndex) => {
-        setPages(prev => {
-            if (prev.length <= 1) {
-                alert(t('editor.deleteLastPageError'));
-                return prev;
-            }
-            const newPages = prev.filter((_, index) => index !== pageIndex);
-
-            // Ajusta a página ativa se necessário
-            if (activePage >= newPages.length) {
-                setActivePage(newPages.length - 1);
-            }
-            return newPages;
-        });
-    }, [activePage, t]);
-
-    const clearPage = useCallback((pageIndex) => {
-        setPages(prevPages => {
-            const newPages = [...prevPages];
-            // Substitui a página no índice especificado por uma nova e vazia
-            newPages[pageIndex] = createNewPage();
-            return newPages;
-        });
+        setSongStructure(prev => prev.map(channel => [...channel, ...Array(8).fill(null)]));
     }, []);
 
-    const projectData = {
-        title, description, bpm, instrument, volume, pages, collaborators, ownerId
-    };
+    const removePage = useCallback((pageIndex) => {
+        const barCount = songStructure[0]?.length || 0;
+        if (barCount <= 8) return; // Não remove a última página
 
-    // ✅ ATUALIZADO: Reidrata os dados compactos vindos da API
+        const start = pageIndex * 8;
+        const end = start + 8;
+
+        setSongStructure(prev => prev.map(channel => {
+            const newChannel = [...channel];
+            newChannel.splice(start, 8);
+            return newChannel;
+        }));
+    }, [songStructure]);
+
+
     const loadProjectData = useCallback((data) => {
-        setTitle(data.title ?? "Novo Projeto");
+        if (!data) return;
+
+        setTitle(data.title ?? "New Project");
         setDescription(data.description ?? "");
         setBpm(data.bpm ?? 120);
-        setInstrument(data.instrument ?? 'piano');
         setVolume(data.volume ?? -10);
-        if (data.layers && data.layers.length > 0) {
-            const rehydratedPages = rehydrateLayers(data.layers, ROWS);
-            setPages(rehydratedPages);
-            setActivePage(0);
+        setOwner(data.user_id ?? null);
+
+        const loadedChannels = data.channels && data.channels.length > 0 ? data.channels : [createNewChannel()];
+        setChannels(loadedChannels);
+
+        const loadedPatterns = data.patterns && Object.keys(data.patterns).length > 0 ? data.patterns : { 'default': { id: 'default', notes: [], createdAt: new Date().toISOString() } };
+        setPatterns(loadedPatterns);
+
+        const loadedStructure = data.songStructure && data.songStructure.length > 0 ?
+            data.songStructure.map((channel) => {
+                if (channel.length % INITIAL_BAR_COUNT !== 0)
+                    return channel.concat(Array(INITIAL_BAR_COUNT - channel.length % INITIAL_BAR_COUNT).fill(null))
+                return channel
+            }) : [Array(INITIAL_BAR_COUNT).fill(null)];
+        setSongStructure(loadedStructure);
+
+        console.log("SONG STRUTUCTURE ANTES")
+        console.log(data.songStructure)
+        console.log("SONG STRUTUCTURE DEPOIS")
+        console.log(loadedStructure)
+
+
+        setActiveChannelIndex(0);
+
+        const patternIds = Object.keys(loadedPatterns);
+        if (patternIds.length > 0) {
+            // Tenta manter o ID ativo se ele ainda existir, senão pega o primeiro
+            setActivePatternId(prevId => patternIds.includes(prevId) ? prevId : patternIds[0]);
         } else {
-            setPages([createNewMatrix()]);
+            const newPattern = createNewPattern();
+            setPatterns({ [newPattern.id]: newPattern });
+            setActivePatternId(newPattern.id);
         }
-        setCollaborators(data.collaborators ?? [])
-        setOwnerId(data.created_by._id ?? null)
 
     }, []);
 
-    const loadVersionData = useCallback((data) => {
-        if (data.layers && data.layers.length > 0) {
-            const rehydratedPages = rehydrateLayers(data.layers, ROWS);
-            setPages(rehydratedPages);
-            setActivePage(0);
-        } else {
-            setPages([createNewMatrix()]);
-        }
-    }, []);
+
+    const projectData = { title, description, bpm, volume, owner, channels, patterns, songStructure };
 
     return {
-        state: { title, description, bpm, instrument, volume, rhythm, pages, activePage, selectedColumn },
+        state: { ...projectData, activeChannelIndex, activePatternId },
         actions: {
-            setTitle, setDescription, setBpm, setInstrument, setVolume, setRhythm,
-            setPages, setActivePage, setSelectedColumn, addPage, movePage, deletePage, loadProjectData, loadVersionData,
-            clearPage,
+            setTitle, setDescription, setBpm, setVolume,
+            addChannel, deleteChannel, setChannelInstrument,
+            createNewPatternAndSelect, deletePattern, setActivePatternId,
+            updatePatternNotes, setPatternInStructure, loadProjectData,
+            addPage, removePage
         },
         projectData,
     };
 };
 
-export default useProjectState;
+export default useProjectStates;

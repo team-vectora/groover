@@ -1,8 +1,6 @@
-# models/search.py
 from .user import User
 from .post import Post
 from .project import Project
-
 
 class Search:
     @staticmethod

@@ -1,22 +1,22 @@
+/* src/styles/global.css */
 @import "../../node_modules/tailwindcss";
 
-/* src/styles/global.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 
 :root {
-  --color-background: #e3dcc1;
-  --color-foreground: #E6E5E0;
-  --color-text-lighter: #FFFFFF;
-  --color-bg-secondary: #3A3935;
-  --color-bg-darker: #1F1E1B;
-  --color-primary: #667A44;
-  --color-primary-light: #8CA360;
-  --color-accent: #B26B49;
-  --color-accent-light: #D28F68;
-  --color-accent-sidebar: #35332E;
+  --color-bg-darker: #f8f9fa;
+  --color-accent-light: #d39c63;
+  --color-background: #ffffff;
+  --color-foreground: #343a40;
+  --color-bg-secondary: #f8f9fa;
+  --color-primary: #7a8c5a;       /* Antigo --groove-olive-dark */
+  --color-primary-light: #5c6c3d ; /* Antigo --groove-olive-light */
+  --color-accent: #ac7e4b;        /* Antigo --groove-brown */
+  --color-text-lighter: #343a40;;  /* Antigo --groove-white */
+  --color-accent-sidebar: rgba(108, 117, 125, 0.2); /* Manteve a função original */
 }
 
 
@@ -67,25 +67,6 @@ body {
   --color-text-lighter: #ffffff;
 }
 
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a090d;
-    --foreground: #e6e8e3;
-  }
-}
-
-body {
-  @apply bg-[#0a090d] text-[#e6e8e3];
-}
-
 .control-range {
   -webkit-appearance: none;
   appearance: none;
@@ -132,3 +113,36 @@ body {
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+
+/* --- INÍCIO DA CORREÇÃO: SCROLLBAR PERSONALIZADO --- */
+
+/* Para navegadores baseados em WebKit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px; /* Largura fina */
+  height: 8px;
+}
+
+/* Fundo da barra de rolagem (a "pista") */
+::-webkit-scrollbar-track {
+  background: var(--color-bg-darker); /* Cor de fundo mais escura da paleta */
+}
+
+/* O "polegar" ou a parte que se move */
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-primary); /* Cor primária da paleta */
+  border-radius: 10px; /* Bordas arredondadas */
+  border: 2px solid var(--color-bg-darker); /* Pequena borda para espaçamento */
+}
+
+/* O "polegar" ao passar o rato por cima */
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-accent); /* Cor de destaque ao passar o rato */
+}
+
+/* Para Firefox */
+* {
+  scrollbar-width: thin; /* Deixa a barra de rolagem fina */
+  scrollbar-color: var(--color-primary) var(--color-bg-darker); /* Cor do polegar e da pista */
+}
+/* --- FIM DA CORREÇÃO --- */

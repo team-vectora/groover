@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
-export default function useForkProject(token) {
+export default function useForkProject() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -12,10 +12,10 @@ export default function useForkProject(token) {
   const forkProject = async (projectId) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/projects/fork`, {
+      const response = await apiFetch(`/projects/fork`, {
         method: "POST",
+        credentials: "include", // envia o cookie HTTP-only
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
+import { usePosts } from "../../hooks";
 
-export default function useDeletePost(token) {
+export default function useDeletePost() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const {deletePostUpdate} = usePosts();
 
   const deletePost = async (postId, onSuccess) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/posts/${postId}`, {
+      const response = await apiFetch(`/posts/${postId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include"
       });
 
       if (!response.ok) {
@@ -23,7 +23,9 @@ export default function useDeletePost(token) {
       }
 
       toast.success(t('post.deletedSuccess'));
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(postId); // Passa o ID do post deletado
+      deletePostUpdate(postId);
+      window.location.reload();
     } catch (err) {
       toast.error(err.message);
     } finally {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
 export default function useLogin() {
@@ -12,17 +12,18 @@ export default function useLogin() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/signin`, {
+      const response = await apiFetch(`/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password: senha }),
+        credentials: "include",
       });
 
       const data = await response.json();
       setLoading(false);
 
       if (response.ok) {
-        localStorage.setItem("token", data.access_token);
+
         localStorage.setItem("username", data.username);
         localStorage.setItem("id", data.user_id);
         localStorage.setItem("avatar", data.avatar);
@@ -30,25 +31,28 @@ export default function useLogin() {
 
         return { success: true, data };
       } else {
-
         const backendErrors = {};
 
         if (data.error.includes("Invalid credentials")) {
           backendErrors.general = t("backend_errors.invalid_credentials");
         } else if (data.error.includes("User is not active.")) {
           backendErrors.general = t("backend_errors.user_not_active");
-        } else if (data.error.includes("Username and password are required")){
-          backendErrors.general = t("backend_errors.username_is_required")
+        } else if (data.error.includes("Username and password are required")) {
+          backendErrors.general = t("backend_errors.username_is_required");
         } else {
           backendErrors.general = data.error || t("errors.generic_error");
         }
+
         setErrors(backendErrors);
         return { success: false, errors: backendErrors };
       }
     } catch (err) {
       setLoading(false);
-      setErrors({ general: t('errors.network_error') });
-      return { success: false, errors: { general: t('errors.network_error') } };
+      setErrors({ general: t("errors.network_error") });
+      return {
+        success: false,
+        errors: { general: t("errors.network_error") },
+      };
     }
   };
 

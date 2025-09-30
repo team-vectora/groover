@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PostFormPopUp from './PostFormPopUp';
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 
@@ -18,13 +18,13 @@ const CommentForm = ({ postId, token, onCommentAdded, projects }) => {
         }
         setIsSubmitting(true);
         try {
-            await fetch(`${API_BASE_URL}/posts/${postId}/comment`, {
+            await apiFetch(`/posts/${postId}/comment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({ caption })
+                body: JSON.stringify({ caption }),
+                credentials: 'include'
             });
             setCaption('');
             onCommentAdded();
@@ -35,6 +35,7 @@ const CommentForm = ({ postId, token, onCommentAdded, projects }) => {
             setIsSubmitting(false);
         }
     };
+
 
     return (
         <>

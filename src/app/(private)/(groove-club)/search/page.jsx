@@ -1,22 +1,23 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useAuth, useDebounce } from '../../../hooks';
-import { GENRES } from '../../../constants';
-import { Post, ProjectCard, UserSearchResult, LoadingDisc } from '../../../components';
+import {useAuth , useDebounce , usePosts} from '../../../../hooks';
+import { GENRES } from '../../../../constants';
+import { Post, ProjectCard, UserSearchResult, LoadingDisc } from '../../../../components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { useTranslation } from 'react-i18next';
-import { API_BASE_URL } from "../../../config";
+import { apiFetch } from "../../../../lib/util/apiFetch";
 
 export default function SearchPage() {
     const { t, i18n } = useTranslation();
-    const { token } = useAuth();
     const [query, setQuery] = useState('');
     const [selectedTags, setSelectedTags] = useState([]);
     const [searchType, setSearchType] = useState('all');
     const [tagsExpanded, setTagsExpanded] = useState(false);
+    const { updatePost } = usePosts();
     const [results, setResults] = useState({ users: [], posts: [], projects: [] });
     const [loading, setLoading] = useState(false);
+    const { userId } = useAuth();
 
     const debouncedQuery = useDebounce(query, 500);
 
@@ -28,19 +29,23 @@ export default function SearchPage() {
             }
 
             setLoading(true);
-            const tagsQuery = selectedTags.join(',');
-            const response = await fetch(`${API_BASE_URL}/search?q=${debouncedQuery}&tags=${tagsQuery}&type=${searchType}`, {
-                headers: { Authorization: `Bearer ${token}` }
+            const params = new URLSearchParams({
+                q: debouncedQuery,
+                tags: selectedTags.join(','),
+                type: searchType,
+            });
+
+            const response = await apiFetch(`/search?${params.toString()}`, {
+                credentials: "include"
             });
             const data = await response.json();
             setResults(data);
             setLoading(false);
         };
+        performSearch();
 
-        if (token) {
-            performSearch();
-        }
-    }, [debouncedQuery, selectedTags, searchType, token]);
+    }, [debouncedQuery, selectedTags, searchType]);
+
 
     const toggleTag = (tag) => {
         setSelectedTags(prev =>
@@ -56,7 +61,7 @@ export default function SearchPage() {
             (results.posts?.length || 0) > 0 ||
             (results.projects?.length || 0) > 0;
 
-        if (!hasResults) return <p className="text-center mt-8 text-gray-400">{t('search.noResults')}</p>;
+        if (!hasResults) return <p className="text-center mt-8 text-text-lighter">{t('search.noResults')}</p>;
 
         return (
             <div className="space-y-12 mt-8">
@@ -72,7 +77,11 @@ export default function SearchPage() {
                     <section>
                         <h2 className="text-2xl font-bold mb-4 text-accent-light">{t('search.posts')}</h2>
                         <div className="space-y-6">
-                            {results.posts.map(post => <Post key={post._id} post={post} />)}
+                            {results.posts.map(post => <Post key={post._id}
+                                                             userId={userId}
+                                                             post={post}
+                                                             profileId={userId}
+                                                             onUpdatePost={updatePost}  />)}
                         </div>
                     </section>
                 )}
@@ -81,7 +90,7 @@ export default function SearchPage() {
                         <h2 className="text-2xl font-bold mb-4 text-accent-light">{t('search.projects')}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {results.projects?.map((project, idx) => (
-                              <ProjectCard key={project._id || idx} project={project} isYourProfile={false} />
+                                <ProjectCard key={project._id || idx} project={project} isYourProfile={false} />
                             ))}
                         </div>
                     </section>
@@ -109,7 +118,7 @@ export default function SearchPage() {
                     placeholder={t('search.placeholder')}
                     className="w-full p-4 pl-12 bg-bg-secondary rounded-lg border border-primary focus:outline-none focus:ring-2 focus:ring-accent"
                 />
-                <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-lighter" />
             </div>
 
             <div className="flex items-center gap-2 mb-4">
@@ -118,7 +127,7 @@ export default function SearchPage() {
                     <button
                         key={btn.value}
                         onClick={() => setSearchType(btn.value)}
-                        className={`px-3 py-1 rounded-full text-sm transition ${searchType === btn.value ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'}`}
+                        className={`px-3 py-1 rounded-full text-sm transition ${searchType === btn.value ? 'bg-accent text-text-lighter' : 'bg-primary hover:bg-primary-light'}`}
                     >
                         {btn.label}
                     </button>
@@ -140,7 +149,7 @@ export default function SearchPage() {
                             <button
                                 key={genre}
                                 onClick={() => toggleTag(genre)}
-                                className={`px-3 py-1 rounded-full text-sm transition ${selectedTags.includes(genre) ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'}`}
+                                className={`px-3 py-1 rounded-full text-sm transition ${selectedTags.includes(genre) ? 'bg-accent text-text-lighter' : 'bg-primary hover:bg-primary-light'}`}
                             >
                                 {t(`genres.${genre}`)}
                             </button>

@@ -7,12 +7,12 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Plataforma%20Online-blue?style=for-the-badge&logo=musicbrainz&logoColor=white" alt="Status Plataforma Online">
   <img src="https://img.shields.io/badge/Feito%20com-Qualidade%20e%20Colabora%C3%A7%C3%A3o-blueviolet?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="Feito com Qualidade e Colaboração">
-  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/JavaScript-3178C6?style=for-the-badge&logo=javascript&logoColor=white" alt="TypeScript">
 </p>
 
 ---
 
-## ✨ O Projeto Groover: 
+## ✨ O Projeto Groover:
 
 O **Groover** é uma plataforma digital inovadora, desenvolvida pelo **Team Vectora**, que foi criada para **revolucionar a criação musical colaborativa**. Nosso objetivo é superar as limitações das ferramentas convencionais, focadas no uso individual, oferecendo um ambiente especializado com um **editor MIDI compartilhado**.
 
@@ -44,7 +44,7 @@ Nossa arquitetura foi construída para garantir **escalabilidade** e **manutenib
 ### 🏗️ Arquitetura de Software
 
 * **Padrão MVVM (Model-View-ViewModel):** Utilizado para separar a lógica de negócios da interface, garantindo modularidade e flexibilidade na evolução do código.
-* **TypeScript:** O Frontend utiliza TypeScript, adicionando tipagem estática para aumentar a **robustez e a qualidade do código**.
+* **TypeScript:** O Frontend utiliza Javascript, adicionando tipagem estática para aumentar a **robustez e a qualidade do código**.
 * **Metodologia Ágil (Scrum adaptado):** O desenvolvimento segue ciclos iterativos com foco na entrega contínua de valor e ajustes rápidos baseados em feedback.
 
 ### 🔒 Segurança e Integração de Dados
@@ -100,10 +100,10 @@ O Groover foi desenvolvido pelo **Team Vectora**, uma equipe de cinco estudantes
 
 Siga-nos e acompanhe as novidades do projeto e futuras iterações:
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/company/team-vectora/) 
-[![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/teamvectora/) 
-[![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@TeamVectora) 
-[![GitHub (Repositório)](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/team-vectora/groover) 
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/company/team-vectora/)
+[![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/teamvectora/)
+[![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@TeamVectora)
+[![GitHub (Repositório)](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/team-vectora/groover)
 
 ---
 

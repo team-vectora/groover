@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
 import useDebounce from '../../hooks/search/useDebounce';
-import { API_BASE_URL } from '../../config';
+import { apiFetch } from '../../lib/util/apiFetch';
 import { toast } from 'react-toastify';
 
 const SharePopUp = ({ open, onClose, project, onShare }) => {
@@ -23,9 +23,8 @@ const SharePopUp = ({ open, onClose, project, onShare }) => {
       }
       setLoading(true);
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${API_BASE_URL}/users/search?q=${debouncedSearchTerm}`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await apiFetch(`/users/search?q=${debouncedSearchTerm}`, {
+          credentials: "include"
         });
         const data = await response.json();
         setUsers(data);
@@ -55,7 +54,7 @@ const SharePopUp = ({ open, onClose, project, onShare }) => {
         <div ref={popupRef} className="bg-bg-secondary rounded-xl w-full max-w-md border border-primary">
           <div className="flex justify-between items-center px-5 py-4 border-b border-primary">
             <h3 className="text-lg font-semibold text-accent-light">{t('sharePopup.inviteTo')} {project.title}</h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-white">
+            <button onClick={onClose} className="text-text-lighter hover:text-white">
               <FontAwesomeIcon icon={faTimes} size="lg" />
             </button>
           </div>
@@ -65,7 +64,7 @@ const SharePopUp = ({ open, onClose, project, onShare }) => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={t('sharePopup.placeholder')}
-                className="w-full p-3 bg-bg-darker border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"
+                className="w-full p-3 bg-bg-darker border border-primary rounded-md text-text-lighter focus:outline-none focus:border-accent-light"
             />
             <div className="mt-4 max-h-60 overflow-y-auto">
               {loading && <p>{t('sharePopup.loading')}</p>}

@@ -4,8 +4,6 @@ from utils.db import mongo
 from utils.genres import GENRES
 from bson import Binary
 
-
-# FAzer bunitinho neh? Separar seguidor da entidade usuario
 class Followers:
 
     @staticmethod
@@ -39,7 +37,6 @@ class Followers:
 
     @staticmethod
     def get_followers(user_id):
-        # retorna lista de ids (strings) de quem segue user_id
         cursor = mongo.db.followers.find({"following_id": ObjectId(user_id)})
         return [str(f['follower_id']) for f in cursor]
 
@@ -58,4 +55,3 @@ class Followers:
             "following_id": following_oid
         })
         return bool(existing)
-

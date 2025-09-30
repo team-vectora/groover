@@ -1,214 +1,70 @@
+// src/hooks/editor/useProjectAPI.jsx
 "use client";
-
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Midi } from "@tonejs/midi";
 import * as Tone from "tone";
-import { useProjectStates, useAuth } from "../../hooks";
-import {NOTES , ROWS} from "../../constants";
-import { API_BASE_URL } from "../../config"; // ajuste o caminho conforme sua estrutura
+import { NOTES } from "../../constants";
+import { apiFetch } from "../../lib/util/apiFetch";
+import { toast } from 'react-toastify';
+import { uploadToCloudinary } from '../../lib/util/upload';
 
-// 🔹 Utilitário: converte Blob → Base64
 const blobToBase64 = (blob) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(",")[1]);
+        reader.onloadend = () => {
+            if (reader.result) {
+                resolve(reader.result.split(",")[1]);
+            } else {
+                reject(new Error("Failed to read blob."));
+            }
+        };
         reader.onerror = reject;
         reader.readAsDataURL(blob);
     });
 };
 
-// ✅ FUNÇÃO ATUALIZADA: Implementa a compactação dos dados para o backend
-const convertPagesToLayers = (pages) => {
-    if (!pages) return [];
-    return pages.map(page =>
-        page.map(column =>
-            column.map(noteArray => { // 'noteArray' é o array de sub-notas do cliente
-                if (!noteArray || noteArray.length === 0) return null;
-
-                const compactedSubNotes = noteArray.map(subNote => {
-                    if (!subNote?.name) {
-                        return null; // Colapsa {name: null, ...} para null
-                    }
-                    return { // Mantém apenas as propriedades relevantes
-                        name: subNote.name,
-                        isSeparated: subNote.isSeparated || false,
-                    };
-                });
-
-                // Se todas as sub-notas forem nulas, colapsa o array inteiro para null
-                if (compactedSubNotes.every(sn => sn === null)) {
-                    return null;
-                }
-
-                return compactedSubNotes;
-            })
-        )
-    );
-};
-
-
-const toJson = (data) => ({
-    title: data.title || "Novo Projeto",
-    description: data.description || "",
-    bpm: data.bpm || 120,
-    instrument: data.instrument || "piano",
-    volume: data.volume || -10,
-    layers: convertPagesToLayers(data.pages),
-});
-
-const createNote = (duration = 1) => Array(duration).fill(null);
-
-const createNewPage = () =>
-    Array.from({ length: 10 }, () =>
-        Array.from({ length: ROWS }, () => createNote())
-    );
-
 export const useProjectAPI = (projectId, projectActions) => {
     const router = useRouter();
-
-    // Estados principais da API
     const [loading, setLoading] = useState(true);
     const [project, setProject] = useState(null);
-    const [version, setVersion] = useState(null);
     const [versions, setVersions] = useState([]);
     const [currentMusicId, setCurrentMusicId] = useState("");
-    const [lastVersionId, setLastVersionId] = useState("");
-    const {actions: statesActions} = useProjectStates();
-    const token = localStorage.getItem('token');
 
-    // 🔹 Carregar dados iniciais
-    useEffect(() => {
-        const loadInitialData = async () => {
-            if (!projectId || !token || projectId === "new") {
-                setLoading(false);
-                return;
-            }
-            setLoading(true);
-            try {
-                const response = await fetch(
-                    `${API_BASE_URL}/projects/${projectId}`,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-
-                if (response.status === 401) {
-                    router.push("/login");
-                    return;
-                }
-
-                if (!response.ok) throw new Error(t('toasts.error_loading_project'));
-
-                const data = await response.json();
-
-                console.log(data)
-
-                setProject(data);
-                setVersion(data.current_music_id);
-                setVersions(data.music_versions);
-                setCurrentMusicId(data.current_music_id._id);
-                setLastVersionId(data.current_music_id._id);
-
-            } catch (error) {
-                console.error("Erro ao carregar projeto:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadInitialData();
-    }, [router.isReady]);
-
-    // 🔹 Salvar projeto
-    const handleSave = useCallback(
-        async (projectData) => {
-            if (!token) throw new Error("Token não disponível");
-
-            const payload = toJson(projectData);
-            const midiBlob = exportToMIDI(projectData, true); // oia a sacanagem, export to midi espera PAGES
-            payload.midi = await blobToBase64(midiBlob);        // mas o back espera LAYERS
-            console.log("PAYLOAD");
-            console.log(JSON.stringify(payload));
-
-            if (projectId !== "new") {
-                payload.id = projectId;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/projects`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify(payload),
-                });
-
-                if (response.status === 401) {
-                    router.push("/login");
-                    return;
-                }
-
-                if (!response.ok) throw new Error("Falha ao salvar o projeto.");
-
-                const data = await response.json();
-
-                if (projectId === "new" && data?._id) {
-                    router.push(`/editor/${data._id}`);
-                }
-
-                setProject(data);
-                setVersion(data.current_music_id);
-                setVersions(data.music_versions);
-                setCurrentMusicId(data.current_music_id._id);
-                setLastVersionId(data.current_music_id._id);
-
-                return data;
-            } catch (error) {
-                console.error("Erro ao salvar projeto:", error);
-                throw error;
-            }
-        },
-        [token]
-    );
-
-    // 🔹 Exportar para MIDI
-    const exportToMIDI = (projectData, returnBlob = false) => {
+    const exportToMIDI = useCallback(async (projectData, returnBlob = false) => {
+        const { bpm, channels, patterns, songStructure } = projectData;
         const midi = new Midi();
-        const track = midi.addTrack();
-        midi.header.setTempo(projectData.bpm);
+        midi.header.setTempo(bpm);
+        const barDuration = (60 / bpm) * 4;
 
-        let currentTime = 0;
-        projectData.pages.forEach((page) => {
-            page.forEach((col) => {
-                const colDuration = Tone.Time("4n").toSeconds();
-                const subNotesCount = Math.max(
-                    1,
-                    ...col.map((note) => note?.length || 1) // ✅ Modificado
-                );
-                const subDuration = colDuration / subNotesCount;
+        channels.forEach((channel, channelIndex) => {
+            const track = midi.addTrack();
+            track.instrument.name = channel.instrument;
+            let currentTime = 0;
+            const channelStructure = songStructure[channelIndex] || [];
 
-                col.forEach((noteRow) => {
-                    (noteRow || []).forEach((subNote, subIndex) => { // ✅ Modificado
-                        if (subNote?.name) { // ✅ Modificado
+            channelStructure.forEach(patternId => {
+                if (patternId && patterns[patternId]) {
+                    const pattern = patterns[patternId];
+                    pattern.notes?.forEach(note => {
+                        const noteName = NOTES[note.pitch];
+                        if (noteName) {
                             try {
                                 track.addNote({
-                                    name: subNote.name,
-                                    time: currentTime + subIndex * subDuration,
-                                    duration: subDuration,
+                                    name: noteName,
+                                    time: currentTime + (note.start / 32) * barDuration,
+                                    duration: ((note.end - note.start) / 32) * barDuration,
+                                    velocity: 1
                                 });
-                            } catch (e) {
-                                console.error(`Nota inválida não exportada: ${subNote.name}`, e);
-                            }
+                            } catch (e) { console.error(`Nota inválida não exportada: ${noteName}`, e); }
                         }
                     });
-                });
-
-                currentTime += colDuration;
+                }
+                currentTime += barDuration;
             });
         });
 
-        const blob = new Blob([midi.toArray()], { type: "audio/midi" });
-
+        const blob = new Blob([await midi.toArray()], { type: "audio/midi" });
         if (returnBlob) return blob;
 
         const url = URL.createObjectURL(blob);
@@ -219,67 +75,166 @@ export const useProjectAPI = (projectId, projectActions) => {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    };
+    }, []);
+
+    useEffect(() => {
+        const loadInitialData = async () => {
+            if (projectId === "new") {
+                projectActions.loadProjectData();
+                setLoading(false);
+                return;
+            }
+            setLoading(true);
+            try {
+                const res = await apiFetch(`/projects/${projectId}`, { credentials: "include" });
+                if (!res.ok) throw new Error('Failed to load project');
+                const data = await res.json();
+                setProject(data);
+                projectActions.loadProjectData(data.current_music_id ? { ...data, ...data.current_music_id } : data);
+                setCurrentMusicId(data.current_music_id?._id);
+                setVersions(data.music_versions || []);
+            } catch (error) {
+                console.error("Error loading project:", error);
+                toast.error("Error loading project.");
+                router.push('/editor/new');
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadInitialData();
+    }, [projectId, router]);
+
+    const handleSave = useCallback(async (projectData) => {
+        setLoading(true);
+        try {
+            const midiBlob = await exportToMIDI(projectData, true);
+            const base64Midi = await blobToBase64(midiBlob);
+            const payload = { ...projectData, midi: base64Midi };
+
+            if (projectData.coverImage instanceof File) {
+                const imageUrl = await uploadToCloudinary(projectData.coverImage);
+                if (!imageUrl) {
+                    setLoading(false);
+                    return;
+                }
+                payload.cover_image = imageUrl;
+            }
+
+            if (projectId !== "new") payload.id = projectId;
+
+            const response = await apiFetch(`/projects`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to save project.");
+            }
+            const data = await response.json();
+            toast.success("Project saved!");
+            if (projectId === "new" && data?._id) {
+                router.push(`/editor/${data._id}`);
+            } else {
+                setProject(data);
+                setCurrentMusicId(data.current_music_id?._id);
+                setVersions(data.music_versions || []);
+            }
+        } catch (error) {
+            console.error("Error saving project:", error);
+            toast.error(`Failed to save project: ${error.message}`);
+        } finally {
+            setLoading(false);
+        }
+    }, [projectId, router, exportToMIDI]);
 
     const importFromMIDI = useCallback(async (file) => {
         if (!file) return;
-
         try {
-            const midiData = await Midi.fromUrl(URL.createObjectURL(file));
-            const newPages = [];
-            let currentPage = createNewPage(); // Função auxiliar para criar página vazia
-            let currentCols = 0;
+            const midiData = new Midi(await file.arrayBuffer());
+            const bpm = midiData.header.tempos[0]?.bpm || 120;
+            const barDurationInSeconds = (60 / bpm) * 4;
+            const TICKS_PER_BAR = 32;
+            const newChannels = [], newPatterns = {}, newSongStructure = [];
+            let totalBars = 0;
 
-            const totalColsPerPage = 10;
-
-            midiData.tracks.forEach(track => {
+            midiData.tracks.forEach((track, trackIndex) => {
+                if (track.notes.length === 0) return;
+                const channelId = `imported-channel-${trackIndex}`;
+                newChannels.push({ id: channelId, instrument: track.instrument.name || 'piano', volume: -10 });
+                const channelStructureRow = [], notesByBar = {};
                 track.notes.forEach(note => {
-                    const noteEnd = note.time + note.duration;
-                    const colIndex = Math.floor(note.time / (Tone.Time('4n').toSeconds()));
-                    const pageIndex = Math.floor(colIndex / totalColsPerPage);
-                    const localColIndex = colIndex % totalColsPerPage;
-
-                    // Adiciona novas páginas se necessário
-                    while (newPages.length <= pageIndex) {
-                        newPages.push(createNewPage());
-                    }
-
-                    const rowIndex = NOTES.indexOf(note.name);
-
-                    if (rowIndex > -1) {
-                        // Garante que a nota seja inserida
-                        if(!newPages[pageIndex][localColIndex]) newPages[pageIndex][localColIndex] = Array.from({ length: NOTES.length }, () => [null]);
-                        newPages[pageIndex][localColIndex][rowIndex] = [{ name: note.name, isSeparated: false }];
-                    }
+                    const barIndex = Math.floor(note.time / barDurationInSeconds);
+                    if (!notesByBar[barIndex]) notesByBar[barIndex] = [];
+                    notesByBar[barIndex].push(note);
+                    totalBars = Math.max(totalBars, barIndex + 1);
                 });
+                for (let i = 0; i < totalBars; i++) {
+                    const barNotes = notesByBar[i];
+                    if (barNotes?.length) {
+                        const patternId = `pattern-${channelId}-${i}`;
+                        const patternNotes = barNotes.map(note => {
+                            const noteStartInBar = note.time % barDurationInSeconds;
+                            const startTick = Math.floor((noteStartInBar / barDurationInSeconds) * TICKS_PER_BAR);
+                            const endTick = Math.ceil(((noteStartInBar + note.duration) / barDurationInSeconds) * TICKS_PER_BAR);
+                            const pitch = NOTES.indexOf(note.name);
+                            if (pitch === -1) return null;
+                            return { id: `note-${Math.random()}`, pitch, start: startTick, end: Math.max(startTick + 1, endTick) };
+                        }).filter(Boolean);
+                        if (patternNotes.length > 0) {
+                            newPatterns[patternId] = { id: patternId, notes: patternNotes, createdAt: new Date().toISOString() };
+                            channelStructureRow.push(patternId);
+                        } else {
+                            channelStructureRow.push(null);
+                        }
+                    } else {
+                        channelStructureRow.push(null);
+                    }
+                }
+                newSongStructure.push(channelStructureRow);
             });
 
-            projectActions.setPages(newPages.length > 0 ? newPages : [createNewPage()]);
-            projectActions.setBpm(midiData.header.tempos[0]?.bpm || 120);
-
+            if (newChannels.length === 0) {
+                toast.warn("No valid notes found in the MIDI file.");
+                return;
+            }
+            newSongStructure.forEach(row => {
+                while (row.length < totalBars) row.push(null);
+            });
+            projectActions.loadProjectData({
+                title: file.name.replace(/\.mid$/i, ''), description: "Imported from MIDI file.", bpm, volume: -10,
+                channels: newChannels, patterns: newPatterns, songStructure: newSongStructure,
+            });
+            toast.success("MIDI imported successfully!");
         } catch (e) {
-            console.error("Erro ao importar MIDI:", e);
-            alert("Não foi possível ler o arquivo MIDI.");
+            console.error("Error importing MIDI:", e);
+            toast.error("Failed to read or parse the MIDI file.");
         }
     }, [projectActions]);
 
-    // 🔹 Alterar versão ativa
-    const handleVersionChange = useCallback(
-        (musicId) => {
-            const selectedVersion = versions.find((v) => v.music_id._id === musicId);
-            if (selectedVersion) {
-                console.log("VERSION: ");
-                console.log(selectedVersion);
-                setVersion(selectedVersion.music_id);
-                setCurrentMusicId(musicId);
-            }
-        },
-        [versions]
-    );
+    const handleVersionChange = useCallback(async (musicId) => {
+        if (!musicId || musicId === currentMusicId) return;
+        setLoading(true);
+        try {
+            const res = await apiFetch(`/projects/${projectId}/versions/${musicId}`, { credentials: "include" });
+            if (!res.ok) throw new Error('Failed to load version');
+            const versionData = await res.json();
+            projectActions.loadProjectData({ ...project, ...versionData });
+            setCurrentMusicId(musicId);
+            toast.info("Version loaded.");
+        } catch (error) {
+            console.error("Error loading version:", error);
+            toast.error("Failed to load version.");
+        } finally {
+            setLoading(false);
+        }
+    }, [projectId, project, currentMusicId, projectActions]);
 
     return {
-        apiState: { loading, project, version, versions, currentMusicId, lastVersionId },
-        apiActions: { handleSave, exportToMIDI, handleVersionChange, importFromMIDI },
+        apiState: { loading, project, versions, currentMusicId },
+        apiActions: { handleSave, exportToMIDI, importFromMIDI, handleVersionChange },
     };
 };
 

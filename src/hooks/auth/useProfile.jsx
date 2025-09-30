@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { API_BASE_URL } from '../../config';
+import { apiFetch } from '../../lib/util/apiFetch';
 import { useTranslation } from 'react-i18next';
 
-export default function useProfile(username, token) {
+export default function useProfile(username) {
   const { t } = useTranslation();
   const [profileData, setProfileData] = useState({
     user: null,
@@ -13,94 +13,82 @@ export default function useProfile(username, token) {
     error: null
   });
 
-  const fetchData = useCallback(async (isBackgroundUpdate = false) => {
-    if (!username || !token) return;
-
-    const cacheKey = `profile_${username}`;
-
-    // Na carga inicial, tenta usar o cache.
-    if (!isBackgroundUpdate) {
-      const cachedData = sessionStorage.getItem(cacheKey);
-      if (cachedData) {
-        setProfileData({ ...JSON.parse(cachedData), loading: false });
-        // Após carregar o cache, inicia uma atualização silenciosa em segundo plano.
-        fetchData(true);
-        return;
-      }
-    }
-
-    // Mostra o "loading" principal apenas se não houver cache (primeira carga).
-    // A atualização em segundo plano não deve disparar este estado.
-    if (!isBackgroundUpdate) {
-      setProfileData(prev => ({ ...prev, loading: true, error: null }));
-    }
-
+  const fetchData = useCallback(async () => {
+    if (!username) return;
+    setProfileData(prev => ({ ...prev, loading: true, error: null }));
     try {
-      // Busca todos os dados em paralelo
-      const [userRes, postsRes, projectsRes, invitesRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/users/${username}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${API_BASE_URL}/posts/username/${username}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch(`${API_BASE_URL}/projects/user/${username}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        // Só busca convites se for o perfil do próprio usuário
-        localStorage.getItem('username') === username
-            ? fetch(`${API_BASE_URL}/invitations`, {
-              headers: { Authorization: `Bearer ${token}` }
-            })
-            : Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
-      ]);
+      // SUBSTITUA 'fetch' por 'apiFetch'
+      const res = await apiFetch(`/users/profile/${username}`);
 
-      if (!userRes.ok) throw new Error(t('errors.user_not_found'));
-
-      const userData = await userRes.json();
-      const postsData = await postsRes.json();
-      const projectsData = await projectsRes.json();
-      const invitesData = await invitesRes.json();
-
-      const newData = {
-        user: userData,
-        posts: postsData,
-        projects: projectsData,
-        invites: invitesData,
-        loading: false,
-        error: null
-      };
-
-      // Armazena os dados frescos no cache e atualiza o estado.
-      sessionStorage.setItem(cacheKey, JSON.stringify(newData));
-      setProfileData(newData);
-
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || t('errors.user_not_found'));
+      }
+      const data = await res.json();
+      setProfileData({ ...data, loading: false, error: null });
     } catch (error) {
-      // Erros em atualizações de segundo plano podem falhar silenciosamente.
-      if (!isBackgroundUpdate) {
-        setProfileData(prev => ({
-          ...prev,
-          loading: false,
-          error: error.message
-        }));
-      } else {
-        console.error("Falha na atualização de perfil em segundo plano:", error);
+      // O erro 401 já foi tratado. Outros erros (ex: "User not found") caem aqui.
+      if (error.message !== "Unauthorized") {
+        setProfileData(prev => ({ ...prev, loading: false, error: error.message }));
       }
     }
-  }, [username, token, t]);
+  }, [username, t]);
 
-  // Refetch manual deve limpar o cache e mostrar o "loading".
   const refetch = useCallback(() => {
-    const cacheKey = `profile_${username}`;
-    sessionStorage.removeItem(cacheKey);
-    fetchData(false);
-  }, [username, fetchData]);
-
-
-  useEffect(() => {
-    // Busca inicial ao montar o componente.
-    fetchData(false);
+    fetchData();
   }, [fetchData]);
 
-  return { ...profileData, refetch };
+  const updatePostInProfile = useCallback((updatedPost) => {
+    setProfileData(prev => ({
+      ...prev,
+      posts: prev.posts.map(post =>
+          post._id === updatedPost._id ? updatedPost : post
+      ),
+    }));
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+    const handleFollowingUpdate = ({ detail }) => {
+      setProfileData(prev => {
+        if (!prev.user) return prev;
+        const newFollowing = [...prev.user.following];
+        const newFollowers = [...prev.user.followers];
+        let newIsFollowing = prev.user.is_following;
+        const currentUserId = localStorage.getItem('id');
+        if (prev.user._id === detail.userId) {
+          newIsFollowing = detail.isFollowing;
+          if (detail.isFollowing) {
+            if (!newFollowers.includes(currentUserId)) newFollowers.push(currentUserId);
+          } else {
+            const index = newFollowers.indexOf(currentUserId);
+            if (index > -1) newFollowers.splice(index, 1);
+          }
+        }
+        if (prev.user._id === currentUserId) {
+          if (detail.isFollowing) {
+            if (!newFollowing.includes(detail.userId)) newFollowing.push(detail.userId);
+          } else {
+            const index = newFollowing.indexOf(detail.userId);
+            if (index > -1) newFollowing.splice(index, 1);
+          }
+        }
+        return {
+          ...prev,
+          user: {
+            ...prev.user,
+            followers: newFollowers,
+            following: newFollowing,
+            is_following: newIsFollowing
+          }
+        };
+      });
+    };
+    window.addEventListener('followingUpdated', handleFollowingUpdate);
+    return () => {
+      window.removeEventListener('followingUpdated', handleFollowingUpdate);
+    };
+  }, [fetchData]);
+
+  return { ...profileData, refetch, updatePostInProfile  };
 }

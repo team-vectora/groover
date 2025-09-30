@@ -1,68 +1,62 @@
-import { useState, useEffect } from "react";
-import { API_BASE_URL } from "../../config";
+'use client';
+import { useState, useEffect, useCallback } from "react";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
-export default function useNotifications(token) {
+export default function useNotifications() {
   const { t } = useTranslation();
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Inicia como true
   const [error, setError] = useState("");
 
-  const fetchNotifications = async () => {
-    if (!token) return;
-
+  // useCallback para garantir que a função seja estável
+  const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/notifications`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await apiFetch(`/notifications`, {
+        credentials: "include",
       });
       const data = await res.json();
       if (res.ok) {
         setNotifications(data);
       } else {
-        setError(data.error || t('toasts.error_loading_notifications'));
+        setError(data.error || t("toasts.error_loading_notifications"));
       }
     } catch (err) {
-      setError(t('errors.network_error'));
+      setError(t("errors.network_error"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]); // A dependência em 't' é estável
 
   const checkNotification = async (notification_id) => {
-    if (!token) return;
-
     try {
-      const res = await fetch(`${API_BASE_URL}/notifications/check`, {
+      const res = await apiFetch(`/notifications/check`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ notification_id }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || t('toasts.error_marking_notification'));
+        setError(data.error || t("toasts.error_marking_notification"));
       } else {
+        // Atualiza o estado local para refletir a mudança imediatamente
         setNotifications((prev) =>
-          prev.map((n) =>
-            n._id === notification_id ? { ...n, read: true } : n
-          )
+            prev.filter((n) => n._id !== notification_id)
         );
       }
     } catch (err) {
-      setError(t('errors.network_error'));
+      setError(t("errors.network_error"));
     }
   };
 
-      useEffect(() => {
-        if (!token) return;
+  // Efeito para buscar as notificações apenas uma vez quando o hook é montado
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
 
-        fetchNotifications();
-        const interval = setInterval(fetchNotifications, 10000);
-        return () => clearInterval(interval);
-      }, [token]);
+  // REMOVEMOS O useEffect que conectava ao socket daqui.
 
   return { notifications, loading, error, refetch: fetchNotifications, checkNotification };
 }

@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
-export default function useDeleteProject(token) {
+export default function useDeleteProject() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const deleteProject = async (projectId, onSuccess) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
+      const response = await apiFetch(`/projects/${projectId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -22,6 +22,7 @@ export default function useDeleteProject(token) {
 
       toast.success(t('project.deletedSuccess'));
       if (onSuccess) onSuccess();
+
     } catch (err) {
       toast.error(err.message);
     } finally {

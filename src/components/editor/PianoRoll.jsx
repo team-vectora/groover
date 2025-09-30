@@ -1,114 +1,144 @@
+// src/components/editor/PianoRoll.jsx
 "use client";
-import { useEffect } from "react";
-import * as Tone from 'tone';
+import { useRef, useState, useCallback } from "react";
+import { NOTES, ROWS } from '../../constants';
+import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
+import Playhead from './Playhead';
+
+const TICKS_PER_PATTERN = 32;
+const ROW_HEIGHT_PX = 30;
+const TOTAL_HEIGHT_PX = ROWS * ROW_HEIGHT_PX;
 
 const PianoRoll = ({
-                       synthRef,
-                       pages,
-                       activePage,
-                       activeCol,
-                       activeSubIndex,
-                       notes,
-                       rows,
-                       selectedColumn,
-                       setSelectedColumn,
-                       setPages,
-                       isCurrentUserProject,
+                       patternNotes, onNotesChange, isCurrentUserProject,
+                       activeInstrument, playNote, playheadPositionInTicks,
+                       isPlaying, isPatternPlaying
                    }) => {
+    const { t } = useTranslation();
+    const [dragging, setDragging] = useState(null);
+    const svgRef = useRef(null);
+    const [cursor, setCursor] = useState(isCurrentUserProject ? 'cell' : 'not-allowed');
 
-    const handleDoubleClick = (colIndex) => {
-        if (!isCurrentUserProject) return;
-        setSelectedColumn(colIndex === selectedColumn ? null : colIndex);
+    const isOverlapping = (noteA, noteB) => noteA.pitch === noteB.pitch && noteA.start < noteB.end && noteA.end > noteB.start;
+
+    const getCoordsFromEvent = (e, snapToColumn = false) => {
+        if (!svgRef.current) return { tick: 0, pitch: 0 };
+        const rect = svgRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const tickWidth = rect.width / TICKS_PER_PATTERN;
+        const pitchHeight = TOTAL_HEIGHT_PX / ROWS;
+
+        let tick = Math.max(0, Math.floor(x / tickWidth));
+        if (snapToColumn) tick = Math.floor(tick / 4) * 4;
+
+        const pitch = Math.max(0, Math.min(ROWS - 1, Math.floor(y / pitchHeight)));
+        return { tick, pitch };
     };
 
-    // ✅ ATUALIZADO: Manipula a criação e remoção de sub-notas na nova estrutura
-    const handleSubNoteClick = (e, rowIndex, colIndex, subIndex) => {
-        if (!isCurrentUserProject) return;
-        e.stopPropagation();
-        setPages((prevPages) => {
-            const newPages = JSON.parse(JSON.stringify(prevPages));
-            const noteArray = newPages[activePage][colIndex][rowIndex];
-            const noteName = notes[rowIndex];
-            const subNote = noteArray[subIndex];
+    const findNoteAt = (tick, pitch) => (patternNotes || []).find(note => note.pitch === pitch && tick >= note.start && tick < note.end);
 
-            if (subNote?.name) {
-                noteArray[subIndex] = null; // Transforma o objeto em null
-            } else {
-                noteArray[subIndex] = { name: noteName, isSeparated: false }; // Cria o objeto
-            }
-            return newPages;
-        });
-        synthRef.current?.triggerAttackRelease(notes[rowIndex], "32n");
-    };
-
-    // ✅ ATUALIZADO: Manipula a propriedade 'isSeparated'
-    const handleSubNoteRightClick = (e, rowIndex, colIndex, subIndex) => {
+    const handleMouseDown = (e) => {
         if (!isCurrentUserProject) return;
         e.preventDefault();
-        e.stopPropagation();
-        setPages((prevPages) => {
-            const newPages = JSON.parse(JSON.stringify(prevPages));
-            const subNote = newPages[activePage][colIndex][rowIndex][subIndex];
-            // Só funciona se a sub-nota já existir (não for nula)
-            if (subNote) {
-                subNote.isSeparated = !subNote.isSeparated;
+        const coords = getCoordsFromEvent(e);
+        const noteAtCursor = findNoteAt(coords.tick, coords.pitch);
+
+        if (e.button === 2 && noteAtCursor) {
+            onNotesChange(patternNotes.filter(n => n.id !== noteAtCursor.id));
+            return;
+        }
+
+        if (noteAtCursor) {
+            const rect = svgRef.current.getBoundingClientRect();
+            const tickWidth = rect.width / TICKS_PER_PATTERN;
+            const noteStartX = (noteAtCursor.start * tickWidth) + rect.left;
+            const noteEndX = (noteAtCursor.end * tickWidth) + rect.left;
+
+            if (Math.abs(e.clientX - noteStartX) < 10) {
+                setDragging({ type: 'resize_start', noteId: noteAtCursor.id });
+            } else if (Math.abs(e.clientX - noteEndX) < 10) {
+                setDragging({ type: 'resize_end', noteId: noteAtCursor.id });
+            } else {
+                setDragging({ type: 'move', noteId: noteAtCursor.id, tickOffset: coords.tick - noteAtCursor.start, pitchOffset: coords.pitch - noteAtCursor.pitch });
             }
-            return newPages;
-        });
+        } else {
+            const snappedCoords = getCoordsFromEvent(e, true);
+            const newNote = { id: Date.now() + Math.random(), pitch: snappedCoords.pitch, start: snappedCoords.tick, end: snappedCoords.tick + 4 };
+            if ((patternNotes || []).some(note => isOverlapping(newNote, note))) {
+                toast.error(t('editor.pianoRoll.noteOverlapError'));
+                return;
+            }
+            onNotesChange([...(patternNotes || []), newNote]);
+            playNote(NOTES[snappedCoords.pitch], activeInstrument);
+            setDragging({ type: 'resize_end', noteId: newNote.id });
+        }
     };
 
-    // ✅ ATUALIZADO: Renderiza a UI com base na nova estrutura
-    const tableMaker = () => {
-        const currentMatrix = pages?.[activePage];
-        if (!currentMatrix) return null;
+    const handleMouseMove = useCallback((e) => {
+        if (!isCurrentUserProject) return;
+        const { tick, pitch } = getCoordsFromEvent(e);
+        const noteAtCursor = findNoteAt(tick, pitch);
+        if (noteAtCursor && svgRef.current) {
+            const rect = svgRef.current.getBoundingClientRect();
+            const tickWidth = rect.width / TICKS_PER_PATTERN;
+            const noteStartX = (noteAtCursor.start * tickWidth) + rect.left;
+            const noteEndX = (noteAtCursor.end * tickWidth) + rect.left;
+            if (Math.abs(e.clientX - noteStartX) < 10 || Math.abs(e.clientX - noteEndX) < 10) {
+                setCursor('ew-resize');
+            } else {
+                setCursor('move');
+            }
+        } else {
+            setCursor('cell');
+        }
 
-        return (
-            <table className="border-collapse w-full table-fixed ">
-                <tbody>
-                {Array.from({ length: rows }).map((_, rowIndex) => (
-                    <tr key={`row-${rowIndex}`} className={`${notes[rowIndex].startsWith("C") && !notes[rowIndex].startsWith("C#") ? 'bg-primary/10' : ''}`}>
-                        {Array.from({ length: 10 }).map((_, colIndex) => {
-                            const note = currentMatrix[colIndex]?.[rowIndex];
-                            if (!note) {
-                                return <td key={`cell-${rowIndex}-${colIndex}`} className="border-t border-bg-darker h-[30px] p-0"></td>;
-                            }
+        if (!dragging || !patternNotes) return;
+        e.preventDefault();
+        const newNotes = [...patternNotes];
+        const noteIndex = newNotes.findIndex(n => n.id === dragging.noteId);
+        if (noteIndex === -1) return;
 
-                            return (
-                                <td
-                                    key={`cell-${rowIndex}-${colIndex}`}
-                                    className={`relative border-t border-bg-darker h-[30px] p-0
-                                            ${isCurrentUserProject ? 'cursor-pointer' : 'cursor-not-allowed'} // ✅ Cursor atualizado
-                                            ${selectedColumn === colIndex ? 'ring-2 ring-accent z-10' : ''}`}
-                                    onDoubleClick={() => handleDoubleClick(colIndex)}
-                                >
-                                    <div className="flex w-full h-full">
-                                        {note.map((subNote, subIndex) => (
-                                            <div
-                                                key={`subnote-${rowIndex}-${colIndex}-${subIndex}`}
-                                                className={`
-                                                        h-full box-border transition-colors duration-100
-                                                        border-r border-primary/20
-                                                        ${subNote?.name ? 'bg-accent' : (isCurrentUserProject ? 'hover:bg-accent/40' : '')} // ✅ Hover atualizado
-                                                        ${activeCol === colIndex && activeSubIndex === subIndex ? 'bg-primary-light animate-pulse' : ''}
-                                                        ${subNote?.isSeparated ? 'opacity-70 border-l-2 border-bg-darker' : ''} 
-                                                    `}
-                                                style={{ width: `${100 / note.length}%` }}
-                                                onClick={(e) => handleSubNoteClick(e, rowIndex, colIndex, subIndex)}
-                                                onContextMenu={(e) => handleSubNoteRightClick(e, rowIndex, colIndex, subIndex)}
-                                            />
-                                        ))}
-                                    </div>
-                                </td>
-                            );
-                        })}
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-        );
-    };
+        const originalNote = newNotes[noteIndex];
+        const updatedNote = { ...originalNote };
+        const otherNotes = newNotes.filter(n => n.id !== dragging.noteId);
 
-    return <>{tableMaker()}</>;
+        if (dragging.type === 'move') {
+            const duration = updatedNote.end - updatedNote.start;
+            updatedNote.start = Math.max(0, tick - dragging.tickOffset);
+            updatedNote.end = updatedNote.start + duration;
+            updatedNote.pitch = Math.max(0, Math.min(ROWS - 1, pitch - dragging.pitchOffset));
+        } else if (dragging.type === 'resize_end') {
+            updatedNote.end = Math.max(updatedNote.start + 1, tick + 1);
+        } else if (dragging.type === 'resize_start') {
+            updatedNote.start = Math.min(updatedNote.end - 1, tick);
+        }
+
+        if (!otherNotes.some(note => isOverlapping(updatedNote, note))) {
+            newNotes[noteIndex] = updatedNote;
+            onNotesChange(newNotes);
+        }
+    }, [dragging, patternNotes, onNotesChange, isCurrentUserProject]);
+
+    const handleMouseUp = () => setDragging(null);
+
+    return (
+        <div className="relative w-full" style={{ height: `${TOTAL_HEIGHT_PX}px` }} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onMouseMove={handleMouseMove} onContextMenu={(e) => e.preventDefault()}>
+            <svg ref={svgRef} width="100%" height="100%" className="absolute top-0 left-0 bg-transparent" style={{ cursor: cursor }}>
+                {NOTES.map((note, index) => note.startsWith('C') && !note.includes("#") && <rect key={`highlight-${note}`} x="0" y={`${(index / ROWS) * 100}%`} width="100%" height={`${(1 / ROWS) * 100}%`} className="fill-primary opacity-15" />)}
+                {Array.from({ length: TICKS_PER_PATTERN }).map((_, i) => <line key={`tick-line-${i}`} x1={`${(i / TICKS_PER_PATTERN) * 100}%`} y1="0" x2={`${(i / TICKS_PER_PATTERN) * 100}%`} y2="100%" stroke={i % 4 === 0 ? "#555" : "#333"} />)}
+                {Array.from({ length: ROWS }).map((_, i) => <line key={`row-line-${i}`} x1="0" y1={`${(i / ROWS) * 100}%`} x2="100%" y2={`${(i / ROWS) * 100}%`} stroke="#444" />)}
+                {(patternNotes || []).map(note => {
+                    const pitchHeight = TOTAL_HEIGHT_PX / ROWS;
+                    const tickWidth = svgRef.current ? svgRef.current.getBoundingClientRect().width / TICKS_PER_PATTERN : 0;
+                    return <rect key={note.id} x={note.start * tickWidth} y={note.pitch * pitchHeight} width={(note.end - note.start) * tickWidth} height={pitchHeight} className="fill-accent stroke-primary" strokeWidth="1" style={{ pointerEvents: 'none' }} />;
+                })}
+                <rect width="100%" height="100%" fill="transparent" onMouseDown={handleMouseDown} />
+            </svg>
+            <Playhead isPlaying={isPlaying} isPatternPlaying={isPatternPlaying} playheadPositionInTicks={playheadPositionInTicks} container="pianoroll" />
+        </div>
+    );
 };
 
 export default PianoRoll;

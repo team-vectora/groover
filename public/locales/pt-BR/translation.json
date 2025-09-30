@@ -10,10 +10,12 @@
     "logout": "Sair",
     "close": "Fechar",
     "loading": "Carregando...",
-    "no_notifications": "Nenhuma notificação"
+    "no_notifications": "Nenhuma notificação",
+    "explore": "Explorar"
   },
   "feed": {
-    "loading": "Carregando ..."
+    "loading": "Carregando ...",
+    "open_feed": "Abrir Feed"
   },
   "forgotPassword": {
     "title": "Esqueceu a senha?",
@@ -169,6 +171,7 @@
     "logout": "Sair",
     "loading": "Carregando perfil...",
     "noPosts": "Nenhum post encontrado",
+    "noMusics": "Nenhuma música ainda",
     "newProject": "Novo Projeto",
     "noInvites": "Nenhum convite encontrado",
     "deleteProjectTitle": "Excluir Projeto",
@@ -223,17 +226,43 @@
       }
     },
     "confirmation": {
-      "clearTitle": "Limpar Página",
-      "clearMessage": "Todas as notas da página atual serão removidas. Esta ação não pode ser desfeita.",
+      "clearTitle": "Limpar Padrão?",
+      "clearMessage": "Todas as notas do padrão atual serão removidas. Esta ação não pode ser desfeita.",
       "deleteTitle": "Excluir Página",
-      "deleteMessage": "Esta página será excluída permanentemente. Tem certeza?"
+      "deleteMessage": "Esta página será excluída permanentemente. Tem certeza?",
+      "deleteChannelTitle": "Excluir Canal?",
+      "deleteChannelMessage": "Tem certeza que deseja excluir este canal? Todas as sequências de padrões nele serão perdidas.",
+      "deletePatternTitle": "Excluir Padrão?",
+      "deletePatternMessage": "Tem certeza que deseja excluir este padrão? Ele será removido de todos os canais na sequência. Esta ação não pode ser desfeita.",
+      "deletePageTitle": "Excluir Página?",
+      "deletePageMessage": "Tem certeza que deseja excluir a página {{page}}? Esta ação não pode ser desfeita."
+    },
+    "sequencer": {
+      "deleteChannel": "Excluir Canal",
+      "deletePattern": "Excluir Padrão",
+      "title": "Sequenciador",
+      "channel": "Canal",
+      "addChannel": "Adicionar Canal",
+      "newPattern": "Novo Padrão",
+      "page": "Página {{current}} de {{total}}"
+    },
+    "pianoRoll": {
+      "noteOverlapError": "As notas não podem se sobrepor."
     },
     "saveProject": "Salvar Projeto",
     "title": "Título",
     "description": "Descrição",
     "save": "Salvar",
     "deleteLastPageError": "Não é possível excluir a última página.",
-    "loadingMessage": "O editor está carregando para você criar músicas incríveis!"
+    "loadingMessage": "O editor está carregando para você criar músicas incríveis!",
+    "channels": "Canais",
+    "channel": "Canal",
+    "patterns": "Padrões",
+    "pattern": "Padrão",
+    "patternControls": {
+      "play": "Tocar Padrão",
+      "pause": "Pausar Padrão"
+    }
   },
   "midiPlayer": {
     "expand": "Expandir",
@@ -276,13 +305,20 @@
     "invites": "Convites"
   },
   "project": {
-    "deletedSuccess": "Projeto excluído com sucesso!"
+    "manage_collaborators": "Gerenciar colaboradores",
+    "deletedSuccess": "Projeto excluído com sucesso!",
+    "no_collaborators": "Nenhum Colaborador",
+    "view_collaborators": "Ver Colaboradores",
+    "delete_project": "Excluir projeto",
+    "remove_collaborator_title": "Remover Colaborador",
+    "remove_collaborator_confirmation": "Tem certeza de que deseja remover {{user}} como colaborador? Esta ação não pode ser desfeita."
   },
   "fork": {
     "copiedSuccess": "Projeto copiado para seu perfil!"
   },
   "share": {
-    "sharedSuccess": "Projeto compartilhado"
+    "sharedSuccess": "Projeto compartilhado",
+    "link_copied": "Link do post copiado para a área de transferência!"
   },
   "upload": {
     "imageTooLarge": "Imagem muito grande (máximo 2MB)",
@@ -454,7 +490,8 @@
     "error_loading_notifications": "Erro ao carregar notificações",
     "error_marking_notification": "Erro ao marcar notificação",
     "error_loading_similar_users": "Erro ao buscar usuários similares",
-    "error_creating_post": "Erro ao criar post"
+    "error_creating_post": "Erro ao criar post",
+    "patternCleared": "Padrão limpo!"
   },
   "alerts": {
     "max_images": "Máximo de 5 imagens permitidas"
@@ -476,5 +513,10 @@
     "project_no_music": "O projeto não tem música para copiar",
     "following_id_required": "following_id obrigatório",
     "cant_follow_self": "Não é possível seguir a si mesmo."
+  },
+  "profileSetup": {
+    "title": "Finalizar cadastro",
+    "subtitle": "Personalize seu perfil para encontrar outros músicos!",
+    "skip": "Pular por enquanto"
   }
 }

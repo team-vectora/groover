@@ -1,28 +1,27 @@
 import { useState } from "react";
-import { API_BASE_URL } from "../../config";
+import { apiFetch } from "../../lib/util/apiFetch";
 import { useTranslation } from "react-i18next";
 
-export default function useLikePost(token, onSuccess) {
+export default function useLikePost(onSuccess) {
   const { t } = useTranslation();
   const [error, setError] = useState("");
 
   const likePost = async (post_id, owner_id) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/posts/like`, {
+      const res = await apiFetch(`/posts/like`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: "include",
         body: JSON.stringify({ post_id, owner_id }),
       });
+
+      const data = await res.json();
 
       if (!res.ok) {
         if (res.status === 401) {
           setError(t('errors.invalid_token'));
           return;
         }
-        const data = await res.json();
         setError(t(`backend_errors.${data.error}`, { defaultValue: t('errors.generic_error') }));
         return;
       }

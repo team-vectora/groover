@@ -7,7 +7,7 @@ import { uploadToCloudinary } from '../../lib/util/upload';
 import { GENRES } from '../../constants'
 import useOutsideClick from '../../hooks/posts/useOutsideClick';
 import { toast } from 'react-toastify';
-import {API_BASE_URL} from "../../config";
+import {apiFetch} from "../../lib/util/apiFetch";
 import { useTranslation } from 'react-i18next';
 
 
@@ -52,7 +52,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
         );
       }
 
-      const url = isComment ? `${API_BASE_URL}/posts/${postId}/comment` : `${API_BASE_URL}/posts`;
+      const url = isComment ? `/posts/${postId}/comment` : `/posts`;
       const body = {
         caption,
         photos: photoUrls,
@@ -60,12 +60,12 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
         genres: selectedGenres,
       };
 
-      const response = await fetch(url, {
+      const response = await apiFetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify(body),
       });
 
@@ -130,7 +130,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
               <button
                   onClick={onClose}
                   disabled={isSubmitting}
-                  className="text-gray-400 hover:text-white"
+                  className="text-text-lighter hover:text-text-lighter"
               >
                 <FontAwesomeIcon icon={faTimes} size="lg" />
               </button>
@@ -143,14 +143,14 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
                   placeholder={isComment ? t('postForm.commentPlaceholder') : t('postForm.captionPlaceholder')}
                   rows={4}
                   maxLength={500}
-                  className="w-full p-3 bg-bg-darker border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"
+                  className="w-full p-3 bg-bg-darker border border-primary rounded-md text-text-lighter focus:outline-none focus:border-accent-light"
               />
               <div className="text-right text-xs text-primary-light mt-1">
                 {caption.length}/500
               </div>
             </div>
 
-            <label className="block mb-2 text-sm text-gray-300">{t('postForm.selectTags')}</label>
+            <label className="block mb-2 text-sm text-text-lighter">{t('postForm.selectTags')}</label>
             <div className="grid grid-cols-3 md:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 mb-4 bg-bg-darker border border-primary rounded-md">
               {GENRES.map((genre) => (
                   <button
@@ -158,7 +158,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
                       type="button"
                       className={`px-2 py-1 rounded-full text-center transition ${
                           selectedGenres.includes(genre)
-                              ? "bg-primary text-white font-semibold"
+                              ? "bg-primary text-text-lighter-white font-semibold"
                               : "bg-bg-secondary text-foreground hover:bg-text-lighter"
                       }`}
                       onClick={() => toggleGenre(genre)}
@@ -198,7 +198,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
                         <button
                             type="button"
                             onClick={() => removeImage(index)}
-                            className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black bg-opacity-70 text-white hover:bg-red-600 flex items-center justify-center"
+                            className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black bg-opacity-70 text-text-lighter hover:bg-red-600 flex items-center justify-center"
                         >
                           <FontAwesomeIcon icon={faTimes} size="xs" />
                         </button>
@@ -227,7 +227,7 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
 
             <label
                 htmlFor="file-upload"
-                className="inline-block px-4 py-2 rounded-md cursor-pointer select-none bg-primary text-white hover:bg-primary-light mb-4"
+                className="inline-block px-4 py-2 rounded-md cursor-pointer select-none bg-primary text-text-lighter hover:bg-primary-light mb-4"
             >
               {t('postForm.selectImages')}
             </label>
@@ -241,15 +241,15 @@ const PostFormPopUp = ({ open, onClose, projects, isComment = false, postId = nu
                 className="hidden"
             />
 
-            <label className="block mb-2 text-sm text-gray-300 w-full">{t('postForm.projectLabel')}</label>
+            <label className="block mb-2 text-sm text-text-lighter w-full">{t('postForm.projectLabel')}</label>
             <select
                 value={selectedProject}
                 onChange={(e) => setSelectedProject(e.target.value)}
-                className="w-full p-3 bg-bg-darker: border border-primary rounded-md text-white focus:outline-none focus:border-accent-light"
+                className="w-full p-3 bg-bg-darker border border-primary rounded-md text-text-lighter focus:outline-none focus:border-accent-light"
             >
-              <option value="">{t('postForm.noProject')}</option>
+              <option value="" className="bg-bg-darker">{t('postForm.noProject')}</option>
               {projects.map((proj) => (
-                  <option key={proj.id} value={proj.id}>{proj.title}</option>
+                  <option key={proj.id} value={proj.id} className="bg-bg-darker">{proj.title}</option>
               ))}
             </select>
           </div>

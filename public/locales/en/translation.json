@@ -10,10 +10,12 @@
     "logout": "Logout",
     "close": "Close",
     "loading": "Loading...",
-    "no_notifications": "No notifications"
+    "no_notifications": "No notifications",
+    "explore": "Explore"
   },
   "feed": {
-    "loading": "Loading ..."
+    "loading": "Loading ...",
+    "open_feed": "Open Feed"
   },
   "forgotPassword": {
     "title": "Forgot your password?",
@@ -170,6 +172,7 @@
     "logout": "Logout",
     "loading": "Loading profile...",
     "noPosts": "No posts found",
+    "noMusics": "No musics yet",
     "newProject": "New Project",
     "noInvites": "No invites found",
     "deleteProjectTitle": "Delete Project",
@@ -224,17 +227,43 @@
       }
     },
     "confirmation": {
-      "clearTitle": "Clear Page",
-      "clearMessage": "All notes on the current page will be removed. This action cannot be undone.",
+      "clearTitle": "Clear Pattern?",
+      "clearMessage": "All notes on the current pattern will be removed. This action cannot be undone.",
       "deleteTitle": "Delete Page",
-      "deleteMessage": "This page will be permanently deleted. Are you sure?"
+      "deleteMessage": "This page will be permanently deleted. Are you sure?",
+      "deleteChannelTitle": "Delete Channel?",
+      "deleteChannelMessage": "Are you sure you want to delete this channel? All pattern sequences within it will be lost.",
+      "deletePatternTitle": "Delete Pattern?",
+      "deletePatternMessage": "Are you sure you want to delete this pattern? It will be removed from all channels in the sequence. This action cannot be undone.",
+      "deletePageTitle": "Delete Page?",
+      "deletePageMessage": "Are you sure you want to delete page {{page}}? This action cannot be undone."
+    },
+    "sequencer": {
+      "deleteChannel": "Delete Channel",
+      "deletePattern": "Delete Pattern",
+      "title": "Sequencer",
+      "channel": "Channel",
+      "addChannel": "Add Channel",
+      "newPattern": "New Pattern",
+      "page": "Page {{current}} of {{total}}"
+    },
+    "pianoRoll": {
+      "noteOverlapError": "Notes cannot overlap."
     },
     "saveProject": "Save Project",
     "title": "Title",
     "description": "Description",
     "save": "Save",
     "deleteLastPageError": "Cannot delete the last page.",
-    "loadingMessage": "The editor is loading so you can create amazing music!"
+    "loadingMessage": "The editor is loading so you can create amazing music!",
+    "channels": "Channels",
+    "channel": "Channel",
+    "patterns": "Patterns",
+    "pattern": "Pattern",
+    "patternControls": {
+      "play": "Play Pattern",
+      "pause": "Pause Pattern"
+    }
   },
   "midiPlayer": {
     "expand": "Expand",
@@ -277,13 +306,20 @@
     "invites": "Invites"
   },
   "project": {
-    "deletedSuccess": "Project deleted successfully!"
+    "manage_collaborators": "Manage Collaborators",
+    "deletedSuccess": "Project deleted successfully!",
+    "no_collaborators": "No Collaborators",
+    "view_collaborators": "View Collaborators",
+    "delete_project": "Delete project",
+    "remove_collaborator_title": "Remove Collaborator",
+    "remove_collaborator_confirmation": "Are you sure you want to remove {{user}} as a collaborator? This action cannot be undone."
   },
   "fork": {
     "copiedSuccess": "Project copied to your profile!"
   },
   "share": {
-    "sharedSuccess": "Project shared"
+    "sharedSuccess": "Project shared",
+    "link_copied": "Post link copied to clipboard!"
   },
   "upload": {
     "imageTooLarge": "Image too large (maximum 2MB)",
@@ -456,7 +492,8 @@
     "error_loading_notifications": "Error loading notifications",
     "error_marking_notification": "Error marking notification",
     "error_loading_similar_users": "Error fetching similar users",
-    "error_creating_post": "Error creating post"
+    "error_creating_post": "Error creating post",
+    "patternCleared": "Pattern cleared!"
   },
   "alerts": {
     "max_images": "Maximum of 5 images allowed"
@@ -478,5 +515,10 @@
     "project_no_music": "Project doesn't have music to copy",
     "following_id_required": "missing following_id",
     "cant_follow_self": "Can't follow itself."
+  },
+  "profileSetup": {
+    "title": "Finalize your registration",
+    "subtitle": "Customize your profile to find other musicians!",
+    "skip": "Skip for now"
   }
 }

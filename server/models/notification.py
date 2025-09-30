@@ -3,7 +3,6 @@ from bson import ObjectId
 from utils.db import mongo
 
 class Notification:
-
     @staticmethod
     def create(user_id, actor, type, post_id=None, project_id=None, content=None):
         notification = {
@@ -59,4 +58,3 @@ class Notification:
         if result.modified_count > 0:
             return True
         return False
-

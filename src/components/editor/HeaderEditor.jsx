@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 const HeaderEditor = ({
     onPlaySong, onClear, onStop, isPlaying, onExport,
-    onImport, onSave, onFork, isCurrentUserProject, title, setIsControlPanelOpen, isControlPanelOpen
+    onImport, onSave, onFork, isCurrentUserProject, title, setIsControlPanelOpen, isControlPanelOpen, setIsSequencerOpen, isSequencerOpen
 }) => {
     const { username, avatar } = useAuth();
     const { t } = useTranslation();
@@ -29,7 +29,7 @@ const HeaderEditor = ({
 <header className="bg-bg-darker flex flex-col md:flex-row items-center justify-between gap-3 md:gap-6 p-3 flex-shrink-0 w-full fixed z-20">
 
   <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
-    <Link href="/feed" className="text-gray-400 hover:text-accent transition-colors" title={t("header.backToFeed")}>
+    <Link href="/feed" className="text-text-lighter hover:text-accent transition-colors" title={t("header.backToFeed")}>
       <FontAwesomeIcon icon={faHouse} className="h-5 w-5 mb-1" />
     </Link>
     <Image src="/img/groover_logo.png" alt="Logo" width={40} height={40} />
@@ -38,14 +38,25 @@ const HeaderEditor = ({
   {/* Center: Player Controls */}
   <div className="flex flex-wrap justify-center md:justify-start gap-2 w-full md:w-auto">
     {isMobile && (
-      <button
-        className="flex items-center px-3 py-2 text-xs md:text-sm font-semibold rounded-md border-2 border-primary hover:bg-primary/30 transition"
-        onClick={() => setIsControlPanelOpen(true)}
-        title="Abrir painel"
-      >
-        <FontAwesomeIcon icon={faSliders} className="mr-1" />
-        <span className="hidden sm:inline">Painel</span>
-      </button>
+      <>
+        <button
+          className="flex items-center px-3 py-2 text-xs md:text-sm font-semibold rounded-md border-2 border-primary hover:bg-primary/30 transition"
+          onClick={() => setIsControlPanelOpen(true)}
+          title="Abrir painel"
+        >
+          <FontAwesomeIcon icon={faSliders} className="mr-1" />
+          <span className="hidden sm:inline">Painel</span>
+        </button>
+
+        <button
+          className="flex items-center px-3 py-2 text-xs md:text-sm font-semibold rounded-md border-2 border-primary hover:bg-primary/30 transition"
+          onClick={() => setIsSequencerOpen(true)}
+          title="Abrir sequenciador"
+        >
+          <FontAwesomeIcon icon={faSliders} className="mr-1" />
+          <span className="hidden sm:inline">{t("editor.sequencer.title")}</span>
+        </button>
+      </>
     )}
     <button
       title={t("header.playSong")}
@@ -78,7 +89,7 @@ const HeaderEditor = ({
       onClick={onExport}
       title={t("header.exportMidi")}
     >
-      <FontAwesomeIcon icon={faDownload} className="mr-1" />
+      <FontAwesomeIcon icon={faUpload} className="mr-1" />
       <span className="hidden sm:inline">{t("header.export")}</span>
     </button>
 
@@ -86,7 +97,7 @@ const HeaderEditor = ({
       className="flex items-center px-3 py-2 text-xs md:text-sm font-semibold rounded-md border-2 border-accent hover:bg-accent/30 transition cursor-pointer"
       title={t("header.importMidi")}
     >
-      <FontAwesomeIcon icon={faUpload} className="mr-1" />
+      <FontAwesomeIcon icon={faDownload } className="mr-1" />
       <span className="hidden sm:inline">{t("header.import")}</span>
       <input
         type="file"

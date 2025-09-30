@@ -1,11 +1,11 @@
 // src/app/(groove-club)/settings/page.jsx
 'use client';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useTheme } from '../../../../contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
-import { useDeleteAccount } from '../../../hooks/settings/useDeleteAccount';
+import { useDeleteAccount } from '../../../../hooks/settings/useDeleteAccount';
 
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();
@@ -90,7 +90,7 @@ export default function SettingsPage() {
           key={s}
           onClick={() => setSize(s)}
           className={`px-4 py-2 rounded-md text-sm transition ${
-            size === s ? 'bg-accent text-white' : 'bg-primary hover:bg-primary-light'
+            size === s ? 'bg-accent text-text-lighter' : 'bg-primary hover:bg-primary-light'
           }`}
         >
           {t(`settings.${s}`)}
@@ -139,7 +139,7 @@ export default function SettingsPage() {
     <button
       onClick={handleDeleteClick}
       disabled={deleting}
-      className="flex items-center gap-3 px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
+      className="flex items-center gap-3 px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-text-lighter transition-colors"
     >
       <FontAwesomeIcon icon={faTrash} />
       {deleting ? t('settings.deleting') : t('settings.deleteAccount')}
@@ -157,13 +157,13 @@ export default function SettingsPage() {
         <div className="flex justify-center gap-4 mt-4">
           <button
             onClick={confirmDelete}
-            className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition-colors"
+            className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-text-lighter transition-colors"
           >
             {t('settings.yesDelete')}
           </button>
           <button
             onClick={cancelDelete}
-            className="px-4 py-2 rounded-md bg-gray-400 hover:bg-gray-500 text-white transition-colors"
+            className="px-4 py-2 rounded-md bg-gray-400 hover:bg-gray-500 text-text-lighter transition-colors"
           >
             {t('settings.cancel')}
           </button>

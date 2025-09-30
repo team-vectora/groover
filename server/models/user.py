@@ -9,12 +9,10 @@ from utils.mail import mail
 from .followers import Followers
 from markupsafe import escape
 from werkzeug.security import generate_password_hash
-
 from utils.similarity import cosine_similarity
-# Corrigido: Use o TimedSerializer para tokens com expiração
+
 s = URLSafeTimedSerializer(os.getenv('AUTH_KEY'))
 
-# Textos de e-mail para internacionalização
 EMAIL_CONTENT = {
     'pt-BR': {
         'subject': "Por favor, confirme seu e-mail",
@@ -55,7 +53,6 @@ class User:
         token = s.dumps(email, salt=os.getenv('SALT_AUTH'))
         confirm_url = f"{host_url}api/auth/confirm_email/{token}"
 
-        # Seleciona o idioma ou usa inglês como padrão
         content = EMAIL_CONTENT.get(lang, EMAIL_CONTENT['en'])
 
         html_body = f"""
@@ -140,11 +137,7 @@ class User:
     @staticmethod
     def delete(user_id):
         user_oid = ObjectId(user_id)
-
-        # Encontra todos os posts do usuário a ser deletado
         posts_to_delete = list(mongo.db.posts.find({'user_id': user_oid}))
-
-        # Itera sobre os posts e decrementa o contador de comentários dos posts pais
         for post in posts_to_delete:
             if post.get('parent_post_id'):
                 mongo.db.posts.update_one(
@@ -152,23 +145,23 @@ class User:
                     {'$inc': {'comment_count': -1}}
                 )
 
-        # Deleta todos os posts do usuário
         if posts_to_delete:
             mongo.db.posts.delete_many({'user_id': user_oid})
-
-        # Deleta o usuário
         result_user = mongo.db.users.delete_one({'_id': user_oid})
 
         return result_user.deleted_count > 0
 
 
     @staticmethod
-    def find_by_username(username):
+    def find_by_username(username, current_user_id=None):
         user = mongo.db.users.find_one({'username': username})
         if user:
-            user['_id'] = str(user['_id'])
-            user['followers'] = User.get_followers(user['_id'])
-            user['following'] = User.get_following(user['_id'])
+            user_id_str = str(user['_id'])
+            user['_id'] = user_id_str
+            user['followers'] = User.get_followers(user_id_str)
+            user['following'] = User.get_following(user_id_str)
+            if current_user_id:
+                user['is_following'] = Followers.is_following(current_user_id, user_id_str)
         return user
 
     @staticmethod
@@ -331,7 +324,7 @@ class User:
 
         users_cursor = mongo.db.users.find(
             {'_id': {'$in': user_object_ids}},
-            {'username': 1, 'avatar': 1, 'bio': 1}  # Projeção para retornar apenas campos necessários
+            {'username': 1, 'avatar': 1, 'bio': 1}
         )
 
         users = []

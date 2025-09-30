@@ -1,10 +1,8 @@
-# routes/posts.py
-
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Post, User
 import cloudinary.uploader
-
+from utils.socket import socketio
 from models.notification import Notification
 
 posts_bp = Blueprint('posts', __name__)
@@ -22,6 +20,9 @@ def create_post():
         caption=data.get('caption', ""),
         genres=data.get('genres')
     )
+
+    # Notifica todos os clientes sobre o novo post
+    socketio.emit("new_post_notification")
 
     return jsonify({'message': 'Post created', 'post_id': str(post_id)}), 201
 
@@ -41,6 +42,7 @@ def upload_image():
         return jsonify({'error': str(e)}), 500
 
 
+
 @posts_bp.route('', methods=['GET'])
 @jwt_required()
 def get_posts():
@@ -53,6 +55,8 @@ def get_posts():
 @jwt_required()
 def get_post_by_id(id):
     post = Post.get_post(id)
+    if not post:
+        return jsonify({"error": "Post not found"}), 404
     return jsonify(post), 200
 
 
@@ -78,9 +82,18 @@ def post_like():
     user_id_owner = data.get('owner_id')
     user = User.get_user(user_id)
 
-    Notification.create(user_id=user_id_owner, type="like", actor=user["username"], post_id=post_id)
+    Notification.create(
+        user_id=user_id_owner,
+        type="like",
+        actor=user["username"],
+        post_id=post_id
+    )
+
+    socketio.emit("new_notification")
+
 
     return jsonify(response), status
+
 
 @posts_bp.route('/<post_id>/comment', methods=['POST'])
 @jwt_required()
@@ -91,7 +104,6 @@ def add_comment_to_post(post_id):
     if not data or not data.get('caption'):
         return jsonify({'error': 'O texto do comentário é obrigatório'}), 400
 
-    # Cria um novo post que é um comentário
     comment_id = Post.create(
         user_id=user_id,
         parent_post_id=post_id,
@@ -102,10 +114,11 @@ def add_comment_to_post(post_id):
         genres=data.get('genres', [])
     )
 
-    # Notificar o dono do post original
     original_post = Post.get_post(post_id)
     if original_post and str(original_post['user']['_id']) != user_id:
         actor_user = User.get_user(user_id)
+
+        # Cria a notificação no banco
         Notification.create(
             user_id=str(original_post['user']['_id']),
             actor=actor_user['username'],
@@ -114,7 +127,12 @@ def add_comment_to_post(post_id):
             content=data.get('caption')
         )
 
+        # Dispara notificação via WebSocket
+        socketio.emit("new_notification")
+
+
     return jsonify({'message': 'Comentário adicionado', 'comment_id': str(comment_id)}), 201
+
 
 @posts_bp.route('/<post_id>', methods=['DELETE'])
 @jwt_required()
