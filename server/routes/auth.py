@@ -157,10 +157,14 @@ def signin():
     }))
 
     resp.set_cookie(
-        "access_token", access_token, httponly=True,
-        secure=True if 'ON_RENDER' in os.environ else False,
-        samesite="Lax", max_age=60 * 60 * 24
+        "access_token",
+        access_token,
+        httponly=True,
+        secure=True,
+        samesite="None",   
+        max_age=60 * 60 * 24
     )
+
     return resp
 
 

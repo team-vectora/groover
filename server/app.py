@@ -40,7 +40,6 @@ def create_app():
     Swagger(app)
     app.config.from_object(Config)
 
-
     app.config["JWT_SECRET_KEY"] = Config.JWT_SECRET_KEY
     app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
     app.config["JWT_ACCESS_COOKIE_NAME"] = "access_token"
