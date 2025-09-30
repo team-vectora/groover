@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import User
 import traceback
 from utils.socket import socketio
+from app import app
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -28,17 +29,19 @@ def signup():
     hashed_pw = generate_password_hash(data['password'])
     email = data.get('email')
     lang = data.get('lang', 'en')
+    username = data['username']
 
     user_id = User.create(
-        username=data['username'],
+        username=username,
         password_hash=hashed_pw,
         email=email
     )
 
     socketio.start_background_task(
         User.send_email_verification,
+        app=app,
         email=email,
-        username=data['username'],
+        username=username,
         host_url=request.host_url,
         lang=lang
     )

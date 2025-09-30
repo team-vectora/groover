@@ -49,7 +49,7 @@ class User:
         return mongo.db.users.insert_one(user).inserted_id
 
     @staticmethod
-    def send_email_verification(email, username, host_url, lang='en'):
+    def send_email_verification(app, email, username, host_url, lang='en'):
         token = s.dumps(email, salt=os.getenv('SALT_AUTH'))
         confirm_url = f"{host_url}api/auth/confirm_email/{token}"
 
@@ -96,7 +96,10 @@ class User:
             html=html_body,
             sender=os.getenv('MAIL_USERNAME')
         )
-        mail.send(msg)
+
+        # Envolve o envio do e-mail com o contexto da aplicação
+        with app.app_context():
+            mail.send(msg)
 
     @staticmethod
     def update_password(email, new_password):
