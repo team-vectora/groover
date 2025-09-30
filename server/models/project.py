@@ -109,20 +109,12 @@ class Project:
             project['_id'] = str(project['_id'])
             if 'current_music_id' in project:
                 project['current_music_id'] = str(project['current_music_id'])
-            if 'music_versions' in project:
-                for version in project['music_versions']:
-                    version['music_id'] = str(version['music_id'])
-                    version['update_by'] = str(version.get('update_by', ''))
             if 'midi' in project and project['midi']:
                 midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
                 project['midi'] = f"data:audio/midi;base64,{midi_b64}"
 
-            collaborator_ids = project.get('collaborators', [])
-            project['collaborators'] = User.get_user_details_by_ids(collaborator_ids)
-
             project['user_id'] = str(project['user_id'])
             project['created_by'] = User.get_user(project.get('user_id', ''))
-            project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
 
             projects.append(project)
 
