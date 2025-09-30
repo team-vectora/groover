@@ -24,18 +24,18 @@ from utils.socket import socketio
 def create_app():
     app = Flask(__name__)
 
-    frontend_url = os.getenv("FRONTEND_URL")
 
-    CORS(app,
-         supports_credentials=True,
-         resources={r"/api/*": {"origins": frontend_url}})
+    allowed_origins = ["https://groover.app.br", "https://staging.groover.app.br"]
+
+    CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
 
     socketio.init_app(
         app,
-        cors_allowed_origins=frontend_url,
+        cors_allowed_origins=allowed_origins,
         logger=True,
         engineio_logger=True
     )
+
 
     Swagger(app)
     app.config.from_object(Config)
