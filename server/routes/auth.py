@@ -1,18 +1,20 @@
 import os
 from datetime import timedelta
-from flask import Blueprint, request, jsonify, redirect, render_template, make_response
+from flask import Blueprint, request, jsonify, redirect, render_template, make_response, current_app
 from flask_jwt_extended import create_access_token
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import User
 import traceback
 from utils.socket import socketio
-from app import app
 
 auth_bp = Blueprint('auth', __name__)
 
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+IS_DEPLOYED = False
+
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://groover.app.br' if IS_DEPLOYED else 'http://localhost:3000')
 s = URLSafeTimedSerializer(os.getenv('AUTH_KEY'))
+
 
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
@@ -37,9 +39,13 @@ def signup():
         email=email
     )
 
+    # Obtenha a instância real da aplicação a partir do contexto da requisição
+    app_instance = current_app._get_current_object()
+
+    # Inicie a tarefa em segundo plano passando a instância do app
     socketio.start_background_task(
         User.send_email_verification,
-        app=app,
+        app=app_instance,
         email=email,
         username=username,
         host_url=request.host_url,
@@ -107,7 +113,9 @@ def forgot_password():
     token = s.dumps(email, salt=os.getenv('SALT_AUTH'))
     reset_url = f"{request.host_url}api/auth/reset_password/{token}"
 
-    User.send_reset_password_email(email, user['username'], reset_url)
+    app_instance = current_app._get_current_object()
+
+    User.send_reset_password_email(app_instance, email, user['username'], reset_url)
     return {"message": "Password reset email sent"}, 200
 
 
@@ -147,7 +155,20 @@ def signin():
 
     if not user['active']:
         lang = request.headers.get('Accept-Language', 'en').split(',')[0]
-        User.send_email_verification(user['email'], user['username'], request.host_url, lang)
+
+        # Obtenha a instância real da aplicação a partir do contexto da requisição
+        app_instance = current_app._get_current_object()
+
+        # Inicie a tarefa em segundo plano passando a instância do app
+        socketio.start_background_task(
+            User.send_email_verification,
+            app=app_instance,
+            email=user['email'],
+            username=user['username'],
+            host_url=request.host_url,
+            lang=lang
+        )
+
         return jsonify({'error': 'User is not active. Verification email resent.'}), 401
 
     expires = timedelta(hours=24)

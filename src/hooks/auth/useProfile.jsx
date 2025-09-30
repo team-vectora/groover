@@ -25,6 +25,7 @@ export default function useProfile(username) {
         throw new Error(errorData.error || t('errors.user_not_found'));
       }
       const data = await res.json();
+      console.log("Data",  data)
       setProfileData({ ...data, loading: false, error: null });
     } catch (error) {
       // O erro 401 já foi tratado. Outros erros (ex: "User not found") caem aqui.

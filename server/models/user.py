@@ -1,9 +1,10 @@
+# models/user.py
 import os
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.db import mongo
 from utils.genres import GENRES
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired # Corrigido
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from flask_mail import Message
 from utils.mail import mail
 from .followers import Followers
@@ -97,7 +98,6 @@ class User:
             sender=os.getenv('MAIL_USERNAME')
         )
 
-        # Envolve o envio do e-mail com o contexto da aplicação
         with app.app_context():
             mail.send(msg)
 
@@ -110,9 +110,8 @@ class User:
         )
         return result.modified_count > 0
 
-
     @staticmethod
-    def send_reset_password_email(email, username, reset_url):
+    def send_reset_password_email(app, email, username, reset_url):
         html_body = f"""
         <html>
         <body style="font-family: Arial; background:#0a090d; color:#e6e8e3; padding:20px;">
@@ -134,8 +133,9 @@ class User:
             html=html_body,
             sender=os.getenv('MAIL_USERNAME')
         )
-        mail.send(msg)
 
+        with app.app_context():
+            mail.send(msg)
 
     @staticmethod
     def delete(user_id):
@@ -153,7 +153,6 @@ class User:
         result_user = mongo.db.users.delete_one({'_id': user_oid})
 
         return result_user.deleted_count > 0
-
 
     @staticmethod
     def find_by_username(username, current_user_id=None):
@@ -183,7 +182,6 @@ class User:
             {"$set": {"active": True}}
         )
         return result.matched_count > 0
-
 
     @staticmethod
     def get_user(user_id):
@@ -339,3 +337,73 @@ class User:
                 'bio': user.get('bio', '')
             })
         return users
+
+    @staticmethod
+    def get_profile_data(username, current_user_id):
+        pipeline = [
+            {'$match': {'username': username}},
+            {'$lookup': {'from': 'posts', 'localField': '_id', 'foreignField': 'user_id', 'as': 'posts'}},
+            {'$lookup': {'from': 'projects', 'localField': '_id', 'foreignField': 'user_id', 'as': 'projects'}},
+            {'$lookup': {'from': 'invitations', 'localField': '_id', 'foreignField': 'to_user_id', 'as': 'invites'}},
+            {'$lookup': {'from': 'followers', 'localField': '_id', 'foreignField': 'following_id', 'as': 'followers'}},
+            {'$lookup': {'from': 'followers', 'localField': '_id', 'foreignField': 'follower_id', 'as': 'following'}},
+            {'$addFields': {'is_following': {'$in': [ObjectId(current_user_id), '$followers.follower_id']}}},
+            {'$project': {'password': 0}}
+        ]
+
+        result = list(mongo.db.users.aggregate(pipeline))
+        if not result:
+            return None
+
+        raw_data = result[0]
+
+        # --- INÍCIO DA CORREÇÃO ---
+        # Função auxiliar para serializar documentos de forma segura
+        def serialize_doc(doc, fields_to_str):
+            for field in fields_to_str:
+                if field in doc and doc[field] is not None:
+                    doc[field] = str(doc[field])
+            if 'created_at' in doc and isinstance(doc['created_at'], datetime):
+                doc['created_at'] = doc['created_at'].isoformat()
+            if 'updated_at' in doc and isinstance(doc['updated_at'], datetime):
+                doc['updated_at'] = doc['updated_at'].isoformat()
+            return doc
+
+        # Serializa o objeto do usuário principal
+        user_data = {
+            '_id': str(raw_data['_id']),
+            'username': raw_data.get('username'),
+            'avatar': raw_data.get('avatar'),
+            'bio': raw_data.get('bio'),
+            'email': raw_data.get('email'),
+            'created_at': raw_data.get('created_at').isoformat() if isinstance(raw_data.get('created_at'),
+                                                                               datetime) else raw_data.get(
+                'created_at'),
+            'active': raw_data.get('active'),
+            'genres': raw_data.get('genres'),
+            'is_following': raw_data.get('is_following'),
+            'followers': [str(f['follower_id']) for f in raw_data.get('followers', [])],
+            'following': [str(f['following_id']) for f in raw_data.get('following', [])]
+        }
+
+        # Serializa os posts
+        posts_data = [serialize_doc(p, ['_id', 'user_id', 'project_id', 'parent_post_id']) for p in
+                      raw_data.get('posts', [])]
+
+        # Serializa os projetos
+        projects_data = [serialize_doc(p, ['_id', 'user_id', 'created_by', 'last_updated_by']) for p in
+                         raw_data.get('projects', [])]
+        for proj in projects_data:
+            proj['collaborators'] = [str(c) for c in proj.get('collaborators', [])]
+
+        # Serializa os convites
+        invites_data = [serialize_doc(i, ['_id', 'project_id', 'from_user_id', 'to_user_id']) for i in
+                        raw_data.get('invites', [])]
+
+        return {
+            "user": user_data,
+            "posts": posts_data,
+            "projects": projects_data,
+            "invites": invites_data
+        }
+        # --- FIM DA CORREÇÃO ---

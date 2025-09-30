@@ -24,8 +24,7 @@ from utils.socket import socketio
 def create_app():
     app = Flask(__name__)
 
-
-    allowed_origins = ["https://groover.app.br", "https://staging.groover.app.br"]
+    allowed_origins = ["https://groover.app.br", "https://staging.groover.app.br", "http://localhost:3000"]
 
     CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
 
@@ -35,7 +34,6 @@ def create_app():
         logger=True,
         engineio_logger=True
     )
-
 
     Swagger(app)
     app.config.from_object(Config)
@@ -53,7 +51,7 @@ def create_app():
     def api_root():
         """Endpoint para verificar se a API está no ar."""
         return {"status": "ok", "message": "API esta funcionando perfeitamente!"}
-    
+
     # Inicializa o banco de dados
     mongo.init_db()
 
@@ -88,6 +86,7 @@ def create_app():
         print(f"{rule.rule} -> {methods}")
 
     return app
+
 
 if __name__ == '__main__':
     import eventlet

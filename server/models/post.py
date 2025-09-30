@@ -1,4 +1,3 @@
-# models/post.py
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.db import mongo
@@ -58,11 +57,9 @@ class Post:
             {'$unwind': {'path': '$user', 'preserveNullAndEmptyArrays': True}},
             {'$lookup': {'from': 'projects', 'localField': 'project_id', 'foreignField': '_id', 'as': 'project'}},
             {'$unwind': {'path': '$project', 'preserveNullAndEmptyArrays': True}},
-            # --- INÍCIO DA CORREÇÃO ---
             {'$lookup': {'from': 'users', 'localField': 'project.user_id', 'foreignField': '_id',
                          'as': 'project_creator'}},
             {'$unwind': {'path': '$project_creator', 'preserveNullAndEmptyArrays': True}},
-            # --- FIM DA CORREÇÃO ---
             {
                 '$project': {
                     '_id': {'$toString': '$_id'},
@@ -82,13 +79,11 @@ class Post:
                                 'id': {'$toString': '$project._id'},
                                 'cover_image': '$project.cover_image',
                                 'user_id': {'$toString': '$project.user_id'},
-                                # --- INÍCIO DA CORREÇÃO ---
                                 'created_by': {
                                     '_id': {'$toString': '$project_creator._id'},
                                     'username': '$project_creator.username',
                                     'avatar': '$project_creator.avatar'
                                 },
-                                # --- FIM DA CORREÇÃO ---
                                 'title': '$project.title',
                                 'description': '$project.description',
                                 'bpm': '$project.bpm',
@@ -141,11 +136,9 @@ class Post:
             {'$unwind': {'path': '$user', 'preserveNullAndEmptyArrays': True}},
             {'$lookup': {'from': 'projects', 'localField': 'project_id', 'foreignField': '_id', 'as': 'project'}},
             {'$unwind': {'path': '$project', 'preserveNullAndEmptyArrays': True}},
-            # --- INÍCIO DA CORREÇÃO ---
             {'$lookup': {'from': 'users', 'localField': 'project.user_id', 'foreignField': '_id',
                          'as': 'project_creator'}},
             {'$unwind': {'path': '$project_creator', 'preserveNullAndEmptyArrays': True}},
-            # --- FIM DA CORREÇÃO ---
             {
                 '$project': {
                     '_id': {'$toString': '$_id'},
@@ -165,13 +158,11 @@ class Post:
                                 'id': {'$toString': '$project._id'},
                                 'cover_image': '$project.cover_image',
                                 'user_id': {'$toString': '$project.user_id'},
-                                # --- INÍCIO DA CORREÇÃO ---
                                 'created_by': {
                                     '_id': {'$toString': '$project_creator._id'},
                                     'username': '$project_creator.username',
                                     'avatar': '$project_creator.avatar'
                                 },
-                                # --- FIM DA CORREÇÃO ---
                                 'title': '$project.title',
                                 'description': '$project.description',
                                 'bpm': '$project.bpm',
@@ -215,11 +206,9 @@ class Post:
             {'$unwind': '$user'},
             {'$lookup': {'from': 'projects', 'localField': 'project_id', 'foreignField': '_id', 'as': 'project'}},
             {'$unwind': {'path': '$project', 'preserveNullAndEmptyArrays': True}},
-            # --- INÍCIO DA CORREÇÃO ---
             {'$lookup': {'from': 'users', 'localField': 'project.user_id', 'foreignField': '_id',
                          'as': 'project_creator'}},
             {'$unwind': {'path': '$project_creator', 'preserveNullAndEmptyArrays': True}},
-            # --- FIM DA CORREÇÃO ---
             {'$project': {
                 '_id': {'$toString': '$_id'},
                 'caption': 1, 'photos': 1, 'created_at': 1, 'likes': 1, 'comment_count': 1, 'genres': 1,
@@ -236,13 +225,11 @@ class Post:
                             'id': {'$toString': '$project._id'},
                             'cover_image': '$project.cover_image',
                             'user_id': {'$toString': '$project.user_id'},
-                            # --- INÍCIO DA CORREÇÃO ---
                             'created_by': {
                                 '_id': {'$toString': '$project_creator._id'},
                                 'username': '$project_creator.username',
                                 'avatar': '$project_creator.avatar'
                             },
-                            # --- FIM DA CORREÇÃO ---
                             'title': '$project.title',
                             'description': '$project.description',
                             'bpm': '$project.bpm',
@@ -274,11 +261,9 @@ class Post:
             {'$unwind': '$user'},
             {'$lookup': {'from': 'projects', 'localField': 'project_id', 'foreignField': '_id', 'as': 'project'}},
             {'$unwind': {'path': '$project', 'preserveNullAndEmptyArrays': True}},
-            # --- INÍCIO DA CORREÇÃO ---
             {'$lookup': {'from': 'users', 'localField': 'project.user_id', 'foreignField': '_id',
                          'as': 'project_creator'}},
             {'$unwind': {'path': '$project_creator', 'preserveNullAndEmptyArrays': True}},
-            # --- FIM DA CORREÇÃO ---
             {'$project': {
                 '_id': {'$toString': '$_id'},
                 'caption': 1, 'photos': 1, 'created_at': 1, 'likes': 1, 'comment_count': 1, 'genres': 1,
@@ -295,13 +280,11 @@ class Post:
                             'id': {'$toString': '$project._id'},
                             'cover_image': '$project.cover_image',
                             'user_id': {'$toString': '$project.user_id'},
-                            # --- INÍCIO DA CORREÇÃO ---
                             'created_by': {
                                 '_id': {'$toString': '$project_creator._id'},
                                 'username': '$project_creator.username',
                                 'avatar': '$project_creator.avatar'
                             },
-                            # --- FIM DA CORREÇÃO ---
                             'title': '$project.title',
                             'description': '$project.description',
                             'bpm': '$project.bpm',
@@ -357,11 +340,9 @@ class Post:
             {'$unwind': '$user'},
             {'$lookup': {'from': 'projects', 'localField': 'project_id', 'foreignField': '_id', 'as': 'project'}},
             {'$unwind': {'path': '$project', 'preserveNullAndEmptyArrays': True}},
-            # --- INÍCIO DA CORREÇÃO ---
             {'$lookup': {'from': 'users', 'localField': 'project.user_id', 'foreignField': '_id',
                          'as': 'project_creator'}},
             {'$unwind': {'path': '$project_creator', 'preserveNullAndEmptyArrays': True}},
-            # --- FIM DA CORREÇÃO ---
             {'$project': {
                 '_id': {'$toString': '$_id'},
                 'caption': 1, 'photos': 1, 'created_at': 1, 'likes': 1, 'comment_count': 1, 'genres': 1,
@@ -377,13 +358,11 @@ class Post:
                             'id': {'$toString': '$project._id'},
                             'cover_image': '$project.cover_image',
                             'user_id': {'$toString': '$project.user_id'},
-                            # --- INÍCIO DA CORREÇÃO ---
                             'created_by': {
                                 '_id': {'$toString': '$project_creator._id'},
                                 'username': '$project_creator.username',
                                 'avatar': '$project_creator.avatar'
                             },
-                            # --- FIM DA CORREÇÃO ---
                             'title': '$project.title',
                             'description': '$project.description',
                             'bpm': '$project.bpm',

@@ -10,6 +10,7 @@ from utils.similarity import cosine_similarity
 from .music import Music
 from .user import User
 
+
 class Project:
     @staticmethod
     def create_project(user_id, project_data):
@@ -90,41 +91,74 @@ class Project:
     @staticmethod
     def get_explore_feed(sample_size=15, pool_size=50):
         """
-        Busca uma grande quantidade de projetos recentes e retorna uma amostra aleatória,
-        garantindo que os dados do usuário criador sejam incluídos corretamente.
+        Busca projetos recentes e retorna uma amostra aleatória com dados do usuário criador,
+        usando uma única agregação otimizada.
         """
         pipeline = [
             {'$sort': {'created_at': -1}},
             {'$limit': pool_size},
+            {'$sample': {'size': sample_size}},
+            {
+                '$lookup': {
+                    'from': 'users',
+                    'localField': 'created_by',
+                    'foreignField': '_id',
+                    'as': 'created_by_user'
+                }
+            },
+            {'$unwind': {'path': '$created_by_user', 'preserveNullAndEmptyArrays': True}},
+            {
+                '$project': {
+                    '_id': 1,
+                    'title': 1,
+                    'description': 1,
+                    'cover_image': 1,
+                    'bpm': 1,
+                    'volume': 1,
+                    'created_at': 1,
+                    'user_id': 1,
+                    'midi': 1,
+                    'created_by_user': {
+                        '_id': '$created_by_user._id',
+                        'username': '$created_by_user.username',
+                        'avatar': '$created_by_user.avatar'
+                    },
+                    'last_updated_by': 1,
+                    'collaborators': 1
+                }
+            }
         ]
 
-        recent_projects = list(mongo.db.projects.aggregate(pipeline))
+        raw_projects = list(mongo.db.projects.aggregate(pipeline))
 
-        actual_sample_size = min(sample_size, len(recent_projects))
-        random_sample = random.sample(recent_projects, actual_sample_size)
-
+        # A serialização e formatação final são feitas aqui, na aplicação
         projects = []
-        for p in random_sample:
-            project = p.copy()
-            project['_id'] = str(project['_id'])
-            if 'current_music_id' in project:
-                project['current_music_id'] = str(project['current_music_id'])
-            if 'music_versions' in project:
-                for version in project['music_versions']:
-                    version['music_id'] = str(version['music_id'])
-                    version['update_by'] = str(version.get('update_by', ''))
-            if 'midi' in project and project['midi']:
-                midi_b64 = base64.b64encode(project['midi']).decode('utf-8')
-                project['midi'] = f"data:audio/midi;base64,{midi_b64}"
+        for p in raw_projects:
+            project_id_str = str(p['_id'])
+            created_by_user = p.get('created_by_user')
 
-            collaborator_ids = project.get('collaborators', [])
-            project['collaborators'] = User.get_user_details_by_ids(collaborator_ids)
+            # Processamento do MIDI
+            midi_data = None
+            if p.get('midi') and isinstance(p['midi'], bytes):
+                midi_b64 = base64.b64encode(p['midi']).decode('utf-8')
+                midi_data = f"data:audio/midi;base64,{midi_b64}"
 
-            project['user_id'] = str(project['user_id'])
-            project['created_by'] = User.get_user(project.get('user_id', ''))
-            project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
-
-            projects.append(project)
+            projects.append({
+                '_id': project_id_str,
+                'title': p.get('title'),
+                'description': p.get('description'),
+                'cover_image': p.get('cover_image'),
+                'bpm': p.get('bpm'),
+                'volume': p.get('volume'),
+                'created_at': p.get('created_at'),
+                'user_id': str(p.get('user_id')),
+                'midi': midi_data,
+                'created_by': {
+                    '_id': str(created_by_user.get('_id')) if created_by_user else None,
+                    'username': created_by_user.get('username') if created_by_user else "Unknown",
+                    'avatar': created_by_user.get('avatar') if created_by_user else None
+                }
+            })
 
         return projects
 
@@ -207,7 +241,6 @@ class Project:
             project['last_updated_by'] = User.get_user(project.get('last_updated_by', ''))
         return project
 
-
     @staticmethod
     def get_user_projects_by_username(username):
         user = User.find_by_username(username)
@@ -232,10 +265,8 @@ class Project:
                 'title': p.get('title', 'Untitled'),
                 'description': p.get('description', ''),
                 'bpm': p.get('bpm', 120),
-                # --- INÍCIO DA CORREÇÃO ---
                 'midi': (f"data:audio/midi;base64," + base64.b64encode(p['midi']).decode('utf-8')
                          if 'midi' in p and p.get('midi') else None),
-                # --- FIM DA CORREÇÃO ---
                 'created_at': p.get('created_at'),
                 'created_by': created_by_user,
                 'is_owner': str(p.get('user_id')) == str(user_id_obj),

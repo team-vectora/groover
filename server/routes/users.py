@@ -1,6 +1,6 @@
 # routes/users.py
 import os
-from flask import Blueprint, jsonify, request, render_template
+from flask import Blueprint, jsonify, request, render_template, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import User, Followers, Post, Project, Invitation, Notification
 from itsdangerous import URLSafeSerializer, SignatureExpired
@@ -27,38 +27,11 @@ def get_user_by_username(username):
 @jwt_required()
 def get_user_profile(username):
     current_user_id = get_jwt_identity()
-    user = User.find_by_username(username, current_user_id)
+    profile_data = User.get_profile_data(username, current_user_id)
 
-    if not user:
+    if not profile_data:
         return jsonify({"error": "User not found"}), 404
 
-    posts = Post.get_posts_by_username(username)
-    projects = Project.get_user_projects_by_username(username)
-
-    invites_cursor = []
-    # Apenas busca convites se o perfil visualizado for o do usuário logado
-    if str(user['_id']) == current_user_id:
-        invites_from_db = Invitation.find_pending_by_user(current_user_id)
-        # **CORREÇÃO APLICADA AQUI**
-        # Serializa os convites para converter ObjectId para string
-        for inv in invites_from_db:
-            project = Project.get_project(str(inv['project_id']))
-            from_user = User.get_user(str(inv['from_user_id']))
-            invites_cursor.append({
-                'id': str(inv['_id']),
-                'project': {
-                    'id': str(inv['project_id']),
-                    'title': project.get('title') if project else 'Unknown Project'
-                },
-                'from_user': {
-                    'id': str(inv['from_user_id']),
-                    'username': from_user.get('username') if from_user else 'Unknown User'
-                },
-                'status': inv['status'],
-                'created_at': inv['created_at'].isoformat()  # Converte datetime para string
-            })
-
-    profile_data = {"user": user, "posts": posts, "projects": projects, "invites": invites_cursor}
     return jsonify(profile_data), 200
 
 
@@ -73,7 +46,7 @@ def delete_email():
     token = s.dumps(user["email"], salt=os.getenv("SALT_DELETE"))
     delete_url = f"{request.host_url}api/users/delete-confirm/{token}"
 
-    html_body = html_body = f"""
+    html_body = f"""
     <html>
       <body style="font-family: Arial, sans-serif; background-color:#0a090d; color:#e6e8e3; padding:20px;">
         <div style="max-width:600px; margin:auto; background:#121113; border-radius:10px; padding:30px; box-shadow:0 2px 10px rgba(0,0,0,0.5);">
@@ -113,7 +86,12 @@ def delete_email():
 
     msg = Message(subject="Confirm Account Deletion", recipients=[user["email"]], html=html_body,
                   sender=os.getenv("MAIL_USERNAME"))
-    mail.send(msg)
+
+    app_instance = current_app._get_current_object()
+
+    with app_instance.app_context():
+        mail.send(msg)
+
     return jsonify({"message": "Check your email to confirm account deletion."}), 200
 
 
@@ -167,23 +145,17 @@ def post_follower():
         result = Followers.create_follow(user_id, following_id)
         status_code = 201 if result.get('status') == 'followed' else 200
 
-        # --- INÍCIO DA CORREÇÃO ---
-        # Se a ação foi "followed", cria e envia a notificação
         if result.get('status') == 'followed':
-            actor_user = User.get_user(user_id) # O usuário que clicou em seguir
+            actor_user = User.get_user(user_id)
             if actor_user:
-                # Cria a notificação no banco de dados
                 Notification.create(
-                    user_id=following_id,       # O usuário que foi seguido recebe
+                    user_id=following_id,
                     type='new_follower',
                     actor=actor_user['username']
                 )
-                # Emite o evento via WebSocket
                 socketio.emit(
                     "new_notification"
                 )
-        # --- FIM DA CORREÇÃO ---
-
         return jsonify(result), status_code
     except ValueError as ve:
         return jsonify({'error': str(ve)}), 400

@@ -15,6 +15,7 @@ export default function ProfileSetupPage() {
     useEffect(() => {
         // Lemos o username do cookie definido pelo backend após a confirmação de e-mail
         const userFromCookie = Cookies.get('username');
+        console.log("userFrom cookie", userFromCookie);
         if (userFromCookie) {
             setUsername(userFromCookie);
             // Sincroniza com localStorage para consistência com o resto da aplicação
