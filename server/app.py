@@ -23,15 +23,16 @@ from utils.socket import socketio
 
 def create_app():
     app = Flask(__name__)
+
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
     CORS(app,
          supports_credentials=True,
-         resources={r"/api/*": {"origins": os.getenv("FRONTEND_URL", "http://localhost:3000")}}
-         )
-
+         resources={r"/api/*": {"origins": frontend_url}})
 
     socketio.init_app(
         app,
-        cors_allowed_origins=os.getenv("FRONTEND_URL", "*"),
+        cors_allowed_origins=frontend_url,
         logger=True,
         engineio_logger=True
     )
