@@ -12,7 +12,6 @@ auth_bp = Blueprint('auth', __name__)
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 s = URLSafeTimedSerializer(os.getenv('AUTH_KEY'))
 
-
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()

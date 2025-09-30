@@ -1,4 +1,3 @@
-// src/app/(groove-club)/profile/[user]/page.jsx
 'use client'
 
 import React from "react";

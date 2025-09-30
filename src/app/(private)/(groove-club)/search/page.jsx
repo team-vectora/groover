@@ -1,4 +1,3 @@
-// src/app/(groove-club)/search/page.jsx
 'use client';
 import { useState, useEffect } from 'react';
 import {useAuth , useDebounce , usePosts} from '../../../../hooks';

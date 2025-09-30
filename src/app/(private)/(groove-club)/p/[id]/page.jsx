@@ -1,4 +1,3 @@
-// src/app/(groove-club)/p/[id]/page.jsx
 'use client';
 import { useState, useEffect, useContext } from "react";
 import { Post, CommentForm, CommentThread, LoadingDisc } from "../../../../../components";

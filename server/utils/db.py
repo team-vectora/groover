@@ -18,7 +18,6 @@ class MongoDB:
     
     def init_db(self):
         try:
-            # Configuração da URI de conexão
             username = os.getenv('MONGO_USERNAME')
             password = os.getenv('MONGO_PASSWORD')
             cluster = os.getenv('MONGO_CLUSTER')
@@ -30,7 +29,6 @@ class MongoDB:
             self.client = MongoClient(self.uri)
             self.db = self.client[dbname]
             
-            # Testa a conexão
             self.db.command('ping')
             print("Conexão com MongoDB estabelecida com sucesso!")
         except Exception as e:
@@ -40,5 +38,4 @@ class MongoDB:
     def jsonify(self, data):
         return json.loads(dumps(data))
 
-# Instância global do banco de dados
 mongo = MongoDB()

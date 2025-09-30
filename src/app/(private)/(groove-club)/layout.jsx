@@ -11,7 +11,6 @@ export default function RootLayout({ children }) {
 
   const pathname = usePathname();
 
-  // NOVO: Este useEffect irá rastrear as mudanças de rota
   useEffect(() => {
     // A lógica é: o valor que está salvo é o da página anterior.
     // Nós o lemos e depois salvamos o valor da página ATUAL para a PRÓXIMA navegação.
