@@ -7,6 +7,7 @@ export default function useLikePost(onSuccess) {
   const [error, setError] = useState("");
 
   const likePost = async (post_id, owner_id) => {
+    if (onSuccess) onSuccess();
     try {
       const res = await apiFetch(`/posts/like`, {
         method: 'POST',
@@ -25,8 +26,6 @@ export default function useLikePost(onSuccess) {
         setError(t(`backend_errors.${data.error}`, { defaultValue: t('errors.generic_error') }));
         return;
       }
-
-      if (onSuccess) onSuccess();
 
     } catch (err) {
       setError(t('errors.network_error'));

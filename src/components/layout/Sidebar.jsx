@@ -23,6 +23,7 @@ import Image from "next/image";
 import { useOutsideClick } from "../../hooks";
 import { useTranslation } from "react-i18next";
 import { io } from "socket.io-client";
+import {API_BASE_URL} from "@/config";
 
 const restoreStyle = "color: #8be9fd; font-weight: bold;";
 
@@ -49,7 +50,7 @@ const Sidebar = () => {
     if (storedAvatar && storedAvatar !== "null") setAvatarUrl(storedAvatar);
 
     // Conexão de socket para produção
-    const socket = io("https://groover-api.onrender.com", {
+    const socket = io(API_BASE_URL.slice(0, -4), {
       withCredentials: true, // permite enviar cookies ou JWT
       transports: ["websocket"], // força WebSocket
     });
