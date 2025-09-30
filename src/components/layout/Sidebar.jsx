@@ -23,7 +23,7 @@ import Image from "next/image";
 import { useOutsideClick } from "../../hooks";
 import { useTranslation } from "react-i18next";
 import { io } from "socket.io-client";
-import {API_BASE_URL} from "@/config";
+import {API_BASE_URL} from "../../config";
 
 const restoreStyle = "color: #8be9fd; font-weight: bold;";
 
