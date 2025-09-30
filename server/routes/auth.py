@@ -10,7 +10,7 @@ from utils.socket import socketio
 
 auth_bp = Blueprint('auth', __name__)
 
-IS_DEPLOYED = False
+IS_DEPLOYED = True
 
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://groover.app.br' if IS_DEPLOYED else 'http://localhost:3000')
 s = URLSafeTimedSerializer(os.getenv('AUTH_KEY'))

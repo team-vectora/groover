@@ -31,7 +31,12 @@ export default function ProfilePage({ params }) {
   const { shareProject: shareProjectApi } = useShareProject();
   const { deleteProject } = useDeleteProject();
 
-  const isCurrentUser = currentUsername === username;
+  console.log('[user/page] current username', currentUsername)
+  console.log('[user/page] username', username)
+
+  const isCurrentUser = (username) ? currentUsername === decodeURIComponent(username) : false;
+
+  console.log('[user/page] isCurrentUser', isCurrentUser)
 
   useEffect(() => {
     if (searchParams.get('newPost') === 'true' && isCurrentUser) {

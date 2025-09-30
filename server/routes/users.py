@@ -27,11 +27,35 @@ def get_user_by_username(username):
 @jwt_required()
 def get_user_profile(username):
     current_user_id = get_jwt_identity()
-    profile_data = User.get_profile_data(username, current_user_id)
+    user = User.find_by_username(username, current_user_id)
 
-    if not profile_data:
+    if not user:
         return jsonify({"error": "User not found"}), 404
 
+    posts = Post.get_posts_by_username(username)
+    projects = Project.get_user_projects_by_username(username)
+
+    invites_cursor = []
+    if str(user['_id']) == current_user_id:
+        invites_from_db = Invitation.find_pending_by_user(current_user_id)
+        for inv in invites_from_db:
+            project = Project.get_project(str(inv['project_id']))
+            from_user = User.get_user(str(inv['from_user_id']))
+            invites_cursor.append({
+                'id': str(inv['_id']),
+                'project': {
+                    'id': str(inv['project_id']),
+                    'title': project.get('title') if project else 'Unknown Project'
+                },
+                'from_user': {
+                    'id': str(inv['from_user_id']),
+                    'username': from_user.get('username') if from_user else 'Unknown User'
+                },
+                'status': inv['status'],
+                'created_at': inv['created_at'].isoformat()  # Converte datetime para string
+            })
+
+    profile_data = {"user": user, "posts": posts, "projects": projects, "invites": invites_cursor}
     return jsonify(profile_data), 200
 
 
