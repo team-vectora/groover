@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Post, User
 import cloudinary.uploader
-from utils.socket import socketio
+# from utils.socket import socketio
 from models.notification import Notification
 
 posts_bp = Blueprint('posts', __name__)
@@ -89,7 +89,7 @@ def post_like():
         post_id=post_id
     )
 
-    socketio.emit("new_notification")
+    # socketio.emit("new_notification")
 
 
     return jsonify(response), status
@@ -128,7 +128,7 @@ def add_comment_to_post(post_id):
         )
 
         # Dispara notificação via WebSocket
-        socketio.emit("new_notification")
+        # socketio.emit("new_notification")
 
 
     return jsonify({'message': 'Comentário adicionado', 'comment_id': str(comment_id)}), 201

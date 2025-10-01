@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Invitation, Project, User, Notification
-from utils.socket import socketio # <-- ADICIONADO
+# from utils.socket import socketio # <-- ADICIONADO
 
 invitations_bp = Blueprint('invitations', __name__)
 
@@ -74,7 +74,7 @@ def respond_invitation(invitation_id):
 
     # <-- INÍCIO DA CORREÇÃO -->
     # Emite o evento para o dono original do projeto
-    socketio.emit("new_notification")
+    # socketio.emit("new_notification")
     # <-- FIM DA CORREÇÃO -->
 
 

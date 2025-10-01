@@ -7,7 +7,7 @@ from itsdangerous import URLSafeSerializer, SignatureExpired
 from flask_mail import Message
 from utils.mail import mail
 from html import escape
-from utils.socket import socketio
+# from utils.socket import socketio
 
 users_bp = Blueprint('users', __name__)
 s = URLSafeSerializer(os.getenv('AUTH_KEY'))
@@ -177,9 +177,9 @@ def post_follower():
                     type='new_follower',
                     actor=actor_user['username']
                 )
-                socketio.emit(
-                    "new_notification"
-                )
+                # socketio.emit(
+                #     "new_notification"
+                # )
         return jsonify(result), status_code
     except ValueError as ve:
         return jsonify({'error': str(ve)}), 400

@@ -22,8 +22,8 @@ import NotificationItem from "../posts/NotificationItem";
 import Image from "next/image";
 import { useOutsideClick } from "../../hooks";
 import { useTranslation } from "react-i18next";
-import { io } from "socket.io-client";
-import {API_BASE_URL} from "../../config";
+// import { io } from "socket.io-client";
+// import {API_BASE_URL} from "../../config";
 
 const restoreStyle = "color: #8be9fd; font-weight: bold;";
 
@@ -42,38 +42,38 @@ const Sidebar = () => {
 
   // <-- INÍCIO DA CORREÇÃO -->
   // Unificamos toda a lógica de WebSocket em um único useEffect
-  useEffect(() => {
-    // Busca os dados do usuário do localStorage
-    const storedUsername = localStorage.getItem("username");
-    const storedAvatar = localStorage.getItem("avatar");
-    if (storedUsername) setUsername(storedUsername);
-    if (storedAvatar && storedAvatar !== "null") setAvatarUrl(storedAvatar);
-
-    // Conexão de socket para produção
-    const socket = io(API_BASE_URL.slice(0, -4), {
-      withCredentials: true, // permite enviar cookies ou JWT
-      transports: ["websocket"], // força WebSocket
-    });
-
-    // Ouvinte para a atualização do FEED
-    socket.on("new_post_notification", () => {
-      setShowFeedReload(true);
-    });
-
-    // Ouvinte para as NOTIFICAÇÕES PESSOAIS (like, comentário, etc.)
-    socket.on("new_notification", (data) => {
-      console.log("Nova notificação recebida, recarregando lista...", data);
-      refetch(); // Chama a função do hook para buscar a nova lista de notificações
-    });
-
-    // Função de limpeza para desconectar o socket quando o componente for desmontado
-    return () => {
-      socket.off("new_post_notification");
-      socket.off("new_notification");
-      socket.disconnect();
-    };
-  }, [pathname, refetch]); // Adicionamos refetch às dependências
-  // <-- FIM DA CORREÇÃO -->
+  // useEffect(() => {
+  //   // Busca os dados do usuário do localStorage
+  //   const storedUsername = localStorage.getItem("username");
+  //   const storedAvatar = localStorage.getItem("avatar");
+  //   if (storedUsername) setUsername(storedUsername);
+  //   if (storedAvatar && storedAvatar !== "null") setAvatarUrl(storedAvatar);
+  //
+  //   // Conexão de socket para produção
+  //   const socket = io(API_BASE_URL.slice(0, -4), {
+  //     withCredentials: true, // permite enviar cookies ou JWT
+  //     transports: ["websocket"], // força WebSocket
+  //   });
+  //
+  //   // Ouvinte para a atualização do FEED
+  //   socket.on("new_post_notification", () => {
+  //     setShowFeedReload(true);
+  //   });
+  //
+  //   // Ouvinte para as NOTIFICAÇÕES PESSOAIS (like, comentário, etc.)
+  //   socket.on("new_notification", (data) => {
+  //     console.log("Nova notificação recebida, recarregando lista...", data);
+  //     refetch(); // Chama a função do hook para buscar a nova lista de notificações
+  //   });
+  //
+  //   // Função de limpeza para desconectar o socket quando o componente for desmontado
+  //   return () => {
+  //     socket.off("new_post_notification");
+  //     socket.off("new_notification");
+  //     socket.disconnect();
+  //   };
+  // }, [pathname, refetch]); // Adicionamos refetch às dependências
+  // // <-- FIM DA CORREÇÃO -->
 
   useEffect(() => {
     const handleProfileUpdate = () => {
