@@ -21,8 +21,8 @@ def create_post():
         genres=data.get('genres')
     )
 
-    # Notifica todos os clientes sobre o novo post
-    socketio.emit("new_post_notification")
+    
+    # socketio.emit("new_post_notification")
 
     return jsonify({'message': 'Post created', 'post_id': str(post_id)}), 201
 
