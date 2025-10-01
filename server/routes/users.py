@@ -2,11 +2,13 @@
 import os
 from flask import Blueprint, jsonify, request, render_template, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from sendgrid import SendGridAPIClient
+
 from models import User, Followers, Post, Project, Invitation, Notification
 from itsdangerous import URLSafeSerializer, SignatureExpired
-from flask_mail import Message
-from utils.mail import mail
 from html import escape
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 # from utils.socket import socketio
 
 users_bp = Blueprint('users', __name__)
@@ -108,13 +110,22 @@ def delete_email():
     </html>
     """
 
-    msg = Message(subject="Confirm Account Deletion", recipients=[user["email"]], html=html_body,
-                  sender=os.getenv("MAIL_USERNAME"))
+    message = Mail(
+        from_email=os.getenv('MAIL_USERNAME'),  # Use um e-mail verificado no SendGrid
+        to_emails=user["email"],
+        subject="Confirm Account Deletion",
+        html_content=html_body
+    )
 
-    app_instance = current_app._get_current_object()
-
-    with app_instance.app_context():
-        mail.send(msg)
+    try:
+        # Pega a chave de API do ambiente
+        sg = SendGridAPIClient(os.getenv('SENDGRID_API_KEY'))
+        response = sg.send(message)
+        # Opcional: log para verificar se o envio funcionou
+        print(f"SendGrid response status code: {response.status_code}")
+    except Exception as e:
+        # Opcional: log para depurar erros
+        print(f"Erro ao enviar e-mail com SendGrid: {e}")
 
     return jsonify({"message": "Check your email to confirm account deletion."}), 200
 

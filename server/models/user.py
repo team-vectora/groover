@@ -6,9 +6,10 @@ from utils.db import mongo
 from utils.genres import GENRES
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
-from utils.mail import mail
 from .followers import Followers
 from markupsafe import escape
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from werkzeug.security import generate_password_hash
 from utils.similarity import cosine_similarity
 
@@ -91,15 +92,22 @@ class User:
         </html>
         """
 
-        msg = Message(
+        message = Mail(
+            from_email=os.getenv('MAIL_USERNAME'),  # Use um e-mail verificado no SendGrid
+            to_emails=email,
             subject=content['subject'],
-            recipients=[email],
-            html=html_body,
-            sender=os.getenv('MAIL_USERNAME')
+            html_content=html_body
         )
 
-        with app.app_context():
-            mail.send(msg)
+        try:
+            # Pega a chave de API do ambiente
+            sg = SendGridAPIClient(os.getenv('SENDGRID_API_KEY'))
+            response = sg.send(message)
+            # Opcional: log para verificar se o envio funcionou
+            print(f"SendGrid response status code: {response.status_code}")
+        except Exception as e:
+            # Opcional: log para depurar erros
+            print(f"Erro ao enviar e-mail com SendGrid: {e}")
 
     @staticmethod
     def update_password(email, new_password):
@@ -126,16 +134,22 @@ class User:
         </html>
         """
 
-        msg = Message(
+        message = Mail(
+            from_email=os.getenv('MAIL_USERNAME'),  # Use um e-mail verificado no SendGrid
+            to_emails=email,
             subject="Groover Password Reset",
-            recipients=[email],
-            body=f"Hello {username}, reset your password: {reset_url}",
-            html=html_body,
-            sender=os.getenv('MAIL_USERNAME')
+            html_content=html_body
         )
 
-        with app.app_context():
-            mail.send(msg)
+        try:
+            # Pega a chave de API do ambiente
+            sg = SendGridAPIClient(os.getenv('SENDGRID_API_KEY'))
+            response = sg.send(message)
+            # Opcional: log para verificar se o envio funcionou
+            print(f"SendGrid response status code: {response.status_code}")
+        except Exception as e:
+            # Opcional: log para depurar erros
+            print(f"Erro ao enviar e-mail com SendGrid: {e}")
 
     @staticmethod
     def delete(user_id):
