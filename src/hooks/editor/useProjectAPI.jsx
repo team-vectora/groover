@@ -154,7 +154,7 @@ export const useProjectAPI = (projectId, projectActions) => {
         if (!file) return;
         try {
             const midiData = new Midi(await file.arrayBuffer());
-            const bpm = midiData.header.tempos[0]?.bpm || 120;
+            const bpm = Math.round(midiData.header.tempos[0]?.bpm || 120);
             const barDurationInSeconds = (60 / bpm) * 4;
             const TICKS_PER_BAR = 32;
             const newChannels = [], newPatterns = {}, newSongStructure = [];
