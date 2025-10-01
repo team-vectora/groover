@@ -50,27 +50,27 @@ const Sidebar = () => {
     if (storedAvatar && storedAvatar !== "null") setAvatarUrl(storedAvatar);
 
     // Conexão de socket para produção
-    // const socket = io(API_BASE_URL.slice(0, -4), {
-    //   withCredentials: true, // permite enviar cookies ou JWT
-    //   transports: ["websocket"], // força WebSocket
-    // });
+    const socket = io(API_BASE_URL.slice(0, -4), {
+      withCredentials: true, // permite enviar cookies ou JWT
+      transports: ["websocket"], // força WebSocket
+    });
 
     // Ouvinte para a atualização do FEED
-    // socket.on("new_post_notification", () => {
-    //   setShowFeedReload(true);
-    // });
-    //
+    socket.on("new_post_notification", () => {
+      setShowFeedReload(true);
+    });
+
     // // Ouvinte para as NOTIFICAÇÕES PESSOAIS (like, comentário, etc.)
-    // socket.on("new_notification", (data) => {
-    //   console.log("Nova notificação recebida, recarregando lista...", data);
-    //   refetch(); // Chama a função do hook para buscar a nova lista de notificações
-    // });
+    socket.on("new_notification", (data) => {
+      console.log("Nova notificação recebida, recarregando lista...", data);
+      refetch(); // Chama a função do hook para buscar a nova lista de notificações
+    });
 
     // Função de limpeza para desconectar o socket quando o componente for desmontado
     return () => {
-      // socket.off("new_post_notification");
-      // socket.off("new_notification");
-      // socket.disconnect();
+      socket.off("new_post_notification");
+      socket.off("new_notification");
+      socket.disconnect();
     };
   }, [pathname, refetch]); // Adicionamos refetch às dependências
   // <-- FIM DA CORREÇÃO -->

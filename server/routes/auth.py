@@ -76,14 +76,14 @@ def confirm_email(token):
 
         response.set_cookie(
             "access_token", access_token, httponly=True,
-            secure=True if 'ON_RENDER' in os.environ else False,
-            samesite="Lax", max_age=60 * 60 * 24
+            secure=IS_DEPLOYED,
+            samesite=None, max_age=60 * 60 * 24
         )
 
-        response.set_cookie('username', user['username'], max_age=60 * 60 * 24, samesite='Lax', path='/')
-        response.set_cookie('id', user['_id'], max_age=60 * 60 * 24, samesite='Lax', path='/')
+        response.set_cookie('username', user['username'], max_age=60 * 60 * 24, samesite='None', path='/')
+        response.set_cookie('id', user['_id'], max_age=60 * 60 * 24, samesite='None', path='/')
         # CORREÇÃO: Garante que o valor do cookie nunca seja None
-        response.set_cookie('avatar', user.get('avatar') or '', max_age=60 * 60 * 24, samesite='Lax', path='/')
+        response.set_cookie('avatar', user.get('avatar') or '', max_age=60 * 60 * 24, samesite='None', path='/')
 
         return response
 
