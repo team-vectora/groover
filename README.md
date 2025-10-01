@@ -4,6 +4,9 @@
 
 <h1 align="center">🎶 Groover: Criação Musical Colaborativa</h1>
 
+
+
+
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Plataforma%20Online-blue?style=for-the-badge&logo=musicbrainz&logoColor=white" alt="Status Plataforma Online">
   <img src="https://img.shields.io/badge/Feito%20com-Qualidade%20e%20Colabora%C3%A7%C3%A3o-blueviolet?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="Feito com Qualidade e Colaboração">
