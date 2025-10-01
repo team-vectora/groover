@@ -2,7 +2,6 @@ from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from utils.db import mongo
-import smtplib
 from routes.auth import auth_bp
 from routes.notification import notifications_bp
 from routes.users import users_bp
@@ -15,15 +14,33 @@ import os
 import cloudinary
 from flasgger import Swagger
 from utils.mail import mail
+# from utils.socket import socketio
 
 
 def create_app():
     app = Flask(__name__)
+
+    allowed_origins = ["https://groover.app.br", "https://staging.groover.app.br", "http://localhost:3000"]
+
+    CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
+    #
+    # socketio.init_app(
+    #     app,
+    #     cors_allowed_origins=allowed_origins,
+    #     logger=True,
+    #     engineio_logger=True
+    # )
+
     Swagger(app)
     app.config.from_object(Config)
 
-    # Configurações
-    CORS(app)
+    app.config["JWT_SECRET_KEY"] = Config.JWT_SECRET_KEY
+    app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
+    app.config["JWT_ACCESS_COOKIE_NAME"] = "access_token"
+    app.config["JWT_COOKIE_SECURE"] = True
+    app.config["JWT_COOKIE_SAMESITE"] = "None"
+    app.config["JWT_COOKIE_CSRF_PROTECT"] = False
+
     JWTManager(app)
 
     @app.route('/api')
