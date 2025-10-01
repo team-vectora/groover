@@ -56,11 +56,19 @@ export default function Post({
     const pathname = usePathname();
 
     const handleNavigation = (path) => {
-        if (pathname === '/feed') {
-            const scrollY = window.scrollY.toString();
-            console.log(`%c[Sidebar] SALVANDO SCROLL: Clicou para sair do feed. Posição salva: ${scrollY}`, 'color: #e67e22;');
-            sessionStorage.setItem('savedScrollY', scrollY);
-            sessionStorage.setItem('useLastPostLengthSave', 'true');
+        if (pathname === '/feed' && path === '/feed') {
+            console.log(`%c[FeedPage] A limpar o cache para o próximo refresh.`, restoreStyle);
+            sessionStorage.removeItem('feedState');
+            setIsMenuOpen(false);
+            window.location.reload();
+            return;
+        }
+        if (pathname === '/feed' && path !== '/feed') {
+            const feedState = JSON.parse(sessionStorage.getItem('feedState') || '{}');
+            sessionStorage.setItem('feedState', JSON.stringify({
+                ...feedState,
+                scrollPosition: window.scrollY
+            }));
         }
         router.push(path);
         setIsMenuOpen(false);
