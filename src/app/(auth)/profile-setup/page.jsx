@@ -13,29 +13,27 @@ export default function ProfileSetupPage() {
     const [username, setUsername] = useState(null);
 
     useEffect(() => {
-        // Lemos o username do cookie definido pelo backend após a confirmação de e-mail
+        console.log('Cookies', Cookies)
+
+        const userId = Cookies.get('user_id');
         const userFromCookie = Cookies.get('username');
         console.log("userFrom cookie", userFromCookie);
-        if (userFromCookie) {
+        if (userId) {
             setUsername(userFromCookie);
-            // Sincroniza com localStorage para consistência com o resto da aplicação
+
             localStorage.setItem('username', userFromCookie);
-            localStorage.setItem('id', Cookies.get('id'));
-            localStorage.setItem('avatar', Cookies.get('avatar'));
+            localStorage.setItem('id', userId);
         } else {
-            // Se não houver cookie, talvez o usuário tenha chegado aqui por engano
             router.push('/login');
         }
         setIsClient(true);
     }, [router]);
 
     const handleSuccessOrSkip = () => {
-        // Limpa os cookies de informação, pois o localStorage já foi atualizado
         Cookies.remove('username');
-        Cookies.remove('id');
-        Cookies.remove('avatar');
+        Cookies.remove('user_id');
         router.push('/feed');
-    };
+    }
 
     if (!isClient || !username) {
         return <LoadingDisc />;
@@ -47,7 +45,7 @@ export default function ProfileSetupPage() {
             <p className="text-foreground mb-6">{t('profileSetup.subtitle')}</p>
             <ConfigUserPopUp
                 open={true}
-                onClose={() => {}} // Não permitir fechar
+                onClose={() => {}}
                 username={username}
                 onSuccess={handleSuccessOrSkip}
                 isOnboarding={true}

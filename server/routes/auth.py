@@ -75,15 +75,25 @@ def confirm_email(token):
         response = make_response(redirect(f"{FRONTEND_URL}/profile-setup"))
 
         response.set_cookie(
-            "access_token", access_token, httponly=True,
-            secure=IS_DEPLOYED,
-            samesite=None, max_age=60 * 60 * 24
+            "access_token",
+            access_token,
+            httponly=True,
+            secure=True if IS_DEPLOYED else False,
+            samesite='None' if IS_DEPLOYED else 'Lax',
+            max_age=60 * 60 * 24
         )
 
-        response.set_cookie('username', user['username'], max_age=60 * 60 * 24, samesite='None', path='/')
-        response.set_cookie('id', user['_id'], max_age=60 * 60 * 24, samesite='None', path='/')
-        # CORREÇÃO: Garante que o valor do cookie nunca seja None
-        response.set_cookie('avatar', user.get('avatar') or '', max_age=60 * 60 * 24, samesite='None', path='/')
+        response.set_cookie('username', user['username'],
+                            httponly=False,
+                            samesite='None' if IS_DEPLOYED else 'Lax',
+                            secure=True if IS_DEPLOYED else False,
+                            max_age=60 * 60 * 24)
+
+        response.set_cookie('user_id', user['_id'],
+                            httponly=False,
+                            samesite='None' if IS_DEPLOYED else 'Lax',
+                            secure=True if IS_DEPLOYED else False,
+                            max_age=60 * 60 * 24)
 
         return response
 
@@ -184,8 +194,8 @@ def signin():
         "access_token",
         access_token,
         httponly=True,
-        secure=True,
-        samesite="None",
+        secure=True if IS_DEPLOYED else False,
+        samesite='None' if IS_DEPLOYED else 'Lax',
         max_age=60 * 60 * 24
     )
 
