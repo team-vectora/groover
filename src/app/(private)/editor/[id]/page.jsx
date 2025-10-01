@@ -29,8 +29,9 @@ export default function EditorPage() {
     const [confirmationAction, setConfirmationAction] = useState(null);
     const [coverImageFile, setCoverImageFile] = useState(null);
 
+    console.log('projectdata', projectData)
     const isOwner = projectData.owner === userId;
-    const isCollaborator = projectData.collaborators?.includes(userId);
+    const isCollaborator = projectData.collaborators?.some(collaborator => collaborator.id === userId);
     const isNewProject = projectId === "new";
     const isCurrentUserProject = isOwner || isCollaborator || isNewProject;
 

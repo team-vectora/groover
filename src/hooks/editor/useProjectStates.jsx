@@ -16,6 +16,7 @@ export const useProjectStates = () => {
     const [bpm, setBpm] = useState(120);
     const [volume, setVolume] = useState(-10);
     const [owner, setOwner] = useState(null);
+    const [collaborators, setCollaborators] = useState([]);
 
     const [channels, setChannels] = useState([createNewChannel()]);
     const [patterns, setPatterns] = useState(() => {
@@ -117,6 +118,7 @@ export const useProjectStates = () => {
         setBpm(data.bpm ?? 120);
         setVolume(data.volume ?? -10);
         setOwner(data.user_id ?? null);
+        setCollaborators(data.collaborators ?? [])
 
         const loadedChannels = data.channels && data.channels.length > 0 ? data.channels : [createNewChannel()];
         setChannels(loadedChannels);
@@ -153,7 +155,7 @@ export const useProjectStates = () => {
     }, []);
 
 
-    const projectData = { title, description, bpm, volume, owner, channels, patterns, songStructure };
+    const projectData = { title, description, bpm, volume, owner, channels, patterns, songStructure, collaborators };
 
     return {
         state: { ...projectData, activeChannelIndex, activePatternId },
