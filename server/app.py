@@ -1,3 +1,7 @@
+import eventlet
+
+eventlet.monkey_patch()
+
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -14,7 +18,7 @@ import os
 import cloudinary
 from flasgger import Swagger
 from utils.mail import mail
-# from utils.socket import socketio
+from utils.socket import socketio
 
 
 def create_app():
@@ -23,13 +27,13 @@ def create_app():
     allowed_origins = ["https://groover.app.br", "https://staging.groover.app.br", "http://localhost:3000"]
 
     CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
-    #
-    # socketio.init_app(
-    #     app,
-    #     cors_allowed_origins=allowed_origins,
-    #     logger=True,
-    #     engineio_logger=True
-    # )
+
+    socketio.init_app(
+        app,
+        cors_allowed_origins=allowed_origins,
+        logger=True,
+        engineio_logger=True
+    )
 
     Swagger(app)
     app.config.from_object(Config)
@@ -85,5 +89,10 @@ def create_app():
 
 
 if __name__ == '__main__':
+    import eventlet
+    import eventlet.wsgi
+
     app = create_app()
-    app.run(host="0.0.0.0", debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    # Rode o app usando eventlet para suportar WebSockets
+    socketio.run(app, host="0.0.0.0", port=port)

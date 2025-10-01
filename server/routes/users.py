@@ -9,7 +9,7 @@ from itsdangerous import URLSafeSerializer, SignatureExpired
 from html import escape
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-# from utils.socket import socketio
+from utils.socket import socketio
 
 users_bp = Blueprint('users', __name__)
 s = URLSafeSerializer(os.getenv('AUTH_KEY'))
@@ -188,9 +188,7 @@ def post_follower():
                     type='new_follower',
                     actor=actor_user['username']
                 )
-                # socketio.emit(
-                #     "new_notification"
-                # )
+                socketio.emit("new_notification")
         return jsonify(result), status_code
     except ValueError as ve:
         return jsonify({'error': str(ve)}), 400

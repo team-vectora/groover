@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Project, Music, User, Invitation, Notification
 import base64
 from bson.binary import Binary
-# from utils.socket import socketio  # <-- ADICIONADO
+from utils.socket import socketio  # <-- ADICIONADO
 
 projects_bp = Blueprint('projects', __name__)
 
@@ -54,7 +54,8 @@ def save_project():
             )
 
             # <-- INÍCIO DA CORREÇÃO 1 -->
-           #  socketio.emit("new_notification")
+
+            socketio.emit("new_notification")
             # <-- FIM DA CORREÇÃO 1 -->
 
         Music.create_music(project_id=project_id, music_data=music_data, user_id=user_id)
@@ -172,7 +173,7 @@ def invite_user(project_id):
     )
 
     # <-- INÍCIO DA CORREÇÃO 2 -->
-    # socketio.emit("new_notification")
+    socketio.emit("new_notification")
     # <-- FIM DA CORREÇÃO 2 -->
 
     return jsonify({'message': 'Invitation sent', 'invitation_id': str(invitation_id)}), 201

@@ -6,7 +6,7 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import User
 import traceback
-# from utils.socket import socketio
+from utils.socket import socketio
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -43,14 +43,13 @@ def signup():
     app_instance = current_app._get_current_object()
 
     # Inicie a tarefa em segundo plano passando a instância do app
-    #socketio.start_background_task(
+
     User.send_email_verification(
         app=app_instance,
         email=email,
         username=username,
         host_url=request.host_url,
-        lang=lang
-    )
+        lang=lang)
 
     return jsonify({
         'message': 'User created successfully. Check your email to confirm.',
@@ -160,7 +159,6 @@ def signin():
         app_instance = current_app._get_current_object()
 
         # Inicie a tarefa em segundo plano passando a instância do app
-        #socketio.start_background_task(
         User.send_email_verification(
             app=app_instance,
             email=user['email'],
