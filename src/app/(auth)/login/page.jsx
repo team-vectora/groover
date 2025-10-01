@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import {useRouter , useSearchParams} from "next/navigation";
 import { toast } from "react-toastify";
 import { useLogin } from "../../../hooks";
 import Image from 'next/image';
@@ -21,6 +21,8 @@ const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
 
+    const searchParams = useSearchParams();
+
     useEffect(() => {
         if (errors.general) {
             toast.error(errors.general, { theme: "colored", autoClose: 3000 });
@@ -33,7 +35,10 @@ const LoginPage = () => {
 
         if (result.success) {
             toast.success(t("login.login_success"), { theme: "colored", autoClose: 3000 });
-            router.push('/feed');
+            if (searchParams?.get('first-login'))
+                router.push('/profile-setup');
+            else
+                router.push('/feed');
         }
     };
 

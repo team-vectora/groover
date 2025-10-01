@@ -12,32 +12,32 @@ export default function ProfileSetupPage() {
     const [isClient, setIsClient] = useState(false);
     const [username, setUsername] = useState(null);
 
-    useEffect(() => {
-        console.log('Cookies', Cookies)
-
-        const userId = Cookies.get('user_id');
-        const userFromCookie = Cookies.get('username');
-        console.log("userFrom cookie", userFromCookie);
-        if (userId) {
-            setUsername(userFromCookie);
-
-            localStorage.setItem('username', userFromCookie);
-            localStorage.setItem('id', userId);
-        } else {
-            router.push('/login');
-        }
-        setIsClient(true);
-    }, [router]);
+    // useEffect(() => {
+    //     console.log('Cookies', Cookies)
+    //
+    //     const userId = Cookies.get('user_id');
+    //     const userFromCookie = Cookies.get('username');
+    //     console.log("userFrom cookie", userFromCookie);
+    //     if (userId) {
+    //         setUsername(userFromCookie);
+    //
+    //         localStorage.setItem('username', userFromCookie);
+    //         localStorage.setItem('id', userId);
+    //     } else {
+    //         router.push('/login');
+    //     }
+    //     setIsClient(true);
+    // }, [router]);
 
     const handleSuccessOrSkip = () => {
-        Cookies.remove('username');
-        Cookies.remove('user_id');
+        // Cookies.remove('username');
+        // Cookies.remove('user_id');
         router.push('/feed');
     }
 
-    if (!isClient || !username) {
-        return <LoadingDisc />;
-    }
+    // if (!isClient || !username) {
+    //     return <LoadingDisc />;
+    // }
 
     return (
         <div className="w-full flex flex-col items-center justify-center text-center">

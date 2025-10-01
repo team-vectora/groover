@@ -47,6 +47,7 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
         localStorage.setItem("avatar", profilePicUrl);
         window.dispatchEvent(new Event('profileUpdated'));
         toast.success(t('configUserPopup.profileUpdatedSuccess'));
+        refetch();
         if (onSuccess) onSuccess();
         if (!isOnboarding) onClose(); // <-- LÓGICA RESTAURADA
       } else {

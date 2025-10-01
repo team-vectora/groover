@@ -72,7 +72,7 @@ def confirm_email(token):
         expires = timedelta(hours=24)
         access_token = create_access_token(identity=str(user['_id']), expires_delta=expires)
 
-        response = make_response(redirect(f"{FRONTEND_URL}/profile-setup"))
+        response = make_response(redirect(f"{FRONTEND_URL}/login?first-login=true"))
 
         response.set_cookie(
             "access_token",
