@@ -36,7 +36,9 @@ export default function NotificationItem({ notification, onCheck }) {
         router.push(`/profile/${currentUsername}?tab=invites`);
         break;
       case 'invite_accepted':
+        router.push(`/profile/${currentUsername}?tab=projects`);
       case 'collaborator_update':
+      case 'new_follower':
         router.push(`/editor/${project_id}`);
         break;
       case 'like':

@@ -49,7 +49,8 @@
     "invite_rejected": "{{user}} recusou seu convite para o projeto: {{content}}",
     "invitation_received": "{{user}} te enviou um convite para o projeto: {{content}}",
     "collaborator_update": "{{user}} modificou seu projeto: {{content}}",
-    "invitation_received_text": "te convidou para o projeto: "
+    "invitation_received_text": "te convidou para o projeto: ",
+    "new_follower": "{{user}} começou a te seguir."
   },
   "login": {
     "title": "Entrar",

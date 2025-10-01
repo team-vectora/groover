@@ -49,7 +49,9 @@ const CommentForm = ({ postId, token, onCommentAdded, projects }) => {
                 />
                 <div className="flex justify-between items-center mt-2">
                     <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-accent rounded-md">
-                        {isSubmitting ? t('login.logging_in') : t('postForm.comment')}
+                        {isSubmitting ? (
+                            <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                        ) : (isComment ? t('postForm.comment') : t('postForm.publish'))}
                     </button>
                     <button type="button" onClick={() => setIsPopupOpen(true)} className="text-sm text-accent hover:underline">
                         {t('midiPlayer.expand')}

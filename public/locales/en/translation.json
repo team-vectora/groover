@@ -50,7 +50,8 @@
     "invite_rejected": "{{user}} rejected your invitation to the project: {{content}}",
     "invitation_received": "{{user}} sent you an invitation to the project: {{content}}",
     "collaborator_update": "{{user}} modified your project: {{content}}",
-    "invitation_received_text": "invited you to the project: "
+    "invitation_received_text": "invited you to the project: ",
+    "new_follower": "{{user}} started following you."
   },
   "login": {
     "title": "Login",
