@@ -1,11 +1,8 @@
-# import eventlet
-#
-# eventlet.monkey_patch()
-
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from utils.db import mongo
+import smtplib
 from routes.auth import auth_bp
 from routes.notification import notifications_bp
 from routes.users import users_bp
@@ -18,33 +15,15 @@ import os
 import cloudinary
 from flasgger import Swagger
 from utils.mail import mail
-# from utils.socket import socketio
 
 
 def create_app():
     app = Flask(__name__)
-
-    allowed_origins = ["https://groover.app.br", "https://staging.groover.app.br", "http://localhost:3000"]
-
-    CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
-    #
-    # socketio.init_app(
-    #     app,
-    #     cors_allowed_origins=allowed_origins,
-    #     logger=True,
-    #     engineio_logger=True
-    # )
-
     Swagger(app)
     app.config.from_object(Config)
 
-    app.config["JWT_SECRET_KEY"] = Config.JWT_SECRET_KEY
-    app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
-    app.config["JWT_ACCESS_COOKIE_NAME"] = "access_token"
-    app.config["JWT_COOKIE_SECURE"] = True
-    app.config["JWT_COOKIE_SAMESITE"] = "None"
-    app.config["JWT_COOKIE_CSRF_PROTECT"] = False
-
+    # Configurações
+    CORS(app)
     JWTManager(app)
 
     @app.route('/api')
@@ -89,10 +68,6 @@ def create_app():
 
 
 if __name__ == '__main__':
-    import eventlet
-    import eventlet.wsgi
-
     app = create_app()
-    # port = int(os.environ.get("PORT", 5000))
-    # # Rode o app usando eventlet para suportar WebSockets
-    app.run()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
