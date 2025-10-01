@@ -43,13 +43,13 @@ const ConfigUserPopUp = ({ open, onClose, username, bio, profilePic, onSuccess, 
       });
 
       const data = await res.json();
+      console.log('data', data)
       if (res.ok) {
         localStorage.setItem("avatar", profilePicUrl);
         window.dispatchEvent(new Event('profileUpdated'));
         toast.success(t('configUserPopup.profileUpdatedSuccess'));
-        refetch();
-        if (onSuccess) onSuccess();
         if (!isOnboarding) onClose(); // <-- LÓGICA RESTAURADA
+        if (onSuccess) onSuccess();
       } else {
         toast.error(data.error || t('configUserPopup.updateError'));
       }
