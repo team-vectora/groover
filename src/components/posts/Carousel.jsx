@@ -78,8 +78,8 @@ const Carousel = ({ slides = [], options = {} }) => {
             <div className="embla__viewport rounded-lg border-1 border-primary" ref={emblaRef}>
                 <div className="embla__container flex">
                     {slides.map((slide, index) => {
-                        const src = typeof slide === 'string' ? slide : slide.src;
-                        const alt = typeof slide === 'string' ? `Slide ${index + 1}` : slide.alt || `Slide ${index + 1}`;
+                        const src = typeof slide === 'string' ? slide : slide?.src;
+                        const alt = typeof slide === 'string' ? `Slide ${index + 1}` : slide?.alt || `Slide ${index + 1}`;
 
                         return (
                             <div
