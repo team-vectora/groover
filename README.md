@@ -1,11 +1,8 @@
 <div align="center">
-  <img src="public/img/vetora_camiseta_costas_png.png" alt="Logo Groover - Estética Frutiger Aero" height="300" />
+  <img src="public/img/vetora_camiseta_costas_png.png" alt="Logo Groover - Estética Frutiger Aero" height="300" /=>
 </div>
 
 <h1 align="center">🎶 Groover: Criação Musical Colaborativa</h1>
-
-
-
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Plataforma%20Online-blue?style=for-the-badge&logo=musicbrainz&logoColor=white" alt="Status Plataforma Online">
